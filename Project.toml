@@ -1,0 +1,13 @@
+name = "PISP"
+uuid = "0cf86302-bd88-49fb-82d1-7e27fc78d6eb"
+authors = ["Pablo Apablaza <papablaza@student.unimelb.edu.au> and contributors"]
+version = "1.0.0-DEV"
+
+[compat]
+julia = "1.11"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
