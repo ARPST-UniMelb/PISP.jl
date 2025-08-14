@@ -1,1 +1,2 @@
-println("hello guys")
+using PISP
+PISP.hello()
