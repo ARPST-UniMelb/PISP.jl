@@ -50,12 +50,11 @@ function filterSortTimeseriesData(data, units::NamedTuple,
     # Now convert the data into the required FORMAT
     # (based on units, start_dt and end_dt)
     
-    # Get all the relevant ids for which there are any changes before
-    unique_ids = unique(sorted_data[!,filter_by]) 
-
     # Step 1: Remove all the timesteps after the relevant period
     filter!(row -> row[:date] .<= end_dt, sorted_data)
     
+    # Get all the relevant ids for which there are any changes before or in the selected time
+    unique_ids = unique(sorted_data[!,filter_by]) 
 
     # Step 2: Get the latest value before start_dt for each filter_by value
     until_start_data = filter(row -> row[:date] <= start_dt, sorted_data)
@@ -67,6 +66,13 @@ function filterSortTimeseriesData(data, units::NamedTuple,
         end
         start_data = unstack(latest_until_start, [], filter_by, :value)
         start_data.date .= start_dt
+    end
+    # And add the missing columns with a missing value 
+    # (in case there is a change within the time-window, but no value beforehand)
+    for id in unique_ids
+        if !(string(id) in names(start_data))
+            start_data[!, string(id)] = Vector{Union{Missing, Int, Float64}}([missing])
+        end
     end
     
     # Step 3: Create full date range
@@ -91,21 +97,21 @@ function filterSortTimeseriesData(data, units::NamedTuple,
         date_idx = findfirst(==(target_date), result.date)
 
         # Update the value if both column and row exist
-        if !isnothing(date_idx) && value_name in names(result)
+        if !isnothing(date_idx)
             result[date_idx, value_name] = row.value
+        else
+            error("Could not find date $target_date within the selected range of $(start_dt:units.T(units.L):end_dt). Doublecheck the data!")
         end
     end
 
 
     # Step 6: Add the time-series data within the time-window and forward fill missing values
-    
-    pivoted = unstack(sorted_data, :date, filter_by, :value)
-    
+      
     for col in names(result)
         if col != "date"
             # Simple forward fill
             col_data = result[!, col]
-            for i in eachindex(col_data)
+            for i in eachindex(col_data)[2:end] # skip the first row since it cannot be filled from earlier
                 if ismissing(col_data[i]) && !ismissing(col_data[i-1])
                     col_data[i] = col_data[i-1]
                 end
