@@ -3,7 +3,7 @@ function filterSortTimeseriesData(timeseries_data, units::NamedTuple,
     static_data::DataFrame=DataFrame(), static_data_column::String="",
     scenario::Int=2,
     filter_by::String="dem_id",
-    filter_values::Union{Nothing, Vector{Any}, Vector{Int}}=nothing)
+    filter_values::Union{Nothing, Vector{Any}, Vector{Int}, Vector{String}}=nothing)
     """
     Returns a DataFrame with the time-series data in the interval start_dt:units.T(units.L):end_dt with columns for the specified filter_by values.
 
