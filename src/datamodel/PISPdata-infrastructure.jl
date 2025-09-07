@@ -41,6 +41,10 @@ MOD_ESS                 = OrderedDict(
                                         "pmax"              => "REAL NOT NULL",
                                         "lmin"              => "REAL NOT NULL",
                                         "lmax"              => "REAL NOT NULL",
+                                        "fullout"           => "REAL NOT NULL",
+                                        "partialout"        => "REAL NOT NULL",
+                                        "mttrfull"          => "REAL NOT NULL",
+                                        "mttrpart"          => "REAL NOT NULL",
                                         "inertia"           => "REAL NOT NULL",
                                         "powerfactor"       => "REAL NOT NULL",
                                         "ffr"               => "BOOLEAN NOT NULL",
@@ -68,6 +72,11 @@ MOD_GEN = OrderedDict{String, String}(
                                         "type"              => "VARCHAR(225) NOT NULL",
                                         "capacity"          => "REAL NOT NULL",
                                         "forate"            => "REAL NOT NULL",
+                                        "fullout"           => "REAL NOT NULL",
+                                        "partialout"        => "REAL NOT NULL",
+                                        "derate"            => "REAL NOT NULL",
+                                        "mttrfull"          => "REAL NOT NULL",
+                                        "mttrpart"          => "REAL NOT NULL",
                                         "id_bus"            => "INTEGER REFERENCES Bus (id_bus)",
                                         "pmin"              => "REAL NOT NULL",
                                         "pmax"              => "REAL NOT NULL",
@@ -104,21 +113,7 @@ MOD_GEN = OrderedDict{String, String}(
                                         "start_up_time"     => "REAL NOT NULL",
                                         "shut_down_time"    => "REAL NOT NULL",
                                         )
-# Generator commitment
-# MOD_GEN_COMMIT = OrderedDict{String, String}(  
-#                                                 "id"                => "INTEGER PRIMARY KEY", 
-#                                                 "active"            => "BOOLEAN NOT NULL",
-#                                                 "id_gen"            => "INTEGER REFERENCES Generator (id_gen)",
-#                                                 "down_time"         => "REAL NOT NULL",
-#                                                 "up_time"           => "REAL NOT NULL",
-#                                                 "last_state"        => "REAL NOT NULL",
-#                                                 "last_state_period" => "REAL NOT NULL",
-#                                                 "last_state_output" => "REAL NOT NULL",
-#                                                 "start_up_cost"     => "REAL NOT NULL",
-#                                                 "shut_down_cost"    => "REAL NOT NULL",
-#                                                 "start_up_time"     => "REAL NOT NULL",
-#                                                 "shut_down_time"    => "REAL NOT NULL",
-#                                         )
+                                        
 # Line
 MOD_LINE = OrderedDict{String, String}(  
                                         "id_lin"            => "INTEGER PRIMARY KEY", 

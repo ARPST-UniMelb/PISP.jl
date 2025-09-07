@@ -243,3 +243,696 @@ function line_invoptions(ts, ispdata24)
         push!(ts.line, vline)
     end
 end
+
+function generator_table(ts, ispdata19, ispdata24)
+    # ============================================ #
+    # ============== Generator data ============== #
+    # ============================================ #
+    mkdir(".tmp")
+    bust = ts.bus
+    # areat = PSO.gettable(socketSYS, "Area")
+
+    # Month to number dict
+    m2n = Dict( "jan" => 1, "feb" => 2, "mar" => 3, "apr" => 4, "may" => 5, "jun" => 6, "jul" => 7, "aug" => 8, "sep" => 9, "oct" => 10, "nov" => 11, "dec" => 12,
+                "january" => 1, "february" => 2, "march" => 3, "april" => 4, "may" => 5, "june" => 6, "july" => 7, "august" => 8, "september" => 9, "october" => 10, "november" => 11, "december" => 12)
+
+    str2date(date) = date isa Number ? Dates.DateTime(1899, 12, 30) + Dates.Day(date) : DateTime(parse(Int64,split(date,' ')[2]),m2n[lowercase(split(date,' ')[1])])
+    MAPPING  = PISP.read_xlsx_with_header(ispdata24, "Summary Mapping", "B6:B680")      # EXISTING GENERATOR
+    MAPPING2 = PISP.read_xlsx_with_header(ispdata24, "Summary Mapping", "AA6:AA680")    # MLF
+    namedict = PISP.OrderedDict(zip(MAPPING[!,1], MAPPING2[!,1]))
+
+    # ====================================== #
+    # ==== General list of Power Plants ==== #
+    # ====================================== #
+    GENS = PISP.read_xlsx_with_header(ispdata24, "Maximum capacity", "B8:D260")
+    GENS[!, :Generator] = [k == "Bogong / Mackay" ? "Bogong / MacKay" : k for k in GENS[!, :Generator]] # Fix for Bogong / Mackay
+    GENS[!, :Generator] = [k == "Lincoln Gap Wind Farm - Stage 2" ? "Lincoln Gap Wind Farm - stage 2" : k for k in GENS[!, :Generator]] # Fix for Bogong / Mackay
+
+    COMGEN_MAXCAP = PISP.read_xlsx_with_header(ispdata24, "Maximum capacity", "F8:I35")
+    ADVGEN_MAXCAP = PISP.read_xlsx_with_header(ispdata24, "Maximum capacity", "K8:N24")
+
+    MAPPING3 = PISP.read_xlsx_with_header(ispdata24, "Summary Mapping", "B4:I680")
+    MAPPING3 = MAPPING3[completecases(MAPPING3),:]                              # SELECT ONLY ROWS OF MAPPING3 WITHOUT MISSING VALUES
+    rename!(MAPPING3, 1 => :Generator)                                          # Rename first column to "Generator" 
+
+    ngen = size(GENS, 1) # Number of existing generators
+    GENS[!, Symbol("Commissioning date")] = [DateTime(2020) for k in 1:ngen]
+    rename!(COMGEN_MAXCAP, [1,2,3,4] .=> names(GENS)) # Rename columns as columns in GENS
+    rename!(ADVGEN_MAXCAP, [1,2,3,4] .=> names(GENS))
+
+    append!(GENS, COMGEN_MAXCAP) # Create a unique dataframe with existing, commited and anticipated projects 
+    append!(GENS, ADVGEN_MAXCAP) # TOTAL = EXISTING + COMMITED + ANTICIPATED = 295 GENERATORS
+
+    GENS = leftjoin(GENS, MAPPING3, on = :Generator, makeunique=true)
+
+    rename!(GENS, Symbol("Sub-region") => :Bus)
+    select!(GENS, Not([:Region_1])) 
+    GENS.id_bus = [bust[bust[!,:name] .== k, :id_bus][1] for k in GENS.Bus] 
+    GENS.area_id .= 0
+    GENS[!,:Generator] = [namedict[n] for n in GENS[!,:Generator]]
+    # Transform columns id_bus and area_id to Int64 to save in database
+    GENS.id_bus = Int64.(GENS.id_bus)
+    GENS.area_id = Int64.(GENS.area_id)
+
+    GENS[!, :Generator] = [k == "Devils Gate" ? "Devils gate" : k for k in GENS[!, :Generator]]
+    GENS[!, :Generator] = [k == "Bungala One Solar Farm" ? "Bungala one Solar Farm" : k for k in GENS[!, :Generator]]
+    GENS[!, :Generator] = [k == "Tallawarra B*" ? "Tallawarra B" : k for k in GENS[!, :Generator]] 
+
+    XLSX.writetable(".tmp/GENS.xlsx", Tables.columntable(GENS); sheetname="Generators", overwrite=true)
+
+    # ====================================== #
+    # Units with unit commitment and ramping #
+    # ====================================== #
+    # Generation limits and stable levels for coal and gas generators
+    DATA_COALMSG = PISP.read_xlsx_with_header(ispdata24, "Generation limits", "B8:D52")
+    DATA_GPGMSG = PISP.read_xlsx_with_header(ispdata24, "GPG Min Stable Level", "B9:E34")
+    select!(DATA_GPGMSG, Not(Symbol("Technology Type")))
+
+    # Minimum up times for different units
+    DATA_MINUP_UNITS = PISP.read_xlsx_with_header(ispdata24, "Min Up&Down Times", "B8:E25")
+    DATA_MINUP_UNITS19 = PISP.read_xlsx_with_header(ispdata19, "Generation limits", "O9:Q69") # Min UP and DW - GAS+COAL UNITS (2019)
+    select!(DATA_MINUP_UNITS, Not(Symbol("Technology Type")))
+    XLSX.writetable(".tmp/DATA_MINUP_UNITS19.xlsx", Tables.columntable(DATA_MINUP_UNITS19); sheetname="Generators19", overwrite=true)
+    # Ramp rates for different units
+    UC = PISP.read_xlsx_with_header(ispdata24, "Max Ramp Rates", "B8:F72")
+    select!(UC, Not(Symbol("Technology Type")))
+    XLSX.writetable(".tmp/UC.xlsx", Tables.columntable(UC); sheetname="UC", overwrite=true)
+
+    #DUID -> Dispatchable Unit Identifier
+    rename!(UC, Dict(2 => Symbol("DUID"), 3 => :rup, 4 => :rdw));
+    rename!(DATA_COALMSG, 2 => Symbol("DUID")); 
+    rename!(DATA_GPGMSG, 2 => Symbol("DUID")); 
+    rename!(DATA_MINUP_UNITS, [2,3] .=> [Symbol("DUID"),Symbol("MinUpTime")]); 
+    rename!(DATA_COALMSG, 3 => Symbol("MSG")); 
+    rename!(DATA_GPGMSG, 3 => Symbol("MSG")); 
+    rename!(DATA_MINUP_UNITS19, [2,3] .=> [Symbol("DUID"),Symbol("MinUpTime")]);
+
+    # ==> 5 DATAFRAMES: UC, DATA_COALMSG, DATA_GPGMSG, DATA_MINUP_UNITS, DATA_MINUP_UNITS19
+    ## DATA_COALMSG -> Limits of Coal generation (Minimum Stable Generation)
+    ## DATA_GPGMSG -> Limits of Gas turbines (Minimum Stable Generation)
+    ## DATA_MINUP_UNITS -> Min UP and DW - GAS UNITS
+    ## DATA_MINUP_UNITS19 -> Min UP and DW - GAS+COAL UNITS (2019)
+    ## UC -> Max ramp up and down of generators
+
+    # DATA_COALMSG contains the minimum stable generation for coal and gas
+    append!(DATA_COALMSG, DATA_GPGMSG)
+    XLSX.writetable(".tmp/DATA_COALGASMSG.xlsx", Tables.columntable(DATA_COALMSG); sheetname="CoalGasMSG", overwrite=true)
+
+    # DATA_MINUP_UNITS contains the minimum up time for coal and gas units
+    append!(DATA_MINUP_UNITS, DATA_MINUP_UNITS19)
+    XLSX.writetable(".tmp/DATA_MINUP_UNITS.xlsx", Tables.columntable(DATA_MINUP_UNITS); sheetname="MinUpUnits", overwrite=true)
+
+    # JOIN UC (Ramp Rates) with DATA_COALMSG (Minimum Stable Generation)
+    UC = outerjoin(UC, DATA_COALMSG,on = :DUID,makeunique=true)
+    XLSX.writetable(".tmp/UC1.xlsx", Tables.columntable(UC); sheetname="UC1", overwrite=true)
+
+    # JOIN UC with DATA_MINUP_UNITS (Minimum Up Time)
+    UC = outerjoin(UC,DATA_MINUP_UNITS,on = :DUID,makeunique=true)
+    XLSX.writetable(".tmp/UC2.xlsx", Tables.columntable(UC); sheetname="UC2", overwrite=true)
+    # Delete rows that if the string in column DUID contains "LD" - Asociated with Lidell Station (decommissioned)
+    UC = UC[.!occursin.("LD",UC[!,:DUID]),:]
+    # Create a unique column with the generator station name 
+    UC[!,1] = [ismissing(UC[k,1]) ? UC[k,5] : UC[k,1] for k in eachindex(UC[:,1])]
+    UC[!,1] = [ismissing(UC[k,1]) ? UC[k,7] : UC[k,1] for k in eachindex(UC[:,1])]
+    select!(UC, Not([5,7])) # Eliminate columns 5 and 7
+    UC = unique(UC) # Eliminate rows with the exact same information 
+    filter!((row) -> !(row[1] == "Tallawarra" && row[6] == 6), UC)
+    filter!((row) -> !(row[1] == "Townsville Power Station" && row[2] == "YABULU" && row[6] == 3), UC)
+    filter!((row) -> !(row[1] == "Condamine A" && row[2] == "CPSA" && row[6] == 6), UC)
+    filter!((row) -> !(row[1] == "Darling Downs" && row[2] == "DDPS1" && row[6] == 6), UC)
+    filter!((row) -> !(row[1] == "Osborne" && row[2] == "OSB-AG" && row[6] == 6), UC)
+    filter!((row) -> !(row[1] == "Pelican Point" && row[2] == "PPCCGT" && row[6] == 4), UC)
+    filter!((row) -> !(row[1] == "Tamar Valley Combined Cycle" && row[2] == "TVCC201" && row[6] == 6), UC)
+    XLSX.writetable(".tmp/UC2__.xlsx", Tables.columntable(UC); sheetname="UC2__", overwrite=true)
+    # ➡️➡️➡️➡️➡️➡️➡️➡️➡️➡️ CHECK IF THIS IS WORKING OK
+    # this is the rename as per the DUIDs are in the Retirement sheet
+    DUIDar = Dict(      "CPSA_GT1"      => "CPSA", 
+                        "CPSA_GT2"      => "CPSA", 
+                        "CPSA_ST"      => "CPSA", 
+                        "DDPS1_GT1"     => "DDPS1", 
+                        "DDPS1_GT2"     => "DDPS1", 
+                        "DDPS1_GT3"     => "DDPS1", 
+                        "DDPS1_ST"     => "DDPS1",
+                        "OsborneGT"     => "OSB-AG", 
+                        "OsborneST"     => "OSB-AG",
+                        "PPCCGTGT1"     => "PPCCGT", 
+                        "PPCCGTGT2"     => "PPCCGT", 
+                        "PPCCGTST"     => "PPCCGT",
+                        "TVCC201_GT"    => "TVCC201")
+    UC[!,:DUID] = [n in keys(DUIDar) ? DUIDar[n] : n for n in UC[!,:DUID]]
+    XLSX.writetable(".tmp/UC3.xlsx", Tables.columntable(UC); sheetname="UC3", overwrite=true)
+
+    # ====================================== #
+    # ============= RETIREMENTS ============ #
+    # ====================================== #
+    UNITS = PISP.read_xlsx_with_header(ispdata24, "Retirement", "B9:D460")
+    rename!(UNITS, 1 => "Generator")
+    UNITS[!,:RETIRE] = DateTime.(PISP.parseif(UNITS[:,3]))
+
+    # FIX SOME MISMATCHES BETWEEN NAMES IN SHEETS
+    UNITS[!,:Generator] = [n == "Bogong / Mackay" ? "Bogong / MacKay" : n for n in UNITS[!,:Generator]]
+    UNITS[!,:Generator] = [n == "Eraring*" ? "Eraring" : n for n in UNITS[!,:Generator]]
+
+    # FIX DUID OF SOME UNITS THAT DO NOT HAVE DUID
+    UNITS[UNITS[!,:Generator] .== "Kogan Gas", :DUID] .= "Kogan Gas"
+    UNITS[UNITS[!,:Generator] .== "SA Hydrogen Turbine", :DUID] .= "SA Hydrogen Turbine"
+
+    select!(UNITS,Not(3))
+    XLSX.writetable(".tmp/RETIREMENTS.xlsx", Tables.columntable(UNITS); sheetname="Retirements", overwrite=true)
+
+    # ====================================== #
+    # ============= RELIABILITY ============ #
+    # ====================================== #
+    RELIA = PISP.read_xlsx_with_header(ispdata24, "Generator Reliability Settings", "B20:G28")
+    RELIANEW = PISP.read_xlsx_with_header(ispdata24, "Generator Reliability Settings", "I20:N40")
+
+
+    # ====================================== #
+    # ========= GENERATION SUMMARY ========= #
+    # ====================================== #
+    GENSUM = PISP.read_xlsx_with_header(ispdata24, "Existing Gen Data Summary", "B10:U319")
+    GENSUM_ADD = PISP.read_xlsx_with_header(ispdata24, "Existing Gen Data Summary", "B382:U397")
+    GENSUM = vcat(GENSUM, GENSUM_ADD)
+    GENSUM = GENSUM[3:end,:]
+    flagrow = [!all(ismissing.(Matrix(GENSUM[k:k,2:end]))) for k in 1:nrow(GENSUM)]
+    GENSUM = GENSUM[flagrow,:]
+    GENSUM = GENSUM[.!ismissing.(GENSUM[!,2]),:]
+    GENSUM = GENSUM[GENSUM[!,2] .!= "Generator type",:]
+    GENSUM = GENSUM[GENSUM[!,2] .!= "Battery Storage",:]
+    GENSUM[!,:Generator] = [namedict[n] for n in GENSUM[!,:Generator]]
+    GENSUM[!,:Generator] = [n == "Tallawarra B*" ? "Tallawarra B" : n for n in GENSUM[!,:Generator]]
+    GENSUM[!,:Generator] = [n == "Bungala One Solar Farm" ? "Bungala one Solar Farm" : n for n in GENSUM[!,:Generator]]
+    GENSUM[!,:Generator] = [n == "Devils Gate" ? "Devils gate" : n for n in GENSUM[!,:Generator]]
+    XLSX.writetable(".tmp/GENSUM.xlsx", Tables.columntable(GENSUM); sheetname="GENSUM", overwrite=true)
+
+    FULL = outerjoin(UNITS, GENS, on = :Generator)
+    XLSX.writetable(".tmp/FULL.xlsx", Tables.columntable(FULL); sheetname="FULL", overwrite=true)
+
+    FULL = outerjoin(FULL, UC, on = :DUID, matchmissing=:equal)
+    rename!(FULL, Dict(:Region => :Area,  Symbol("Installed capacity (MW)") => :CAPACITY, Symbol("Generator Station") => :NAME))
+    XLSX.writetable(".tmp/FULL2.xlsx", Tables.columntable(FULL); sheetname="FULL2", overwrite=true)
+
+    FULL = outerjoin(FULL, GENSUM, on = :Generator, matchmissing=:equal, makeunique=true)
+    FULL.id_bus = [ismissing(k) ? missing : bust[bust[!,:name] .== k, :id_bus][1] for k in FULL[!,Symbol("ISP \nsub-region")]] 
+    # FULL.area_id = [ismissing(k) ? missing : areat[areat[!,:name] .== k, :id][1] for k in FULL[!,Symbol("Region")]]
+    FULL.id_bus = [ismissing(k) ? missing : Int64(k) for k in FULL.id_bus]
+    # FULL.area_id = [ismissing(k) ? missing : Int64(k) for k in FULL.area_id]
+    FULL.Area = [ismissing(k) ? missing : k for k in FULL.Region]
+    FULL[!,Symbol("Technology type")] = [ismissing(k) ? missing : k for k in FULL[!,Symbol("Generator type")]]
+    FULL[!,Symbol("Fuel type")] = [ismissing(k) ? missing : k for k in FULL[!,Symbol("Fuel/technology type")]]
+    FULL.Bus = [ismissing(k) ? missing : k for k in FULL[!,Symbol("ISP \nsub-region")]]
+    FULL[!,Symbol("REZ location")] = [ismissing(k) ? missing : k for k in FULL[!,Symbol("REZ location_1")]]
+    XLSX.writetable(".tmp/FULL3.xlsx", Tables.columntable(FULL); sheetname="FULL3", overwrite=true)
+
+    for c in [:NAME,:Region,Symbol("Generator type"),Symbol("Regional build cost zone"),
+        Symbol("ISP \nsub-region"), Symbol("Fuel/technology type"), Symbol("REZ location_1")] select!(FULL, Not(c)) end 
+    FULL[!,:CAPACITY] = coalesce.(FULL[!,:CAPACITY], FULL[!,18]) # Assign maximum capacity to generators with missing capacity
+    # remove rows with missing values in column Generator
+    FULL = FULL[.!ismissing.(FULL[!,:Generator]),:]
+    # @warn("Deleted Steam Turbines from generator table due to missing information. CHECK!")
+    XLSX.writetable(".tmp/GENERATORS.xlsx", Tables.columntable(FULL); sheetname="Generators", overwrite=true)
+
+    # ====================================== #
+    # ======== RENEWABLE GENERATION ======== #
+    # ====================================== #
+    GENLIST = FULL[!,:Generator]
+    vretunit = (occursin.("solar",  GENLIST) .| 
+                occursin.("wind",   GENLIST) .| 
+                occursin.("Solar",  GENLIST) .| 
+                occursin.("Wind",   GENLIST) .|
+                occursin.("Wind",   coalesce.(FULL[!,Symbol("Technology type")],"")) .| 
+                occursin.("solar",  coalesce.(FULL[!,Symbol("Technology type")],"")) .| 
+                occursin.("Solar",  coalesce.(FULL[!,Symbol("Technology type")],""))
+                )
+
+    bessunit = (    occursin.("Hornsdale Power Reserve",    FULL[!,:Generator]) .| 
+                    occursin.("BESS",                       FULL[!,:Generator]) .| 
+                    occursin.("Storage",                    FULL[!,:Generator]) .| 
+                    occursin.("Battery",                    FULL[!,:Generator]) .|
+                    occursin.("Renewable Energy Hub",                       FULL[!,:Generator])
+                    )
+
+    syncunit = vretunit .| bessunit
+
+    VRET = FULL[vretunit,:]
+    BESS = FULL[bessunit,:]
+    SYNC = FULL[.!syncunit,:]
+
+    XLSX.writetable(".tmp/VRET.xlsx", Tables.columntable(VRET); sheetname="VRET", overwrite=true)
+    XLSX.writetable(".tmp/BESS.xlsx", Tables.columntable(BESS); sheetname="BESS", overwrite=true)
+    XLSX.writetable(".tmp/SYNC.xlsx", Tables.columntable(SYNC); sheetname="SYNC", overwrite=true)
+
+    sort!(SYNC, [Symbol("Fuel type"), :Generator]) #sort table
+    gens = unique(SYNC[!,:Generator])
+    gensfreq = PISP.OrderedDict([(g,count(x->x==g,SYNC[!,:Generator])) for g in gens]) # Count number of units per generator
+
+    selar = Bool[]
+    nar = Int64[]
+    for r in keys(gensfreq) 
+        append!(selar,true); append!(nar,gensfreq[r]);
+        for k in 1:(gensfreq[r]-1) append!(selar,false); append!(nar,0); end
+    end
+
+    SYNC[!,:n] = nar
+    SYNC2 = SYNC[selar,:]
+    sort!(SYNC2, [Symbol("Fuel type"), :Generator])
+    XLSX.writetable(".tmp/SYNC3.xlsx", Tables.columntable(SYNC2); sheetname="SYNC3", overwrite=true)
+
+
+    SYNC3 = copy(SYNC2)
+    lat = Union{Missing, Float64}[]
+    lon = Union{Missing, Float64}[]
+    fuel = String[]
+    tech = String[]
+    type = String[]
+
+    for r in 1:nrow(SYNC3)
+        # println(r)
+        gty = SYNC3[r, :Generator]                  # Generator name
+        fty = SYNC3[r, Symbol("Technology type")]   # Technologytype
+        tty = SYNC3[r, Symbol("Fuel type")]         #  Fuel type
+        # println(gty, " // ", fty, " // ", tty)
+
+        if gty in keys(PISP.units)
+            SYNC3[r,:n] = PISP.units[gty][1]
+            push!(fuel, PISP.units[gty][2])
+            push!(tech, PISP.units[gty][3])
+            push!(type, PISP.units[gty][4])
+            push!(lat,  PISP.units[gty][5])
+            push!(lon,  PISP.units[gty][6])
+        else
+            for t in PISP.fueltype
+                if fty in t[2]
+                    push!(fuel,t[1])
+                    if t[1] == "Coal" 
+                        push!(tech,tty) 
+                    else 
+                        push!(tech,fty) 
+                    end
+                    push!(type,fty)
+                else
+                    # println("NO DATA ---> ", gty, " ", fty, " ", tty)
+                end
+            end
+            push!(lat, 0.0); push!(lon, 0.0);
+        end
+    end
+
+    SYNC3[!,:fuel] = fuel
+    SYNC3[!,:tech] = tech
+    SYNC3[!,:type] = type
+    SYNC3[!,:lat]  = lat
+    SYNC3[!,:lon]  = lon
+
+    for k in 1:length(SYNC3[!,:fuel])
+        if SYNC3[k,:fuel] == "Diesel" 
+            SYNC3[k,:tech] = "Diesel" 
+        end
+        if SYNC3[k,:tech] == "Gas-powered steam turbine" 
+            SYNC3[k,:tech] = "OCGT" 
+        end
+    end
+
+    SYNC3[!,:cap] = SYNC3[!,:CAPACITY] ./ SYNC3[!,:n]
+    XLSX.writetable(".tmp/SYNC4.xlsx", Tables.columntable(SYNC3); sheetname="SYNC4", overwrite=true)
+
+    # ====================================== #
+    # ============ EMMISSIONS ============== #
+    # ====================================== #
+    EMI = PISP.read_xlsx_with_header(ispdata24, "Emissions intensity", "B7:D73")
+    select!(EMI, Not(2))
+    rename!(EMI, 2 => "Emissions")
+    EMI[!,:Generator] = strip.(EMI[!,:Generator])
+    EMI[!,:Generator] = [string(k) for k in EMI[!,:Generator]]
+
+    genemi =  Dict( 
+                    # "Mt Piper" => "Mount Piper", 
+                    "Callide C" => "Callide C", 
+                    # "Loy Yang A Power Station" => "Loy Yang A", 
+                    "Yabulu Steam Turbine" => "Yabulu Steam Turbine ", 
+                    "Port Lincoln Gt" => "Port Lincoln GT", 
+                    "Yarwun Cogen" => "Yarwun 1" )
+    for k in 1:length(EMI[!,:Generator]) EMI[k,:Generator] in keys(genemi) ? EMI[k,:Generator] = genemi[EMI[k,:Generator]] : 0.0 end
+    filteremi = .![n in [k+j for k in 1:length(EMI[!,:Generator]) for j in 0:2 if ismissing.(EMI[!,:Generator])[k]] for n in 1:length(EMI[!,:Generator])]
+    EMI = EMI[filteremi,:]
+    SYNC3 = leftjoin(SYNC3, EMI, on = :Generator)
+    SYNC3[!,:Emissions] = [ismissing(e) ? 0.0 : e for e in SYNC3[!,:Emissions]]
+    XLSX.writetable(".tmp/SYNC5.xlsx", Tables.columntable(SYNC3); sheetname="SYNC5", overwrite=true)
+
+    SYNC4 = SYNC3[.!(SYNC3[!,:tech] .== "Pumped-Storage"),:]
+    PS = SYNC3[(SYNC3[!,:tech] .== "Pumped-Storage"),:]
+    XLSX.writetable(".tmp/SYNC6.xlsx", Tables.columntable(SYNC4); sheetname="SYNC6", overwrite=true)
+    XLSX.writetable(".tmp/PS.xlsx", Tables.columntable(PS); sheetname="PS", overwrite=true)
+
+    # ====================================== #
+    # ======== FILLING GENERATORS ========== #
+    # ====================================== #
+    slopear = Dict( "OCGT"              => 0.6, 
+                    "Black Coal"        => 0.3,
+                    "Black Coal NSW"    => 0.3, 
+                    "Black Coal QLD"    => 0.3,
+                    "Brown Coal"        => 0.3, 
+                    "Brown Coal VIC"    => 0.3,
+                    "Reservoir"         => 0.6, 
+                    "Run-of-River"      => 0.6, 
+                    "Pumped-Storage"    => 0.6, 
+                    "Diesel"            => 0.6, 
+                    "CCGT"              => 0.4,
+                    "Hydrogen-based gas turbines" => 0.4)
+                    
+    # @warn("Slope for Hydrogen-based gas turbines is defined as 0.4. CHECK!")
+    inertiaar = Dict(   "OCGT"              => 4.0, 
+                        "Black Coal"        => 4.0, 
+                        "Black Coal NSW"    => 4.0,
+                        "Black Coal QLD"    => 4.0,
+                        "Brown Coal"        => 4.0, 
+                        "Brown Coal VIC"    => 4.0,
+                        "Reservoir"         => 2.5, 
+                        "Run-of-River"      => 2.5, 
+                        "Pumped-Storage"    => 2.2, 
+                        "Diesel"            => 4.0, 
+                        "CCGT"              => 4.0,
+                        "Hydrogen-based gas turbines" => 4.0)
+    # @warn("Inertia for Hydrogen-based gas turbines is defined as 4.0. CHECK!")
+    sort!(SYNC4, [Symbol("fuel"), :Generator]) #sort table to solve problem with unit Quarantine
+
+
+    GENERATORS = DataFrame(id = 1:nrow(SYNC4))
+    GENERATORS[!,:name] = SYNC4[!,:Generator]
+    GENERATORS[!,:alias] = [ismissing(SYNC4[n,:DUID]) ? SYNC4[n,:Generator] : SYNC4[n,:DUID] for n in 1:length(SYNC4[!,:DUID])]
+    GENERATORS[!,:fuel] = SYNC4[!,:fuel]
+    GENERATORS[!,:tech] = SYNC4[!,:tech]
+    GENERATORS[!,:type] = SYNC4[!,:type]
+    GENERATORS[!,:capacity] = SYNC4[!,:cap]
+
+    fullout = []
+    partialout = []
+    derate = []
+    mttrfull = []
+    mttrpart = []
+    for k in 1:nrow(GENERATORS)
+        if ((GENERATORS[k,:tech] == "OCGT" || GENERATORS[k,:tech] == "Diesel") && GENERATORS[k,:capacity] >= 150)       tgt = (RELIA[!,1] .== "OCGT");                              push!(fullout, RELIA[tgt, 2][1]); push!(partialout, RELIA[tgt, 3][1]); push!(mttrfull, RELIA[tgt, 4][1]); push!(mttrpart, RELIA[tgt, 5][1]); push!(derate, RELIA[tgt, 6][1])
+        elseif ((GENERATORS[k,:tech] == "OCGT" || GENERATORS[k,:tech] == "Diesel") && GENERATORS[k,:capacity] < 150)    tgt = (RELIA[!,1] .== "Small peaking plants");              push!(fullout, RELIA[tgt, 2][1]); push!(partialout, RELIA[tgt, 3][1]); push!(mttrfull, RELIA[tgt, 4][1]); push!(mttrpart, RELIA[tgt, 5][1]); push!(derate, RELIA[tgt, 6][1])
+        elseif GENERATORS[k,:tech] == "CCGT"                                                                            tgt = (RELIA[!,1] .== "CCGT + Steam Turbine");              push!(fullout, RELIA[tgt, 2][1]); push!(partialout, RELIA[tgt, 3][1]); push!(mttrfull, RELIA[tgt, 4][1]); push!(mttrpart, RELIA[tgt, 5][1]); push!(derate, RELIA[tgt, 6][1])
+        elseif GENERATORS[k,:fuel] == "Hydro"                                                                           tgt = (RELIA[!,1] .== "Hydro");                             push!(fullout, RELIA[tgt, 2][1]); push!(partialout, RELIA[tgt, 3][1]); push!(mttrfull, RELIA[tgt, 4][1]); push!(mttrpart, RELIA[tgt, 5][1]); push!(derate, RELIA[tgt, 6][1])
+        elseif GENERATORS[k,:tech] == "Reciprocating Engine"                                                            tgt = (RELIA[!,1] .== "Small peaking plants");              push!(fullout, RELIA[tgt, 2][1]); push!(partialout, RELIA[tgt, 3][1]); push!(mttrfull, RELIA[tgt, 4][1]); push!(mttrpart, RELIA[tgt, 5][1]); push!(derate, RELIA[tgt, 6][1])
+        elseif GENERATORS[k,:tech] == "Brown Coal"                                                                      tgt = (RELIA[!,1] .== "Brown Coal");                        push!(fullout, RELIA[tgt, 2][1]); push!(partialout, RELIA[tgt, 3][1]); push!(mttrfull, RELIA[tgt, 4][1]); push!(mttrpart, RELIA[tgt, 5][1]); push!(derate, RELIA[tgt, 6][1])
+        elseif GENERATORS[k,:tech] == "Brown Coal VIC"                                                                  tgt = (RELIA[!,1] .== "Brown Coal");                        push!(fullout, RELIA[tgt, 2][1]); push!(partialout, RELIA[tgt, 3][1]); push!(mttrfull, RELIA[tgt, 4][1]); push!(mttrpart, RELIA[tgt, 5][1]); push!(derate, RELIA[tgt, 6][1])
+        elseif GENERATORS[k,:tech] == "Black Coal NSW"                                                                  tgt = (RELIA[!,1] .== "Black Coal NSW");                    push!(fullout, RELIA[tgt, 2][1]); push!(partialout, RELIA[tgt, 3][1]); push!(mttrfull, RELIA[tgt, 4][1]); push!(mttrpart, RELIA[tgt, 5][1]); push!(derate, RELIA[tgt, 6][1])
+        elseif GENERATORS[k,:tech] == "Black Coal QLD"                                                                  tgt = (RELIA[!,1] .== "Black Coal QLD");                    push!(fullout, RELIA[tgt, 2][1]); push!(partialout, RELIA[tgt, 3][1]); push!(mttrfull, RELIA[tgt, 4][1]); push!(mttrpart, RELIA[tgt, 5][1]); push!(derate, RELIA[tgt, 6][1])
+        elseif GENERATORS[k,:tech] == "Hydrogen-based gas turbines"                                                     tgt = (RELIANEW[!,1] .== "Hydrogen-based gas turbines");    push!(fullout, RELIANEW[tgt, 2][1]/100); push!(partialout, RELIANEW[tgt, 3][1]/100); push!(mttrfull, RELIANEW[tgt, 4][1]); push!(mttrpart, RELIANEW[tgt, 5][1]); push!(derate, RELIANEW[tgt, 6][1]/100)
+        else 
+            push!(derate, "XXX")
+            # println(GENERATORS[k,:name]," ", GENERATORS[k,:tech]," ", GENERATORS[k,:capacity]," ", GENERATORS[k,:fuel])
+        end
+    end
+
+    # @warn("Partialout and derating factor are missing for some hydrogen-based generators. Replacing with 0.0")
+    fullout     = [ismissing(k) ? 0.0 : k for k in fullout]
+    partialout  = [ismissing(k) ? 0.0 : k for k in partialout]
+    derate      = [ismissing(k) ? 0.0 : k for k in derate]
+    mttrfull    = [ismissing(k) ? 0.0 : k for k in mttrfull]
+    mttrpart    = [ismissing(k) ? 0.0 : k for k in mttrpart]
+
+    GENERATORS[!,:forate] = ones(nrow(SYNC4)) .- (fullout  .+ partialout  .* (ones(nrow(SYNC4)) .- derate))
+    GENERATORS[!,:fullout]      = fullout
+    GENERATORS[!,:partialout]   = partialout
+    GENERATORS[!,:derate]       = derate
+    GENERATORS[!,:mttrfull]     = mttrfull
+    GENERATORS[!,:mttrpart]     = mttrpart
+    XLSX.writetable(".tmp/GENERATORS2.xlsx", Tables.columntable(GENERATORS); sheetname="GENERATORS2", overwrite=true)
+
+    GENERATORS[!,:id_bus] = SYNC4[!,:id_bus]
+    GENERATORS[!,:pmin] = coalesce.(SYNC4[!,:MSG], 0.0)
+    GENERATORS[!,:pmax] = SYNC4[!,:cap]
+    GENERATORS[!,:rup] = coalesce.(SYNC4[!,:rup], 9999.0)
+    GENERATORS[!,:rdw] = coalesce.(SYNC4[!,:rdw], 9999.0)
+    GENERATORS[!,:investment] = Int64.([ false for k in 1:nrow(SYNC4)])
+    GENERATORS[!,:active] = Int64.([ true for k in 1:nrow(SYNC4)])
+    GENERATORS[!,:cvar] = SYNC4[!,Symbol("SRMC (\$/MWh)")]
+    GENERATORS[!,:cfuel] = SYNC4[!, Symbol("Fuel cost (\$/GJ)")]
+    GENERATORS[!,:cvom] = SYNC4[!, Symbol("VOM (\$/MWh sent-out)")]
+    GENERATORS[!,:cfom] = SYNC4[!, Symbol("FOM (\$/kW/annum)")]./1000
+    GENERATORS[!,:co2] = SYNC4[!,:Emissions]
+    GENERATORS[!,:slope] = [slopear[GENERATORS[k,:tech]] for k in 1:nrow(SYNC4) ]
+    GENERATORS[!,:hrate] = SYNC4[!, Symbol("Heat rate (GJ/MWh HHV s.o.)")]
+    GENERATORS[!,:pfrmax] = GENERATORS[!,:pmax] * 0.1
+    # @warn("PFRMAX is set to 10% of Pmax")
+    GENERATORS[!,:g] = zeros(nrow(SYNC4))
+    GENERATORS[!,:inertia] = [inertiaar[GENERATORS[k,:tech]] for k in 1:nrow(SYNC4) ]
+    GENERATORS[!,:ffr] = Int64.([ false for k in 1:nrow(SYNC4)])
+    GENERATORS[!,:pfr] = Int64.([ true for k in 1:nrow(SYNC4)])
+    GENERATORS[!,:res2] = Int64.([ true for k in 1:nrow(SYNC4)])
+    GENERATORS[!,:res3] = Int64.([ false for k in 1:nrow(SYNC4)])
+    GENERATORS[!,:powerfactor] = ones(nrow(SYNC4)) * 0.85
+    # @warn("Power factor is set to 85%")
+    GENERATORS[!,:latitude] = SYNC4[!,:lat]
+    GENERATORS[!,:longitude] = SYNC4[!,:lon]
+    GENERATORS[!,:n] = SYNC4[!,:n]
+    GENERATORS[!,:contingency] = Int64.([ true for k in 1:nrow(SYNC4)])
+    XLSX.writetable(".tmp/GENERATORS3.xlsx", Tables.columntable(GENERATORS); sheetname="GENERATORS3", overwrite=true)
+    # @warn("Check fuel cost for Hydrogen-based units")
+
+    for r in 1:nrow(GENERATORS)
+        if GENERATORS[r,:fuel] == "Natural Gas"
+            if GENERATORS[r,:tech] == "CCGT" && GENERATORS[r,:pmin] == 0.0
+                GENERATORS[r,:pmin] = round(0.52 * GENERATORS[r,:pmax], digits=2)
+            elseif GENERATORS[r,:tech] == "OCGT" && GENERATORS[r,:pmin] == 0.0
+                GENERATORS[r,:pmin] = round(0.33 * GENERATORS[r,:pmax], digits=2)
+            end
+        elseif GENERATORS[r,:fuel] == "Hydro" && GENERATORS[r,:pmin] == 0.0
+            GENERATORS[r,:pmin] = round(0.2 * GENERATORS[r,:pmax], digits=2)
+        elseif GENERATORS[r,:fuel] == "Diesel" && GENERATORS[r,:pmin] == 0.0
+            GENERATORS[r,:pmin] = round(0.2 * GENERATORS[r,:pmax], digits=2)
+        end
+    end
+
+    # @warn("Pmin for CCGT is set to 52% of Pmax")
+    # @warn("Pmin for OCGT is set to 33% of Pmax")
+    # @warn("Pmin for Hydro is set to 20% of Pmax")
+    # @warn("Pmin for Diesel is set to 20% of Pmax")
+
+    # ====================================== #
+    # ============= COMMITMENT ============= #
+    # ====================================== #
+
+    COMMITMENT = DataFrame(id = 1:nrow(SYNC4))
+    COMMITMENT[!,:gen_id] = 1:nrow(SYNC4)
+    COMMITMENT[!,:down_time] = zeros(nrow(SYNC4))
+    COMMITMENT[!,:up_time] = coalesce.(SYNC4[!,:MinUpTime], 0.0)
+    COMMITMENT[!,:last_state] = zeros(nrow(SYNC4))
+    COMMITMENT[!,:last_state_period] = zeros(nrow(SYNC4))
+    COMMITMENT[!,:last_state_output] = zeros(nrow(SYNC4))
+    COMMITMENT[!,:start_up_cost] = [GENERATORS[GENERATORS[!,:id] .== k, :fuel][1] == "Coal" ? GENERATORS[GENERATORS[!,:id] .== k, :cvar][1] * GENERATORS[GENERATORS[!,:id] .== k, :pmax][1] * 4.0 : 0.0 for k in COMMITMENT[!,:gen_id] ] # 
+    COMMITMENT[!,:shut_down_cost] = zeros(nrow(SYNC4))
+    COMMITMENT[!,:start_up_time] = zeros(nrow(SYNC4))
+    COMMITMENT[!,:shut_down_time] = zeros(nrow(SYNC4))
+
+    # @warn("No minimum down time for any generator")
+    # @warn("Start up cost for coal generators is set to 4 times the variable cost times the maximum capacity")
+    # @warn("No shut down cost for any generator")
+    # @warn("No start up time for any generator")
+    # @warn("No shut down time for any generator")
+
+    # MERGE GENERATOR AND COMMITMENT IN left `id` and right `gen_id`. Fill missing values in COMMITMENT with 0
+    merged = leftjoin(GENERATORS, COMMITMENT, on = [:id => :gen_id], makeunique=true)
+    select!(merged, Not(:id_1))
+    rename!(merged, :id => :id_gen)
+    ts.gen = merged
+    XLSX.writetable(".tmp/GENERATORS_FULL.xlsx", Tables.columntable(merged); sheetname="GENERATORS", overwrite=true)
+    rm(".tmp"; recursive=true)
+    return SYNC3, SYNC4, GENERATORS, BESS, PS
+end
+
+function gen_n_sched_table(tv, SYNC4, GENERATORS)
+    # COMMITED AND ANTICIPATED PROJECTS DATES
+    MISSING_DATES = PISP.OrderedDict("Kogan Gas" => "2026-07-01T00:00:00")
+    N_SCHED_COMM = DataFrame([Symbol(k) => Vector{Any}() for k in keys(PISP.MOD_GEN_N)])
+    i = isempty(tv.gen_n.id) ? 1 : maximum(tv.gen_n.id) + 1
+    for r in 1:nrow(SYNC4) 
+        # FIX COMMISSIONING DATE FOR GENERATORS
+        d = SYNC4[r, Symbol("Commissioning date")] # Comissioning date
+        if ismissing(d)
+            if SYNC4[r,:Generator] in keys(MISSING_DATES)
+                SYNC4[r, Symbol("Commissioning date")] = DateTime(MISSING_DATES[SYNC4[r,:Generator]])
+            else
+                @warn("No commissioning date for ", SYNC4[r,:Generator])
+            end
+        end
+        # GENERATE DATAFRAME WITH SCHEDULED COMMISSIONING
+        d = SYNC4[r, Symbol("Commissioning date")] # Comissioning date
+        if d > DateTime("2020-01-01T01:00:00")
+            genid = GENERATORS[GENERATORS[!,:name] .== SYNC4[r,:Generator], :id][1]
+            genname = GENERATORS[GENERATORS[!,:name] .== SYNC4[r,:Generator], :name][1]
+            # @warn("Setting commissioning date for $(SYNC4[r,:Generator]) to $(d)")
+            for sc in keys(PISP.ID2SCE)
+                # BEFORE COMMISSIONING -> deactivated
+                row = [i, genid, sc, DateTime("2020-01-01T00:00:00"), 0]
+                push!(N_SCHED_COMM, row)
+                i+=1
+                # COMMISSIONING DATE -> activated
+                if genname == "Kurri Kurri OCGT"
+                    row = [i, genid, sc, d, 2]
+                    push!(N_SCHED_COMM, row)
+                else
+                    row = [i, genid, sc, d, 1]
+                    push!(N_SCHED_COMM, row)
+                end
+                i+=1
+            end
+        end
+    end
+    # @info("\n✓ GENERATOR_n_sched - Commissioned & Anticipated projects")
+
+    # Fill commitment table
+    for k in 1:nrow(N_SCHED_COMM) push!(tv.gen_n, collect(N_SCHED_COMM[k,:])) end
+end
+
+function gen_retirements(ts, tv)
+    gent = ts.gen
+
+    pnid    = isempty(tv.gen_n) ? 0 : maximum(tv.gen_n.id)
+    ppmaxid = isempty(tv.gen_pmax) ? 0 : maximum(tv.gen_pmax.id)
+
+    for scid in keys(PISP.ID2SCE)
+        for unit in PISP.Retirements2024[scid]
+            genid = gent[gent[!,:name] .== unit[1], :id_gen][1]
+            for ndata in unit[2]
+                pnid+=1; 
+                push!(tv.gen_n, [pnid, genid, scid, DateTime(ndata[3],ndata[2],ndata[1]), ndata[4]])
+            end
+        end
+
+        for unit in PISP.Reduction2024[scid]
+            genid = gent[gent[!,:name] .== unit[1], :id_gen][1]
+            for ndata in unit[2]
+                ppmaxid+=1; 
+                push!(tv.gen_pmax, [ppmaxid, genid, scid, DateTime(ndata[3],ndata[2],ndata[1]), ndata[4]])
+            end
+        end
+    end
+end
+
+function ess_tables(ts, tv, PSESS, ispdata24)
+    bust = ts.bus
+
+    BESS_PROP   = PISP.read_xlsx_with_header(ispdata24, "Storage properties", "B4:H13")
+    PS_PROP     = PISP.read_xlsx_with_header(ispdata24, "Storage properties", "B22:K26")
+    BESS_CAP    = PISP.read_xlsx_with_header(ispdata24, "Maximum capacity", "P8:U62")
+    BESS_SUM    = PISP.read_xlsx_with_header(ispdata24, "Summary Mapping", "B314:AB370")
+    RELIANEW    = PISP.read_xlsx_with_header(ispdata24, "Generator Reliability Settings", "I20:N40")
+
+    BESS_SUM = BESS_SUM[3:end,:]
+    BESS_SUM[!,:cheff] = [replace(BESS_SUM[i,Symbol("VOM (\$/MWh sent-out)")], "All " => "") for i in 1:nrow(BESS_SUM)]
+    BESS_SUM[!,:dcheff] = [replace(BESS_SUM[i,Symbol("VOM (\$/MWh sent-out)")], "All " => "") for i in 1:nrow(BESS_SUM)]
+
+    BESS = BESS_CAP
+    BESS_FOR = DataFrame(id_ess = 1:nrow(BESS))
+    BESS_FOR[!,:name] = BESS[!,:Storage]
+    BESS_FOR[!,:alias] = [PISP.databess[BESS[!,:Storage][k]][2] for k in 1:length(BESS[!,:Storage])]
+    BESS_FOR[!,:tech] = ["BESS" for k in 1:nrow(BESS)]
+    BESS_FOR[!,:type] = ["SHALLOW" for k in 1:nrow(BESS)]
+    BESS_FOR[!,:capacity] = BESS[!,Symbol("Installed capacity (MW)")]
+    BESS_FOR[!,:investment] = [0 for k in 1:nrow(BESS)]
+    BESS_FOR[!,:active] = [ 1 for k in 1:nrow(BESS)]
+    BESS_FOR[!,:id_bus] = Int64.([bust[bust[!,:name] .== BESS_SUM[BESS_SUM[!,:Batteries] .== k, Symbol("Sub-region")][1],:id_bus][1] for k in BESS[!,:Storage]])
+    BESS_FOR[!,:ch_eff] = round.([BESS_PROP[BESS_PROP[!,:Property] .== "Charge efficiency (utility)", Symbol(BESS_SUM[k,:cheff])][1] for k in 1:nrow(BESS)],digits=4) ./ 100
+    BESS_FOR[!,:dch_eff] = round.([BESS_PROP[BESS_PROP[!,:Property] .== "Discharge efficiency (utility)", Symbol(BESS_SUM[k,:dcheff])][1] for k in 1:nrow(BESS)],digits=4) ./ 100
+    BESS_FOR[!,:eini] = [BESS_PROP[BESS_PROP[!,:Property] .== "Allowable min state of charge", Symbol("Battery storage (2hrs storage)")][1] for k in 1:nrow(BESS)] 
+    BESS_FOR[!,:emin] = [BESS_PROP[BESS_PROP[!,:Property] .== "Allowable min state of charge", Symbol("Battery storage (2hrs storage)")][1] for k in 1:nrow(BESS)]
+    BESS_FOR[!,:emax] = BESS[!,Symbol("Energy (MWh)")] 
+    BESS_FOR[!,:pmin] = [ 0.0 for k in 1:nrow(BESS)]
+    BESS_FOR[!,:pmax] = BESS[!,Symbol("Installed capacity (MW)")] 
+    BESS_FOR[!,:lmin] = [ 0.0 for k in 1:nrow(BESS)]
+    BESS_FOR[!,:lmax] = BESS[!,Symbol("Installed capacity (MW)")]
+    BESS_FOR[!,:fullout] = [RELIANEW[8,2] for k in 1:nrow(BESS)]
+    BESS_FOR[!,:partialout] = [0 for k in 1:nrow(BESS)]
+    BESS_FOR[!,:mttrfull] = [RELIANEW[8,4] for k in 1:nrow(BESS)]
+    BESS_FOR[!,:mttrpart] = [0 for k in 1:nrow(BESS)]
+    BESS_FOR[!,:inertia] = [ 0.0 for k in 1:nrow(BESS)]
+    BESS_FOR[!,:powerfactor] = [ 1.0 for k in 1:nrow(BESS)]
+    BESS_FOR[!,:ffr] = [ 1 for k in 1:nrow(BESS)]
+    BESS_FOR[!,:pfr] = [ 0 for k in 1:nrow(BESS)]
+    BESS_FOR[!,:res2] = [ 1 for k in 1:nrow(BESS)]
+    BESS_FOR[!,:res3] = [ 0 for k in 1:nrow(BESS)]
+    BESS_FOR[!,:fr_db] = [ 0.0 for k in 1:nrow(BESS)]
+    BESS_FOR[!,:fr_ad] = [ 0.3 for k in 1:nrow(BESS)]
+    BESS_FOR[!,:fr_dt] = [ 0.05 for k in 1:nrow(BESS)]
+    BESS_FOR[!,:fr_frt] = [ 1000.0 for k in 1:nrow(BESS)]
+    BESS_FOR[!,:fr_fr] = [ 70 for k in 1:nrow(BESS)]
+    BESS_FOR[!,:longitude] = [ PISP.databess[k][1][2] for k in BESS[!,:Storage]]
+    BESS_FOR[!,:latitude] = [ PISP.databess[k][1][1] for k in BESS[!,:Storage]]
+    BESS_FOR[!,:n] = Int64.(BESS_CAP[!,Symbol("Project status")] .!= "Anticipated")
+    # @warn("Anticipated BESS projects are deactivated initially")
+    BESS_FOR[!,:contingency] = [ 0 for k in 1:nrow(BESS)]
+
+    PS_FOR = DataFrame(id_ess = (nrow(BESS)+1):(nrow(BESS)+nrow(PSESS)))
+    PS_FOR[!,:name] = string.(PSESS[!,:Generator])
+    PS_FOR[!,:alias] = [PISP.dataps[k][8] for k in PSESS[!,:Generator]]
+    PS_FOR[!,:tech] = ["PS" for k in 1:nrow(PSESS)]
+    PS_FOR[!,:type] = [PISP.dataps[k][9] for k in PSESS[!,:Generator] ]
+    PS_FOR[!,:capacity] = [Float64(max(PISP.dataps[k][3], PISP.dataps[k][4])) for k in PSESS[!,:Generator] ]#PSESS[!,Symbol("CAPACITY")] 
+    PS_FOR[!,:investment] = [ 0 for k in 1:nrow(PSESS) ]
+    PS_FOR[!,:active] = [ 1 for k in 1:nrow(PSESS) ]
+    PS_FOR[!,:id_bus] = Int64.(PSESS[!,:id_bus])
+    PS_FOR[!,:ch_eff] = [ PISP.dataps[k][1] for k in PSESS[!,:Generator] ] ./ 100
+    PS_FOR[!,:dch_eff] = [ PISP.dataps[k][2] for k in PSESS[!,:Generator] ] ./ 100
+    PS_FOR[!,:eini] = [10.0 for k in PSESS[!,:Generator] ]
+    PS_FOR[!,:emin] = [10.0 for k in PSESS[!,:Generator] ]
+    PS_FOR[!,:emax] = [ PISP.dataps[k][5] for k in PSESS[!,:Generator] ]
+    PS_FOR[!,:pmin] = [ 0.0 for k in PSESS[!,:Generator] ]
+    PS_FOR[!,:pmax] = [ PISP.dataps[k][3] for k in PSESS[!,:Generator] ]
+    PS_FOR[!,:lmin] = [ 0.0 for k in PSESS[!,:Generator] ]
+    PS_FOR[!,:lmax] = [ PISP.dataps[k][4] for k in PSESS[!,:Generator] ]
+    PS_FOR[!,:fullout] = [RELIANEW[15,2] for k in 1:nrow(PSESS)]
+    PS_FOR[!,:partialout] = [0 for k in 1:nrow(PSESS)]
+    PS_FOR[!,:mttrfull] = [RELIANEW[15,4] for k in 1:nrow(PSESS)]
+    PS_FOR[!,:mttrpart] = [0 for k in 1:nrow(PSESS)]
+    PS_FOR[!,:inertia] = [ 2.2 for k in PSESS[!,:Generator] ]
+    PS_FOR[!,:powerfactor] = [ 0.85 for k in 1:nrow(PSESS)]
+    PS_FOR[!,:ffr] = [ 0 for k in 1:nrow(PSESS)]
+    PS_FOR[!,:pfr] = [ 1 for k in 1:nrow(PSESS)]
+    PS_FOR[!,:res2] = [ 1 for k in 1:nrow(PSESS)]
+    PS_FOR[!,:res3] = [ 0 for k in 1:nrow(PSESS)]
+    PS_FOR[!,:fr_db] = [ 0.0 for k in 1:nrow(PSESS)]
+    PS_FOR[!,:fr_ad] = [ 0.0 for k in 1:nrow(PSESS)]
+    PS_FOR[!,:fr_dt] = [ 0.0 for k in 1:nrow(PSESS)]
+    PS_FOR[!,:fr_frt] = [ 0.0 for k in 1:nrow(PSESS)]
+    PS_FOR[!,:fr_fr] = [ 70 for k in 1:nrow(PSESS)]
+    PS_FOR[!,:longitude] = [ PISP.dataps[k][7] for k in PSESS[!,:Generator]]
+    PS_FOR[!,:latitude] = [ PISP.dataps[k][6] for k in PSESS[!,:Generator]]
+    PS_FOR[!,:n] = Int64.(PSESS[!,Symbol("Commissioning date")] .< DateTime(2024,1,1))
+    # @warn("Storage comissioned after 01-01-2024 is set as inactive")
+    PS_FOR[!,:contingency] = [ 0 for k in 1:nrow(PSESS)]
+
+    l_cethana = [maximum(PS_FOR[!,:id_ess])+1, "Cethana", PISP.dataps["Cethana"][end-1], "PS", PISP.dataps["Cethana"][end], PISP.dataps["Cethana"][3], 0, 0, 10,PISP.dataps["Cethana"][1]/100, PISP.dataps["Cethana"][2]/100, 10,10,PISP.dataps["Cethana"][5],0,PISP.dataps["Cethana"][3], 0, PISP.dataps["Cethana"][4],RELIANEW[15,2],0,RELIANEW[15,4],0 , 2.2,0.85,0,1,1,0,0,0,0,0,70,PISP.dataps["Cethana"][7],PISP.dataps["Cethana"][6],1,0]
+    push!(PS_FOR, l_cethana)
+
+    # Combine BESS and PS DataFrames
+    ts.ess = vcat(ts.ess, BESS_FOR, PS_FOR)
+
+    # ENTRY DATES FOR ANTICIPATED/COMMISSIONED ENERGY STORAGE 
+    idk = isempty(tv.ess_n) ? 1 : maximum(tv.ess_n[!,:id]) + 1
+    for k in 1:nrow(BESS_CAP) 
+        if BESS_FOR[k,:n] == 0 
+            for sc in keys(PISP.ID2SCE)
+                tgtdate = BESS_CAP[k,Symbol("Indicative commissioning date")]
+                push!(tv.ess_n, [idk, BESS_FOR[k,:id_ess], sc, DateTime(Dates.year(tgtdate), Dates.month(tgtdate), 1, 0, 0, 0), 1])
+                idk+=1
+            end
+        end
+    end
+
+    for k in 1:nrow(PS_FOR)
+        if PS_FOR[k,:name] == "Cethana"
+            continue
+        end 
+        tgtdate = PSESS[k,Symbol("Commissioning date")]
+        if tgtdate >= DateTime(2024,1,1)
+            for sc in keys(PISP.ID2SCE)
+                push!(tv.ess_n, [idk, PS_FOR[k,:id_ess], sc, DateTime(Dates.year(tgtdate), Dates.month(tgtdate), 1, 0, 0, 0), 1])
+                idk+=1
+            end
+        end
+    end
+end
