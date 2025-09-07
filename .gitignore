@@ -6,3 +6,4 @@ usr/usr-params.jl
 Manifest.toml
 data/*
 *.DS_Store
+*.vscode
