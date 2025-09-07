@@ -1,7 +1,4 @@
-function PISPwritedata(input::Union{PISPtimeStatic, PISPtimeVarying}, path::AbstractString)
-    isdir(path) || mkpath(path)
-    input_type = typeof(input)
-    alt_names = Dict(
+alt_names = Dict(
         :gen => "Generator",
         :dem => "Demand",
         :ess => "ESS",
@@ -18,10 +15,26 @@ function PISPwritedata(input::Union{PISPtimeStatic, PISPtimeVarying}, path::Abst
         :line_tmin => "Line_tmin_sched"
     )
 
+function PISPwritedataCSV(input::Union{PISPtimeStatic, PISPtimeVarying}, path::AbstractString)
+    isdir(path) || mkpath(path)
+    input_type = typeof(input)
+
     for name in fieldnames(input_type)
         df = getfield(input, name)
         if df isa DataFrame
             CSV.write(joinpath(path, "$(alt_names[name]).csv"), df)
+        end
+    end
+end
+
+function PISPwritedataArrow(input::Union{PISPtimeStatic, PISPtimeVarying}, path::AbstractString)
+    isdir(path) || mkpath(path)
+    input_type = typeof(input)
+
+    for name in fieldnames(input_type)
+        df = getfield(input, name)
+        if df isa DataFrame
+            Arrow.write(joinpath(path, "$(alt_names[name]).arrow"), df)
         end
     end
 end

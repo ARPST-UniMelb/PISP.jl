@@ -44,5 +44,9 @@ PISP.ess_vpps(tc, ts, tv, vpp_cap, vpp_ene);
 # ============================================ #
 # write 
 # ============================================ #
-PISP.PISPwritedata(ts, "out")
-PISP.PISPwritedata(tv, "out/schedule-1w-new")
+PISP.PISPwritedataCSV(ts, "out")
+PISP.PISPwritedataCSV(tv, "out/schedule-1w-new")
+
+PISP.PISPwritedataArrow(ts, "out-arrow")
+PISP.PISPwritedataArrow(tv, "out-arrow/schedule-1w-new")
+

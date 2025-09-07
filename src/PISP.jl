@@ -4,6 +4,7 @@ module PISP
     using OrderedCollections
     using XLSX
     using CSV
+    using Arrow
 
     include("PISPdatamodel.jl")
     include("PISPutils.jl")

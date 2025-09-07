@@ -10,3 +10,6 @@ data/*
 *.xlsx
 *.tmp
 *.csv
+*.arrow
+out/
+out-*/
