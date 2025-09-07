@@ -181,7 +181,7 @@ function line_sched_table(tc, tv, TXdata)
             txd_min += 1
 
             if (ms in wmonths && me in smonths) || (ms in smonths && me in wmonths)
-                @warn "Problem start month is in winter and end month is in summer, check written data."
+                # @warn "Problem start month is in winter and end month is in summer, check written data."
                 if me in wmonths
                     push!(tv.line_tmax, (id=txd, id_lin=txid, scenario=scid, date=DateTime(ys,me,1), value=TXdata[txid,8]))
                     push!(tv.line_tmin, (id=txd, id_lin=txid, scenario=scid, date=DateTime(ys,me,1), value=TXdata[txid,11]))
@@ -617,7 +617,7 @@ function generator_table(ts, ispdata19, ispdata24)
     sort!(SYNC4, [Symbol("fuel"), :Generator]) #sort table to solve problem with unit Quarantine
 
 
-    GENERATORS = DataFrame(id = 1:nrow(SYNC4))
+    GENERATORS = DataFrame(id_gen = 1:nrow(SYNC4))
     GENERATORS[!,:name] = SYNC4[!,:Generator]
     GENERATORS[!,:alias] = [ismissing(SYNC4[n,:DUID]) ? SYNC4[n,:Generator] : SYNC4[n,:DUID] for n in 1:length(SYNC4[!,:DUID])]
     GENERATORS[!,:fuel] = SYNC4[!,:fuel]
@@ -723,7 +723,7 @@ function generator_table(ts, ispdata19, ispdata24)
     COMMITMENT[!,:last_state] = zeros(nrow(SYNC4))
     COMMITMENT[!,:last_state_period] = zeros(nrow(SYNC4))
     COMMITMENT[!,:last_state_output] = zeros(nrow(SYNC4))
-    COMMITMENT[!,:start_up_cost] = [GENERATORS[GENERATORS[!,:id] .== k, :fuel][1] == "Coal" ? GENERATORS[GENERATORS[!,:id] .== k, :cvar][1] * GENERATORS[GENERATORS[!,:id] .== k, :pmax][1] * 4.0 : 0.0 for k in COMMITMENT[!,:gen_id] ] # 
+    COMMITMENT[!,:start_up_cost] = [GENERATORS[GENERATORS[!,:id_gen] .== k, :fuel][1] == "Coal" ? GENERATORS[GENERATORS[!,:id_gen] .== k, :cvar][1] * GENERATORS[GENERATORS[!,:id_gen] .== k, :pmax][1] * 4.0 : 0.0 for k in COMMITMENT[!,:gen_id] ] # 
     COMMITMENT[!,:shut_down_cost] = zeros(nrow(SYNC4))
     COMMITMENT[!,:start_up_time] = zeros(nrow(SYNC4))
     COMMITMENT[!,:shut_down_time] = zeros(nrow(SYNC4))
@@ -735,13 +735,13 @@ function generator_table(ts, ispdata19, ispdata24)
     # @warn("No shut down time for any generator")
 
     # MERGE GENERATOR AND COMMITMENT IN left `id` and right `gen_id`. Fill missing values in COMMITMENT with 0
-    merged = leftjoin(GENERATORS, COMMITMENT, on = [:id => :gen_id], makeunique=true)
-    select!(merged, Not(:id_1))
-    rename!(merged, :id => :id_gen)
+    merged = leftjoin(GENERATORS, COMMITMENT, on = [:id_gen => :gen_id], makeunique=true)
+    select!(merged, Not(:id))
+    # rename!(merged, :id => :id_gen)
     ts.gen = merged
     XLSX.writetable(".tmp/GENERATORS_FULL.xlsx", Tables.columntable(merged); sheetname="GENERATORS", overwrite=true)
     rm(".tmp"; recursive=true)
-    return SYNC3, SYNC4, GENERATORS, BESS, PS
+    return SYNC4, GENERATORS, PS
 end
 
 function gen_n_sched_table(tv, SYNC4, GENERATORS)
@@ -762,7 +762,7 @@ function gen_n_sched_table(tv, SYNC4, GENERATORS)
         # GENERATE DATAFRAME WITH SCHEDULED COMMISSIONING
         d = SYNC4[r, Symbol("Commissioning date")] # Comissioning date
         if d > DateTime("2020-01-01T01:00:00")
-            genid = GENERATORS[GENERATORS[!,:name] .== SYNC4[r,:Generator], :id][1]
+            genid = GENERATORS[GENERATORS[!,:name] .== SYNC4[r,:Generator], :id_gen][1]
             genname = GENERATORS[GENERATORS[!,:name] .== SYNC4[r,:Generator], :name][1]
             # @warn("Setting commissioning date for $(SYNC4[r,:Generator]) to $(d)")
             for sc in keys(PISP.ID2SCE)
@@ -933,6 +933,529 @@ function ess_tables(ts, tv, PSESS, ispdata24)
                 push!(tv.ess_n, [idk, PS_FOR[k,:id_ess], sc, DateTime(Dates.year(tgtdate), Dates.month(tgtdate), 1, 0, 0, 0), 1])
                 idk+=1
             end
+        end
+    end
+end
+
+function gen_pmax_distpv(tc, ts, tv, profilespath)
+    probs = tc.problem;
+    bust = ts.bus;
+
+    gid = isempty(ts.gen.id_gen) ? 0 : maximum(ts.gen.id_gen);
+    pmaxid = isempty(tv.gen_pmax.id) ? 0 : maximum(tv.gen_pmax.id);
+
+    for st in keys(PISP.NEMBUSNAME)
+        gid += 1
+        bus_data = bust[bust[!,:name] .== st, :]
+        bus_id = bus_data[!, :id_bus][1]
+        bus_lat = bus_data[!, :latitude][1]
+        bus_lon = bus_data[!, :longitude][1]
+        arrgen = [gid,"RTPV_$(st)","RTPV_$(st)","Solar","RoofPV","RoofPV", 100.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, bus_id, 0.0, 100.0, 9999.9, 9999.9, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0, 1.0, bus_lat, bus_lon, 1, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        push!(ts.gen, arrgen)
+        for p in 1:nrow(probs)
+            scid = probs[p,:scenario][1]
+            sc = PISP.ID2SCE[scid]
+
+            df = CSV.File(string(profilespath,"demand_$(st)_$(sc)/",st,"_RefYear_4006_",replace(uppercase(PISP.ID2SCE2[scid]), " " => "_"),"_POE10_PV_TOT.csv")) |> DataFrame
+
+            dstart = probs[p,:dstart]
+            dend = probs[p,:dend]
+            yr = Dates.year(dstart)
+            ds = Dates.day(dstart)
+            de = Dates.day(dend)
+            ms = Dates.month(dstart)
+            me = Dates.month(dend)
+
+            df1 = df[((df[!,:Year] .== yr) .& ((df[!,:Month] .>= ms) .| (df[!,:Month] .<= me)) ),:]
+
+            if ms == me
+                df2 = df1[ ( ((df1[!,:Month] .== ms) .& (df1[!,:Day] .>= ds)) .& ((df1[!,:Month] .== me) .& (df1[!,:Day] .<= de)) ) ,:]
+            elseif me == ms + 1
+                df2 = df1[ ( ((df1[!,:Month] .== ms) .& (df1[!,:Day] .>= ds)) .| ((df1[!,:Month] .== me) .& (df1[!,:Day] .<= de)) ) ,:]
+            else 
+                df2 = df1[ .!( ((df1[!,:Month] .== ms) .& (df1[!,:Day] .< ds)) .| ((df1[!,:Month] .== me) .& (df1[!,:Day] .> de)) ) ,:]
+            end
+
+            data = vec(permutedims(Tables.matrix(df2[:,4:end])))
+            data2 = round.([ (data[2*i-1]+data[2*i])/2 for i in 1:Int64(length(data)/2) ], digits=4)
+
+            for h in 1:Int64(Dates.Hour(dend - dstart)/Dates.Hour(1)+1)
+                pmaxid += 1
+                push!(tv.gen_pmax, [pmaxid, gid, scid, dstart+Dates.Hour(h-1), data2[h]])
+            end
+        end
+    end
+end
+
+function dem_load(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, profilespath::String)
+    probs = tc.problem
+    bust = ts.bus
+
+    did     = isempty(ts.dem.id_dem) ? 0 : maximum(ts.dem.id_dem)
+    lmaxid  = isempty(tv.dem_load.id) ? 0 : maximum(tv.dem_load.id)
+
+    for st in keys(PISP.NEMBUSNAME)
+        did += 1
+        bus_data = bust[bust[!,:name] .== st, :]
+        bus_id = bus_data[!, :id_bus][1]
+
+        arrdem = [did,"DEM_$(st)", 100.0, bus_id, 1, 0, 17500.0, 1]
+        push!(ts.dem, arrdem)
+        for p in 1:nrow(probs)
+            scid = probs[p,:scenario][1]
+            sc = PISP.ID2SCE[scid]
+
+            df = CSV.File(string(profilespath,"demand_$(st)_$(sc)/",st,"_RefYear_4006_",replace(uppercase(PISP.ID2SCE2[scid]), " " => "_"),"_POE10_OPSO_MODELLING_PVLITE.csv")) |> DataFrame
+
+            dstart = probs[p,:dstart]
+            dend = probs[p,:dend]
+            yr = Dates.year(dstart)
+            ds = Dates.day(dstart)
+            de = Dates.day(dend)
+            ms = Dates.month(dstart)
+            me = Dates.month(dend)
+
+            df1 = df[((df[!,:Year] .== yr) .& ((df[!,:Month] .>= ms) .| (df[!,:Month] .<= me)) ),:]
+
+            if ms == me
+                df2 = df1[ ( ((df1[!,:Month] .== ms) .& (df1[!,:Day] .>= ds)) .& ((df1[!,:Month] .== me) .& (df1[!,:Day] .<= de)) ) ,:]
+            elseif me == ms + 1
+                df2 = df1[ ( ((df1[!,:Month] .== ms) .& (df1[!,:Day] .>= ds)) .| ((df1[!,:Month] .== me) .& (df1[!,:Day] .<= de)) ) ,:]
+            else 
+                df2 = df1[ .!( ((df1[!,:Month] .== ms) .& (df1[!,:Day] .< ds)) .| ((df1[!,:Month] .== me) .& (df1[!,:Day] .> de)) ) ,:]
+            end
+
+            data = vec(permutedims(Tables.matrix(df2[:,4:end])))
+            data2 = [ (data[2*i-1]+data[2*i])/2 for i in 1:Int64(length(data)/2) ]
+
+            for h in 1:Int64(Dates.Hour(dend - dstart)/Dates.Hour(1)+1)
+                lmaxid += 1
+                push!(tv.dem_load, [lmaxid, did, scid, dstart+Dates.Hour(h-1), data2[h]])
+            end
+        end
+    end
+end
+
+function gen_pmax_solar(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, ispdata24::String, outlookdata::String, outlookAEMO::String, profilespath::String)
+    probs = tc.problem
+    bust = ts.bus
+
+    gid = isempty(ts.gen.id_gen) ? 0 : maximum(ts.gen.id_gen);
+    pmaxid = isempty(tv.gen_pmax.id) ? 0 : maximum(tv.gen_pmax.id);
+
+    tch = "Solar"
+    EXIST_TECH = PISP.read_xlsx_with_header(ispdata24, "Existing Gen Data Summary", "B11:K297")
+    EXIST_SOLAR = EXIST_TECH[occursin.(tch[2:end], coalesce.(EXIST_TECH[!,2],"")),:]
+    # @warn("Anticipated solar PV projects not considered in the existing data")
+
+    REZ_BUS = PISP.read_xlsx_with_header(ispdata24, "Renewable Energy Zones", "B7:G50")
+    # println(REZ_BUS)
+
+    genid = Dict()
+    for st in setdiff(keys(PISP.NEMBUSNAME),["GG", "SNW"]) ## Buses with no large-scale solar projects or REZ are not considered
+        gid += 1
+        bus_data = bust[bust[!,:name] .== st, :]
+        bus_id = bus_data[!, :id_bus][1]    
+        bus_lat = bus_data[!, :latitude][1]
+        bus_lon = bus_data[!, :longitude][1]
+        exs_gen_sol = EXIST_SOLAR[EXIST_SOLAR[!,4] .== st,:];
+        if st == "TAS" capaux = 0.0 else capaux = sum(EXIST_SOLAR[EXIST_SOLAR[!,4] .== st,7]) end
+        genid[st] = [gid, capaux]
+        arrgen = [gid,"LSPV_$(st)","LSPV_$(st)","Solar","LargePV","LargePV", capaux, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, bus_id, 0.0, capaux, 9999.9,  9999.9, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0, 1.0, bus_lat, bus_lon, 1, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        push!(ts.gen, arrgen)
+    end
+
+    name_ex = Dict()
+
+    foldertech = string(profilespath, "solar/solar/")
+
+    scid2cdp = Dict(1 => "CDP14", 2 => "CDP14", 3 => "CDP14", 4 => "CDP14")
+    auxf = []
+    auxk = []
+
+    for p in 1:nrow(probs)
+        scid = probs[p,:scenario][1]
+        sc = PISP.ID2SCE[scid]
+        dstart = probs[p,:dstart]
+        dend = probs[p,:dend]
+        yr = Dates.year(dstart)
+        ds = Dates.day(dstart)
+        de = Dates.day(dend)
+        ms = Dates.month(dstart)
+        me = Dates.month(dend)
+        outlookfile = string(outlookdata,"/2024 ISP - ",sc," - Core_RED.xlsx")
+
+        TECH_CAP = PISP.read_xlsx_with_header(outlookAEMO, "CapacityOutlook", "A1:G14356")
+        SOLAR_CAP = PISP.read_xlsx_with_header(outlookfile, "REZ Generation Capacity", "B3:AG2238")
+        SOLAR_CAP = dropmissing(SOLAR_CAP,:CDP)
+        
+        y = ms < 7 ? yr - 1 : yr
+
+        for st in setdiff(keys(PISP.NEMBUSNAME),["GG", "SNW"]) # Buses with no large-scale solar projects are not considered
+
+            REZs = REZ_BUS[(REZ_BUS[!,Symbol("ISP Sub-region")] .== st),:ID]
+            REZSUM = REZ_BUS[(REZ_BUS[!,Symbol("ISP Sub-region")] .== st),[:ID,:Name,Symbol("ISP Sub-region")]]
+
+            SOLARAUX = SOLAR_CAP[in.(SOLAR_CAP[!,:REZ],[REZs]) .& (SOLAR_CAP[!,:CDP] .== scid2cdp[scid]) .& (SOLAR_CAP[!,:Technology] .== tch), [:REZ,Symbol("$(y)-$(string(y+1)[3:end])")]]
+
+            rename!(SOLARAUX, Dict(:REZ => :ID))
+            SOLARAUX = innerjoin(SOLARAUX,REZSUM, on = :ID)
+            SOLARAUX[!,:EXISTING] = [0.0 for s in 1:nrow(SOLARAUX)]
+
+            dataexi = zeros(Int64(Dates.Hour(dend - dstart)/Dates.Hour(1)+1)*2)
+            exi_cap = 0.0
+            df2 = DataFrame()
+            for r in 1:nrow(EXIST_SOLAR)
+                k = EXIST_SOLAR[r,1]
+                reg = EXIST_SOLAR[r,5]
+
+                if EXIST_SOLAR[r,4] == st # IF GENERATOR IS IN THE SUBREGION
+                    for sexp in 1:nrow(SOLARAUX)
+                        if SOLARAUX[sexp,:Name] == reg # IF THE REZ IS EQUAL TO THE REZ OF THE GENERATOR
+                            SOLARAUX[sexp,:EXISTING] = SOLARAUX[sexp,:EXISTING] + EXIST_SOLAR[r,10] # ADD CAPACITY TO THE REZ IF THE GENERATOR IS IN THE REZ
+                        end
+                    end
+
+                    file = ""
+                    if k in keys(name_ex)
+                        file = name_ex[k]
+                    else
+                        for f in readdir(foldertech)
+                            if f[1:3] != "REZ" && occursin(split(k," ")[1],f)
+                                push!(auxf,f)
+                                push!(auxk,k)
+                                file = f
+                                break
+                            end
+                        end
+                    end
+
+                    df = CSV.File(string(foldertech,file)) |> DataFrame
+
+                    df1 = DataFrame()
+                    df1 = df[((df[!,:Year] .== yr) .& ((df[!,:Month] .>= ms) .& (df[!,:Month] .<= me)) ),:] #select data for the year and problems 
+
+                    if ms == me
+                        df2 = df1[ ( ((df1[!,:Month] .== ms) .& (df1[!,:Day] .>= ds)) .& ((df1[!,:Month] .== me) .& (df1[!,:Day] .<= de)) ) ,:]
+                    elseif me == ms + 1
+                        df2 = df1[ ( ((df1[!,:Month] .== ms) .& (df1[!,:Day] .>= ds)) .| ((df1[!,:Month] .== me) .& (df1[!,:Day] .<= de)) ) ,:]
+                    else 
+                        df2 = df1[ .!( ((df1[!,:Month] .== ms) .& (df1[!,:Day] .< ds)) .| ((df1[!,:Month] .== me) .& (df1[!,:Day] .> de)) ) ,:]
+                    end
+                    dataexi = dataexi .+ vec(permutedims(Tables.matrix(df2[:,4:end]))) * EXIST_SOLAR[r,10]
+                    exi_cap += EXIST_SOLAR[r,10] # EXISTING CAPACITY FROM WINTER RATING
+                end
+            end
+            SOLARAUX[!,:DIFF] = SOLARAUX[!,2] .- SOLARAUX[!,:EXISTING] # REZ capacity utilised 
+
+            naux = 0    
+            datanew = zeros(Int64(Dates.Hour(dend - dstart)/Dates.Hour(1)+1)*2)
+            nauxrez = 0
+            datarez = zeros(Int64(Dates.Hour(dend - dstart)/Dates.Hour(1)+1)*2)  
+
+            drezcap = 0
+            rezcap = 0
+            tch_ = "Utility solar"
+
+            if dstart > DateTime(2024,7,1,0,0,0)
+                instcap = TECH_CAP[(TECH_CAP[!,:Scenario] .== sc) .& (TECH_CAP[!,:Subregion] .== st) .& (TECH_CAP[!,:Technology] .== tch_) .& (year.(TECH_CAP[!,:date]) .== y), 7][1]
+                # future capacity profile (average of REZ profiles in the area)
+                for f in readdir(foldertech)
+                    sub = split(f,['_','.'])
+                    if "REZ" in sub && "SAT" in sub && sub[2] in REZs
+                        df = CSV.File(string(foldertech,f)) |> DataFrame
+                        df1 = df[((df[!,:Year] .== yr) .& ((df[!,:Month] .>= ms) .& (df[!,:Month] .<= me)) ),:]
+
+                        if ms == me
+                            df2 = df1[ ( ((df1[!,:Month] .== ms) .& (df1[!,:Day] .>= ds)) .& ((df1[!,:Month] .== me) .& (df1[!,:Day] .<= de)) ) ,:]
+                        elseif me == ms + 1
+                            df2 = df1[ ( ((df1[!,:Month] .== ms) .& (df1[!,:Day] .>= ds)) .| ((df1[!,:Month] .== me) .& (df1[!,:Day] .<= de)) ) ,:]
+                        else 
+                            df2 = df1[ .!( ((df1[!,:Month] .== ms) .& (df1[!,:Day] .< ds)) .| ((df1[!,:Month] .== me) .& (df1[!,:Day] .> de)) ) ,:]
+                        end
+                        datanew = datanew .+ vec(permutedims(Tables.matrix(df2[:,4:end])))
+                        naux += 1
+
+                        #check if specific REZ capacity is available
+                        if nrow(SOLARAUX) > 0
+                            for r in 1:nrow(SOLARAUX)
+                                if SOLARAUX[r,:ID] == sub[2] && SOLARAUX[r,:DIFF] >= 0.01
+                                    datarez = datarez .+ vec(permutedims(Tables.matrix(df2[:,4:end]))) * SOLARAUX[r,:DIFF]
+                                    drezcap += SOLARAUX[r,:DIFF]
+                                end
+                            end
+                        end
+
+                    end
+                end
+            else
+                instcap = exi_cap
+            end
+
+            if (instcap - exi_cap - drezcap) > 0
+                dataN = datanew / naux * (instcap - exi_cap - drezcap)
+                data = (dataexi .+ datarez) .+ dataN
+            elseif instcap - exi_cap < drezcap
+                dataN = datanew / naux * abs(instcap - exi_cap)
+                data = dataexi .+ dataN
+                if ((instcap - exi_cap) < 0 )&& (abs(instcap - exi_cap) > 100)  end #@warn("$(st) $(sc) $(abs(instcap - exi_cap))")
+            else
+                dataN = naux == 0 ? datanew : datanew / naux * 0.0
+                data = (dataexi .+ datarez) .+ dataN
+            end
+
+            data2 = [ (data[2*i-1]+data[2*i])/2 for i in 1:Int64(length(data)/2) ]
+            for h in 1:Int64(Dates.Hour(dend - dstart)/Dates.Hour(1)+1)
+                pmaxid += 1
+                push!(tv.gen_pmax, [pmaxid, genid[st][1], scid, dstart+Dates.Hour(h-1), data2[h]])
+            end
+        end
+    end
+end
+
+function gen_pmax_wind(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, ispdata24::String, outlookdata::String, outlookAEMO::String, profilespath::String)
+    probs = tc.problem
+    bust = ts.bus
+
+    gid = isempty(ts.gen.id_gen) ? 0 : maximum(ts.gen.id_gen);
+    pmaxid = isempty(tv.gen_pmax.id) ? 0 : maximum(tv.gen_pmax.id);
+
+    tch = "Wind"
+    EXIST_TECH = PISP.read_xlsx_with_header(ispdata24, "Existing Gen Data Summary", "B11:K297")
+    EXIST_WIND = EXIST_TECH[occursin.(tch[2:end], coalesce.(EXIST_TECH[!,2],"")),:]
+    REZ_BUS = PISP.read_xlsx_with_header(ispdata24, "Renewable Energy Zones", "B7:G50")
+
+    genid = Dict()
+    for st in setdiff(keys(PISP.NEMBUSNAME),["GG"]) ## Buses with no large-scale solar projects or REZ are not considered
+        gid += 1
+        bus_data = bust[bust[!,:name] .== st, :]
+        bus_id = bus_data[!, :id_bus][1]    
+        bus_lat = bus_data[!, :latitude][1]
+        bus_lon = bus_data[!, :longitude][1]
+
+        arrgen = []
+        if st == "SNW"
+            capaux = 0.0
+            genid[st] = [gid, capaux]
+            arrgen = [gid,"WIND_$(st)","WIND_$(st)","Wind","Wind","Wind",        capaux, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, bus_id, 0.0, capaux, 9999.9,  9999.9, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0, 1.0, bus_lat, bus_lon, 1, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        else
+            capaux = sum(EXIST_WIND[EXIST_WIND[!,4] .== st,7])
+            genid[st] = [gid, capaux]
+            arrgen = [gid,"WIND_$(st)","WIND_$(st)","Wind","Wind","Wind",        capaux, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, bus_id, 0.0, capaux, 9999.9,  9999.9, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0, 1.0, bus_lat, bus_lon, 1, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        end
+        push!(ts.gen, arrgen)
+    end
+
+    foldertech = string(profilespath, "wind/wind/")
+
+    scid2cdp = Dict(1 => "CDP14", 2 => "CDP14", 3 => "CDP14", 4 => "CDP14")
+    auxf = []
+    auxk = []
+
+    for p in 1:nrow(probs)
+        scid = probs[p,:scenario][1]
+        sc = PISP.ID2SCE[scid]
+        dstart = probs[p,:dstart]
+        dend = probs[p,:dend]
+        yr = Dates.year(dstart)
+        ds = Dates.day(dstart)
+        de = Dates.day(dend)
+        ms = Dates.month(dstart)
+        me = Dates.month(dend)
+        outlookfile = string(outlookdata,"/2024 ISP - ",sc," - Core_RED.xlsx")
+
+        TECH_CAP = PISP.read_xlsx_with_header(outlookAEMO, "CapacityOutlook", "A1:G14356")
+        WIND_CAP = PISP.read_xlsx_with_header(outlookfile, "REZ Generation Capacity", "B3:AG2238")
+        WIND_CAP = dropmissing(WIND_CAP,:CDP)
+        
+        y = ms < 7 ? yr - 1 : yr
+
+        for st in setdiff(keys(PISP.NEMBUSNAME),["GG"]) # Buses with no large-scale wind are not considered
+
+            REZs = REZ_BUS[(REZ_BUS[!,Symbol("ISP Sub-region")] .== st),:ID]
+            REZSUM = REZ_BUS[(REZ_BUS[!,Symbol("ISP Sub-region")] .== st),[:ID,:Name,Symbol("ISP Sub-region")]]
+
+            WINDAUX = WIND_CAP[in.(WIND_CAP[!,:REZ],[REZs]) .& (WIND_CAP[!,:CDP] .== scid2cdp[scid]) .& (WIND_CAP[!,:Technology] .== tch), [:REZ,Symbol("$(y)-$(string(y+1)[3:end])")]]
+
+            rename!(WINDAUX, Dict(:REZ => :ID))
+            WINDAUX = innerjoin(WINDAUX,REZSUM, on = :ID)
+            WINDAUX[!,:EXISTING] = [0.0 for s in 1:nrow(WINDAUX)]
+
+            dataexi = zeros(Int64(Dates.Hour(dend - dstart)/Dates.Hour(1)+1)*2)
+            exi_cap = 0.0
+            df2 = DataFrame()
+            for r in 1:nrow(EXIST_WIND)
+                k = EXIST_WIND[r,1]
+                reg = EXIST_WIND[r,5]
+                if EXIST_WIND[r,4] == st # IF GENERATOR IS IN THE SUBREGION
+                    for sexp in 1:nrow(WINDAUX)
+                        if WINDAUX[sexp,:Name] == reg # IF THE REZ IS EQUAL TO THE REZ OF THE GENERATOR
+                            WINDAUX[sexp,:EXISTING] = WINDAUX[sexp,:EXISTING] + EXIST_WIND[r,7] # ADD CAPACITY TO THE REZ IF THE GENERATOR IS IN THE REZ
+                        end
+                    end
+                    # println(" =============== $(k) ============== ")
+                    file = ""
+                    if k in keys(PISP.name_ex)
+                        file = PISP.name_ex[k]
+                    else
+                        for f in readdir(foldertech)
+                            if f[1:3] != "REZ" && occursin(split(k," ")[1],f)
+                                push!(auxf,f)
+                                push!(auxk,k)
+                                file = f
+                                # println(k, " ==> ", f)
+                                break
+                            end
+                        end
+                    end
+                    # println(" $(k) ======>", file)
+
+                    df = CSV.File(string(foldertech,file)) |> DataFrame
+
+                    df1 = DataFrame()
+                    df1 = df[((df[!,:Year] .== yr) .& ((df[!,:Month] .>= ms) .& (df[!,:Month] .<= me)) ),:] #select data for the year and problems 
+
+                    if ms == me
+                        df2 = df1[ ( ((df1[!,:Month] .== ms) .& (df1[!,:Day] .>= ds)) .& ((df1[!,:Month] .== me) .& (df1[!,:Day] .<= de)) ) ,:]
+                    elseif me == ms + 1
+                        df2 = df1[ ( ((df1[!,:Month] .== ms) .& (df1[!,:Day] .>= ds)) .| ((df1[!,:Month] .== me) .& (df1[!,:Day] .<= de)) ) ,:]
+                    else 
+                        df2 = df1[ .!( ((df1[!,:Month] .== ms) .& (df1[!,:Day] .< ds)) .| ((df1[!,:Month] .== me) .& (df1[!,:Day] .> de)) ) ,:]
+                    end
+                    dataexi = dataexi .+ vec(permutedims(Tables.matrix(df2[:,4:end]))) * EXIST_WIND[r,7]
+                    exi_cap += EXIST_WIND[r,7] # EXISTING CAPACITY FROM WINTER RATING
+                end
+            end
+            WINDAUX[!,:DIFF] = WINDAUX[!,2] .- WINDAUX[!,:EXISTING] # REZ capacity utilised 
+
+            naux = 0    
+            datanew = zeros(Int64(Dates.Hour(dend - dstart)/Dates.Hour(1)+1)*2)
+            nauxrez = 0
+            datarez = zeros(Int64(Dates.Hour(dend - dstart)/Dates.Hour(1)+1)*2)  
+
+            drezcap = 0
+            rezcap = 0
+            tch_ = "Wind"
+
+            if dstart > DateTime(2024,7,1,0,0,0)
+                instcap = TECH_CAP[(TECH_CAP[!,:Scenario] .== sc) .& (TECH_CAP[!,:Subregion] .== st) .& (TECH_CAP[!,:Technology] .== tch_) .& (year.(TECH_CAP[!,:date]) .== y), 7][1]
+                # future capacity profile (average of REZ profiles in the area)
+                for f in readdir(foldertech)
+                    sub = split(f,['_','.'])
+                    if sub[1] in REZs && "WH" in sub#f[1] == st[1]
+                        df = CSV.File(string(foldertech,f)) |> DataFrame
+                        df1 = df[((df[!,:Year] .== yr) .& ((df[!,:Month] .>= ms) .& (df[!,:Month] .<= me)) ),:]
+
+                        if ms == me
+                            df2 = df1[ ( ((df1[!,:Month] .== ms) .& (df1[!,:Day] .>= ds)) .& ((df1[!,:Month] .== me) .& (df1[!,:Day] .<= de)) ) ,:]
+                        elseif me == ms + 1
+                            df2 = df1[ ( ((df1[!,:Month] .== ms) .& (df1[!,:Day] .>= ds)) .| ((df1[!,:Month] .== me) .& (df1[!,:Day] .<= de)) ) ,:]
+                        else 
+                            df2 = df1[ .!( ((df1[!,:Month] .== ms) .& (df1[!,:Day] .< ds)) .| ((df1[!,:Month] .== me) .& (df1[!,:Day] .> de)) ) ,:]
+                        end
+                        datanew = datanew .+ vec(permutedims(Tables.matrix(df2[:,4:end])))
+                        naux += 1
+
+                        #check if specific REZ capacity is available
+                        if nrow(WINDAUX) > 0
+                            for r in 1:nrow(WINDAUX)
+                                if WINDAUX[r,:ID] == sub[1] && WINDAUX[r,:DIFF] >= 0.01
+                                    datarez = datarez .+ vec(permutedims(Tables.matrix(df2[:,4:end]))) * WINDAUX[r,:DIFF]
+                                    drezcap += WINDAUX[r,:DIFF]
+                                end
+                            end
+                        end
+
+                    end
+                end
+            else
+                instcap = exi_cap
+            end
+
+            if (instcap - exi_cap - drezcap) > 0
+                dataN = datanew / naux * (instcap - exi_cap - drezcap)
+                data = (dataexi .+ datarez) .+ dataN
+            elseif instcap - exi_cap < drezcap
+                # print(instcap - exi_cap)
+                dataN = datanew / naux * abs(instcap - exi_cap)
+                data = dataexi .+ dataN
+                if ((instcap - exi_cap) < 0 )&& (abs(instcap - exi_cap) > 100) end #@warn("$(st) $(sc) $(abs(instcap - exi_cap))") 
+            else
+                dataN = naux == 0 ? datanew : datanew / naux * 0.0
+                data = (dataexi .+ datarez) .+ dataN
+            end
+
+            data2 = [ (data[2*i-1]+data[2*i])/2 for i in 1:Int64(length(data)/2) ]
+            for h in 1:Int64(Dates.Hour(dend - dstart)/Dates.Hour(1)+1)
+                pmaxid += 1
+                push!(tv.gen_pmax, [pmaxid, genid[st][1], scid, dstart+Dates.Hour(h-1), data2[h]])
+            end
+        end
+    end
+end
+
+function ess_vpps(tc, ts, tv, vpp_cap, vpp_ene)
+    bust = ts.bus
+    probs = tc.problem
+
+    bmid = isempty(ts.ess.id_ess) ? 0 : maximum(ts.ess.id_ess)
+    bmpmid = isempty(tv.ess_pmax.id) ? 0 : maximum(tv.ess_pmax.id)
+    bmlmid = isempty(tv.ess_lmax.id) ? 0 : maximum(tv.ess_lmax.id)
+    bmemid = isempty(tv.ess_emax.id) ? 0 : maximum(tv.ess_emax.id)
+    BMBESSid = Dict()
+
+    sc = collect(keys(PISP.SCE))[2]
+    # CER STORAGE CAPACITY
+    VPPCAP = PISP.read_xlsx_with_header(vpp_cap, "$(sc)", "A1:AE2080")
+    VPPCAP = VPPCAP[(VPPCAP[!,1] .== "CDP14") .& (VPPCAP[!,Symbol("storage category")] .== "Coordinated CER storage"),:]
+    rename!(VPPCAP, Dict(:Subregion => :bus))
+
+    #CER STORAGE ENERGY
+    VPPENE = PISP.read_xlsx_with_header(vpp_ene, "$(sc)", "A1:AE2080")
+    VPPENE = VPPENE[(VPPENE[!,1] .== "CDP14") .& (VPPENE[!,Symbol("Technology")] .== "Coordinated CER storage"),:]
+    rename!(VPPENE, Dict(:Subregion => :bus))
+
+    for st in keys(PISP.NEMBUSES)
+        yr = 2024
+        bmid += 1
+        bus_id = bust[bust[!,:name] .== st, :id_bus][1]
+        data_cap = VPPCAP[VPPCAP[!,:bus] .== st, Symbol("$(yr)-$(string(yr+1)[3:end])")][1]
+        data_ene = VPPENE[VPPENE[!,:bus] .== st, Symbol("$(yr)-$(string(yr+1)[3:end])")][1]*1000
+        BMBESSid[st] = [bmid, data_cap, data_ene]
+        arrbmss = [bmid,"VPP_CER_$(st)","VPP_CER_$(st)","BESS","SHALLOW", data_cap, 0, 1, bus_id, 0.9, 0.9, 10.0, 10.0, data_ene, 0.0, data_cap, 0.0, data_cap, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0, 0, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, PISP.NEMBUSES[st][2], PISP.NEMBUSES[st][1], 1, 0]
+        push!(ts.ess, arrbmss)
+    end
+
+    for p in 1:nrow(probs)
+        scid = probs[p,:scenario][1]
+        sc = PISP.ID2SCE[scid]
+        dstart = probs[p,:dstart]
+        dend = probs[p,:dend]
+        yr = Dates.year(dstart)
+        ds = Dates.day(dstart)
+        de = Dates.day(dend)
+        ms = Dates.month(dstart)
+        me = Dates.month(dend)
+
+        yr = ms < 7 ? yr - 1 : yr
+        VPPCAP = PISP.read_xlsx_with_header(vpp_cap, "$(sc)", "A1:AE2080")
+        VPPENE = PISP.read_xlsx_with_header(vpp_ene, "$(sc)", "A1:AE2080")
+        for st in keys(PISP.NEMBUSES)
+            # CER STORAGE CAPACITY
+            VPPCAP = VPPCAP[(VPPCAP[!,1] .== "CDP14") .& (VPPCAP[!,Symbol("storage category")] .== "Coordinated CER storage"),:]
+            rename!(VPPCAP, names(VPPCAP)[3] => :bus)
+
+            #CER STORAGE ENERGY
+            VPPENE = VPPENE[(VPPENE[!,1] .== "CDP14") .& (VPPENE[!,Symbol("Technology")] .== "Coordinated CER storage"),:]
+            rename!(VPPENE, names(VPPENE)[3] => :bus)
+
+            data_cap = VPPCAP[VPPCAP[!,:bus] .== st, Symbol("$(yr)-$(string(yr+1)[3:end])")][1]
+            data_ene = VPPENE[VPPENE[!,:bus] .== st, Symbol("$(yr)-$(string(yr+1)[3:end])")][1]*1000
+
+            bmpmid+=1; bmlmid+=1; bmemid+=1;
+            push!(tv.ess_pmax, [bmpmid, BMBESSid[st][1], scid, dstart, data_cap])
+            push!(tv.ess_lmax, [bmlmid, BMBESSid[st][1], scid, dstart, data_cap])
+            push!(tv.ess_emax, [bmemid, BMBESSid[st][1], scid, dstart, data_ene])
         end
     end
 end

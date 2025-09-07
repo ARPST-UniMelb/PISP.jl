@@ -70,3 +70,5 @@ SCE2 = OrderedDict(
             "Progressive"   => 1, 
             "Step"          => 2, 
             "Green"         => 3)
+
+ID2SCE2 = Dict(1 => "Progressive Change", 2 => "Step Change", 3 => "Hydrogen Export")

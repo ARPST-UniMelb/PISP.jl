@@ -10,7 +10,7 @@ end
 
 mutable struct PISPtimeStatic
     bus::DataFrame
-    demand::DataFrame
+    dem::DataFrame
     ess::DataFrame
     gen::DataFrame
     line::DataFrame
@@ -18,11 +18,11 @@ mutable struct PISPtimeStatic
     # Default constructor
     function PISPtimeStatic()
         bus    = PISP.schema_to_dataframe(PISP.MOD_BUS)
-        demand = PISP.schema_to_dataframe(PISP.MOD_DEMAND)
+        dem    = PISP.schema_to_dataframe(PISP.MOD_DEMAND)
         ess    = PISP.schema_to_dataframe(PISP.MOD_ESS)
         gen    = PISP.schema_to_dataframe(PISP.MOD_GEN)
         line   = PISP.schema_to_dataframe(PISP.MOD_LINE)
-        new(bus, demand, ess, gen, line)
+        new(bus, dem, ess, gen, line)
     end
 end
 
