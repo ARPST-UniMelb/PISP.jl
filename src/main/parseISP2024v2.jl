@@ -23,7 +23,7 @@ PISP.problem_table(tc);
 PISP.bus_table(ts); 
 txdata = PISP.line_table(ts, tv, ispdata24);
 PISP.line_sched_table(tc, tv, txdata);
-line_invoptions(ts, ispdata24);
+PISP.line_invoptions(ts, ispdata24);
 # ============================================ #
 # ============== Generator data ============== #
 # ============================================ #
@@ -102,7 +102,7 @@ GENS[!, :Generator] = [k == "Devils Gate" ? "Devils gate" : k for k in GENS[!, :
 GENS[!, :Generator] = [k == "Bungala One Solar Farm" ? "Bungala one Solar Farm" : k for k in GENS[!, :Generator]]
 GENS[!, :Generator] = [k == "Tallawarra B*" ? "Tallawarra B" : k for k in GENS[!, :Generator]] 
 
-XLSX.writetable("GENS.xlsx", Tables.columntable(GENS); sheetname="Generators", overwrite=true)
+XLSX.writetable(".tmp/GENS.xlsx", Tables.columntable(GENS); sheetname="Generators", overwrite=true)
 
 # ====================================== #
 # Units with unit commitment and ramping #
@@ -116,11 +116,11 @@ select!(DATA_GPGMSG, Not(Symbol("Technology Type")))
 DATA_MINUP_UNITS = PISP.read_xlsx_with_header(ispdata24, "Min Up&Down Times", "B8:E25")
 DATA_MINUP_UNITS19 = PISP.read_xlsx_with_header(ispdata19, "Generation limits", "O9:Q69") # Min UP and DW - GAS+COAL UNITS (2019)
 select!(DATA_MINUP_UNITS, Not(Symbol("Technology Type")))
-XLSX.writetable("DATA_MINUP_UNITS19.xlsx", Tables.columntable(DATA_MINUP_UNITS19); sheetname="Generators19", overwrite=true)
+XLSX.writetable(".tmp/DATA_MINUP_UNITS19.xlsx", Tables.columntable(DATA_MINUP_UNITS19); sheetname="Generators19", overwrite=true)
 # Ramp rates for different units
 UC = PISP.read_xlsx_with_header(ispdata24, "Max Ramp Rates", "B8:F72")
 select!(UC, Not(Symbol("Technology Type")))
-XLSX.writetable("UC.xlsx", Tables.columntable(UC); sheetname="UC", overwrite=true)
+XLSX.writetable(".tmp/UC.xlsx", Tables.columntable(UC); sheetname="UC", overwrite=true)
 
 #DUID -> Dispatchable Unit Identifier
 rename!(UC, Dict(2 => Symbol("DUID"), 3 => :rup, 4 => :rdw));
@@ -140,19 +140,19 @@ rename!(DATA_MINUP_UNITS19, [2,3] .=> [Symbol("DUID"),Symbol("MinUpTime")]);
 
 # DATA_COALMSG contains the minimum stable generation for coal and gas
 append!(DATA_COALMSG, DATA_GPGMSG)
-XLSX.writetable("DATA_COALGASMSG.xlsx", Tables.columntable(DATA_COALMSG); sheetname="CoalGasMSG", overwrite=true)
+XLSX.writetable(".tmp/DATA_COALGASMSG.xlsx", Tables.columntable(DATA_COALMSG); sheetname="CoalGasMSG", overwrite=true)
 
 # DATA_MINUP_UNITS contains the minimum up time for coal and gas units
 append!(DATA_MINUP_UNITS, DATA_MINUP_UNITS19)
-XLSX.writetable("DATA_MINUP_UNITS.xlsx", Tables.columntable(DATA_MINUP_UNITS); sheetname="MinUpUnits", overwrite=true)
+XLSX.writetable(".tmp/DATA_MINUP_UNITS.xlsx", Tables.columntable(DATA_MINUP_UNITS); sheetname="MinUpUnits", overwrite=true)
 
 # JOIN UC (Ramp Rates) with DATA_COALMSG (Minimum Stable Generation)
 UC = outerjoin(UC, DATA_COALMSG,on = :DUID,makeunique=true)
-XLSX.writetable("UC1.xlsx", Tables.columntable(UC); sheetname="UC1", overwrite=true)
+XLSX.writetable(".tmp/UC1.xlsx", Tables.columntable(UC); sheetname="UC1", overwrite=true)
 
 # JOIN UC with DATA_MINUP_UNITS (Minimum Up Time)
 UC = outerjoin(UC,DATA_MINUP_UNITS,on = :DUID,makeunique=true)
-XLSX.writetable("UC2.xlsx", Tables.columntable(UC); sheetname="UC2", overwrite=true)
+XLSX.writetable(".tmp/UC2.xlsx", Tables.columntable(UC); sheetname="UC2", overwrite=true)
 # Delete rows that if the string in column DUID contains "LD" - Asociated with Lidell Station (decommissioned)
 UC = UC[.!occursin.("LD",UC[!,:DUID]),:]
 # Create a unique column with the generator station name 
@@ -167,7 +167,7 @@ filter!((row) -> !(row[1] == "Darling Downs" && row[2] == "DDPS1" && row[6] == 6
 filter!((row) -> !(row[1] == "Osborne" && row[2] == "OSB-AG" && row[6] == 6), UC)
 filter!((row) -> !(row[1] == "Pelican Point" && row[2] == "PPCCGT" && row[6] == 4), UC)
 filter!((row) -> !(row[1] == "Tamar Valley Combined Cycle" && row[2] == "TVCC201" && row[6] == 6), UC)
-XLSX.writetable("UC2__.xlsx", Tables.columntable(UC); sheetname="UC2__", overwrite=true)
+XLSX.writetable(".tmp/UC2__.xlsx", Tables.columntable(UC); sheetname="UC2__", overwrite=true)
 # ➡️➡️➡️➡️➡️➡️➡️➡️➡️➡️ CHECK IF THIS IS WORKING OK
 # this is the rename as per the DUIDs are in the Retirement sheet
 DUIDar = Dict(      "CPSA_GT1"      => "CPSA", 
@@ -184,7 +184,7 @@ DUIDar = Dict(      "CPSA_GT1"      => "CPSA",
                     "PPCCGTST"     => "PPCCGT",
                     "TVCC201_GT"    => "TVCC201")
 UC[!,:DUID] = [n in keys(DUIDar) ? DUIDar[n] : n for n in UC[!,:DUID]]
-XLSX.writetable("UC3.xlsx", Tables.columntable(UC); sheetname="UC3", overwrite=true)
+XLSX.writetable(".tmp/UC3.xlsx", Tables.columntable(UC); sheetname="UC3", overwrite=true)
 
 # ====================================== #
 # ============= RETIREMENTS ============ #
@@ -203,7 +203,7 @@ UNITS[UNITS[!,:Generator] .== "Kogan Gas", :DUID] .= "Kogan Gas"
 UNITS[UNITS[!,:Generator] .== "SA Hydrogen Turbine", :DUID] .= "SA Hydrogen Turbine"
 
 select!(UNITS,Not(3))
-XLSX.writetable("RETIREMENTS.xlsx", Tables.columntable(UNITS); sheetname="Retirements", overwrite=true)
+XLSX.writetable(".tmp/RETIREMENTS.xlsx", Tables.columntable(UNITS); sheetname="Retirements", overwrite=true)
 
 # ====================================== #
 # ============= RELIABILITY ============ #
@@ -227,18 +227,18 @@ GENSUM[!,:Generator] = [namedict[n] for n in GENSUM[!,:Generator]]
 GENSUM[!,:Generator] = [n == "Tallawarra B*" ? "Tallawarra B" : n for n in GENSUM[!,:Generator]]
 GENSUM[!,:Generator] = [n == "Bungala One Solar Farm" ? "Bungala one Solar Farm" : n for n in GENSUM[!,:Generator]]
 GENSUM[!,:Generator] = [n == "Devils Gate" ? "Devils gate" : n for n in GENSUM[!,:Generator]]
-XLSX.writetable("GENSUM.xlsx", Tables.columntable(GENSUM); sheetname="GENSUM", overwrite=true)
+XLSX.writetable(".tmp/GENSUM.xlsx", Tables.columntable(GENSUM); sheetname="GENSUM", overwrite=true)
 # Filter CELLS OF GENSUM WHERE THE VALUE IS EQUAL TO Missing in any column
 # for r in eachrow(GENSUM)
 #     println(r)
 # end
 
 FULL = outerjoin(UNITS, GENS, on = :Generator)
-XLSX.writetable("FULL.xlsx", Tables.columntable(FULL); sheetname="FULL", overwrite=true)
+XLSX.writetable(".tmp/FULL.xlsx", Tables.columntable(FULL); sheetname="FULL", overwrite=true)
 
 FULL = outerjoin(FULL, UC, on = :DUID, matchmissing=:equal)
 rename!(FULL, Dict(:Region => :Area,  Symbol("Installed capacity (MW)") => :CAPACITY, Symbol("Generator Station") => :NAME))
-XLSX.writetable("FULL2.xlsx", Tables.columntable(FULL); sheetname="FULL2", overwrite=true)
+XLSX.writetable(".tmp/FULL2.xlsx", Tables.columntable(FULL); sheetname="FULL2", overwrite=true)
 
 FULL = outerjoin(FULL, GENSUM, on = :Generator, matchmissing=:equal, makeunique=true)
 FULL.bus_id = [ismissing(k) ? missing : bust[bust[!,:name] .== k, :id_bus][1] for k in FULL[!,Symbol("ISP \nsub-region")]] 
@@ -250,7 +250,7 @@ FULL[!,Symbol("Technology type")] = [ismissing(k) ? missing : k for k in FULL[!,
 FULL[!,Symbol("Fuel type")] = [ismissing(k) ? missing : k for k in FULL[!,Symbol("Fuel/technology type")]]
 FULL.Bus = [ismissing(k) ? missing : k for k in FULL[!,Symbol("ISP \nsub-region")]]
 FULL[!,Symbol("REZ location")] = [ismissing(k) ? missing : k for k in FULL[!,Symbol("REZ location_1")]]
-XLSX.writetable("FULL3.xlsx", Tables.columntable(FULL); sheetname="FULL3", overwrite=true)
+XLSX.writetable(".tmp/FULL3.xlsx", Tables.columntable(FULL); sheetname="FULL3", overwrite=true)
 
 for c in [:NAME,:Region,Symbol("Generator type"),Symbol("Regional build cost zone"),
     Symbol("ISP \nsub-region"), Symbol("Fuel/technology type"), Symbol("REZ location_1")] select!(FULL, Not(c)) end 
@@ -258,7 +258,7 @@ FULL[!,:CAPACITY] = coalesce.(FULL[!,:CAPACITY], FULL[!,18]) # Assign maximum ca
 # remove rows with missing values in column Generator
 FULL = FULL[.!ismissing.(FULL[!,:Generator]),:]
 @warn("Deleted Steam Turbines from generator table due to missing information. CHECK!")
-XLSX.writetable("GENERATORS.xlsx", Tables.columntable(FULL); sheetname="Generators", overwrite=true)
+XLSX.writetable(".tmp/GENERATORS.xlsx", Tables.columntable(FULL); sheetname="Generators", overwrite=true)
 
 # ====================================== #
 # ======== RENEWABLE GENERATION ======== #
@@ -286,9 +286,9 @@ VRET = FULL[vretunit,:]
 BESS = FULL[bessunit,:]
 SYNC = FULL[.!syncunit,:]
 
-XLSX.writetable("VRET.xlsx", Tables.columntable(VRET); sheetname="VRET", overwrite=true)
-XLSX.writetable("BESS.xlsx", Tables.columntable(BESS); sheetname="BESS", overwrite=true)
-XLSX.writetable("SYNC.xlsx", Tables.columntable(SYNC); sheetname="SYNC", overwrite=true)
+XLSX.writetable(".tmp/VRET.xlsx", Tables.columntable(VRET); sheetname="VRET", overwrite=true)
+XLSX.writetable(".tmp/BESS.xlsx", Tables.columntable(BESS); sheetname="BESS", overwrite=true)
+XLSX.writetable(".tmp/SYNC.xlsx", Tables.columntable(SYNC); sheetname="SYNC", overwrite=true)
 
 sort!(SYNC, [Symbol("Fuel type"), :Generator]) #sort table
 gens = unique(SYNC[!,:Generator])
@@ -304,7 +304,7 @@ end
 SYNC[!,:n] = nar
 SYNC2 = SYNC[selar,:]
 sort!(SYNC2, [Symbol("Fuel type"), :Generator])
-XLSX.writetable("SYNC3.xlsx", Tables.columntable(SYNC2); sheetname="SYNC3", overwrite=true)
+XLSX.writetable(".tmp/SYNC3.xlsx", Tables.columntable(SYNC2); sheetname="SYNC3", overwrite=true)
 
 units = Dict(
                 "Angaston"                          => [1, "Diesel", "Diesel", "Reciprocating Engine", -34.5035, 139.0245],
@@ -439,7 +439,7 @@ for k in 1:length(SYNC3[!,:fuel])
 end
 
 SYNC3[!,:cap] = SYNC3[!,:CAPACITY] ./ SYNC3[!,:n]
-XLSX.writetable("SYNC4.xlsx", Tables.columntable(SYNC3); sheetname="SYNC4", overwrite=true)
+XLSX.writetable(".tmp/SYNC4.xlsx", Tables.columntable(SYNC3); sheetname="SYNC4", overwrite=true)
 
 # ====================================== #
 # ============ EMMISSIONS ============== #
@@ -463,12 +463,12 @@ filteremi = .![n in [k+j for k in 1:length(EMI[!,:Generator]) for j in 0:2 if is
 EMI = EMI[filteremi,:]
 SYNC3 = leftjoin(SYNC3, EMI, on = :Generator)
 SYNC3[!,:Emissions] = [ismissing(e) ? 0.0 : e for e in SYNC3[!,:Emissions]]
-XLSX.writetable("SYNC5.xlsx", Tables.columntable(SYNC3); sheetname="SYNC5", overwrite=true)
+XLSX.writetable(".tmp/SYNC5.xlsx", Tables.columntable(SYNC3); sheetname="SYNC5", overwrite=true)
 
 SYNC4 = SYNC3[.!(SYNC3[!,:tech] .== "Pumped-Storage"),:]
 PS = SYNC3[(SYNC3[!,:tech] .== "Pumped-Storage"),:]
-XLSX.writetable("SYNC6.xlsx", Tables.columntable(SYNC4); sheetname="SYNC6", overwrite=true)
-XLSX.writetable("PS.xlsx", Tables.columntable(PS); sheetname="PS", overwrite=true)
+XLSX.writetable(".tmp/SYNC6.xlsx", Tables.columntable(SYNC4); sheetname="SYNC6", overwrite=true)
+XLSX.writetable(".tmp/PS.xlsx", Tables.columntable(PS); sheetname="PS", overwrite=true)
 
 # ====================================== #
 # ======== FILLING GENERATORS ========== #
@@ -537,7 +537,7 @@ partialout = [ismissing(k) ? 0.0 : k for k in partialout]
 derate = [ismissing(k) ? 0.0 : k for k in derate]
 
 GENERATORS[!,:forate] = ones(nrow(SYNC4)) .- (fullout  .+ partialout  .* (ones(nrow(SYNC4)) .- derate))
-XLSX.writetable("GENERATORS2.xlsx", Tables.columntable(GENERATORS); sheetname="GENERATORS2", overwrite=true)
+XLSX.writetable(".tmp/GENERATORS2.xlsx", Tables.columntable(GENERATORS); sheetname="GENERATORS2", overwrite=true)
 
 GENERATORS[!,:bus_id] = SYNC4[!,:bus_id]
 GENERATORS[!,:pmin] = coalesce.(SYNC4[!,:MSG], 0.0)
@@ -568,7 +568,7 @@ GENERATORS[!,:longitude] = SYNC4[!,:lon]
 GENERATORS[!,:n] = SYNC4[!,:n]
 GENERATORS[!,:contingency] = Int64.([ true for k in 1:nrow(SYNC4)])
 # save("GENERATORS3.xlsx", GENERATORS)
-XLSX.writetable("GENERATORS3.xlsx", Tables.columntable(GENERATORS); sheetname="GENERATORS3", overwrite=true)
+XLSX.writetable(".tmp/GENERATORS3.xlsx", Tables.columntable(GENERATORS); sheetname="GENERATORS3", overwrite=true)
 @warn("Check fuel cost for Hydrogen-based units")
 
 for r in 1:nrow(GENERATORS)
@@ -616,7 +616,7 @@ COMMITMENT[!,:shut_down_time] = zeros(nrow(SYNC4))
 # MERGE GENERATOR AND COMMITMENT IN left `id` and right `gen_id`. Fill missing values in COMMITMENT with 0
 merged = leftjoin(GENERATORS, COMMITMENT, on = [:id => :gen_id], makeunique=true)
 select!(merged, Not(:id_1))
-XLSX.writetable("GENERATORS_FULL.xlsx", Tables.columntable(merged); sheetname="GENERATORS", overwrite=true)
+XLSX.writetable(".tmp/GENERATORS_FULL.xlsx", Tables.columntable(merged); sheetname="GENERATORS", overwrite=true)
 
 # DBInterface.execute(socketSYS, "CREATE TABLE IF NOT EXISTS Generator_commitment($(PSO.strsql(MOD_GEN_COMMIT)))")
 # stmt_commit = DBInterface.prepare(socketSYS, "INSERT INTO Generator_commitment VALUES ($(qm(length(MOD_GEN_COMMIT))));")
