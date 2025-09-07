@@ -1,9 +1,10 @@
 module PISP
 
-using Dates
-using DataFrames
+    using Dates
+    using DataFrames
 
-# Write your package code here.
-include("./data_processing/filterSortTimeseriesData.jl")
+    include("PISPdatamodel.jl")
+    include("PISPutils.jl")
+    include("PISPparameters.jl")
 
 end
