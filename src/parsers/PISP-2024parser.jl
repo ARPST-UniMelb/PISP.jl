@@ -1,4 +1,4 @@
-function problem_table(tc)
+function problem_table(tc::PISPtimeConfig)
     start_date = DateTime(2025, 1, 1, 0, 0, 0)
     step_ = Day(7) 
     nblocks = 5
@@ -32,7 +32,7 @@ function problem_table(tc)
     end
 end
 
-function bus_table(ts)
+function bus_table(ts::PISPtimeStatic)
     idx = 1
     for b in keys(PISP.NEMBUSES)
         push!(ts.bus,(idx, b, PISP.NEMBUSNAME[b], true, PISP.NEMBUSES[b][1], PISP.NEMBUSES[b][2], PISP.STID[PISP.BUS2AREA[b]]))
@@ -40,7 +40,7 @@ function bus_table(ts)
     end
 end
 
-function line_table(ts, tv, ispdata24)
+function line_table(ts::PISPtimeStatic, tv::PISPtimeVariable, ispdata24::String)
     bust = ts.bus
     # Read XLSX with line capacities
     DATALINES = PISP.read_xlsx_with_header(ispdata24, "Network Capability", "B6:H21")
@@ -151,7 +151,7 @@ function line_table(ts, tv, ispdata24)
     return Results
 end
 
-function line_sched_table(tc, tv, TXdata)
+function line_sched_table(tc::PISPtimeConfig, tv::PISPtimeVariable, TXdata::DataFrame)
     wmonths = [4,5,6,7,8,9]     # Winter months
     smonths = [10,11,12,1,2,3]  # Summer months
     probs   = tc.problem        # Call problem table 
@@ -196,7 +196,7 @@ function line_sched_table(tc, tv, TXdata)
     end
 end
 
-function line_invoptions(ts, ispdata24)
+function line_invoptions(ts::PISPtimeStatic, ispdata24::String)
     bust = ts.bus
     maxidlin = isempty(ts.line) ? 0 : maximum(ts.line.id_lin)
     DATALININV = PISP.read_xlsx_with_header(ispdata24, "Flow Path Augmentation options", "B11:N94")
@@ -244,7 +244,7 @@ function line_invoptions(ts, ispdata24)
     end
 end
 
-function generator_table(ts, ispdata19, ispdata24)
+function generator_table(ts::PISPtimeStatic, ispdata19::String, ispdata24::String)
     # ============================================ #
     # ============== Generator data ============== #
     # ============================================ #
@@ -744,7 +744,7 @@ function generator_table(ts, ispdata19, ispdata24)
     return SYNC4, GENERATORS, PS
 end
 
-function gen_n_sched_table(tv, SYNC4, GENERATORS)
+function gen_n_sched_table(tv::PISPtimeVariable, SYNC4::DataFrame, GENERATORS::DataFrame)
     # COMMITED AND ANTICIPATED PROJECTS DATES
     MISSING_DATES = PISP.OrderedDict("Kogan Gas" => "2026-07-01T00:00:00")
     N_SCHED_COMM = DataFrame([Symbol(k) => Vector{Any}() for k in keys(PISP.MOD_GEN_N)])
@@ -813,7 +813,7 @@ function gen_retirements(ts, tv)
     end
 end
 
-function ess_tables(ts, tv, PSESS, ispdata24)
+function ess_tables(ts::PISPtimeStatic, tv::PISPtimeVariable, PSESS::DataFrame, ispdata24::String)
     bust = ts.bus
 
     BESS_PROP   = PISP.read_xlsx_with_header(ispdata24, "Storage properties", "B4:H13")
@@ -937,7 +937,7 @@ function ess_tables(ts, tv, PSESS, ispdata24)
     end
 end
 
-function gen_pmax_distpv(tc, ts, tv, profilespath)
+function gen_pmax_distpv(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVariable, profilespath::String)
     probs = tc.problem;
     bust = ts.bus;
 
@@ -1394,7 +1394,7 @@ function gen_pmax_wind(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVaryi
     end
 end
 
-function ess_vpps(tc, ts, tv, vpp_cap, vpp_ene)
+function ess_vpps(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVariable, vpp_cap::String, vpp_ene::String)
     bust = ts.bus
     probs = tc.problem
 
