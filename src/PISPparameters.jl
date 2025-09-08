@@ -1,0 +1,4 @@
+include("parameters/general2024ISP.jl")
+include("parameters/retirements2024ISP.jl")
+include("parameters/ess2024ISP.jl")
+include("parameters/gens2024ISP.jl")

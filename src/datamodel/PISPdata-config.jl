@@ -1,0 +1,9 @@
+MOD_PROBLEM                = OrderedDict(  
+                                        "id"                => "INTEGER PRIMARY KEY", 
+                                        "name"              => "VARCHAR(225) NOT NULL",
+                                        "scenario"          => "INTEGER NOT NULL",
+                                        "weight"            => "REAL NOT NULL",
+                                        "problem_type"      => "VARCHAR(225) NOT NULL",
+                                        "dstart"            => "DATETIME NOT NULL",
+                                        "dend"              => "DATETIME NOT NULL",
+                                        "tstep"             => "INTEGER NOT NULL")
