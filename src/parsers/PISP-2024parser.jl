@@ -1,37 +1,3 @@
-function problem_table(tc::PISPtimeConfig)
-    start_date = DateTime(2025, 1, 1, 0, 0, 0)
-    step_ = Day(7) 
-    nblocks = 5
-    date_blocks = PISP.OrderedDict()
-    ref_year = 2025
-
-    for i in 1:nblocks
-        dstart = start_date + (i-1) * step_
-        dend = dstart + Day(6) + Hour(23)
-
-        if month(dend) >= 07 && month(dstart) <= 6
-            dend = DateTime(year(dstart), month(dstart), 30, 23, 0, 0)
-        end
-
-        if i>1 && day(date_blocks[i-1][2]) == 30 && month(date_blocks[i-1][2]) == 6
-            dstart = DateTime(year(dstart), month(dstart), 1, 0, 0, 0)
-        end
-
-        date_blocks[i] = (dstart, dend)
-    end
-
-    i = 1
-    for sc in keys(PISP.ID2SCE)
-        pbname = "$(PISP.ID2SCE[sc])_$(i)"
-        nd_yr = ref_year
-        dstart = DateTime(nd_yr, month(date_blocks[i][1]), day(date_blocks[i][1]), 0, 0, 0)
-        dend   = DateTime(nd_yr, month(date_blocks[i][2]), day(date_blocks[i][2]), 23, 0, 0)
-        arr = [i, replace(pbname," "=> "_"), sc, 1, "UC", dstart, dend, 60]
-        push!(tc.problem, arr)
-        i = i + 1
-    end
-end
-
 function bus_table(ts::PISPtimeStatic)
     idx = 1
     for b in keys(PISP.NEMBUSES)
@@ -40,7 +6,7 @@ function bus_table(ts::PISPtimeStatic)
     end
 end
 
-function line_table(ts::PISPtimeStatic, tv::PISPtimeVariable, ispdata24::String)
+function line_table(ts::PISPtimeStatic, tv::PISPtimeVarying, ispdata24::String)
     bust = ts.bus
     # Read XLSX with line capacities
     DATALINES = PISP.read_xlsx_with_header(ispdata24, "Network Capability", "B6:H21")
@@ -151,7 +117,7 @@ function line_table(ts::PISPtimeStatic, tv::PISPtimeVariable, ispdata24::String)
     return Results
 end
 
-function line_sched_table(tc::PISPtimeConfig, tv::PISPtimeVariable, TXdata::DataFrame)
+function line_sched_table(tc::PISPtimeConfig, tv::PISPtimeVarying, TXdata::DataFrame)
     wmonths = [4,5,6,7,8,9]     # Winter months
     smonths = [10,11,12,1,2,3]  # Summer months
     probs   = tc.problem        # Call problem table 
@@ -744,7 +710,7 @@ function generator_table(ts::PISPtimeStatic, ispdata19::String, ispdata24::Strin
     return SYNC4, GENERATORS, PS
 end
 
-function gen_n_sched_table(tv::PISPtimeVariable, SYNC4::DataFrame, GENERATORS::DataFrame)
+function gen_n_sched_table(tv::PISPtimeVarying, SYNC4::DataFrame, GENERATORS::DataFrame)
     # COMMITED AND ANTICIPATED PROJECTS DATES
     MISSING_DATES = PISP.OrderedDict("Kogan Gas" => "2026-07-01T00:00:00")
     N_SCHED_COMM = DataFrame([Symbol(k) => Vector{Any}() for k in keys(PISP.MOD_GEN_N)])
@@ -813,7 +779,7 @@ function gen_retirements(ts, tv)
     end
 end
 
-function ess_tables(ts::PISPtimeStatic, tv::PISPtimeVariable, PSESS::DataFrame, ispdata24::String)
+function ess_tables(ts::PISPtimeStatic, tv::PISPtimeVarying, PSESS::DataFrame, ispdata24::String)
     bust = ts.bus
 
     BESS_PROP   = PISP.read_xlsx_with_header(ispdata24, "Storage properties", "B4:H13")
@@ -937,7 +903,7 @@ function ess_tables(ts::PISPtimeStatic, tv::PISPtimeVariable, PSESS::DataFrame, 
     end
 end
 
-function gen_pmax_distpv(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVariable, profilespath::String)
+function gen_pmax_distpv(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, profilespath::String)
     probs = tc.problem;
     bust = ts.bus;
 
@@ -1394,7 +1360,7 @@ function gen_pmax_wind(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVaryi
     end
 end
 
-function ess_vpps(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVariable, vpp_cap::String, vpp_ene::String)
+function ess_vpps(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, vpp_cap::String, vpp_ene::String)
     bust = ts.bus
     probs = tc.problem
 

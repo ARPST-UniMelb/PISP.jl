@@ -5,13 +5,12 @@ module PISP
     using XLSX
     using CSV
     using Arrow
+    export DataFrames
 
     include("PISPdatamodel.jl")
+    include("PISPstructures.jl")
+    export PISPtimeStatic, PISPtimeVarying, PISPtimeConfig # Export structures to store the generated data
     include("PISPutils.jl")
     include("PISPparameters.jl")
-    include("PISPstructures.jl")
     include("PISPparsers.jl")
-
-    export DataFrames
-    export PISPtimeStatic, PISPtimeVarying, PISPtimeConfig # Export structures to store the generated data
 end
