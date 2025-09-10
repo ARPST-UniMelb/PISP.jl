@@ -99,6 +99,6 @@ PISP.ess_vpps(tc, ts, tv, vpp_cap, vpp_ene);
 PISP.PISPwritedataCSV(ts, "out")                    # Time-static data
 PISP.PISPwritedataCSV(tv, "out/schedule-1w-new")    # Time-varying data (schedules)
 
-# Arrow format
-PISP.PISPwritedataArrow(ts, "out-arrow")                    # Time-static data
-PISP.PISPwritedataArrow(tv, "out-arrow/schedule-1w-new")    # Time-varying data (schedules)
+# # Arrow format
+# PISP.PISPwritedataArrow(ts, "out-arrow")                    # Time-static data
+# PISP.PISPwritedataArrow(tv, "out-arrow/schedule-1w-new")    # Time-varying data (schedules)
