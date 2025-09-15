@@ -35,6 +35,12 @@ function read_xlsx_with_header(filepath::AbstractString,
 
     # Extract and clean header row
     raw_header = rawdata[1, :]
+    #transform each element in the raw_header to string
+    for i in eachindex(raw_header)
+        if typeof(raw_header[i]) != String
+            raw_header[i] = string(raw_header[i])
+        end
+    end
     clean_header = [
         (ismissing(h) || h == "") ? "Column_$(i)" : String(h)
         for (i, h) in enumerate(raw_header)
