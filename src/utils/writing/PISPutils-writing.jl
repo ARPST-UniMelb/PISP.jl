@@ -4,6 +4,7 @@ alt_names = Dict(
         :ess => "ESS",
         :line => "Line",
         :bus => "Bus",
+        :der => "DER",
         :dem_load => "Demand_load_sched",
         :ess_emax => "ESS_emax_sched",
         :ess_lmax => "ESS_lmax_sched",
@@ -12,7 +13,9 @@ alt_names = Dict(
         :gen_n => "Generator_n_sched",
         :gen_pmax => "Generator_pmax_sched",
         :line_tmax => "Line_tmax_sched",
-        :line_tmin => "Line_tmin_sched"
+        :line_tmin => "Line_tmin_sched",
+        :der_pred => "DER_pred_sched",
+
     )
 
 function PISPwritedataCSV(input::Union{PISPtimeStatic, PISPtimeVarying}, path::AbstractString)
