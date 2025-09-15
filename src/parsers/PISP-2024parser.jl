@@ -18,7 +18,7 @@ function line_table(ts::PISPtimeStatic, tv::PISPtimeVarying, ispdata24::String)
                 NEMTX[13] => RELIALINES[2,:], # Murraylink
                 NEMTX[14] => RELIALINES[3,:], # Basslink
                 NEMTX[4]  => RELIALINES[4,:], # QNI North
-                NEMTX[6]  => RELIALINES[5,:]  # QNI South
+                NEMTX[6]  => RELIALINES[4,:]  # QNI South
             )
     # Link is Interconnector?
     INT = [false, false, false, true, true, false, false, false, false, true, true, false, true, true]
