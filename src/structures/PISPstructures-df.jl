@@ -14,6 +14,7 @@ mutable struct PISPtimeStatic
     ess::DataFrame
     gen::DataFrame
     line::DataFrame
+    der::DataFrame
 
     # Default constructor
     function PISPtimeStatic()
@@ -22,7 +23,8 @@ mutable struct PISPtimeStatic
         ess    = PISP.schema_to_dataframe(PISP.MOD_ESS)
         gen    = PISP.schema_to_dataframe(PISP.MOD_GEN)
         line   = PISP.schema_to_dataframe(PISP.MOD_LINE)
-        new(bus, dem, ess, gen, line)
+        der    = PISP.schema_to_dataframe(PISP.MOD_DER)
+        new(bus, dem, ess, gen, line, der)
     end
 end
 
@@ -36,6 +38,7 @@ mutable struct PISPtimeVarying
     gen_pmax::DataFrame
     line_tmax::DataFrame
     line_tmin::DataFrame
+    der_pred::DataFrame
 
     # Default constructor
     function PISPtimeVarying()
@@ -48,8 +51,9 @@ mutable struct PISPtimeVarying
         gen_pmax  = PISP.schema_to_dataframe(PISP.MOD_GEN_PMAX)
         line_tmax = PISP.schema_to_dataframe(PISP.MOD_LINE_TMAX)
         line_tmin = PISP.schema_to_dataframe(PISP.MOD_LINE_TMIN)
+        der_pred  = PISP.schema_to_dataframe(PISP.MOD_DER_PRED_MAX)
 
         new(dem_load, ess_emax, ess_lmax, ess_n, ess_pmax,
-            gen_n, gen_pmax, line_tmax, line_tmin)
+            gen_n, gen_pmax, line_tmax, line_tmin, der_pred)
     end
 end
