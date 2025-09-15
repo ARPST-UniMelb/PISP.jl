@@ -1425,3 +1425,143 @@ function ess_vpps(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, v
         end
     end
 end
+
+function der_tables(ts::PISPtimeStatic)
+    # ============================================ #
+    # DSP table development  ===================== #
+    # ============================================ #
+    dem = ts.dem
+    maxiddem = isempty(dem) ? 1 : maximum(dem.id_dem) + 1
+    cdem_dsp = Dict()
+    for row in eachrow(dem)
+        cdem_name = replace(row["name"], "DEM"=>"DSP")
+        row_cdem = (maxiddem, cdem_name, 0, row["id_bus"], 1, 1 ,17500, 1)
+        push!(ts.dem, row_cdem)
+        cdem_dsp[cdem_name] = maxiddem
+        maxiddem += 1
+    end
+    # ======================================== #
+    # DSP VALUES
+    # ======================================== #
+    der       = ts.der
+    dem       = ts.dem
+    cont_dem  = dem[dem[!, :controllable] .== 1,:]
+    deridx    = isempty(der) ? 1 : maximum(der.id_der) + 1
+    cost_band = [300, 500, 1000, 7500] # 4 cost bands as modelled in the ISP24
+    bands     = length(cost_band)
+
+    for row in eachrow(cont_dem)
+        for band in 1:bands
+            dem_name = row["name"]*"_BAND$band"
+            id_dem   = row["id_dem"]
+            row_der = [ deridx,             # ID_DER
+                        dem_name,           # NAME
+                        "DSP",              # TECH
+                        id_dem,             # ID_DEMAND
+                        1,                  # ACTIVE
+                        0,                  # INVESTMENT
+                        100,                # CAPACITY
+                        1,                  # REDUCT
+                        10,                 # PRED_MAX
+                        cost_band[band],    # COST_RED
+                        1,]                 # N
+            push!(ts.der, row_der)
+            deridx += 1
+        end
+    end
+end
+
+function der_pred_sched(ts::PISPtimeStatic, tv::PISPtimeVarying, dsp_data::String)
+    for scenario in collect(keys(PISP.SCE))
+        QLD_SUM = PISP.read_xlsx_with_header(dsp_data, scenario, "A23:AF28")
+        QLD_WIN = PISP.read_xlsx_with_header(dsp_data, scenario, "A32:AF37")
+
+        NSW_SUM = PISP.read_xlsx_with_header(dsp_data, scenario, "A3:AF8")
+        NSW_WIN = PISP.read_xlsx_with_header(dsp_data, scenario, "A13:AF18")
+
+        SA_SUM = PISP.read_xlsx_with_header(dsp_data, scenario, "A42:AF47")
+        SA_WIN = PISP.read_xlsx_with_header(dsp_data, scenario, "A51:AF56")
+
+        TAS_SUM = PISP.read_xlsx_with_header(dsp_data, scenario, "A61:AF66")
+        TAS_WIN = PISP.read_xlsx_with_header(dsp_data, scenario, "A70:AF75")
+
+        VIC_SUM = PISP.read_xlsx_with_header(dsp_data, scenario, "A80:AF85")
+        VIC_WIN = PISP.read_xlsx_with_header(dsp_data, scenario, "A89:AF94")
+        # ======================================== #
+        # <><><> QLD
+        # ++ NQ
+        perc = 0.0
+        der_ids = ts.der[occursin.("NQ", ts.der[!, :name]), :].id_der
+        PISP.inputDB_dsp(tv, QLD_SUM, der_ids, scenario, perc)
+        PISP.inputDB_dsp(tv, QLD_WIN, der_ids, scenario, perc)
+
+        # ++ CQ
+        perc = 0.0
+        der_ids = ts.der[occursin.("CQ", ts.der[!, :name]), :].id_der
+        PISP.inputDB_dsp(tv, QLD_SUM, der_ids, scenario, perc)
+        PISP.inputDB_dsp(tv, QLD_WIN, der_ids, scenario, perc)
+
+        # ++ GG
+        perc = 0.0
+        der_ids = ts.der[occursin.("GG", ts.der[!, :name]), :].id_der
+        PISP.inputDB_dsp(tv, QLD_SUM, der_ids, scenario, perc)
+        PISP.inputDB_dsp(tv, QLD_WIN, der_ids, scenario, perc)
+
+        # ++ SQ
+        perc = 1.0
+        der_ids = ts.der[occursin.("SQ", ts.der[!, :name]), :].id_der
+        PISP.inputDB_dsp(tv, QLD_SUM, der_ids, scenario, perc)
+        PISP.inputDB_dsp(tv, QLD_WIN, der_ids, scenario, perc)
+        # ======================================== #
+        # ======================================== #
+        # <><><> NSW
+        # ++ NNSW
+        perc = 0.0
+        der_ids = ts.der[occursin.("NNSW", ts.der[!, :name]), :].id_der
+        PISP.inputDB_dsp(tv, NSW_SUM, der_ids, scenario, perc)
+        PISP.inputDB_dsp(tv, NSW_WIN, der_ids, scenario, perc)
+
+        # ++ CNSW
+        perc = 0.0
+        der_ids = ts.der[occursin.("CNSW", ts.der[!, :name]), :].id_der
+        PISP.inputDB_dsp(tv, NSW_SUM, der_ids, scenario, perc)
+        PISP.inputDB_dsp(tv, NSW_WIN, der_ids, scenario, perc)
+
+        # ++ SNW
+        perc = 1.0
+        der_ids = ts.der[occursin.("SNW", ts.der[!, :name]), :].id_der
+        PISP.inputDB_dsp(tv, NSW_SUM, der_ids, scenario, perc)
+        PISP.inputDB_dsp(tv, NSW_WIN, der_ids, scenario, perc)
+
+        # ++ SNSW
+        perc = 0.0
+        der_ids = ts.der[occursin.("SNSW", ts.der[!, :name]), :].id_der
+        PISP.inputDB_dsp(tv, NSW_SUM, der_ids, scenario, perc)
+        PISP.inputDB_dsp(tv, NSW_WIN, der_ids, scenario, perc)
+        # ======================================== #
+        # VIC
+        der_ids = ts.der[occursin.("VIC", ts.der[!, :name]), :].id_der
+        PISP.inputDB_dsp(tv, VIC_SUM, der_ids, scenario, perc)
+        PISP.inputDB_dsp(tv, VIC_WIN, der_ids, scenario, perc)
+
+        # ======================================== #
+        # TAS
+        der_ids = ts.der[occursin.("TAS", ts.der[!, :name]), :].id_der
+        PISP.inputDB_dsp(tv, TAS_SUM, der_ids, scenario, perc)
+        PISP.inputDB_dsp(tv, TAS_WIN, der_ids, scenario, perc)
+
+        # ======================================== #
+        # <><><> SA
+        # ++ CSA
+        perc = 1.0
+        der_ids = ts.der[occursin.("CSA", ts.der[!, :name]), :].id_der
+        PISP.inputDB_dsp(tv, SA_SUM, der_ids, scenario, perc)
+        PISP.inputDB_dsp(tv, SA_WIN, der_ids, scenario, perc)
+
+        # ++ SESA
+        perc = 0.0
+        der_ids = ts.der[occursin.("SESA", ts.der[!, :name]), :].id_der
+        PISP.inputDB_dsp(tv, SA_SUM, der_ids, scenario, perc)
+        PISP.inputDB_dsp(tv, SA_WIN, der_ids, scenario, perc)
+    end
+end
