@@ -9,10 +9,17 @@ end
 function line_table(ts::PISPtimeStatic, tv::PISPtimeVarying, ispdata24::String)
     bust = ts.bus
     # Read XLSX with line capacities
-    DATALINES = PISP.read_xlsx_with_header(ispdata24, "Network Capability", "B6:H21")
+    DATALINES   = PISP.read_xlsx_with_header(ispdata24, "Network Capability", "B6:H21")
+    RELIALINES  = PISP.read_xlsx_with_header(ispdata24, "Transmission Reliability", "B7:G11")
     Results = DataFrame(name = String[], busA = String[], busB = String[], idbusA = Int64[], idbusB = Int64[], fwd_peak = Float64[], fwd_summer = Float64[], fwd_winter = Float64[], rev_peak = Float64[], rev_summer = Float64[], rev_winter = Float64[])
     # Link names
     NEMTX = ["CQ->NQ", "CQ->GG", "SQ->CQ", "QNI North", "Terranora", "QNI South","CNSW->SNW North","CNSW->SNW South", "VNI North","VNI South","Heywood","SESA->CSA","Murraylink", "Basslink"]
+    RELIAMAP = Dict(NEMTX[11] => RELIALINES[1,:], # Heywood
+                NEMTX[13] => RELIALINES[2,:], # Murraylink
+                NEMTX[14] => RELIALINES[3,:], # Basslink
+                NEMTX[4]  => RELIALINES[4,:], # QNI North
+                NEMTX[6]  => RELIALINES[4,:]  # QNI South
+            )
     # Link is Interconnector?
     INT = [false, false, false, true, true, false, false, false, false, true, true, false, true, true]
     NEMTYPE = ["DC", "DC", "DC", "DC", "DC", "DC", "DC", "DC", "DC", "DC", "DC", "DC", "DC", "DC"]
@@ -38,6 +45,7 @@ function line_table(ts::PISPtimeStatic, tv::PISPtimeVarying, ispdata24::String)
     for a in 1:nrow(Results)
         #ID, NAME, ALIAS, TECH, CAPACITY, BUS_ID_FROM, BUS_ID_TO, INVESTMENT, ACTIVE, R, X, TMIN, TMAX, VOLTAGE, SEGMENTS, LATITUDE, LONGITUDE, LENGTH, N, CONTINGENCY
         maxcap = maximum([Results[a, :fwd_winter], Results[a, :rev_winter]])
+        alias = NEMTX[a]
         vallin = (
                 id_lin     = a,
                 name        = Results[a, :name],
@@ -52,6 +60,8 @@ function line_table(ts::PISPtimeStatic, tv::PISPtimeVarying, ispdata24::String)
                 x           = 0.1,
                 tmin        = Results[a, :rev_winter],
                 tmax        = Results[a, :fwd_winter],
+                fullout     = haskey(RELIAMAP, alias) ? RELIAMAP[alias][3] : 0, # reliability values for interconnectors that have data available
+                mttrfull    = haskey(RELIAMAP, alias) ? RELIAMAP[alias][5] : 1, 
                 voltage     = 220.0,
                 segments    = 1,
                 latitude    = "",
@@ -82,6 +92,8 @@ function line_table(ts::PISPtimeStatic, tv::PISPtimeVarying, ispdata24::String)
         x           = 0.1,
         tmin        = 800,
         tmax        = 800,
+        fullout     = 0, # reliability values for interconnectors that have data available
+        mttrfull    = 1, 
         voltage     = 220.0,
         segments    = 1,
         latitude    = "",
@@ -204,7 +216,7 @@ function line_invoptions(ts::PISPtimeStatic, ispdata24::String)
         linename = string(strip(Results[a,1]))
         invname = "NL_$(Results[a,4])$(Results[a,5])_INV$(idx)"
 
-        vline = [maxidlin, linename, invname, "DC", max(Results[a,6],Results[a,7]), Results[a,4], Results[a,5], factive(Results[a,1]), factive(Results[a,1]), 0.01, 0.1, Results[a,7], Results[a,6], 220, 1, "", "", 1, 1, 0]
+        vline = [maxidlin, linename, invname, "DC", max(Results[a,6],Results[a,7]), Results[a,4], Results[a,5], factive(Results[a,1]), factive(Results[a,1]), 0.01, 0.1, Results[a,7], Results[a,6], 0, 1, 220, 1, "", "", 1, 1, 0]
 
         push!(ts.line, vline)
     end
@@ -672,6 +684,17 @@ function generator_table(ts::PISPtimeStatic, ispdata19::String, ispdata24::Strin
             GENERATORS[r,:pmin] = round(0.2 * GENERATORS[r,:pmax], digits=2)
         end
     end
+    
+    # Manual fix for Murray
+    if any(GENERATORS[!,:name] .== "Murray 1")
+        r = findfirst(GENERATORS[!,:name] .== "Murray 1")
+        GENERATORS[r,:alias] = "MURRAY1"
+    end
+
+    if any(GENERATORS[!,:name] .== "Murray 2")
+        r = findfirst(GENERATORS[!,:name] .== "Murray 2")
+        GENERATORS[r,:alias] = "MURRAY2"
+    end
 
     # @warn("Pmin for CCGT is set to 52% of Pmax")
     # @warn("Pmin for OCGT is set to 33% of Pmax")
@@ -811,10 +834,10 @@ function ess_tables(ts::PISPtimeStatic, tv::PISPtimeVarying, PSESS::DataFrame, i
     BESS_FOR[!,:pmax] = BESS[!,Symbol("Installed capacity (MW)")] 
     BESS_FOR[!,:lmin] = [ 0.0 for k in 1:nrow(BESS)]
     BESS_FOR[!,:lmax] = BESS[!,Symbol("Installed capacity (MW)")]
-    BESS_FOR[!,:fullout] = [RELIANEW[8,2] for k in 1:nrow(BESS)]
+    BESS_FOR[!,:fullout] = [RELIANEW[8,2]/100 for k in 1:nrow(BESS)]
     BESS_FOR[!,:partialout] = [0 for k in 1:nrow(BESS)]
     BESS_FOR[!,:mttrfull] = [RELIANEW[8,4] for k in 1:nrow(BESS)]
-    BESS_FOR[!,:mttrpart] = [0 for k in 1:nrow(BESS)]
+    BESS_FOR[!,:mttrpart] = [1.0 for k in 1:nrow(BESS)]
     BESS_FOR[!,:inertia] = [ 0.0 for k in 1:nrow(BESS)]
     BESS_FOR[!,:powerfactor] = [ 1.0 for k in 1:nrow(BESS)]
     BESS_FOR[!,:ffr] = [ 1 for k in 1:nrow(BESS)]
@@ -850,10 +873,10 @@ function ess_tables(ts::PISPtimeStatic, tv::PISPtimeVarying, PSESS::DataFrame, i
     PS_FOR[!,:pmax] = [ PISP.dataps[k][3] for k in PSESS[!,:Generator] ]
     PS_FOR[!,:lmin] = [ 0.0 for k in PSESS[!,:Generator] ]
     PS_FOR[!,:lmax] = [ PISP.dataps[k][4] for k in PSESS[!,:Generator] ]
-    PS_FOR[!,:fullout] = [RELIANEW[15,2] for k in 1:nrow(PSESS)]
+    PS_FOR[!,:fullout] = [RELIANEW[15,2]/100 for k in 1:nrow(PSESS)]
     PS_FOR[!,:partialout] = [0 for k in 1:nrow(PSESS)]
     PS_FOR[!,:mttrfull] = [RELIANEW[15,4] for k in 1:nrow(PSESS)]
-    PS_FOR[!,:mttrpart] = [0 for k in 1:nrow(PSESS)]
+    PS_FOR[!,:mttrpart] = [1.0 for k in 1:nrow(PSESS)]
     PS_FOR[!,:inertia] = [ 2.2 for k in PSESS[!,:Generator] ]
     PS_FOR[!,:powerfactor] = [ 0.85 for k in 1:nrow(PSESS)]
     PS_FOR[!,:ffr] = [ 0 for k in 1:nrow(PSESS)]
@@ -916,7 +939,7 @@ function gen_pmax_distpv(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVar
         bus_id = bus_data[!, :id_bus][1]
         bus_lat = bus_data[!, :latitude][1]
         bus_lon = bus_data[!, :longitude][1]
-        arrgen = [gid,"RTPV_$(st)","RTPV_$(st)","Solar","RoofPV","RoofPV", 100.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, bus_id, 0.0, 100.0, 9999.9, 9999.9, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0, 1.0, bus_lat, bus_lon, 1, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        arrgen = [gid,"RTPV_$(st)","RTPV_$(st)","Solar","RoofPV","RoofPV", 100.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, bus_id, 0.0, 100.0, 9999.9, 9999.9, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0, 1.0, bus_lat, bus_lon, 1, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         push!(ts.gen, arrgen)
         for p in 1:nrow(probs)
             scid = probs[p,:scenario][1]
@@ -1027,7 +1050,7 @@ function gen_pmax_solar(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVary
         exs_gen_sol = EXIST_SOLAR[EXIST_SOLAR[!,4] .== st,:];
         if st == "TAS" capaux = 0.0 else capaux = sum(EXIST_SOLAR[EXIST_SOLAR[!,4] .== st,7]) end
         genid[st] = [gid, capaux]
-        arrgen = [gid,"LSPV_$(st)","LSPV_$(st)","Solar","LargePV","LargePV", capaux, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, bus_id, 0.0, capaux, 9999.9,  9999.9, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0, 1.0, bus_lat, bus_lon, 1, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        arrgen = [gid,"LSPV_$(st)","LSPV_$(st)","Solar","LargePV","LargePV", capaux, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, bus_id, 0.0, capaux, 9999.9,  9999.9, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0, 1.0, bus_lat, bus_lon, 1, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         push!(ts.gen, arrgen)
     end
 
@@ -1203,11 +1226,11 @@ function gen_pmax_wind(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVaryi
         if st == "SNW"
             capaux = 0.0
             genid[st] = [gid, capaux]
-            arrgen = [gid,"WIND_$(st)","WIND_$(st)","Wind","Wind","Wind",        capaux, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, bus_id, 0.0, capaux, 9999.9,  9999.9, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0, 1.0, bus_lat, bus_lon, 1, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            arrgen = [gid,"WIND_$(st)","WIND_$(st)","Wind","Wind","Wind",        capaux, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, bus_id, 0.0, capaux, 9999.9,  9999.9, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0, 1.0, bus_lat, bus_lon, 1, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         else
             capaux = sum(EXIST_WIND[EXIST_WIND[!,4] .== st,7])
             genid[st] = [gid, capaux]
-            arrgen = [gid,"WIND_$(st)","WIND_$(st)","Wind","Wind","Wind",        capaux, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, bus_id, 0.0, capaux, 9999.9,  9999.9, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0, 1.0, bus_lat, bus_lon, 1, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            arrgen = [gid,"WIND_$(st)","WIND_$(st)","Wind","Wind","Wind",        capaux, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, bus_id, 0.0, capaux, 9999.9,  9999.9, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0, 1.0, bus_lat, bus_lon, 1, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         end
         push!(ts.gen, arrgen)
     end
@@ -1388,7 +1411,7 @@ function ess_vpps(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, v
         data_cap = VPPCAP[VPPCAP[!,:bus] .== st, Symbol("$(yr)-$(string(yr+1)[3:end])")][1]
         data_ene = VPPENE[VPPENE[!,:bus] .== st, Symbol("$(yr)-$(string(yr+1)[3:end])")][1]*1000
         BMBESSid[st] = [bmid, data_cap, data_ene]
-        arrbmss = [bmid,"VPP_CER_$(st)","VPP_CER_$(st)","BESS","SHALLOW", data_cap, 0, 1, bus_id, 0.9, 0.9, 10.0, 10.0, data_ene, 0.0, data_cap, 0.0, data_cap, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0, 0, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, PISP.NEMBUSES[st][2], PISP.NEMBUSES[st][1], 1, 0]
+        arrbmss = [bmid,"VPP_CER_$(st)","VPP_CER_$(st)","BESS","SHALLOW", data_cap, 0, 1, bus_id, 0.9, 0.9, 10.0, 10.0, data_ene, 0.0, data_cap, 0.0, data_cap, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0, 0, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, PISP.NEMBUSES[st][2], PISP.NEMBUSES[st][1], 1, 0]
         push!(ts.ess, arrbmss)
     end
 
@@ -1423,5 +1446,145 @@ function ess_vpps(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, v
             push!(tv.ess_lmax, [bmlmid, BMBESSid[st][1], scid, dstart, data_cap])
             push!(tv.ess_emax, [bmemid, BMBESSid[st][1], scid, dstart, data_ene])
         end
+    end
+end
+
+function der_tables(ts::PISPtimeStatic)
+    # ============================================ #
+    # DSP table development  ===================== #
+    # ============================================ #
+    dem = ts.dem
+    maxiddem = isempty(dem) ? 1 : maximum(dem.id_dem) + 1
+    cdem_dsp = Dict()
+    for row in eachrow(dem)
+        cdem_name = replace(row["name"], "DEM"=>"DSP")
+        row_cdem = (maxiddem, cdem_name, 0, row["id_bus"], 1, 1 ,17500, 1)
+        push!(ts.dem, row_cdem)
+        cdem_dsp[cdem_name] = maxiddem
+        maxiddem += 1
+    end
+    # ======================================== #
+    # DSP VALUES
+    # ======================================== #
+    der       = ts.der
+    dem       = ts.dem
+    cont_dem  = dem[dem[!, :controllable] .== 1,:]
+    deridx    = isempty(der) ? 1 : maximum(der.id_der) + 1
+    cost_band = [300, 500, 1000, 7500] # 4 cost bands as modelled in the ISP24
+    bands     = length(cost_band)
+
+    for row in eachrow(cont_dem)
+        for band in 1:bands
+            dem_name = row["name"]*"_BAND$band"
+            id_dem   = row["id_dem"]
+            row_der = [ deridx,             # ID_DER
+                        dem_name,           # NAME
+                        "DSP",              # TECH
+                        id_dem,             # ID_DEMAND
+                        1,                  # ACTIVE
+                        0,                  # INVESTMENT
+                        100,                # CAPACITY
+                        1,                  # REDUCT
+                        10,                 # PRED_MAX
+                        cost_band[band],    # COST_RED
+                        1,]                 # N
+            push!(ts.der, row_der)
+            deridx += 1
+        end
+    end
+end
+
+function der_pred_sched(ts::PISPtimeStatic, tv::PISPtimeVarying, dsp_data::String)
+    for scenario in collect(keys(PISP.SCE))
+        QLD_SUM = PISP.read_xlsx_with_header(dsp_data, scenario, "A23:AF28")
+        QLD_WIN = PISP.read_xlsx_with_header(dsp_data, scenario, "A32:AF37")
+
+        NSW_SUM = PISP.read_xlsx_with_header(dsp_data, scenario, "A3:AF8")
+        NSW_WIN = PISP.read_xlsx_with_header(dsp_data, scenario, "A13:AF18")
+
+        SA_SUM = PISP.read_xlsx_with_header(dsp_data, scenario, "A42:AF47")
+        SA_WIN = PISP.read_xlsx_with_header(dsp_data, scenario, "A51:AF56")
+
+        TAS_SUM = PISP.read_xlsx_with_header(dsp_data, scenario, "A61:AF66")
+        TAS_WIN = PISP.read_xlsx_with_header(dsp_data, scenario, "A70:AF75")
+
+        VIC_SUM = PISP.read_xlsx_with_header(dsp_data, scenario, "A80:AF85")
+        VIC_WIN = PISP.read_xlsx_with_header(dsp_data, scenario, "A89:AF94")
+        # ======================================== #
+        # <><><> QLD
+        # ++ NQ
+        perc = 0.0
+        der_ids = ts.der[occursin.("NQ", ts.der[!, :name]), :].id_der
+        PISP.inputDB_dsp(tv, QLD_SUM, der_ids, scenario, perc)
+        PISP.inputDB_dsp(tv, QLD_WIN, der_ids, scenario, perc)
+
+        # ++ CQ
+        perc = 0.0
+        der_ids = ts.der[occursin.("CQ", ts.der[!, :name]), :].id_der
+        PISP.inputDB_dsp(tv, QLD_SUM, der_ids, scenario, perc)
+        PISP.inputDB_dsp(tv, QLD_WIN, der_ids, scenario, perc)
+
+        # ++ GG
+        perc = 0.0
+        der_ids = ts.der[occursin.("GG", ts.der[!, :name]), :].id_der
+        PISP.inputDB_dsp(tv, QLD_SUM, der_ids, scenario, perc)
+        PISP.inputDB_dsp(tv, QLD_WIN, der_ids, scenario, perc)
+
+        # ++ SQ
+        perc = 1.0
+        der_ids = ts.der[occursin.("SQ", ts.der[!, :name]), :].id_der
+        PISP.inputDB_dsp(tv, QLD_SUM, der_ids, scenario, perc)
+        PISP.inputDB_dsp(tv, QLD_WIN, der_ids, scenario, perc)
+        # ======================================== #
+        # ======================================== #
+        # <><><> NSW
+        # ++ NNSW
+        perc = 0.0
+        der_ids = ts.der[occursin.("NNSW", ts.der[!, :name]), :].id_der
+        PISP.inputDB_dsp(tv, NSW_SUM, der_ids, scenario, perc)
+        PISP.inputDB_dsp(tv, NSW_WIN, der_ids, scenario, perc)
+
+        # ++ CNSW
+        perc = 0.0
+        der_ids = ts.der[occursin.("CNSW", ts.der[!, :name]), :].id_der
+        PISP.inputDB_dsp(tv, NSW_SUM, der_ids, scenario, perc)
+        PISP.inputDB_dsp(tv, NSW_WIN, der_ids, scenario, perc)
+
+        # ++ SNW
+        perc = 1.0
+        der_ids = ts.der[occursin.("SNW", ts.der[!, :name]), :].id_der
+        PISP.inputDB_dsp(tv, NSW_SUM, der_ids, scenario, perc)
+        PISP.inputDB_dsp(tv, NSW_WIN, der_ids, scenario, perc)
+
+        # ++ SNSW
+        perc = 0.0
+        der_ids = ts.der[occursin.("SNSW", ts.der[!, :name]), :].id_der
+        PISP.inputDB_dsp(tv, NSW_SUM, der_ids, scenario, perc)
+        PISP.inputDB_dsp(tv, NSW_WIN, der_ids, scenario, perc)
+        # ======================================== #
+        # VIC
+        der_ids = ts.der[occursin.("VIC", ts.der[!, :name]), :].id_der
+        PISP.inputDB_dsp(tv, VIC_SUM, der_ids, scenario, perc)
+        PISP.inputDB_dsp(tv, VIC_WIN, der_ids, scenario, perc)
+
+        # ======================================== #
+        # TAS
+        der_ids = ts.der[occursin.("TAS", ts.der[!, :name]), :].id_der
+        PISP.inputDB_dsp(tv, TAS_SUM, der_ids, scenario, perc)
+        PISP.inputDB_dsp(tv, TAS_WIN, der_ids, scenario, perc)
+
+        # ======================================== #
+        # <><><> SA
+        # ++ CSA
+        perc = 1.0
+        der_ids = ts.der[occursin.("CSA", ts.der[!, :name]), :].id_der
+        PISP.inputDB_dsp(tv, SA_SUM, der_ids, scenario, perc)
+        PISP.inputDB_dsp(tv, SA_WIN, der_ids, scenario, perc)
+
+        # ++ SESA
+        perc = 0.0
+        der_ids = ts.der[occursin.("SESA", ts.der[!, :name]), :].id_der
+        PISP.inputDB_dsp(tv, SA_SUM, der_ids, scenario, perc)
+        PISP.inputDB_dsp(tv, SA_WIN, der_ids, scenario, perc)
     end
 end

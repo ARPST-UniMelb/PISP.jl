@@ -80,7 +80,14 @@ MOD_LINE_TMIN           = OrderedDict(
                                         "date"              => "DATETIME NOT NULL",
                                         "value"             => "REAL NOT NULL"
                                     )
-
+# ================================ #
+# DER SCHEDULES
+# ================================ #
+MOD_DER_PRED_MAX        = OrderedDict(  "id"                => "INTEGER PRIMARY KEY", 
+                                        "id_der"            => "INTEGER REFERENCES DER (id_der)",
+                                        "scenario"          => "INTEGER NOT NULL", 
+                                        "date"              => "DATETIME NOT NULL",
+                                        "value"             => "REAL NOT NULL")
 TABLES_POWERSYSTEM_SCH = OrderedDict(
                                         "Generator_pmax_sched"      => MOD_GEN_PMAX,
                                         "Generator_n_sched"         => MOD_GEN_N,
