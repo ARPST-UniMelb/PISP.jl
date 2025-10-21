@@ -136,7 +136,7 @@ function line_sched_table(tc::PISPtimeConfig, tv::PISPtimeVarying, TXdata::DataF
 
     txd_max = maximum(tv.line_tmax.id) + 1
     txd_min = maximum(tv.line_tmin.id) + 1
-
+    
     for txid in 1:nrow(TXdata)
         for p in 1:nrow(probs)
             scid = probs[p,:scenario][1]    # Scenario ID
@@ -161,11 +161,11 @@ function line_sched_table(tc::PISPtimeConfig, tv::PISPtimeVarying, TXdata::DataF
             if (ms in wmonths && me in smonths) || (ms in smonths && me in wmonths)
                 # @warn "Problem start month is in winter and end month is in summer, check written data."
                 if me in wmonths
-                    push!(tv.line_tmax, (id=txd, id_lin=txid, scenario=scid, date=DateTime(ys,me,1), value=TXdata[txid,8]))
-                    push!(tv.line_tmin, (id=txd, id_lin=txid, scenario=scid, date=DateTime(ys,me,1), value=TXdata[txid,11]))
+                    push!(tv.line_tmax, (id=txd_max, id_lin=txid, scenario=scid, date=DateTime(ys,me,1), value=TXdata[txid,8]))
+                    push!(tv.line_tmin, (id=txd_min, id_lin=txid, scenario=scid, date=DateTime(ys,me,1), value=TXdata[txid,11]))
                 else
-                    push!(tv.line_tmax, (id=txd, id_lin=txid, scenario=scid, date=DateTime(ys,me,1), value=TXdata[txid,7]))
-                    push!(tv.line_tmin, (id=txd, id_lin=txid, scenario=scid, date=DateTime(ys,me,1), value=TXdata[txid,10]))
+                    push!(tv.line_tmax, (id=txd_max, id_lin=txid, scenario=scid, date=DateTime(ys,me,1), value=TXdata[txid,7]))
+                    push!(tv.line_tmin, (id=txd_min, id_lin=txid, scenario=scid, date=DateTime(ys,me,1), value=TXdata[txid,10]))
                 end
                 txd_max += 1
                 txd_min += 1
