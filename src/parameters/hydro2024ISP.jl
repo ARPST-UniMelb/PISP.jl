@@ -84,14 +84,15 @@ WEATHER_YEARS = Dict(
     ("2050-07-01", "2051-06-30") => "2017",
     ("2051-07-01", "2052-06-30") => "2018",
 )
-# Sourced from
+# Dam shares sourced from
 # https://www.snowyhydro.com.au/wp-content/uploads/2020/09/SH1771_Snowy-fact-sheet_website.pdf
 # https://www.waternsw.com.au/documents/publications/education/our-dams/blowering/Blowering-Dam-Fact-Sheet.pdf
-# Shared total is 6428 GL
+# Shared total is 6428 GL; Snowy scheme from AEMO data is formed by Blowering (1628 GL) and Eucumbene (4800 GL) and 
 DAM_SHARES = Dict(
     "Blowering" => 1628/6428, # Gigalitres
     "Eucumbene" => 4800/6428, # Gigalitres
 )
+
 # Dams feeding specific generators
 HYDRO_DAMS_GENS = Dict(
     43 => "Eucumbene", # Murray 1
@@ -99,6 +100,16 @@ HYDRO_DAMS_GENS = Dict(
     51 => "Eucumbene", # Upper Tumut
 )
 
-# HYDRO_DAMS_STORAGE = Dict(
-#     #Tumut 3
-# )
+SNOWY_HYDRO_GROUPS = Dict(
+    "MURRAY" => [43, 44],   # Murray 1 and Murray 2
+    "TUMUT"  => [51]         # Upper Tumut
+)
+
+# Dams feeding specific pumped storage units
+HYDRO_DAMS_STORAGE = Dict(
+    59 => ["Eucumbene", "Blowering"] # Tumut 3
+)
+
+HYDRO_STORAGE_GEN = Dict(
+    59 => 51 # Tumut 3 => Upper Tumut (Upper Tumut releases used for Tumut 3 pumping)
+)
