@@ -97,6 +97,7 @@ using CSV
 using DataFrames
 const HOURS_PER_DAY = 24
 
+# Move these functions to PISPutils-2024ISP.jl later TODO
 function weather_years_df(d::Dict)
     parse_date(x) = x isa Date ? x : Date(x, dateformat"yyyy-mm-dd")
     rows = [(parse_date(s), parse_date(e), string(v)) for ((s,e), v) in d]
@@ -106,8 +107,7 @@ end
 function monthly_to_hourly(df::DataFrame; date_col::Symbol=:exact_date, value_col::Symbol=:value)
     n = nrow(df)
     # hours per row (days in month * 24)
-    hours_per_row = Dates.daysinmonth.(df[!, date_col]) .* 24
-    println("Hours per row: ", hours_per_row)
+    hours_per_row = Dates.daysinmonth.(df[!, date_col]) .* HOURS_PER_DAY
     total_hours = sum(hours_per_row)
 
     dates_out  = Vector{DateTime}(undef, total_hours)
@@ -197,7 +197,7 @@ for (gen_id, fname) in PISP.HYDRO2FILE
     push!(get!(Vector{typeof(gen_id)}, gens_by_file, fname), gen_id)
 end
 
-gens_by_file_sorted = Dict(fname => sort!(copy(ids)) for (fname, ids) in gens_by_file)
+gens_by_file_sorted = Dict(fname => sort!(copy(ids)) for (fname, ids) in gens_by_file) # Associate each inflow file to a sorted list of generator that receive the corresponding inflow
 hydro_groups = Dict(
     fname => subset(hydro_gen, :id_gen => ByRow(in(ids)))
     for (fname, ids) in gens_by_file_sorted
@@ -212,11 +212,12 @@ for scenario in keys(PISP.SCE)
 
     for (file_name, gen_ids) in gens_by_file_sorted
         startswith(file_name, "MonthlyNaturalInflow") || continue # Skip file with energy constraints and only process inflow files
-        println(file_name)
 
         gen_entries = hydro_groups[file_name]
         total_cap   = sum(gen_entries.gen_totcap)
         gen_entries[!, :partial] .= gen_entries.gen_totcap ./ total_cap
+        #print gen_entries id_gen, gen_totcap, partial
+        # println(gen_entries[:, [:id_gen, :name, :gen_totcap, :partial]])
 
         filepath = normpath(hydro_root, file_name * "_" * hydro_sce * ".csv")
         inflow_data = CSV.read(filepath, DataFrame)
@@ -266,7 +267,6 @@ for scenario in keys(PISP.SCE)
 
     for (file_name, gen_ids) in gens_by_file_sorted
         startswith(file_name, "MaxEnergyYear") || continue # Skip file with energy constraints and only process inflow files
-        println(file_name)
 
         gen_entries = hydro_groups[file_name]
         gen_entries[!, :constraint] = [PISP.HYDRO2CNS[row.id_gen] for row in eachrow(gen_entries)] # Map generator to its energy constraint
@@ -302,77 +302,243 @@ for scenario in keys(PISP.SCE)
 end
 
 # 3 - Snowy Scheme Inflows
-hourly_snowy = build_hourly_snowy(ispdata24)
+hourly_snowy = build_hourly_snowy(ispdata24); # Generate hourly values for the Snowy scheme (Tumut, Murray, etc) using the inflows from the IASR 
+df_snowy_capacity = nothing
 for scenario in keys(PISP.SCE)
     sce_label     = PISP.SCE[scenario]      # Scenario number
-    hydro_sce     = PISP.HYDROSCE[scenario] # Hydro scenario from PLEXOS model
-
     for (file_name, gen_ids) in gens_by_file_sorted
-        startswith(file_name, "SNOWY_SCHEME") || continue # Skip file with energy constraints and only process inflow files
-        gen_entries = hydro_groups[file_name]
-        total_cap   = sum(gen_entries.gen_totcap)
-        gen_entries[!, :partial] .= gen_entries.gen_totcap ./ total_cap
-        for id_gen in gen_ids
-            hydro_dam = PISP.HYDRO_DAMS_GENS[id_gen] # Name of the hydro dam
-            share_dam = PISP.DAM_SHARES[hydro_dam] # Share of the dam for this generator
-            share_gen = filter(row -> row.id_gen == id_gen, gen_entries)[1, :partial] # Share of the generator in the snowy scheme
-            snowy_share = share_dam * share_gen
+        startswith(file_name, "SNOWY_SCHEME") || continue   # Skip file with energy constraints and only process inflow files
+        # Work on a copy to avoid mutating the original hydro_groups lookup
+        gen_entries = deepcopy(hydro_groups[file_name])
 
-            scaled_inflows = hourly_snowy.value .* snowy_share * 1000.0 # Scale to MW
-            append!(gen_inflow_dummy, DataFrame(
-                id       = collect(1:nrow(hourly_snowy)),
-                id_gen   = fill(id_gen, nrow(hourly_snowy)),
-                scenario = fill(sce_label, nrow(hourly_snowy)),
-                date     = hourly_snowy.date,
-                value    = scaled_inflows,
-            ))
+        # For each Snowy group keep only the generator with the largest capacity (avoid double counting)
+        for group in values(PISP.SNOWY_HYDRO_GROUPS)
+            present = filter(row -> row.id_gen in group, gen_entries)
+            if nrow(present) > 1
+                # find index of the generator with the largest capacity and keep it
+                _, rel_idx = findmax(present.gen_totcap)
+                to_keep = present[rel_idx, :id_gen]
+                to_remove = setdiff(group, [to_keep])
+                if !isempty(to_remove)
+                    gen_entries = filter(row -> !(row.id_gen in to_remove), gen_entries)
+                end
+            end
         end
+
+        # Recalculate totals and partial shares
+        total_cap = sum(gen_entries.gen_totcap)
+        gen_entries[!, :partial] .= gen_entries.gen_totcap ./ total_cap
+
+        # Precompute hourly vectors once for this Snowy dataset
+        n_hourly = nrow(hourly_snowy)
+        hourly_ids = collect(1:n_hourly)
+        hourly_dates = hourly_snowy.date
+        hourly_values = hourly_snowy.value
+
+        for group in values(PISP.SNOWY_HYDRO_GROUPS)
+            # Generators associated to the Snowy group
+            group_entries = filter(row -> row.id_gen in group, gen_entries) 
+            share_group   = sum(group_entries.partial) # Generation share of the group (%)
+
+            for id_gen in group # Generators forming the Snowy group
+                hydro_dam = PISP.HYDRO_DAMS_GENS[id_gen]
+                share_dam = get(PISP.DAM_SHARES, hydro_dam, 0.0)
+                share_gen = share_group * share_dam
+                println("Scenario: ", sce_label, " Gen: ", id_gen, " Share gen: ", share_gen)
+                scaled_inflows = hourly_values .* share_gen * 1000.0 # Scale to MW (same as original)
+
+                append!(gen_inflow_dummy, DataFrame(
+                    id       = hourly_ids,
+                    id_gen   = fill(id_gen, n_hourly),
+                    scenario = fill(sce_label, n_hourly),
+                    date     = hourly_dates,
+                    value    = scaled_inflows,
+                ))
+            end
+        end
+        df_snowy_capacity = gen_entries
     end
 end
 
 # Final order of the inflow dataframe
 for row in eachrow(tc.problem)
-    sce = row.scenario
+    sce    = row.scenario
     dstart = row.dstart
-    dend = row.dend
+    dend   = row.dend
 
     df_filt = filter(r -> r.scenario == sce && r.date >= dstart && r.date <= dend, gen_inflow_dummy)
     append!(tv.gen_inflow, df_filt)
 end
 sort!(tv.gen_inflow, [:id_gen, :scenario, :date])
 tv.gen_inflow[!, :id] = collect(1:nrow(tv.gen_inflow))
+# save tv_gen_inflow as CSV for checking
+CSV.write("tv_gen_inflow_2024ISP.csv", tv.gen_inflow)
 
 # ============================================ #
 PISP.ess_tables(ts, tv, PS, ispdata24);
 PISP.ess_vpps(tc, ts, tv, vpp_cap, vpp_ene);
-# 1 - Snowy Scheme Inflows for TUMUT PS
-hourly_snowy = build_hourly_snowy(ispdata24)
-for scenario in keys(PISP.SCE)
-    sce_label     = PISP.SCE[scenario]      # Scenario number
-    hydro_sce     = PISP.HYDROSCE[scenario] # Hydro scenario from PLEXOS model
 
-    for (file_name, gen_ids) in gens_by_file_sorted
-        startswith(file_name, "SNOWY_SCHEME") || continue # Skip file with energy constraints and only process inflow files
-        gen_entries = hydro_groups[file_name]
-        total_cap   = sum(gen_entries.gen_totcap)
-        gen_entries[!, :partial] .= gen_entries.gen_totcap ./ total_cap
-        for id_gen in gen_ids
-            hydro_dam = PISP.HYDRO_DAMS_GENS[id_gen] # Name of the hydro dam
-            share_dam = PISP.DAM_SHARES[hydro_dam] # Share of the dam for this generator
-            share_gen = filter(row -> row.id_gen == id_gen, gen_entries)[1, :partial] # Share of the generator in the snowy scheme
-            snowy_share = share_dam * share_gen
-
-            scaled_inflows = hourly_snowy.value .* snowy_share * 1000.0 # Scale to MW
-            append!(gen_inflow_dummy, DataFrame(
-                id       = collect(1:nrow(hourly_snowy)),
-                id_gen   = fill(id_gen, nrow(hourly_snowy)),
-                scenario = fill(sce_label, nrow(hourly_snowy)),
-                date     = hourly_snowy.date,
-                value    = scaled_inflows,
-            ))
-        end
-    end
+# ============================================ #
+ess       = ts.ess
+gen       = ts.gen
+tumut_ps  = filter(row -> row.name == "Tumut 3", ess)
+id_tumut  = tumut_ps.id_ess[1]
+hourly_snowy = build_hourly_snowy(ispdata24); # Generate hourly values for the Snowy scheme (Tumut, Murray, etc) using the inflows from the IASR
+ess_inflow_dummy = deepcopy(tv.ess_inflow)
+# Calculate dam share
+t3_dams  = PISP.HYDRO_DAMS_STORAGE[id_tumut]
+t3_share = 0.0
+for dam in t3_dams
+    t3_share += get(PISP.DAM_SHARES, dam, 0.0)
 end
+
+# Calculate generator share
+tumut_gen = PISP.HYDRO_STORAGE_GEN[id_tumut]
+tumut_entry = filter(row -> row.id_gen == tumut_gen, df_snowy_capacity)
+tumut_partial = tumut_entry.partial
+
+t3_total_share = t3_share * tumut_partial[1]
+
+hourly_values = hourly_snowy.value
+n_hourly      = nrow(hourly_snowy)
+hourly_ids    = collect(1:n_hourly)
+for scenario in keys(PISP.SCE)
+    sce_label      = PISP.SCE[scenario]      # Scenario number
+    scaled_inflows = hourly_values .* t3_total_share * 1000.0 # Scale to MW (same as original)
+    append!(ess_inflow_dummy, DataFrame(
+        id       = hourly_ids,
+        id_ess   = fill(id_tumut, n_hourly),
+        scenario = fill(sce_label, n_hourly),
+        date     = hourly_snowy.date,
+        value    = scaled_inflows,
+    ))
+end
+
+# Final order of the inflow dataframe
+for row in eachrow(tc.problem)
+    sce    = row.scenario
+    dstart = row.dstart
+    dend   = row.dend
+
+    df_filt = filter(r -> r.scenario == sce && r.date >= dstart && r.date <= dend, ess_inflow_dummy)
+    println(df_filt)
+    append!(tv.ess_inflow, df_filt)
+end
+sort!(tv.ess_inflow, [:id_ess, :scenario, :date])
+tv.ess_inflow[!, :id] = collect(1:nrow(tv.ess_inflow))
+# save tv_ess_inflow as CSV for checking
+CSV.write("tv_ess_inflow_2024ISP.csv", tv.ess_inflow)
+
+
+# ============================================ #
+
+# hydro_gen = filter(row -> row.fuel == "Hydro", gen)
+# hydro_gen[!, :gen_totcap] = hydro_gen.pmax .* hydro_gen.n # Total installed capacity of hydro generators
+# ess_inflow_dummy = deepcopy(tv.ess_inflow)
+# hourly_snowy = build_hourly_snowy(ispdata24)
+# # gen_inflow_dummy = deepcopy(tv.gen_inflow)
+
+# # Pre-group generators by inflow file
+# gens_by_file = Dict{String, Vector{typeof(first(first(PISP.HYDRO2FILE)))}}()
+# for (gen_id, fname) in PISP.HYDRO2FILE
+#     push!(get!(Vector{typeof(gen_id)}, gens_by_file, fname), gen_id)
+# end
+
+# gens_by_file_sorted = Dict(fname => sort!(copy(ids)) for (fname, ids) in gens_by_file) # Associate each inflow file to a sorted list of generator that receive the corresponding inflow
+# hydro_groups = Dict(
+#     fname => subset(hydro_gen, :id_gen => ByRow(in(ids)))
+#     for (fname, ids) in gens_by_file_sorted
+# )
+
+# # Pre-group generators by inflow file
+# ess_by_file = Dict{String, Vector{typeof(first(first(PISP.PS2FILE)))}}()
+# for (ess_id, fname) in PISP.PS2FILE
+#     push!(get!(Vector{typeof(ess_id)}, ess_by_file, fname), ess_id)
+# end
+
+# # 1 - Snowy Scheme Inflows for TUMUT PS
+# for scenario in keys(PISP.SCE)
+#     sce_label     = PISP.SCE[scenario]      # Scenario number
+#     for (file_name, gen_ids) in gens_by_file_sorted
+#         startswith(file_name, "SNOWY_SCHEME") || continue   # Skip file with energy constraints and only process inflow files
+
+#         # Work on a copy to avoid mutating the original hydro_groups lookup
+#         gen_entries = deepcopy(hydro_groups[file_name])
+
+#         # For each Snowy group keep only the generator with the largest capacity (avoid double counting)
+#         for group in values(PISP.SNOWY_HYDRO_GROUPS)
+#             present = filter(row -> row.id_gen in group, gen_entries)
+#             if nrow(present) > 1
+#                 # find index of the generator with the largest capacity and keep it
+#                 _, rel_idx = findmax(present.gen_totcap)
+#                 to_keep = present[rel_idx, :id_gen]
+#                 to_remove = setdiff(group, [to_keep])
+#                 if !isempty(to_remove)
+#                     gen_entries = filter(row -> !(row.id_gen in to_remove), gen_entries)
+#                 end
+#             end
+#         end
+
+#         # Recalculate totals and partial shares
+#         total_cap = sum(gen_entries.gen_totcap)
+#         gen_entries[!, :partial] .= gen_entries.gen_totcap ./ total_cap
+
+#         # Precompute hourly vectors once for this Snowy dataset
+#         n_hourly = nrow(hourly_snowy)
+#         hourly_ids = collect(1:n_hourly)
+#         hourly_dates = hourly_snowy.date
+#         hourly_values = hourly_snowy.value
+
+#         for group in values(PISP.SNOWY_HYDRO_GROUPS)
+#             # Generators associated to the Snowy group
+#             group_entries = filter(row -> row.id_gen in group, gen_entries) 
+#             share_group   = sum(group_entries.partial) # Generation share of the group (%)
+
+#             for id_gen in group # Generators forming the Snowy group
+#                 hydro_dam = PISP.HYDRO_DAMS_GENS[id_gen]
+#                 share_dam = get(PISP.DAM_SHARES, hydro_dam, 0.0)
+#                 share_gen = share_group * share_dam
+#                 println("Scenario: ", sce_label, " Gen: ", id_gen, " Share gen: ", share_gen)
+#                 scaled_inflows = hourly_values .* share_gen * 1000.0 # Scale to MW (same as original)
+
+#                 append!(gen_inflow_dummy, DataFrame(
+#                     id       = hourly_ids,
+#                     id_gen   = fill(id_gen, n_hourly),
+#                     scenario = fill(sce_label, n_hourly),
+#                     date     = hourly_dates,
+#                     value    = scaled_inflows,
+#                 ))
+#             end
+#         end
+#     end
+# end
+
+
+# for scenario in keys(PISP.SCE)
+#     sce_label     = PISP.SCE[scenario]      # Scenario number
+
+#     for (file_name, gen_ids) in ess_by_file
+#         # startswith(file_name, "SNOWY_SCHEME") || continue # Skip file with energy constraints and only process inflow files
+#         # gen_entries = hydro_groups[file_name]
+#         # total_cap   = sum(gen_entries.gen_totcap)
+#         # gen_entries[!, :partial] .= gen_entries.gen_totcap ./ total_cap
+#         for id_gen in gen_ids
+#             hydro_dam = PISP.HYDRO_DAMS_GENS[id_gen] # Name of the hydro dam
+#             share_dam = PISP.DAM_SHARES[hydro_dam] # Share of the dam for this generator
+#             share_gen = filter(row -> row.id_gen == id_gen, gen_entries)[1, :partial] # Share of the generator in the snowy scheme
+#             snowy_share = share_dam * share_gen
+
+#             scaled_inflows = hourly_snowy.value .* snowy_share * 1000.0 # Scale to MW
+#             append!(gen_inflow_dummy, DataFrame(
+#                 id       = collect(1:nrow(hourly_snowy)),
+#                 id_gen   = fill(id_gen, nrow(hourly_snowy)),
+#                 scenario = fill(sce_label, nrow(hourly_snowy)),
+#                 date     = hourly_snowy.date,
+#                 value    = scaled_inflows,
+#             ))
+#         end
+#     end
+# end
 
 # PISP.der_tables(ts);
 # PISP.der_pred_sched(ts, tv, dsp_data);
