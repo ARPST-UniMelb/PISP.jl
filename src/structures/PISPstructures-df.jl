@@ -34,26 +34,30 @@ mutable struct PISPtimeVarying
     ess_lmax::DataFrame
     ess_n::DataFrame
     ess_pmax::DataFrame
+    ess_inflow::DataFrame
     gen_n::DataFrame
     gen_pmax::DataFrame
+    gen_inflow::DataFrame
     line_tmax::DataFrame
     line_tmin::DataFrame
     der_pred::DataFrame
 
     # Default constructor
     function PISPtimeVarying()
-        dem_load  = PISP.schema_to_dataframe(PISP.MOD_DEMAND_LOAD)
-        ess_emax  = PISP.schema_to_dataframe(PISP.MOD_ESS_EMAX)
-        ess_lmax  = PISP.schema_to_dataframe(PISP.MOD_ESS_LMAX)
-        ess_n     = PISP.schema_to_dataframe(PISP.MOD_ESS_N)
-        ess_pmax  = PISP.schema_to_dataframe(PISP.MOD_ESS_PMAX)
-        gen_n     = PISP.schema_to_dataframe(PISP.MOD_GEN_N)
-        gen_pmax  = PISP.schema_to_dataframe(PISP.MOD_GEN_PMAX)
-        line_tmax = PISP.schema_to_dataframe(PISP.MOD_LINE_TMAX)
-        line_tmin = PISP.schema_to_dataframe(PISP.MOD_LINE_TMIN)
-        der_pred  = PISP.schema_to_dataframe(PISP.MOD_DER_PRED_MAX)
+        dem_load   = PISP.schema_to_dataframe(PISP.MOD_DEMAND_LOAD)
+        ess_emax   = PISP.schema_to_dataframe(PISP.MOD_ESS_EMAX)
+        ess_lmax   = PISP.schema_to_dataframe(PISP.MOD_ESS_LMAX)
+        ess_n      = PISP.schema_to_dataframe(PISP.MOD_ESS_N)
+        ess_pmax   = PISP.schema_to_dataframe(PISP.MOD_ESS_PMAX)
+        ess_inflow = PISP.schema_to_dataframe(PISP.MOD_ESS_INFLOW)
+        gen_n      = PISP.schema_to_dataframe(PISP.MOD_GEN_N)
+        gen_pmax   = PISP.schema_to_dataframe(PISP.MOD_GEN_PMAX)
+        gen_inflow = PISP.schema_to_dataframe(PISP.MOD_GEN_INFLOW)
+        line_tmax  = PISP.schema_to_dataframe(PISP.MOD_LINE_TMAX)
+        line_tmin  = PISP.schema_to_dataframe(PISP.MOD_LINE_TMIN)
+        der_pred   = PISP.schema_to_dataframe(PISP.MOD_DER_PRED_MAX)
 
-        new(dem_load, ess_emax, ess_lmax, ess_n, ess_pmax,
-            gen_n, gen_pmax, line_tmax, line_tmin, der_pred)
+        new(dem_load, ess_emax, ess_lmax, ess_n, ess_pmax, ess_inflow,
+            gen_n, gen_pmax, gen_inflow, line_tmax, line_tmin, der_pred)
     end
 end

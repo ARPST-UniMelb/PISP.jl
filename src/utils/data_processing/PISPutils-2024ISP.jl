@@ -10,7 +10,6 @@ flow2num(str) = str == "NA" ? 0.0 : parse(Float64,replace(str, "," => ""))
 
 inv2num(str) = str[1] == "Non-network option costs to be provided by interested parties" || str[1] == "Anticipated project." ? 9999.0 : (length(str)<6 ? parse(Float64,replace(str[1], "," => "")) : parse(Float64,replace(str[1], "," => "")) + parse(Float64,replace(str[3], "," => "")))
 
-
 function fiscal_year(year)
         # Given a year in the format "YYYY-YY", return the fiscal year starting in July 1st.
         y = split(year, "-")

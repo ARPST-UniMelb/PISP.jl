@@ -17,6 +17,13 @@ MOD_GEN_N               = OrderedDict(
                                         "date"              => "DATETIME NOT NULL",
                                         "value"             => "INTEGER NOT NULL"
                                     )
+MOD_GEN_INFLOW            = OrderedDict(  
+                                        "id"                => "INTEGER PRIMARY KEY", 
+                                        "id_gen"            => "INTEGER REFERENCES Generator (id_gen)",
+                                        "scenario"          => "INTEGER NOT NULL", 
+                                        "date"              => "DATETIME NOT NULL",
+                                        "value"             => "REAL NOT NULL",
+                                    )
 # =============================== #
 # DEMAND SCHEDULES
 # =============================== #
@@ -61,6 +68,13 @@ MOD_ESS_N               = OrderedDict(
                                         "scenario"          => "INTEGER NOT NULL", 
                                         "date"              => "DATETIME NOT NULL",
                                         "value"             => "INTEGER NOT NULL",
+                                    )
+MOD_ESS_INFLOW            = OrderedDict(  
+                                        "id"                => "INTEGER PRIMARY KEY", 
+                                        "id_ess"            => "INTEGER REFERENCES ESS (id_ess)",
+                                        "scenario"          => "INTEGER NOT NULL", 
+                                        "date"              => "DATETIME NOT NULL",
+                                        "value"             => "REAL NOT NULL",
                                     )
 # ================================ #
 # LINE SCHEDULES

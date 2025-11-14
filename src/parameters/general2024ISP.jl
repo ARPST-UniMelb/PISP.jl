@@ -72,3 +72,9 @@ SCE2 = OrderedDict(
             "Green"         => 3)
 
 ID2SCE2 = Dict(1 => "Progressive Change", 2 => "Step Change", 3 => "Hydrogen Export")
+
+# Hydro inflow files mapping
+HYDROSCE = OrderedDict(
+                "Progressive Change"    => "NetZero2050",
+                "Step Change"           => "StepChange",
+                "Green Energy Exports"  => "HydrogenSuperpower")
