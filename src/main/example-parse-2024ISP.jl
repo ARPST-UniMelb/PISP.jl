@@ -90,19 +90,20 @@ PISP.gen_retirements(ts, tv);
 PISP.gen_pmax_distpv(tc, ts, tv, profiledata);
 PISP.gen_pmax_solar(tc, ts, tv, ispdata24, outlookdata, outlookAEMO, profiledata);
 PISP.gen_pmax_wind(tc, ts, tv, ispdata24, outlookdata, outlookAEMO, profiledata);
+SNOWY_GENS = PISP.gen_inflow_sched(ts, tv, tc, ispdata24);
 
 PISP.ess_tables(ts, tv, PS, ispdata24);
 PISP.ess_vpps(tc, ts, tv, vpp_cap, vpp_ene);
-
+PISP.ess_inflow_sched(ts, tv, tc, ispdata24, SNOWY_GENS);
 PISP.der_tables(ts);
 PISP.der_pred_sched(ts, tv, dsp_data);
 # ============================================ #
 # Write dataframes in CSV and Arrow formats 
 # ============================================ #
 # CSV format
-PISP.PISPwritedataCSV(ts, "out")                    # Time-static data
-PISP.PISPwritedataCSV(tv, "out/schedule-1w-new")    # Time-varying data (schedules)
+PISP.PISPwritedataCSV(ts, "test-hydro/out-hydro")                    # Time-static data
+PISP.PISPwritedataCSV(tv, "test-hydro/out-hydro/schedule-1w-new")    # Time-varying data (schedules)
 
 # Arrow format
-PISP.PISPwritedataArrow(ts, "out-arrow")                    # Time-static data
-PISP.PISPwritedataArrow(tv, "out-arrow/schedule-1w-new")    # Time-varying data (schedules)
+PISP.PISPwritedataArrow(ts, "test-hydro/out-hydro-arrow")                    # Time-static data
+PISP.PISPwritedataArrow(tv, "test-hydro/out-hydro-arrow/schedule-1w-new")    # Time-varying data (schedules)
