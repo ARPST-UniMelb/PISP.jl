@@ -1,31 +1,3 @@
-using PISP
-using Dates
-
-"""
-    default_data_paths()
-
-Return the canonical file-system locations required by the ISP example parser.
-The returned `NamedTuple` contains the base Excel workbooks, trace folders and
-supporting spreadsheets that the helper functions expect to receive.
-
-# Returns
-- `NamedTuple`: Fields include `ispdata19`, `ispdata24`, `profiledata`,
-  `outlookdata`, `outlookAEMO`, `vpp_cap`, `vpp_ene`, and `dsp_data`.
-"""
-function default_data_paths()
-    datapath = normpath(@__DIR__, "..", "..", "data")
-    return (
-        ispdata19 = normpath(datapath, "2019InputandAssumptionsworkbookv13Dec19.xlsx"),
-        ispdata24 = normpath(datapath, "2024 ISP Inputs and Assumptions workbook.xlsx"),
-        profiledata = "/Users/papablaza/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/Modelling/ISP24/Traces/",
-        outlookdata = "/Users/papablaza/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/Modelling/ISP24/2024 ISP generation and storage outlook/Core",
-        outlookAEMO = "/Users/papablaza/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/Modelling/ISP24/CapacityOutlook/CapacityOutlook_2024_ISP_melted_CDP14.xlsx",
-        vpp_cap = "/Users/papablaza/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/Modelling/ISP24/CapacityOutlook/Storage/StorageOutlook_Capacity.xlsx",
-        vpp_ene = "/Users/papablaza/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/Modelling/ISP24/CapacityOutlook/Storage/StorageOutlook_Energy.xlsx",
-        dsp_data = "/Users/papablaza/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/Modelling/ISP24/CapacityOutlook/2024ISP_DSP.xlsx",
-    )
-end
-
 """
     initialise_time_structures()
 
@@ -42,9 +14,9 @@ function initialise_time_structures()
 end
 
 """
-    fill_problem_table(tc)
+    fill_problem_example(tc)
 
-Populate the `tc.problem` table with a week-long block for each scenario
+Example to populate the `tc.problem` table with a week-long block for each scenario
 registered in `PISP.ID2SCE`. The helper constructs start and end dates by
 stepping from 1 January 2025 and wrapping at the June boundary so that no
 interval spans financial years.
@@ -53,7 +25,7 @@ interval spans financial years.
 - `tc::PISPtimeConfig`: Time configuration container whose `problem` DataFrame
   receives the generated rows.
 """
-function fill_problem_table(tc::PISPtimeConfig)
+function fill_problem_example(tc::PISPtimeConfig)
     start_date = DateTime(2025, 1, 1, 0, 0, 0)
     step_ = Day(7)
     nblocks = 3
@@ -101,8 +73,8 @@ sections can be added in one place.
 - `PISPtimeConfig`: The same instance that was mutated, which permits piping the
   result into subsequent functions when convenient.
 """
-function populate_time_config!(tc::PISPtimeConfig)
-    fill_problem_table(tc)
+function populate_time_config!(tc::PISPtimeConfig, fill_problem_function::Function)
+    fill_problem_function(tc)
     return tc
 end
 
@@ -115,11 +87,9 @@ demand, line, generator, ESS and DER metadata using the file paths provided by
 for later steps).
 
 # Arguments
-- `tc::PISPtimeConfig`: Configuration container that supplies time blocks for
-  demand processing.
+- `tc::PISPtimeConfig`: Configuration container that supplies time blocks for demand processing.
 - `ts::PISPtimeStatic`: Static data container that receives the tabular data.
-- `tv::PISPtimeVarying`: Passed through so that `PISP.dem_load` can populate the
-  static and varying demand components together.
+- `tv::PISPtimeVarying`: Passed through so that `PISP.dem_load` can populate the static and varying demand components together.
 - `paths::NamedTuple`: Must contain `profiledata`, `ispdata19`, and `ispdata24`.
 
 # Returns
@@ -181,74 +151,42 @@ function populate_time_varying!(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISP
     PISP.ess_vpps(tc, ts, tv, paths.vpp_cap, paths.vpp_ene)
     PISP.ess_inflow_sched(ts, tv, tc, paths.ispdata24, SNOWY_GENS)
     PISP.der_pred_sched(ts, tv, paths.dsp_data)
-
-    return (SNOWY_GENS = SNOWY_GENS,)
 end
 
 """
-    write_time_data(ts, tv; csv_static_path, csv_varying_path, arrow_static_path, arrow_varying_path)
+    write_time_data(ts, tv; csv_static_path, csv_varying_path,
+                    arrow_static_path, arrow_varying_path,
+                    write_static, write_varying)
 
 Persist the populated static and time-varying tables to CSV and Arrow formats.
 Output paths default to the test folders used prior to the refactor but can be
 overridden via keyword arguments.
 
 # Keyword Arguments
-- `csv_static_path`: Target directory for static CSV exports.
-- `csv_varying_path`: Target directory for time-varying CSV exports.
-- `arrow_static_path`: Target directory for static Arrow exports.
+- `csv_static_path`:    Target directory for static CSV exports.
+- `csv_varying_path`:   Target directory for time-varying CSV exports.
+- `arrow_static_path`:  Target directory for static Arrow exports.
 - `arrow_varying_path`: Target directory for time-varying Arrow exports.
+- `write_static`:       Set to `false` to skip writing the static tables.
+- `write_varying`:      Set to `false` to skip writing the time-varying tables.
 """
 function write_time_data(
         ts::PISPtimeStatic,
         tv::PISPtimeVarying;
-        csv_static_path::AbstractString = "test-hydro/out-hydro",
-        csv_varying_path::AbstractString = "test-hydro/out-hydro/schedule-1w-new",
-        arrow_static_path::AbstractString = "test-hydro/out-hydro-arrow",
-        arrow_varying_path::AbstractString = "test-hydro/out-hydro-arrow/schedule-1w-new",
+        csv_static_path::AbstractString     = "test-hydro/out-hydro",
+        csv_varying_path::AbstractString    = "test-hydro/out-hydro/schedule-1w-new",
+        arrow_static_path::AbstractString   = "test-hydro/out-hydro-arrow",
+        arrow_varying_path::AbstractString  = "test-hydro/out-hydro-arrow/schedule-1w-new",
+        write_static::Bool  = true,
+        write_varying::Bool = true,
 )
-    PISP.PISPwritedataCSV(ts, csv_static_path)
-    PISP.PISPwritedataCSV(tv, csv_varying_path)
-    PISP.PISPwritedataArrow(ts, arrow_static_path)
-    PISP.PISPwritedataArrow(tv, arrow_varying_path)
-end
+    if write_static
+        PISP.PISPwritedataCSV(ts, csv_static_path)
+        PISP.PISPwritedataArrow(ts, arrow_static_path)
+    end
 
-"""
-    run_isp_pipeline(; data_paths = default_data_paths(), csv_static_path,
-                      csv_varying_path, arrow_static_path, arrow_varying_path)
-
-Execute the full ISP preprocessing pipeline: (1) create empty structures, (2)
-populate the time configuration, (3) load the time-static data, (4) derive time
-varying schedules, and (5) export the results. Each stage is wrapped in its own
-function to make bespoke workflows or tests easier to compose.
-
-# Keyword Arguments
-- `data_paths`: NamedTuple from `default_data_paths()` or user supplied
-  equivalent.
-- `csv_static_path`, `csv_varying_path`, `arrow_static_path`,
-  `arrow_varying_path`: Output locations passed to `write_time_data`.
-
-# Returns
-- `NamedTuple`: A convenience bundle containing the populated `tc`, `ts`, `tv`
-  instances and the `SNOWY_GENS` inflow schedules.
-"""
-function run_isp_pipeline(; data_paths::NamedTuple = default_data_paths(),
-        csv_static_path::AbstractString = "test-hydro/out-hydro",
-        csv_varying_path::AbstractString = "test-hydro/out-hydro/schedule-1w-new",
-        arrow_static_path::AbstractString = "test-hydro/out-hydro-arrow",
-        arrow_varying_path::AbstractString = "test-hydro/out-hydro-arrow/schedule-1w-new")
-    tc, ts, tv = initialise_time_structures()
-    populate_time_config!(tc)
-    static_artifacts = populate_time_static!(tc, ts, tv, data_paths)
-    snowy = populate_time_varying!(tc, ts, tv, data_paths, static_artifacts)
-    write_time_data(ts, tv;
-        csv_static_path = csv_static_path,
-        csv_varying_path = csv_varying_path,
-        arrow_static_path = arrow_static_path,
-        arrow_varying_path = arrow_varying_path,
-    )
-
-    return (tc = tc, ts = ts, tv = tv, snowy = snowy.SNOWY_GENS)
-end
-
-# Execute the default pipeline when the script is run directly.
-run_isp_pipeline()
+    if write_varying
+        PISP.PISPwritedataCSV(tv, csv_varying_path)
+        PISP.PISPwritedataArrow(tv, arrow_varying_path)
+    end
+end 
