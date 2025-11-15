@@ -9,15 +9,26 @@ tv = PISPtimeVarying();
 # ======================================== #
 # Data file paths   
 # ======================================== #
-datapath    = normpath(@__DIR__, "..", "..", "data"); # Adjust this path as needed
-ispdata19   = normpath(datapath, "2019InputandAssumptionsworkbookv13Dec19.xlsx");
-ispdata24   = normpath(datapath, "2024 ISP Inputs and Assumptions workbook.xlsx");
-profiledata = "/Users/papablaza/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/Modelling/ISP24/Traces/";
-outlookdata = "/Users/papablaza/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/Modelling/ISP24/2024 ISP generation and storage outlook/Core";
-outlookAEMO = "/Users/papablaza/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/Modelling/ISP24/CapacityOutlook/CapacityOutlook_2024_ISP_melted_CDP14.xlsx";
-vpp_cap     = "/Users/papablaza/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/Modelling/ISP24/CapacityOutlook/Storage/StorageOutlook_Capacity.xlsx";
-vpp_ene     = "/Users/papablaza/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/Modelling/ISP24/CapacityOutlook/Storage/StorageOutlook_Energy.xlsx";
-dsp_data    = "/Users/papablaza/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/Modelling/ISP24/CapacityOutlook/2024ISP_DSP.xlsx";
+# datapath    = normpath(@__DIR__, "..", "..", "data"); # Adjust this path as needed
+# ispdata19   = normpath(datapath, "2019InputandAssumptionsworkbookv13Dec19.xlsx");
+# ispdata24   = normpath(datapath, "2024 ISP Inputs and Assumptions workbook.xlsx");
+# profiledata = "/Users/papablaza/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/Modelling/ISP24/Traces/";
+# outlookdata = "/Users/papablaza/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/Modelling/ISP24/2024 ISP generation and storage outlook/Core";
+# outlookAEMO = "/Users/papablaza/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/Modelling/ISP24/CapacityOutlook/CapacityOutlook_2024_ISP_melted_CDP14.xlsx";
+# vpp_cap     = "/Users/papablaza/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/Modelling/ISP24/CapacityOutlook/Storage/StorageOutlook_Capacity.xlsx";
+# vpp_ene     = "/Users/papablaza/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/Modelling/ISP24/CapacityOutlook/Storage/StorageOutlook_Energy.xlsx";
+# dsp_data    = "/Users/papablaza/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/Modelling/ISP24/CapacityOutlook/2024ISP_DSP.xlsx";
+
+# ================================================ #
+datapath = normpath(@__DIR__, "..", "..", "data-updated")
+ispdata19   = normpath(datapath, "2019InputandAssumptionsworkbookv13Dec19.xlsx")
+ispdata24   = normpath(datapath, "2024 ISP Inputs and Assumptions workbook.xlsx")
+profiledata = "/Users/papablaza/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/Modelling/ISP24/Traces/"
+outlookdata = normpath(datapath,"2024 ISP generation and storage outlook/Core")
+outlookAEMO = normpath(datapath, "CapacityOutlook/CapacityOutlook_2024_ISP_melted_CDP14.xlsx")
+vpp_cap     = normpath(datapath, "CapacityOutlook/Storage/StorageOutlook_Capacity.xlsx")
+vpp_ene     = normpath(datapath, "CapacityOutlook/Storage/StorageOutlook_Energy.xlsx")
+dsp_data    = normpath(datapath, "CapacityOutlook/2024ISP_DSP.xlsx")
 
 # ================================================ #
 #  Define dates and scenarios for data collection  #

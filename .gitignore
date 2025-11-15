@@ -7,7 +7,7 @@ Manifest.toml
 data/*
 *.DS_Store
 *.vscode
-*.xlsx
+*.xls*
 *.tmp
 *.csv
 *.arrow
@@ -15,3 +15,5 @@ out/
 out-*/
 test/
 test-*/
+!data-updated/
+!data-updated/**
