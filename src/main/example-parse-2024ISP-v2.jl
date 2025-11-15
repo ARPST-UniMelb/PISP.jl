@@ -15,7 +15,6 @@ function default_data_paths()
     )
 end
 
-
 # 1. Instantiate data containers and build problem table with desired time blocks.
 data_paths = default_data_paths()
 tc, ts, tv = PISP.initialise_time_structures();
