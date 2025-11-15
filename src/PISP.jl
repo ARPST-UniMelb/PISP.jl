@@ -12,4 +12,5 @@ module PISP
     include("PISPutils.jl")
     include("PISPparameters.jl")
     include("PISPparsers.jl")
+    include("PISPscrappers.jl")
 end
