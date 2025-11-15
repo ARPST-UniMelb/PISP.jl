@@ -1,3 +1,13 @@
+"""
+    bus_table(ts)
+
+Populate the `ts.bus` time-static table with every transmission node defined in
+`PISP.NEMBUSES`. Each entry captures the bus id, name, alias, geographic coordinates, and area identifier so downstream routines can
+refer to a consistent index of locations.
+
+# Arguments
+- `ts::PISPtimeStatic`: Static container whose `bus` table is mutated in place.
+"""
 function bus_table(ts::PISPtimeStatic)
     idx = 1
     for b in keys(PISP.NEMBUSES)
@@ -6,9 +16,27 @@ function bus_table(ts::PISPtimeStatic)
     end
 end
 
+"""
+    line_table(ts, tv, ispdata24)
+
+Read the ISP 2024 workbook to build the transmission line table: seasonal
+forward/reverse limits, interconnector reliability parameters, and a manual
+record for Project EnergyConnect. Static information is written to `ts.line`
+while a summary `DataFrame` of raw limits is returned for use by schedule
+generation routines.
+
+# Arguments
+- `ts::PISPtimeStatic`: Receives the static line rows.
+- `tv::PISPtimeVarying`: Used to seed the staged commissioning entries for
+  Project EnergyConnect.
+- `ispdata24::String`: Path to the ISP inputs workbook.
+
+# Returns
+- `DataFrame`: Raw seasonal capacity data keyed by line alias.
+"""
 function line_table(ts::PISPtimeStatic, tv::PISPtimeVarying, ispdata24::String)
     bust = ts.bus
-    # Read XLSX with line capacities
+    # Read ISP Workbook with line capacities
     DATALINES   = PISP.read_xlsx_with_header(ispdata24, "Network Capability", "B6:H21")
     RELIALINES  = PISP.read_xlsx_with_header(ispdata24, "Transmission Reliability", "B7:G11")
     Results = DataFrame(name = String[], busA = String[], busB = String[], idbusA = Int64[], idbusB = Int64[], fwd_peak = Float64[], fwd_summer = Float64[], fwd_winter = Float64[], rev_peak = Float64[], rev_summer = Float64[], rev_winter = Float64[])
@@ -129,6 +157,19 @@ function line_table(ts::PISPtimeStatic, tv::PISPtimeVarying, ispdata24::String)
     return Results
 end
 
+"""
+    line_sched_table(tc, tv, TXdata)
+
+Convert the static line ratings returned by `line_table` into time-varying
+limits for every scenario. A winter/summer split is applied at the
+problem level so each week inherits the appropriate seasonal value, adding an
+extra transition row when a window straddles the boundary.
+
+# Arguments
+- `tc::PISPtimeConfig`: Supplies start/end timestamps for each problem block.
+- `tv::PISPtimeVarying`: Target schedule tables (`line_tmax`, `line_tmin`).
+- `TXdata::DataFrame`: Raw ratings from `line_table` indexed by line.
+"""
 function line_sched_table(tc::PISPtimeConfig, tv::PISPtimeVarying, TXdata::DataFrame)
     wmonths = [4,5,6,7,8,9]     # Winter months
     smonths = [10,11,12,1,2,3]  # Summer months
@@ -174,6 +215,17 @@ function line_sched_table(tc::PISPtimeConfig, tv::PISPtimeVarying, TXdata::DataF
     end
 end
 
+"""
+    line_invoptions(ts, ispdata24)
+
+Parse the "Flow Path Augmentation options" sheet to derive candidate network
+investments considered in the 2024 ISP. Each option is normalised into the `ts.line` table with indicative
+ratings, and activation flags.
+
+# Arguments
+- `ts::PISPtimeStatic`: Receives the appended candidate-line metadata.
+- `ispdata24::String`: Path to the ISP workbook containing augmentation data.
+"""
 function line_invoptions(ts::PISPtimeStatic, ispdata24::String)
     bust = ts.bus
     maxidlin = isempty(ts.line) ? 0 : maximum(ts.line.id_lin)
@@ -222,6 +274,27 @@ function line_invoptions(ts::PISPtimeStatic, ispdata24::String)
     end
 end
 
+"""
+    generator_table(ts, ispdata19, ispdata24)
+
+Consolidate all generator-related metadata: bus locations, capacities,
+commitments, retirements, reliability, ramp rates and UC parameters. The helper
+reads both the 2019 IASR (for coal-fired generator parameters) and 2024 ISP workbooks, 
+writes the merged dataset into `ts.gen`, and returns auxiliary DataFrames required later  
+for time-varying tables(synchronous unit limits, the full generator table, and the pumped-storage subset).
+
+# Arguments
+- `ts::PISPtimeStatic`: Static container that receives the combined generator
+  table.
+- `ispdata19::String`: Path to the historical assumptions workbook used for
+  supplementary attributes.
+- `ispdata24::String`: Path to the 2024 ISP workbook containing the latest
+  capacities and commissioning data.
+
+# Returns
+- `Tuple{DataFrame,DataFrame,DataFrame}`: `(SYNC4, GENERATORS, PS)` for use by
+  scheduling, ESS, and inflow routines.
+"""
 function generator_table(ts::PISPtimeStatic, ispdata19::String, ispdata24::String)
     # ============================================ #
     # ============== Generator data ============== #
@@ -342,7 +415,6 @@ function generator_table(ts::PISPtimeStatic, ispdata19::String, ispdata24::Strin
     filter!((row) -> !(row[1] == "Pelican Point" && row[2] == "PPCCGT" && row[6] == 4), UC)
     filter!((row) -> !(row[1] == "Tamar Valley Combined Cycle" && row[2] == "TVCC201" && row[6] == 6), UC)
     XLSX.writetable(".tmp/UC2__.xlsx", Tables.columntable(UC); sheetname="UC2__", overwrite=true)
-    # ➡️➡️➡️➡️➡️➡️➡️➡️➡️➡️ CHECK IF THIS IS WORKING OK
     # this is the rename as per the DUIDs are in the Retirement sheet
     DUIDar = Dict(      "CPSA_GT1"      => "CPSA", 
                         "CPSA_GT2"      => "CPSA", 
@@ -388,15 +460,15 @@ function generator_table(ts::PISPtimeStatic, ispdata19::String, ispdata24::Strin
     # ====================================== #
     # ========= GENERATION SUMMARY ========= #
     # ====================================== #
-    GENSUM = PISP.read_xlsx_with_header(ispdata24, "Existing Gen Data Summary", "B10:U319")
+    GENSUM     = PISP.read_xlsx_with_header(ispdata24, "Existing Gen Data Summary", "B10:U319")
     GENSUM_ADD = PISP.read_xlsx_with_header(ispdata24, "Existing Gen Data Summary", "B382:U397")
-    GENSUM = vcat(GENSUM, GENSUM_ADD)
-    GENSUM = GENSUM[3:end,:]
-    flagrow = [!all(ismissing.(Matrix(GENSUM[k:k,2:end]))) for k in 1:nrow(GENSUM)]
-    GENSUM = GENSUM[flagrow,:]
-    GENSUM = GENSUM[.!ismissing.(GENSUM[!,2]),:]
-    GENSUM = GENSUM[GENSUM[!,2] .!= "Generator type",:]
-    GENSUM = GENSUM[GENSUM[!,2] .!= "Battery Storage",:]
+    GENSUM     = vcat(GENSUM, GENSUM_ADD)
+    GENSUM     = GENSUM[3:end,:]
+    flagrow    = [!all(ismissing.(Matrix(GENSUM[k:k,2:end]))) for k in 1:nrow(GENSUM)]
+    GENSUM     = GENSUM[flagrow,:]
+    GENSUM     = GENSUM[.!ismissing.(GENSUM[!,2]),:]
+    GENSUM     = GENSUM[GENSUM[!,2] .!= "Generator type",:]
+    GENSUM     = GENSUM[GENSUM[!,2] .!= "Battery Storage",:]
     GENSUM[!,:Generator] = [namedict[n] for n in GENSUM[!,:Generator]]
     GENSUM[!,:Generator] = [n == "Tallawarra B*" ? "Tallawarra B" : n for n in GENSUM[!,:Generator]]
     GENSUM[!,:Generator] = [n == "Bungala One Solar Farm" ? "Bungala one Solar Farm" : n for n in GENSUM[!,:Generator]]
@@ -427,7 +499,6 @@ function generator_table(ts::PISPtimeStatic, ispdata19::String, ispdata24::Strin
     FULL[!,:CAPACITY] = coalesce.(FULL[!,:CAPACITY], FULL[!,18]) # Assign maximum capacity to generators with missing capacity
     # remove rows with missing values in column Generator
     FULL = FULL[.!ismissing.(FULL[!,:Generator]),:]
-    # @warn("Deleted Steam Turbines from generator table due to missing information. CHECK!")
     XLSX.writetable(".tmp/GENERATORS.xlsx", Tables.columntable(FULL); sheetname="Generators", overwrite=true)
 
     # ====================================== #
@@ -696,11 +767,6 @@ function generator_table(ts::PISPtimeStatic, ispdata19::String, ispdata24::Strin
         GENERATORS[r,:alias] = "MURRAY2"
     end
 
-    # @warn("Pmin for CCGT is set to 52% of Pmax")
-    # @warn("Pmin for OCGT is set to 33% of Pmax")
-    # @warn("Pmin for Hydro is set to 20% of Pmax")
-    # @warn("Pmin for Diesel is set to 20% of Pmax")
-
     # ====================================== #
     # ============= COMMITMENT ============= #
     # ====================================== #
@@ -717,22 +783,29 @@ function generator_table(ts::PISPtimeStatic, ispdata19::String, ispdata24::Strin
     COMMITMENT[!,:start_up_time] = zeros(nrow(SYNC4))
     COMMITMENT[!,:shut_down_time] = zeros(nrow(SYNC4))
 
-    # @warn("No minimum down time for any generator")
-    # @warn("Start up cost for coal generators is set to 4 times the variable cost times the maximum capacity")
-    # @warn("No shut down cost for any generator")
-    # @warn("No start up time for any generator")
-    # @warn("No shut down time for any generator")
-
     # MERGE GENERATOR AND COMMITMENT IN left `id` and right `gen_id`. Fill missing values in COMMITMENT with 0
     merged = leftjoin(GENERATORS, COMMITMENT, on = [:id_gen => :gen_id], makeunique=true)
     select!(merged, Not(:id))
-    # rename!(merged, :id => :id_gen)
     ts.gen = merged
     XLSX.writetable(".tmp/GENERATORS_FULL.xlsx", Tables.columntable(merged); sheetname="GENERATORS", overwrite=true)
     rm(".tmp"; recursive=true)
     return SYNC4, GENERATORS, PS
 end
 
+"""
+    gen_n_sched_table(tv, SYNC4, GENERATORS)
+
+Populate the generator-availability schedule (`tv.gen_n`) with commissioning
+events derived from synchronous unit data and the aggregated generator table.
+The function handles missing dates, seeds pre-commissioning inactive periods,
+and activates units across every configured scenario once their start date is
+reached.
+
+# Arguments
+- `tv::PISPtimeVarying`: Receives the availability schedule records.
+- `SYNC4::DataFrame`: Structured UC-friendly view of synchronous units.
+- `GENERATORS::DataFrame`: Master generator table used to map names to ids.
+"""
 function gen_n_sched_table(tv::PISPtimeVarying, SYNC4::DataFrame, GENERATORS::DataFrame)
     # COMMITED AND ANTICIPATED PROJECTS DATES
     MISSING_DATES = PISP.OrderedDict("Kogan Gas" => "2026-07-01T00:00:00")
@@ -777,6 +850,19 @@ function gen_n_sched_table(tv::PISPtimeVarying, SYNC4::DataFrame, GENERATORS::Da
     for k in 1:nrow(N_SCHED_COMM) push!(tv.gen_n, collect(N_SCHED_COMM[k,:])) end
 end
 
+"""
+    gen_retirements(ts, tv)
+
+Write time-varying retirement and capacity-reduction events into `tv.gen_n` and
+`tv.gen_pmax` based on the `PISP.Retirements2024` and `PISP.Reduction2024`
+tables (Gathered manually from the 2024 Generation Outlook). 
+This ensures each scenario reflects the staged withdrawal or derating of
+specific units.
+
+# Arguments
+- `ts::PISPtimeStatic`: Supplies the generator id mapping.
+- `tv::PISPtimeVarying`: Mutated to include the retirement/pmax events.
+"""
 function gen_retirements(ts, tv)
     gent = ts.gen
 
@@ -802,6 +888,20 @@ function gen_retirements(ts, tv)
     end
 end
 
+"""
+    ess_tables(ts, tv, PSESS, ispdata24)
+
+Build static representations for energy storage systems (ESS) and seed any
+required time-varying placeholders. The function fuses ISP workbook information
+with pumped-storage metadata to describe batteries, charge/discharge limits, and
+loss factors.
+
+# Arguments
+- `ts::PISPtimeStatic`: Destination for static ESS tables.
+- `tv::PISPtimeVarying`: Receives supporting indices when needed.
+- `PSESS::DataFrame`: Pumped-storage subset returned by `generator_table`.
+- `ispdata24::String`: Path to ISP workbook for BESS proposals and limits.
+"""
 function ess_tables(ts::PISPtimeStatic, tv::PISPtimeVarying, PSESS::DataFrame, ispdata24::String)
     bust = ts.bus
 
@@ -926,6 +1026,21 @@ function ess_tables(ts::PISPtimeStatic, tv::PISPtimeVarying, PSESS::DataFrame, i
     end
 end
 
+"""
+    gen_pmax_distpv(tc, ts, tv, profilespath)
+
+Create distributed PV maximum-capacity traces by reading profile files per
+region. The resulting schedules are injected into `tv.gen_pmax` and linked back
+to the generator entries defined in `ts` so rooftop PV contributes to the
+time-varying fleet.
+
+# Arguments
+- `tc::PISPtimeConfig`: Indicates which days and durations to sample from the
+  profiles.
+- `ts::PISPtimeStatic`: Provides generator ids for distributed PV entries.
+- `tv::PISPtimeVarying`: Receives the computed pmax time series.
+- `profilespath::String`: Directory holding the DER traces.
+"""
 function gen_pmax_distpv(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, profilespath::String)
     probs = tc.problem;
     bust = ts.bus;
@@ -976,6 +1091,19 @@ function gen_pmax_distpv(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVar
     end
 end
 
+"""
+    dem_load(tc, ts, tv, profilespath)
+
+Populate both static and time-varying demand tables. Static demand metadata is
+stored in `ts.dem`, while scenario-specific load traces derived from the profile
+directory are written into `tv.dem_sched` for each period defined in `tc`.
+
+# Arguments
+- `tc::PISPtimeConfig`: Specifies schedule windows to generate.
+- `ts::PISPtimeStatic`: Receives regional demand descriptors.
+- `tv::PISPtimeVarying`: Receives chronological demand schedules.
+- `profilespath::String`: Root folder containing demand trace files.
+"""
 function dem_load(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, profilespath::String)
     probs = tc.problem
     bust = ts.bus
@@ -1025,6 +1153,23 @@ function dem_load(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, p
     end
 end
 
+"""
+    gen_pmax_solar(tc, ts, tv, ispdata24, outlookdata, outlookAEMO, profilespath)
+
+Assemble grid-scale solar pmax schedules by combining ISP workbook metadata,
+capacity outlook spreadsheets and hourly trace files. The function interpolates
+scenario trajectories, maps them to generator ids and appends the time-varying
+limits into `tv.gen_pmax` for every study block in `tc`.
+
+# Arguments
+- `tc::PISPtimeConfig`: Defines the time horizon to populate.
+- `ts::PISPtimeStatic`: Supplies generator identifiers and mapping info.
+- `tv::PISPtimeVarying`: Receives the pmax schedules.
+- `ispdata24::String`: Source of installed capacity and mapping tables.
+- `outlookdata::String`: Storage/generation outlook workbook path.
+- `outlookAEMO::String`: Melted capacity outlook file providing scenario series.
+- `profilespath::String`: Directory with solar trace profiles.
+"""
 function gen_pmax_solar(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, ispdata24::String, outlookdata::String, outlookAEMO::String, profilespath::String)
     probs = tc.problem
     bust = ts.bus
@@ -1202,6 +1347,19 @@ function gen_pmax_solar(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVary
     end
 end
 
+"""
+    gen_pmax_wind(tc, ts, tv, ispdata24, outlookdata, outlookAEMO, profilespath)
+
+Generate wind pmax traces following the same process as solar: combine ISP
+metadata, scenario outlooks and wind traces to populate `tv.gen_pmax` for each
+scenario block.
+
+# Arguments
+- `tc::PISPtimeConfig`, `ts::PISPtimeStatic`, `tv::PISPtimeVarying`: See
+  `gen_pmax_solar`.
+- `ispdata24::String`, `outlookdata::String`, `outlookAEMO::String`,
+  `profilespath::String`: Data sources containing wind capacities and traces.
+"""
 function gen_pmax_wind(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, ispdata24::String, outlookdata::String, outlookAEMO::String, profilespath::String)
     probs = tc.problem
     bust = ts.bus
@@ -1383,6 +1541,18 @@ function gen_pmax_wind(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVaryi
     end
 end
 
+"""
+    ess_vpps(tc, ts, tv, vpp_cap, vpp_ene)
+
+Load the virtual power plant (VPP) capacity and energy outlook spreadsheets and
+add the resulting storage schedules to the ESS tables. This augments the static
+VPP definitions with time-varying commissioning and power/energy trajectories.
+
+# Arguments
+- `tc`, `ts`, `tv`: Standard ISP containers used for indexing and storage.
+- `vpp_cap::String`: Path to the capacity outlook workbook.
+- `vpp_ene::String`: Path to the energy outlook workbook.
+"""
 function ess_vpps(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, vpp_cap::String, vpp_ene::String)
     bust = ts.bus
     probs = tc.problem
@@ -1449,6 +1619,16 @@ function ess_vpps(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, v
     end
 end
 
+"""
+    der_tables(ts)
+
+Initialise distributed energy resource (DER) static tables with the regional
+placeholders expected by downstream schedulers. These tables track aggregated
+DER participation factors and ids used when scheduling DER forecasts.
+
+# Arguments
+- `ts::PISPtimeStatic`: Mutated with DER metadata rows.
+"""
 function der_tables(ts::PISPtimeStatic)
     # ============================================ #
     # DSP table development  ===================== #
@@ -1494,6 +1674,18 @@ function der_tables(ts::PISPtimeStatic)
     end
 end
 
+"""
+    der_pred_sched(ts, tv, dsp_data)
+
+Load demand-side participation (DSP) datasets and generate DER prediction
+schedules. The resulting time-varying traces are linked back to the DER entries
+inserted by `der_tables`.
+
+# Arguments
+- `ts::PISPtimeStatic`: Provides DER ids.
+- `tv::PISPtimeVarying`: Receives DER time series.
+- `dsp_data::String`: Path to the DSP workbook or data file.
+"""
 function der_pred_sched(ts::PISPtimeStatic, tv::PISPtimeVarying, dsp_data::String)
     for scenario in collect(keys(PISP.SCE))
         QLD_SUM = PISP.read_xlsx_with_header(dsp_data, scenario, "A23:AF28")
@@ -1589,6 +1781,21 @@ function der_pred_sched(ts::PISPtimeStatic, tv::PISPtimeVarying, dsp_data::Strin
     end
 end
 
+"""
+    gen_inflow_sched(ts, tv, tc, ispdata24)
+
+Construct Hydro generation inflow schedules and other hydro inflow constraints based
+on ISP workbook assumptions. The helper ties reservoir inflows to generator ids
+and returns the Snowy subset for re-use by ESS inflow routines (specific for TUMUT 3 pumped).
+
+# Arguments
+- `ts::PISPtimeStatic`, `tv::PISPtimeVarying`, `tc::PISPtimeConfig`: Standard
+  ISP containers.
+- `ispdata24::String`: Workbook providing inflow/release assumptions.
+
+# Returns
+- `DataFrame`: Snowy generator inflow schedule used by `ess_inflow_sched`.
+"""
 function gen_inflow_sched(ts::PISPtimeStatic, tv::PISPtimeVarying, tc::PISPtimeConfig, ispdata24::String)
     HOURS_PER_DAY = 24
 
@@ -1781,6 +1988,19 @@ function gen_inflow_sched(ts::PISPtimeStatic, tv::PISPtimeVarying, tc::PISPtimeC
     return df_snowy_capacity
 end
 
+"""
+    ess_inflow_sched(ts, tv, tc, ispdata24, df_snowy_capacity)
+
+Extend the hydro inflow logic to storage assets by mapping reservoir inflows to
+ESS units, using the Snowy capacity outputs from `gen_inflow_sched` to cap
+charge/discharge schedules.
+
+# Arguments
+- `ts::PISPtimeStatic`, `tv::PISPtimeVarying`, `tc::PISPtimeConfig`: Core ISP
+  containers mutated/read as part of schedule construction.
+- `ispdata24::String`: Source workbook for inflow assumptions.
+- `df_snowy_capacity::DataFrame`: Snowy-specific inflow data for ESS linkage.
+"""
 function ess_inflow_sched(ts::PISPtimeStatic, tv::PISPtimeVarying, tc::PISPtimeConfig, ispdata24::String, df_snowy_capacity::DataFrame)
     ess       = ts.ess
     gen       = ts.gen
