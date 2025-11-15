@@ -1,7 +1,7 @@
 function bus_table(ts::PISPtimeStatic)
     idx = 1
     for b in keys(PISP.NEMBUSES)
-        push!(ts.bus,(idx, b, PISP.NEMBUSNAME[b], true, PISP.NEMBUSES[b][1], PISP.NEMBUSES[b][2], PISP.STID[PISP.BUS2AREA[b]]))
+        push!(ts.bus,(idx, b, PISP.NEMBUSNAME[b], 1, PISP.NEMBUSES[b][1], PISP.NEMBUSES[b][2], PISP.STID[PISP.BUS2AREA[b]]))
         idx += 1
     end
 end
