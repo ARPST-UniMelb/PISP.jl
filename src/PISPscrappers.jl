@@ -1,1 +1,3 @@
-include("scrappers/PISP-2024traces-scrapper-v2.jl")
+include("scrappers/PISP-scrapper-utils.jl")
+include("scrappers/PISP-scrapper-2024traces.jl")
+include("scrappers/PISP-scrapper-2024files.jl")
