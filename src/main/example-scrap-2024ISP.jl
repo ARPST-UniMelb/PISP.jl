@@ -9,7 +9,6 @@ traces_options = FileDownloadOptions(outdir            = normpath(@__DIR__, ".."
                         skip_existing     = false,
                         throttle_seconds  = isempty(throttle_env) ? nothing : parse(Float64, throttle_env));
 
-
 files_options = FileDownloadOptions(outdir = normpath(@__DIR__, "..", "..", "data-download"),
                         confirm_overwrite = false,
                         skip_existing     = true);

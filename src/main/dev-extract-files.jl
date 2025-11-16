@@ -60,8 +60,17 @@ function extract_all_zips(src_dir::AbstractString, dest_root::AbstractString; kw
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__
-    zip_example = extract_zip("<zip-file>", "path/to/output")
-    @info "Usage example" zip_example
-    all_example = extract_all_zips("path/with/zips", "extracted")
-    @info "Extracted folders" all_example
+    root            = normpath(@__DIR__, "..", "..", "data-download")
+    zip_root        = joinpath(root, "zip")
+    trace_zip_root  = joinpath(zip_root, "traces")
+    files_dest      = root
+    traces_dest     = joinpath(root, "traces")
+
+    @info "Extracting ISP files" src = zip_root dest = files_dest
+    file_dirs = extract_all_zips(zip_root, files_dest; overwrite = true, quiet = true)
+    @info "Finished extracting ISP files" count = length(file_dirs)
+
+    @info "Extracting trace archives" src = trace_zip_root dest = traces_dest
+    trace_dirs = extract_all_zips(trace_zip_root, traces_dest; overwrite = true, quiet = true)
+    @info "Finished extracting trace archives" count = length(trace_dirs)
 end
