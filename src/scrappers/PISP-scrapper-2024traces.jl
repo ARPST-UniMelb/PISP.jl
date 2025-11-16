@@ -1,9 +1,7 @@
-# if !isdefined(Main, :PISPScrapperUtils)
-#     include(joinpath(@__DIR__, "PISP-scrapper-utils.jl"))
-# end
 
 module ISPTraceDownloader
 
+    import PISP.PISPScrapperUtils: FileDownloadOptions
     using HTTP
     using Gumbo
     using Cascadia
@@ -29,21 +27,19 @@ module ISPTraceDownloader
         href::String
     end
 
-    struct DownloadOptions
-        outdir::String
-        confirm_overwrite::Bool
-        skip_existing::Bool
-        throttle_seconds::Union{Nothing,Real}
-        file_headers::Vector{Pair{String,String}}
+    function FileDownloadOptions(; outdir::AbstractString = DEFAULT_OUTDIR,
+                                confirm_overwrite::Bool = true,
+                                skip_existing::Bool = false,
+                                throttle_seconds::Union{Nothing,Real} = nothing,
+                                file_headers::Vector{Pair{String,String}} = DEFAULT_FILE_HEADERS)
+        return PISP.PISPScrapperUtils.FileDownloadOptions(; outdir = outdir,
+                                                        confirm_overwrite = confirm_overwrite,
+                                                        skip_existing = skip_existing,
+                                                        throttle_seconds = throttle_seconds,
+                                                        file_headers = file_headers)
     end
 
-    DownloadOptions(; outdir::AbstractString = DEFAULT_OUTDIR,
-                    confirm_overwrite::Bool = true,
-                    skip_existing::Bool = false,
-                    throttle_seconds::Union{Nothing,Real} = nothing,
-                    file_headers::Vector{Pair{String,String}} = DEFAULT_FILE_HEADERS) =
-        DownloadOptions(String(outdir), confirm_overwrite, skip_existing,
-                        throttle_seconds, file_headers)
+    const DownloadOptions = FileDownloadOptions
 
     function fetch_trace_links(; page_url::AbstractString = DEFAULT_PAGE_URL,
                             selector::Selector = TRACE_SELECTOR,
@@ -64,7 +60,7 @@ module ISPTraceDownloader
     end
 
     function download_traces(trace_links::Vector{TraceLink};
-                            options::DownloadOptions = DownloadOptions(),
+                            options::FileDownloadOptions = FileDownloadOptions(),
                             overwrite_policy::Function = interactive_overwrite_prompt)
         isempty(trace_links) && return String[]
         mkpath(options.outdir)
@@ -119,7 +115,7 @@ module ISPTraceDownloader
     end
 
     function download_isp24_traces(; page_url::AbstractString = DEFAULT_PAGE_URL,
-                                options::DownloadOptions = DownloadOptions())
+                                options::FileDownloadOptions = FileDownloadOptions())
         links = fetch_trace_links(page_url = page_url)
         println("Kept $(length(links)) ISP trace links after filtering.")
         isempty(links) && return String[]

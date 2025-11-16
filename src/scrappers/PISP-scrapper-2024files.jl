@@ -3,7 +3,7 @@
 # end
 
 module ISPFileDownloader
-
+    import PISP.PISPScrapperUtils: FileDownloadOptions
     using PISP.PISPScrapperUtils: DEFAULT_FILE_HEADERS,
         download_file,
         interactive_overwrite_prompt,
@@ -38,21 +38,17 @@ module ISPFileDownloader
                       filename === nothing ? nothing : String(filename),
                       subdir === nothing ? nothing : String(subdir))
 
-    struct FileDownloadOptions
-        outdir::String
-        confirm_overwrite::Bool
-        skip_existing::Bool
-        throttle_seconds::Union{Nothing,Real}
-        file_headers::Vector{Pair{String,String}}
+    function FileDownloadOptions(; outdir::AbstractString = DEFAULT_FILES_OUTDIR,
+                                confirm_overwrite::Bool = true,
+                                skip_existing::Bool = false,
+                                throttle_seconds::Union{Nothing,Real} = nothing,
+                                file_headers::Vector{Pair{String,String}} = DEFAULT_FILE_HEADERS)
+        return FileDownloadOptions(; outdir = outdir,
+                                                        confirm_overwrite = confirm_overwrite,
+                                                        skip_existing = skip_existing,
+                                                        throttle_seconds = throttle_seconds,
+                                                        file_headers = file_headers)
     end
-
-    FileDownloadOptions(; outdir::AbstractString = DEFAULT_FILES_OUTDIR,
-                        confirm_overwrite::Bool = true,
-                        skip_existing::Bool = false,
-                        throttle_seconds::Union{Nothing,Real} = nothing,
-                        file_headers::Vector{Pair{String,String}} = DEFAULT_FILE_HEADERS) =
-        FileDownloadOptions(String(outdir), confirm_overwrite, skip_existing,
-                            throttle_seconds, file_headers)
 
     const ISP_FILE_TARGETS = ISPFileTarget[
         ISPFileTarget(:isp24_inputs,
@@ -65,7 +61,7 @@ module ISPFileDownloader
                       "https://www.aemo.com.au/-/media/files/major-publications/isp/2024/supporting-materials/2024-isp-model.zip?rev=3b35a0a57f564ec88098985782d2932c&sc_lang=en";
                       filename = "2024-isp-model.zip",
                       subdir = "2024/supporting-materials"),
-        ISPFileTarget(:isp24_generation_storage,
+        ISPFileTarget(:isp24_outlook,
                       "2024 ISP generation and storage outlook",
                       "https://www.aemo.com.au/-/media/files/major-publications/isp/2024/supporting-materials/2024-isp-generation-and-storage-outlook.zip?rev=986359059f934cc0bbbd94d0b5280e68&sc_lang=en";
                       filename = "2024-isp-generation-and-storage-outlook.zip",
@@ -91,8 +87,8 @@ module ISPFileDownloader
     download_isp24_model_archive(; options::FileDownloadOptions = FileDownloadOptions()) =
         download_single_target(:isp24_model; options = options)
 
-    download_isp24_generation_storage_archive(; options::FileDownloadOptions = FileDownloadOptions()) =
-        download_single_target(:isp24_generation_storage; options = options)
+    download_isp24_outlook(; options::FileDownloadOptions = FileDownloadOptions()) =
+        download_single_target(:isp24_outlook; options = options)
 
     download_isp19_inputs_workbook(; options::FileDownloadOptions = FileDownloadOptions()) =
         download_single_target(:isp19_inputs_v13; options = options)

@@ -1,27 +1,17 @@
+using PISP
 using PISP.ISPTraceDownloader
 using PISP.ISPFileDownloader
+using PISP.PISPScrapperUtils
 
-page_url = get(ENV, "ISP_PAGE_URL", ISPTraceDownloader.DEFAULT_PAGE_URL)
-# outdir   = get(ENV, "ISP_TRACES_OUTDIR", ISPTraceDownloader.DEFAULT_OUTDIR)
-outdir = normpath(@__DIR__, "..", "..", "downloads-test", "traces")
 throttle_env = get(ENV, "ISP_DOWNLOAD_THROTTLE", "")
-throttle     = isempty(throttle_env) ? nothing : parse(Float64, throttle_env)
-
-options = DownloadOptions(; outdir            = outdir,
+traces_options = FileDownloadOptions(outdir            = normpath(@__DIR__, "..", "..", "downloads", "traces"),
                             confirm_overwrite = true,
                             skip_existing     = false,
-                            throttle_seconds  = throttle);
-
-filenames = download_isp24_traces(; page_url = page_url, options = options);
-println("Finished. Saved $(length(filenames)) files in $(outdir).")
-
-using PISP.ISPFileDownloader
+                            throttle_seconds  = isempty(throttle_env) ? nothing : parse(Float64, throttle_env));
 
 
-single_files = download_all_isp_files(
-    options = FileDownloadOptions(
-        outdir = "scrapped/custom/ISP-files",
-        confirm_overwrite = false,   # optional tweaks
-        skip_existing = true,
-    ),
-)
+isp24_workbook  = download_isp24_inputs_workbook(options = FileDownloadOptions(outdir = "downloads/ISP-files", confirm_overwrite = false, skip_existing = true)) # 2024 IASR workbook
+isp19_workbook  = download_isp19_inputs_workbook(options = FileDownloadOptions(outdir = "downloads/ISP-files", confirm_overwrite = false, skip_existing = true)) # 2019 IASR workbook
+isp24_model     = download_isp24_model_archive(options   = FileDownloadOptions(outdir = "downloads/ISP-files", confirm_overwrite = false, skip_existing = true)) # PLEXOS model
+isp24_outlook   = download_isp24_outlook(options         = FileDownloadOptions(outdir = "downloads/ISP-files", confirm_overwrite = false, skip_existing = true)) # Generation and Storage Outlook
+isp24_traces    = download_isp24_traces(options          = traces_options)

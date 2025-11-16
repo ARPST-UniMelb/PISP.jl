@@ -4,6 +4,7 @@ module PISPScrapperUtils
     using Downloads
 
     export DEFAULT_FILE_HEADERS,
+        FileDownloadOptions,
         download_file,
         interactive_overwrite_prompt,
         prompt_skip_existing,
@@ -16,6 +17,23 @@ module PISPScrapperUtils
         "Accept-Language" => "en-AU,en;q=0.9",
         "Connection"      => "keep-alive",
     ]
+
+    struct FileDownloadOptions
+        outdir::String
+        confirm_overwrite::Bool
+        skip_existing::Bool
+        throttle_seconds::Union{Nothing,Real}
+        file_headers::Vector{Pair{String,String}}
+    end
+
+    function FileDownloadOptions(; outdir::AbstractString,
+                                confirm_overwrite::Bool = true,
+                                skip_existing::Bool = false,
+                                throttle_seconds::Union{Nothing,Real} = nothing,
+                                file_headers::Vector{Pair{String,String}} = DEFAULT_FILE_HEADERS)
+        return FileDownloadOptions(String(outdir), confirm_overwrite, skip_existing,
+                                    throttle_seconds, file_headers)
+    end
 
     function download_file(url::AbstractString, dest::AbstractString;
                             headers::Vector{Pair{String,String}} = DEFAULT_FILE_HEADERS)
