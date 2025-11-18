@@ -17,3 +17,5 @@ test/
 test-*/
 !data-updated/
 !data-updated/**
+*.xml
+*.zip

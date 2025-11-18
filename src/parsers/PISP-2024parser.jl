@@ -1850,7 +1850,8 @@ function gen_inflow_sched(ts::PISPtimeStatic, tv::PISPtimeVarying, tc::PISPtimeC
 
             idx = 1
             for row in eachrow(df_timestamped)
-                per_hour = row.Inflows / HOURS_PER_DAY # Distribute daily inflow equally over 24 hours
+                # Potential energy = ρgQHη (Water density * gravity * Inflow * head * turbine efficiency) [W] / 10^6 = MW  
+                per_hour = row.Inflows * 1000 * 9.81 * 100 * 0.9 / 10^6  #/ HOURS_PER_DAY # Distribute daily inflow equally over 24 hours // Multiply here to transform from hourly cumec to MWh (inflow)
                 for h in 0:HOURS_PER_DAY-1
                     base_dates[idx]   = row.date + Hour(h)
                     base_inflows[idx] = per_hour
