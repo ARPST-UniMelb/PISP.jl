@@ -60,3 +60,32 @@ file_dirs = extract_all_zips(zip_root, files_dest; overwrite = true, quiet = tru
 @info "Extracting trace archives" src = trace_zip_root dest = traces_dest
 trace_dirs = extract_all_zips(trace_zip_root, traces_dest; overwrite = true, quiet = true)
 @info "Finished extracting trace archives" count = length(trace_dirs)
+
+# ================================================ # 
+# Generate auxiliary files
+# ================================================ #
+using XLSX
+using DataFrames
+using CSV
+# get a list of files in data-download/outlook/Core
+datapath = normpath(@__DIR__, "..", "..", "data-download")
+outlook_core_path = normpath(datapath,"2024-isp-generation-and-storage-outlook/Core")
+file_list = readdir(outlook_core_path)
+for f in file_list
+    if endswith(f, ".xlsx")
+        file_path = normpath(outlook_core_path, f)
+        println("Processing file: ", file_path)
+        capacity_df = PISP.read_xlsx_with_header(file_path, "Capacity", "A3:XX5000")
+        csv_path = replace(file_path, ".xlsx" => "_Capacity.csv")
+        CSV.write(csv_path, capacity_df)
+        # 
+        println("Saved capacity data to: ", csv_path)
+    end
+end
+# capacity_df = PISP.read_xlsx_with_header(file_path, "Capacity", "A3:XX5000")
+
+
+outlookAEMO = normpath(datapath, "CapacityOutlook/CapacityOutlook_2024_ISP_melted_CDP14.xlsx")
+vpp_cap     = normpath(datapath, "CapacityOutlook/Storage/StorageOutlook_Capacity.xlsx")
+vpp_ene     = normpath(datapath, "CapacityOutlook/Storage/StorageOutlook_Energy.xlsx")
+dsp_data    = normpath(datapath, "CapacityOutlook/2024ISP_DSP.xlsx")
