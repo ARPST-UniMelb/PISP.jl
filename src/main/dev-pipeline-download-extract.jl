@@ -67,25 +67,61 @@ trace_dirs = extract_all_zips(trace_zip_root, traces_dest; overwrite = true, qui
 using XLSX
 using DataFrames
 using CSV
-# get a list of files in data-download/outlook/Core
-datapath = normpath(@__DIR__, "..", "..", "data-download")
-outlook_core_path = normpath(datapath,"2024-isp-generation-and-storage-outlook/Core")
-file_list = readdir(outlook_core_path)
+using Dates
+using Tables
+# ================================================ #
+# Generating CapacityOutlook_2024_ISP.csv
+# ================================================ #
+datapath               = normpath(@__DIR__, "..", "..", "data-download")
+outlook_core_path      = normpath(datapath,"2024-isp-generation-and-storage-outlook/Core")
+outlook_auxiliary_path = normpath(datapath,"2024-isp-generation-and-storage-outlook/Auxiliary")
+mkpath(outlook_auxiliary_path)
+file_list       = readdir(outlook_core_path)
+all_capacities  = DataFrame[]
 for f in file_list
     if endswith(f, ".xlsx")
-        file_path = normpath(outlook_core_path, f)
-        println("Processing file: ", file_path)
-        capacity_df = PISP.read_xlsx_with_header(file_path, "Capacity", "A3:XX5000")
-        csv_path = replace(file_path, ".xlsx" => "_Capacity.csv")
-        CSV.write(csv_path, capacity_df)
-        # 
-        println("Saved capacity data to: ", csv_path)
+        file_path       = normpath(outlook_core_path, f)
+        parts           = split(f, " - ")
+        scenario_full   = length(parts) >= 2 ? strip(parts[2]) : ""
+        capacity_df     = PISP.read_xlsx_with_header(file_path, "Capacity", "A3:AG5000")
+        insertcols!(capacity_df, 2, :Scenario => fill(scenario_full, nrow(capacity_df)))
+        capacity_df     = filter(row -> any(x -> x isa Number && !ismissing(x), row), capacity_df)
+        push!(all_capacities, capacity_df)
     end
 end
-# capacity_df = PISP.read_xlsx_with_header(file_path, "Capacity", "A3:XX5000")
+combined_capacity_df = isempty(all_capacities) ? DataFrame() : vcat(all_capacities...; cols = :union)
+combined_csv_path    = normpath(outlook_auxiliary_path, "CapacityOutlook_2024_ISP.csv")
+CSV.write(combined_csv_path, combined_capacity_df)
+# ================================================ #
+# Generating the capacity for the CDP 14 scenario
+# outlookAEMO = normpath(datapath, "CapacityOutlook/CapacityOutlook_2024_ISP_melted_CDP14.xlsx")
+# ================================================ #
+# Build melted CapacityOutlook_2024_ISP DataFrame and save CDP14 version
+outlook_combined_path = combined_csv_path
+df_outlook = DataFrame(CSV.File(outlook_combined_path))
 
+# Rename yearly columns (e.g., "2025-26") to a July 1 date string (e.g., "2025-07-01")
+col_names = names(df_outlook)
+for col in col_names[6:end]
+    col_str = String(col)
+    if occursin("-", col_str)
+        first_year = strip(split(col_str, '-')[1])
+        new_date = Dates.Date(parse(Int, first_year), 7, 1)
+        rename!(df_outlook, col => Symbol(Dates.format(new_date, DateFormat("yyyy-mm-dd"))))
+    end
+end
 
-outlookAEMO = normpath(datapath, "CapacityOutlook/CapacityOutlook_2024_ISP_melted_CDP14.xlsx")
+value_vars      = names(df_outlook)[6:end]
+df_melted       = stack(df_outlook, value_vars; variable_name = :date, value_name = :value)
+df_melted.date  = Dates.Date.(string.(df_melted.date), Dates.DateFormat("yyyy-mm-dd"))
+sort!(df_melted, [:Scenario, :Subregion, :Technology, :date])
+df_melted = filter(:CDP => ==("CDP14"), df_melted)
+sort!(df_melted, [:Scenario, :Subregion, :Technology, :date])
+
+mkpath(outlook_auxiliary_path)
+output_melted_path = normpath(outlook_auxiliary_path, "CapacityOutlook2024_Condensed.csv")
+CSV.write(output_melted_path, df_melted)
+
 vpp_cap     = normpath(datapath, "CapacityOutlook/Storage/StorageOutlook_Capacity.xlsx")
 vpp_ene     = normpath(datapath, "CapacityOutlook/Storage/StorageOutlook_Energy.xlsx")
 dsp_data    = normpath(datapath, "CapacityOutlook/2024ISP_DSP.xlsx")
