@@ -148,10 +148,10 @@ end
 combined_energy_df   = isempty(storage_energy_dfs) ? DataFrame() : vcat(storage_energy_dfs...; cols = :union)
 combined_capacity_df = isempty(storage_capacity_dfs) ? DataFrame() : vcat(storage_capacity_dfs...; cols = :union)
 
-storage_energy_path   = normpath(outlook_auxiliary_path, "StorageEnergyOutlook_2024_ISP.csv")
-storage_capacity_path = normpath(outlook_auxiliary_path, "StorageCapacityOutlook_2024_ISP.csv")
-CSV.write(storage_energy_path, combined_energy_df)
-CSV.write(storage_capacity_path, combined_capacity_df)
+storage_energy_path   = normpath(outlook_auxiliary_path, "StorageEnergyOutlook_2024_ISP.xlsx")
+storage_capacity_path = normpath(outlook_auxiliary_path, "StorageCapacityOutlook_2024_ISP.xlsx")
+XLSX.writetable(storage_energy_path, Tables.columntable(combined_energy_df); sheetname="StorageEnergyOutlook_2024_ISP", overwrite=true)
+XLSX.writetable(storage_capacity_path, Tables.columntable(combined_capacity_df); sheetname="StorageCapacityOutlook_2024_ISP", overwrite=true)
 
 # vpp_cap     = normpath(datapath, "CapacityOutlook/Storage/StorageOutlook_Capacity.xlsx")
 # vpp_ene     = normpath(datapath, "CapacityOutlook/Storage/StorageOutlook_Energy.xlsx")
