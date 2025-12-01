@@ -150,7 +150,7 @@ function populate_time_varying!(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISP
 
     PISP.ess_vpps(tc, ts, tv, paths.vpp_cap, paths.vpp_ene)
     PISP.ess_inflow_sched(ts, tv, tc, paths.ispdata24, SNOWY_GENS)
-    PISP.der_pred_sched(ts, tv, paths.dsp_data)
+    PISP.der_pred_sched(ts, tv, paths.ispdata24)
 end
 
 """
