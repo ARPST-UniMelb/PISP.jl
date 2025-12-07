@@ -13,4 +13,6 @@ module PISP
     include("PISPparameters.jl")
     include("PISPparsers.jl")
     include("PISPscrappers.jl")
+
+    export build_pipeline
 end
