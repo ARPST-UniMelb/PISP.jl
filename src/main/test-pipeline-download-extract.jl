@@ -1,5 +1,6 @@
 using PISP
 using PISP.ISPdatabuilder
+using Dates
 
 function fill_problem_table_year(tc::PISPtimeConfig, year::Int)
     # Generate date blocks from 2025 to 2035, with periods starting 01/01 and 01/07
@@ -34,7 +35,7 @@ end
 filepath = normpath(@__DIR__, "../../", "data-download-v2")
 
 # Configure file paths 
-function default_data_paths()
+function default_data_paths(;filepath=@__DIR__)
     datapath = filepath
     return (
         ispdata19   = normpath(datapath, "2019-input-and-assumptions-workbook-v1-3-dec-19.xlsx"),
@@ -48,13 +49,15 @@ function default_data_paths()
     )
 end
 
-poe      = 10
-reftrace = 4006
-year     = 2025
-PISP.ISPdatabuilder.build_pipeline(data_root = filepath, poe=poe)
+poe      = 10   # Probability of exceedance (POE) for demand: 10% or 50%
+reftrace = 2011 # Reference weather year trace: select among 2011 - 2023 or 4006 (trace for the ODP)
+year     = 2030 # Year for which to build the time-varying schedules: select among 2025 - 2050
+
+# Build ISP data: Download, extract and build input data.
+PISP.ISPdatabuilder.build_pipeline(download_files = false, data_root = filepath, poe=poe)
 
 # 1. Instantiate data containers and build problem table with desired time blocks.
-data_paths = default_data_paths()
+data_paths = default_data_paths(filepath=filepath)
 tc, ts, tv = PISP.initialise_time_structures();
 # PISP.populate_time_config!(tc, PISP.fill_problem_example)
 fill_problem_table_year(tc, year)

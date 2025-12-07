@@ -1,18 +1,18 @@
 using PISP
 using Dates
+
 # Configure file paths 
 function default_data_paths()
-    datapath = normpath(@__DIR__, "..", "..", "data-download")
+    datapath = normpath(@__DIR__, "..", "..", "data-download-v2")
     return (
         ispdata19   = normpath(datapath, "2019-input-and-assumptions-workbook-v1-3-dec-19.xlsx"),
         ispdata24   = normpath(datapath, "2024-isp-inputs-and-assumptions-workbook.xlsx"),
-        profiledata = normpath(datapath, "traces"),
-        # profiledata = "/Users/papablaza/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/Modelling/ISP24/Traces/",
-        outlookdata = normpath(datapath,"2024-isp-generation-and-storage-outlook/Core"),
-        outlookAEMO = normpath(datapath, "CapacityOutlook/CapacityOutlook_2024_ISP_melted_CDP14.xlsx"),
-        vpp_cap     = normpath(datapath, "CapacityOutlook/Storage/StorageOutlook_Capacity.xlsx"),
-        vpp_ene     = normpath(datapath, "CapacityOutlook/Storage/StorageOutlook_Energy.xlsx"),
-        dsp_data    = normpath(datapath, "CapacityOutlook/2024ISP_DSP.xlsx"),
+        profiledata = normpath(datapath, "traces/"),
+        outlookdata = normpath(datapath, "Core"),
+        outlookAEMO = normpath(datapath, "Auxiliary/CapacityOutlook2024_Condensed.xlsx"),
+        vpp_cap     = normpath(datapath, "Auxiliary/StorageCapacityOutlook_2024_ISP.xlsx"),
+        vpp_ene     = normpath(datapath, "Auxiliary/StorageEnergyOutlook_2024_ISP.xlsx"),
+        ispmodel    = normpath(datapath, "2024 ISP Model")
     )
 end
 
@@ -49,21 +49,21 @@ end
 # 1. Instantiate data containers and build problem table with desired time blocks.
 data_paths = default_data_paths()
 tc, ts, tv = PISP.initialise_time_structures();
-PISP.populate_time_config!(tc, PISP.fill_problem_example)
-# fill_problem_table_year(tc, year)
+# PISP.populate_time_config!(tc, PISP.fill_problem_example)
+fill_problem_table_year(tc, 2025)
 
 # 2. Load all time-static elements (buses, lines, generators, ESS/DER info).
-STATIC_PARAMS = PISP.populate_time_static!(tc, ts, tv, data_paths);
+STATIC_PARAMS = PISP.populate_time_static!(tc, ts, tv, data_paths, refyear=4006);
 
 # 3. Use static parameters (STATIC_PARAMS) to derive time-varying schedules (Solar PV, Wind, Demand, etc).
-PISP.populate_time_varying!(tc, ts, tv, data_paths, STATIC_PARAMS)
+PISP.populate_time_varying!(tc, ts, tv, data_paths, STATIC_PARAMS, refyear=4006);
 
 # 4. Export results to CSV and Arrow for downstream tools.
 PISP.write_time_data(ts, tv;
-    csv_static_path     = "out-v6/csv",
-    csv_varying_path    = "out-v6/csv/schedule-$(year)",
-    arrow_static_path   = "out-v6/arrow",
-    arrow_varying_path  = "out-v6/arrow/schedule-$(year)",
+    csv_static_path     = "out-v10/csv",
+    csv_varying_path    = "out-v10/csv/schedule-$(year)",
+    arrow_static_path   = "out-v10/arrow",
+    arrow_varying_path  = "out-v10/arrow/schedule-$(year)",
     write_static        = true,
     write_varying       = true,
 )
