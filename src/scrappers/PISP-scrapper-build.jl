@@ -24,7 +24,7 @@ module ISPdatabuilder
         build_refyear4006_traces,
         build_pipeline
 
-    const DEFAULT_DATA_ROOT = normpath(@__DIR__, "..", "..", "data-download-v2")
+    const DEFAULT_DATA_ROOT = normpath(@__DIR__, "..", "..", "data-download")
 
     default_data_root() = DEFAULT_DATA_ROOT
     # Ranges to build the 4006 trace 
