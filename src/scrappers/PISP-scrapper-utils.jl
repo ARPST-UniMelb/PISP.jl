@@ -114,13 +114,15 @@ module PISPScrapperUtils
     end
 
     """
-        extract_all_zips(src_dir::AbstractString, dest_root::AbstractString; kwargs...)
+        extract_all_zips(src_dir::AbstractString, dest_root::AbstractString; skip_existing::Bool = true, kwargs...)
 
     Finds every `.zip` file within `src_dir` (non-recursive) and extracts each archive
-    into `dest_root/<zip-basename>/`. Any keyword arguments are forwarded to
-    `extract_zip`. Returns a vector with the destination paths for each extracted zip.
+    into `dest_root`. If `skip_existing` is true and all entries from a given zip are
+    already present in `dest_root`, that archive is skipped. Any additional keyword
+    arguments are forwarded to `extract_zip`. Returns a vector with the destination
+    paths for each extracted zip (or the existing destination when skipped).
     """
-    function extract_all_zips(src_dir::AbstractString, dest_root::AbstractString; kwargs...)
+    function extract_all_zips(src_dir::AbstractString, dest_root::AbstractString; skip_existing::Bool = true, kwargs...)
         abs_src = normpath(src_dir)
         abs_dest_root = normpath(dest_root)
         isdir(abs_src) || error("Source directory not found: $(abs_src)")
@@ -132,11 +134,30 @@ module PISPScrapperUtils
 
         extracted_paths = String[]
         for zip_path in zip_files
+            if skip_existing && zip_contents_present(zip_path, abs_dest_root)
+                # @info "Skipping extraction; contents already present" zip = zip_path dest = abs_dest_root
+                push!(extracted_paths, abs_dest_root)
+                continue
+            end
             extract_zip(zip_path, abs_dest_root; kwargs...)
             push!(extracted_paths, abs_dest_root)
         end
 
         return extracted_paths
+    end
+
+    function zip_contents_present(zip_path::AbstractString, dest_root::AbstractString)
+        entries = try
+            output = read(`unzip -Z1 $(zip_path)`, String)
+            filter(!isempty, split(chomp(output), '\n'))
+        catch
+            return false
+        end
+        isempty(entries) && return false
+        return all(entry -> begin
+            dest = joinpath(dest_root, entry)
+            isfile(dest) || isdir(dest)
+        end, entries)
     end
 
 end

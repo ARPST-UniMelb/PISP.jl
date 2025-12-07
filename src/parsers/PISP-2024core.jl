@@ -97,9 +97,10 @@ for later steps).
   (currently exposing the `SYNC4`, `GENERATORS`, and `PS` tables) that are
   required by the time-varying stage.
 """
-function populate_time_static!(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, paths::NamedTuple)
+function populate_time_static!(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, paths::NamedTuple; refyear::Int64=2011, poe::Int64=10)
+    @info "Populating time-static data for ISP 2024 - referece weather trace $(refyear) ..."
     PISP.bus_table(ts)
-    PISP.dem_load(tc, ts, tv, paths.profiledata)
+    PISP.dem_load(tc, ts, tv, paths.profiledata; refyear=refyear, poe=poe)
 
     txdata = PISP.line_table(ts, tv, paths.ispdata24)
     PISP.line_invoptions(ts, paths.ispdata24)
@@ -115,7 +116,7 @@ function populate_time_static!(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPt
 end
 
 """
-    populate_time_varying!(tc, ts, tv, paths, static_artifacts)
+    populate_time_varying!(tc, ts, tv, paths, static_artifacts; refyear::Int64=2011)
 
 Populate the time-varying data structures such as schedules, inflows and DER
 profiles. The function expects the `static_artifacts` output of
@@ -136,17 +137,18 @@ derived without recomputing inputs.
   post-processing utilities.
 """
 function populate_time_varying!(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying,
-        paths::NamedTuple, static_artifacts::NamedTuple)
+        paths::NamedTuple, static_artifacts::NamedTuple; refyear::Int64=2011, poe::Int64=10)
+    @info "Populating time-varying data for ISP 2024 - referece weather trace $(refyear) ..."
     txdata = static_artifacts.txdata
     generator_tables = static_artifacts.generator_tables
 
     PISP.line_sched_table(tc, tv, txdata)
     PISP.gen_n_sched_table(tv, generator_tables.SYNC4, generator_tables.GENERATORS)
     PISP.gen_retirements(ts, tv)
-    PISP.gen_pmax_distpv(tc, ts, tv, paths.profiledata)
-    PISP.gen_pmax_solar(tc, ts, tv, paths.ispdata24, paths.outlookdata, paths.outlookAEMO, paths.profiledata)
-    PISP.gen_pmax_wind(tc, ts, tv, paths.ispdata24, paths.outlookdata, paths.outlookAEMO, paths.profiledata)
-    SNOWY_GENS = PISP.gen_inflow_sched(ts, tv, tc, paths.ispdata24)
+    PISP.gen_pmax_distpv(tc, ts, tv, paths.profiledata; refyear=refyear, poe=poe)
+    PISP.gen_pmax_solar(tc, ts, tv, paths.ispdata24, paths.outlookdata, paths.outlookAEMO, paths.profiledata; refyear=refyear)
+    PISP.gen_pmax_wind(tc, ts, tv, paths.ispdata24, paths.outlookdata, paths.outlookAEMO, paths.profiledata; refyear=refyear)
+    SNOWY_GENS = PISP.gen_inflow_sched(ts, tv, tc, paths.ispdata24, paths.ispmodel)
 
     PISP.ess_vpps(tc, ts, tv, paths.vpp_cap, paths.vpp_ene)
     PISP.ess_inflow_sched(ts, tv, tc, paths.ispdata24, SNOWY_GENS)

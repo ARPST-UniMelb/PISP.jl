@@ -1041,7 +1041,7 @@ time-varying fleet.
 - `tv::PISPtimeVarying`: Receives the computed pmax time series.
 - `profilespath::String`: Directory holding the DER traces.
 """
-function gen_pmax_distpv(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, profilespath::String)
+function gen_pmax_distpv(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, profilespath::String; refyear::Int64=2011, poe::Int64=10)
     probs = tc.problem;
     bust = ts.bus;
 
@@ -1060,7 +1060,7 @@ function gen_pmax_distpv(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVar
             scid = probs[p,:scenario][1]
             sc = PISP.ID2SCE[scid]
 
-            df = CSV.File(string(profilespath,"demand_$(st)_$(sc)/",st,"_RefYear_4006_",replace(uppercase(PISP.ID2SCE2[scid]), " " => "_"),"_POE10_PV_TOT.csv")) |> DataFrame
+            df = CSV.File(string(profilespath,"demand_$(st)_$(sc)/",st,"_RefYear_$(refyear)_",replace(uppercase(PISP.ID2SCE2[scid]), " " => "_"),"_POE$(poe)_PV_TOT.csv")) |> DataFrame
 
             dstart = probs[p,:dstart]
             dend = probs[p,:dend]
@@ -1104,7 +1104,7 @@ directory are written into `tv.dem_sched` for each period defined in `tc`.
 - `tv::PISPtimeVarying`: Receives chronological demand schedules.
 - `profilespath::String`: Root folder containing demand trace files.
 """
-function dem_load(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, profilespath::String)
+function dem_load(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, profilespath::String; refyear::Int64=2011, poe::Int64=10)
     probs = tc.problem
     bust = ts.bus
 
@@ -1122,15 +1122,15 @@ function dem_load(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, p
             scid = probs[p,:scenario][1]
             sc = PISP.ID2SCE[scid]
 
-            df = CSV.File(string(profilespath,"demand_$(st)_$(sc)/",st,"_RefYear_4006_",replace(uppercase(PISP.ID2SCE2[scid]), " " => "_"),"_POE10_OPSO_MODELLING_PVLITE.csv")) |> DataFrame
+            df = CSV.File(string(profilespath,"demand_$(st)_$(sc)/",st,"_RefYear_$(refyear)_",replace(uppercase(PISP.ID2SCE2[scid]), " " => "_"),"_POE$(poe)_OPSO_MODELLING_PVLITE.csv")) |> DataFrame
 
             dstart = probs[p,:dstart]
-            dend = probs[p,:dend]
-            yr = Dates.year(dstart)
-            ds = Dates.day(dstart)
-            de = Dates.day(dend)
-            ms = Dates.month(dstart)
-            me = Dates.month(dend)
+            dend   = probs[p,:dend]
+            yr     = Dates.year(dstart)
+            ds     = Dates.day(dstart)
+            de     = Dates.day(dend)
+            ms     = Dates.month(dstart)
+            me     = Dates.month(dend)
 
             df1 = df[((df[!,:Year] .== yr) .& ((df[!,:Month] .>= ms) .| (df[!,:Month] .<= me)) ),:]
 
@@ -1170,7 +1170,7 @@ limits into `tv.gen_pmax` for every study block in `tc`.
 - `outlookAEMO::String`: Melted capacity outlook file providing scenario series.
 - `profilespath::String`: Directory with solar trace profiles.
 """
-function gen_pmax_solar(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, ispdata24::String, outlookdata::String, outlookAEMO::String, profilespath::String)
+function gen_pmax_solar(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, ispdata24::String, outlookdata::String, outlookAEMO::String, profilespath::String; refyear::Int64=2011)
     probs = tc.problem
     bust = ts.bus
 
@@ -1201,7 +1201,7 @@ function gen_pmax_solar(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVary
 
     name_ex = Dict()
 
-    foldertech = string(profilespath, "solar/solar/")
+    foldertech = string(profilespath, "solar_$(refyear)/")
 
     scid2cdp = Dict(1 => "CDP14", 2 => "CDP14", 3 => "CDP14", 4 => "CDP14")
     auxf = []
@@ -1217,10 +1217,14 @@ function gen_pmax_solar(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVary
         de = Dates.day(dend)
         ms = Dates.month(dstart)
         me = Dates.month(dend)
-        outlookfile = string(outlookdata,"/2024 ISP - ",sc," - Core_RED.xlsx")
+        # outlookfile = string(outlookdata,"/Auxiliary/2024 ISP - ",sc," - Core_REZCAP.xlsx")
+        outlookfile = normpath(outlookdata, "..", "Auxiliary", "2024 ISP - $(sc) - Core_REZCAP.xlsx")
 
         TECH_CAP = PISP.read_xlsx_with_header(outlookAEMO, "CapacityOutlook", "A1:G14356")
-        SOLAR_CAP = PISP.read_xlsx_with_header(outlookfile, "REZ Generation Capacity", "B3:AG2238")
+        SOLAR_CAP = PISP.read_xlsx_with_header(outlookfile, "REZ Generation Capacity", "A1:AG2238")
+        # println(SOLAR_CAP)
+        # print first rows of SOLAR_CAP
+        # println(first(SOLAR_CAP,5))
         SOLAR_CAP = dropmissing(SOLAR_CAP,:CDP)
         
         y = ms < 7 ? yr - 1 : yr
@@ -1360,7 +1364,7 @@ scenario block.
 - `ispdata24::String`, `outlookdata::String`, `outlookAEMO::String`,
   `profilespath::String`: Data sources containing wind capacities and traces.
 """
-function gen_pmax_wind(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, ispdata24::String, outlookdata::String, outlookAEMO::String, profilespath::String)
+function gen_pmax_wind(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, ispdata24::String, outlookdata::String, outlookAEMO::String, profilespath::String; refyear::Int64=2011)
     probs = tc.problem
     bust = ts.bus
 
@@ -1393,7 +1397,7 @@ function gen_pmax_wind(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVaryi
         push!(ts.gen, arrgen)
     end
 
-    foldertech = string(profilespath, "wind/wind/")
+    foldertech = string(profilespath, "wind_$(refyear)/")
 
     scid2cdp = Dict(1 => "CDP14", 2 => "CDP14", 3 => "CDP14", 4 => "CDP14")
     auxf = []
@@ -1409,10 +1413,12 @@ function gen_pmax_wind(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVaryi
         de = Dates.day(dend)
         ms = Dates.month(dstart)
         me = Dates.month(dend)
-        outlookfile = string(outlookdata,"/2024 ISP - ",sc," - Core_RED.xlsx")
+        # outlookfile = string(outlookdata,"/Auxiliary/2024 ISP - ",sc," - Core_REZCAP.xlsx")
+        # normpath outlook data going one level above
+        outlookfile = normpath(outlookdata, "..", "Auxiliary", "2024 ISP - $(sc) - Core_REZCAP.xlsx")
 
         TECH_CAP = PISP.read_xlsx_with_header(outlookAEMO, "CapacityOutlook", "A1:G14356")
-        WIND_CAP = PISP.read_xlsx_with_header(outlookfile, "REZ Generation Capacity", "B3:AG2238")
+        WIND_CAP = PISP.read_xlsx_with_header(outlookfile, "REZ Generation Capacity", "A1:AG2238")
         WIND_CAP = dropmissing(WIND_CAP,:CDP)
         
         y = ms < 7 ? yr - 1 : yr
@@ -1442,8 +1448,9 @@ function gen_pmax_wind(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVaryi
                     end
                     # println(" =============== $(k) ============== ")
                     file = ""
-                    if k in keys(PISP.name_ex)
-                        file = PISP.name_ex[k]
+                    name_ex_weather_year = PISP.get_name_ex(refyear)
+                    if k in keys(name_ex_weather_year)
+                        file = name_ex_weather_year[k]
                     else
                         for f in readdir(foldertech)
                             if f[1:3] != "REZ" && occursin(split(k," ")[1],f)
@@ -1565,12 +1572,12 @@ function ess_vpps(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, v
 
     sc = collect(keys(PISP.SCE))[2]
     # CER STORAGE CAPACITY
-    VPPCAP = PISP.read_xlsx_with_header(vpp_cap, "$(sc)", "A1:AE2080")
+    VPPCAP = PISP.read_xlsx_with_header(vpp_cap, "$(sc)", "A1:AG1769")
     VPPCAP = VPPCAP[(VPPCAP[!,1] .== "CDP14") .& (VPPCAP[!,Symbol("storage category")] .== "Coordinated CER storage"),:]
     rename!(VPPCAP, Dict(:Subregion => :bus))
 
     #CER STORAGE ENERGY
-    VPPENE = PISP.read_xlsx_with_header(vpp_ene, "$(sc)", "A1:AE2080")
+    VPPENE = PISP.read_xlsx_with_header(vpp_ene, "$(sc)", "A1:AG1769")
     VPPENE = VPPENE[(VPPENE[!,1] .== "CDP14") .& (VPPENE[!,Symbol("Technology")] .== "Coordinated CER storage"),:]
     rename!(VPPENE, Dict(:Subregion => :bus))
 
@@ -1597,16 +1604,18 @@ function ess_vpps(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, v
         me = Dates.month(dend)
 
         yr = ms < 7 ? yr - 1 : yr
-        VPPCAP = PISP.read_xlsx_with_header(vpp_cap, "$(sc)", "A1:AE2080")
-        VPPENE = PISP.read_xlsx_with_header(vpp_ene, "$(sc)", "A1:AE2080")
+        # VPPCAP = PISP.read_xlsx_with_header(vpp_cap, "$(sc)", "A1:AE2080")
+        # VPPENE = PISP.read_xlsx_with_header(vpp_ene, "$(sc)", "A1:AE2080")
+        VPPCAP = PISP.read_xlsx_with_header(vpp_cap, "$(sc)", "A1:AG1769")
+        VPPENE = PISP.read_xlsx_with_header(vpp_ene, "$(sc)", "A1:AG1769")
         for st in keys(PISP.NEMBUSES)
             # CER STORAGE CAPACITY
             VPPCAP = VPPCAP[(VPPCAP[!,1] .== "CDP14") .& (VPPCAP[!,Symbol("storage category")] .== "Coordinated CER storage"),:]
-            rename!(VPPCAP, names(VPPCAP)[3] => :bus)
+            rename!(VPPCAP, names(VPPCAP)[4] => :bus)
 
             #CER STORAGE ENERGY
             VPPENE = VPPENE[(VPPENE[!,1] .== "CDP14") .& (VPPENE[!,Symbol("Technology")] .== "Coordinated CER storage"),:]
-            rename!(VPPENE, names(VPPENE)[3] => :bus)
+            rename!(VPPENE, names(VPPENE)[4] => :bus)
 
             data_cap = VPPCAP[VPPCAP[!,:bus] .== st, Symbol("$(yr)-$(string(yr+1)[3:end])")][1]
             data_ene = VPPENE[VPPENE[!,:bus] .== st, Symbol("$(yr)-$(string(yr+1)[3:end])")][1]*1000
@@ -1690,22 +1699,41 @@ inserted by `der_tables`.
 - `tv::PISPtimeVarying`: Receives DER time series.
 - `dsp_data::String`: Path to the DSP workbook or data file.
 """
-function der_pred_sched(ts::PISPtimeStatic, tv::PISPtimeVarying, dsp_data::String)
+function der_pred_sched(ts::PISPtimeStatic, tv::PISPtimeVarying, ispdata24::String)
+    sce_dsp = Dict("Progressive Change"     => Dict("QLD" => Dict("SUMMER"  => "B128:AG133", "WINTER"  =>"B137:AG142"), 
+                                                    "NSW" => Dict("SUMMER"  => "B108:AG113", "WINTER"  =>"B118:AG123"), 
+                                                    "SA"  => Dict("SUMMER"  => "B147:AG152", "WINTER"  => "B156:AG161"),
+                                                    "TAS" => Dict("SUMMER"  => "B166:AG171", "WINTER"  => "B175:AG180"),
+                                                    "VIC" => Dict("SUMMER"  => "B185:AG190", "WINTER"  => "B194:AG199")),
+
+                   "Step Change"            => Dict("QLD" => Dict("SUMMER" => "B226:AG231", "WINTER" => "B235:AG240"), 
+                                                    "NSW" => Dict("SUMMER" => "B206:AG211", "WINTER" => "B216:AG221"), 
+                                                    "SA"  => Dict("SUMMER" => "B245:AG250", "WINTER" => "B254:AG259"),
+                                                    "TAS" => Dict("SUMMER" => "B264:AG269", "WINTER" => "B273:AG278"),
+                                                    "VIC" => Dict("SUMMER" => "B283:AG288", "WINTER" => "B292:AG297")),
+
+                   "Green Energy Exports"   => Dict("QLD" => Dict("SUMMER"  => "B30:AG35", "WINTER" =>"B39:AG44"), 
+                                                    "NSW" => Dict("SUMMER"  => "B10:AG15", "WINTER" => "B20:AG25"), 
+                                                    "SA"  => Dict("SUMMER"  =>"B49:AG54", "WINTER"  =>"B58:AG63"), 
+                                                    "TAS" => Dict("SUMMER"  =>"B68:AG73", "WINTER"  =>"B77:AG82"),
+                                                    "VIC" => Dict("SUMMER"  =>"B87:AG92", "WINTER"  =>"B96:AG101")))
+
     for scenario in collect(keys(PISP.SCE))
-        QLD_SUM = PISP.read_xlsx_with_header(dsp_data, scenario, "A23:AF28")
-        QLD_WIN = PISP.read_xlsx_with_header(dsp_data, scenario, "A32:AF37")
+        sce_map = sce_dsp[scenario]
+        QLD_SUM = PISP.read_xlsx_with_header(ispdata24, "DSP", sce_map["QLD"]["SUMMER"])
+        QLD_WIN = PISP.read_xlsx_with_header(ispdata24, "DSP", sce_map["QLD"]["WINTER"])
 
-        NSW_SUM = PISP.read_xlsx_with_header(dsp_data, scenario, "A3:AF8")
-        NSW_WIN = PISP.read_xlsx_with_header(dsp_data, scenario, "A13:AF18")
+        NSW_SUM = PISP.read_xlsx_with_header(ispdata24, "DSP", sce_map["NSW"]["SUMMER"])
+        NSW_WIN = PISP.read_xlsx_with_header(ispdata24, "DSP", sce_map["NSW"]["WINTER"])
 
-        SA_SUM = PISP.read_xlsx_with_header(dsp_data, scenario, "A42:AF47")
-        SA_WIN = PISP.read_xlsx_with_header(dsp_data, scenario, "A51:AF56")
+        SA_SUM = PISP.read_xlsx_with_header(ispdata24, "DSP", sce_map["SA"]["SUMMER"])
+        SA_WIN = PISP.read_xlsx_with_header(ispdata24, "DSP", sce_map["SA"]["WINTER"])
 
-        TAS_SUM = PISP.read_xlsx_with_header(dsp_data, scenario, "A61:AF66")
-        TAS_WIN = PISP.read_xlsx_with_header(dsp_data, scenario, "A70:AF75")
+        TAS_SUM = PISP.read_xlsx_with_header(ispdata24, "DSP", sce_map["TAS"]["SUMMER"])
+        TAS_WIN = PISP.read_xlsx_with_header(ispdata24, "DSP", sce_map["TAS"]["WINTER"])
 
-        VIC_SUM = PISP.read_xlsx_with_header(dsp_data, scenario, "A80:AF85")
-        VIC_WIN = PISP.read_xlsx_with_header(dsp_data, scenario, "A89:AF94")
+        VIC_SUM = PISP.read_xlsx_with_header(ispdata24, "DSP", sce_map["VIC"]["SUMMER"])
+        VIC_WIN = PISP.read_xlsx_with_header(ispdata24, "DSP", sce_map["VIC"]["WINTER"])
         # ======================================== #
         # <><><> QLD
         # ++ NQ
@@ -1802,7 +1830,7 @@ and returns the Snowy subset for re-use by ESS inflow routines (specific for TUM
 # Returns
 - `DataFrame`: Snowy generator inflow schedule used by `ess_inflow_sched`.
 """
-function gen_inflow_sched(ts::PISPtimeStatic, tv::PISPtimeVarying, tc::PISPtimeConfig, ispdata24::String)
+function gen_inflow_sched(ts::PISPtimeStatic, tv::PISPtimeVarying, tc::PISPtimeConfig, ispdata24::String, ispmodel::String)
     HOURS_PER_DAY = 24
 
     gen       = ts.gen
@@ -1827,7 +1855,7 @@ function gen_inflow_sched(ts::PISPtimeStatic, tv::PISPtimeVarying, tc::PISPtimeC
 
     # 1 - Hydro Inflows
     for scenario in keys(PISP.SCE)
-        hydro_root    = "/Users/papablaza/git/ARPST-CSIRO-STAGE-5/PISP-dev.jl/data/2024 ISP Model/2024 ISP $(scenario)/Traces/hydro/"
+        hydro_root    = "$(ispmodel)/2024 ISP $(scenario)/Traces/hydro/"
         sce_label     = PISP.SCE[scenario]      # Scenario number
         hydro_sce     = PISP.HYDROSCE[scenario] # Hydro scenario from PLEXOS model
 
@@ -1883,7 +1911,7 @@ function gen_inflow_sched(ts::PISPtimeStatic, tv::PISPtimeVarying, tc::PISPtimeC
 
     # 2 - Yearly Energy Limits
     for scenario in keys(PISP.SCE)
-        hydro_root    = "/Users/papablaza/git/ARPST-CSIRO-STAGE-5/PISP-dev.jl/data/2024 ISP Model/2024 ISP $(scenario)/Traces/hydro/"
+        hydro_root    = "$(ispmodel)/2024 ISP $(scenario)/Traces/hydro/"
         sce_label     = PISP.SCE[scenario]      # Scenario number
         hydro_sce     = PISP.HYDROSCE[scenario] # Hydro scenario from PLEXOS model
 

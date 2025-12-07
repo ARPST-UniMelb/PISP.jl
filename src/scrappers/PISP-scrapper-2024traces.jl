@@ -1,6 +1,4 @@
-
 module ISPTraceDownloader
-
 
     using HTTP
     using Gumbo
@@ -76,9 +74,9 @@ module ISPTraceDownloader
             dest = joinpath(options.outdir, filename)
 
             println("[$i/$(length(trace_links))] Downloading")
-            println("  Text : ", tl.text)
-            println("  URL  : ", tl.href)
-            println("  File : ", dest, "\n")
+            println("  Filename    : ", tl.text)
+            println("  Source URL  : ", tl.href)
+            println("  Destination : ", dest, "\n")
 
             if isfile(dest)
                 if skip_existing
