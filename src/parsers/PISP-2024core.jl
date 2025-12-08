@@ -26,8 +26,8 @@ interval spans financial years.
   receives the generated rows.
 """
 function fill_problem_example(tc::PISPtimeConfig)
-    start_date = DateTime(2025, 1, 1, 0, 0, 0)
-    step_ = Day(7)
+    start_date = DateTime(2030, 1, 1, 0, 0, 0)
+    step_ = Day(120)
     nblocks = 3
     date_blocks = PISP.OrderedDict()
     ref_year = 2025
@@ -97,9 +97,9 @@ for later steps).
   (currently exposing the `SYNC4`, `GENERATORS`, and `PS` tables) that are
   required by the time-varying stage.
 """
-function populate_time_static!(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, paths::NamedTuple)
+function populate_time_static!(ts::PISPtimeStatic, tv::PISPtimeVarying, paths::NamedTuple; refyear::Int64=2011, poe::Int64=10)
     PISP.bus_table(ts)
-    PISP.dem_load(tc, ts, tv, paths.profiledata)
+    PISP.dem_load(ts)
 
     txdata = PISP.line_table(ts, tv, paths.ispdata24)
     PISP.line_invoptions(ts, paths.ispdata24)
@@ -115,7 +115,7 @@ function populate_time_static!(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPt
 end
 
 """
-    populate_time_varying!(tc, ts, tv, paths, static_artifacts)
+    populate_time_varying!(tc, ts, tv, paths, static_artifacts; refyear::Int64=2011)
 
 Populate the time-varying data structures such as schedules, inflows and DER
 profiles. The function expects the `static_artifacts` output of
@@ -136,21 +136,21 @@ derived without recomputing inputs.
   post-processing utilities.
 """
 function populate_time_varying!(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying,
-        paths::NamedTuple, static_artifacts::NamedTuple)
+        paths::NamedTuple, static_artifacts::NamedTuple; refyear::Int64=2011, poe::Int64=10)
     txdata = static_artifacts.txdata
     generator_tables = static_artifacts.generator_tables
-
+    PISP.dem_load_sched(tc, tv, paths.profiledata; refyear=refyear, poe=poe)
     PISP.line_sched_table(tc, tv, txdata)
     PISP.gen_n_sched_table(tv, generator_tables.SYNC4, generator_tables.GENERATORS)
     PISP.gen_retirements(ts, tv)
-    PISP.gen_pmax_distpv(tc, ts, tv, paths.profiledata)
-    PISP.gen_pmax_solar(tc, ts, tv, paths.ispdata24, paths.outlookdata, paths.outlookAEMO, paths.profiledata)
-    PISP.gen_pmax_wind(tc, ts, tv, paths.ispdata24, paths.outlookdata, paths.outlookAEMO, paths.profiledata)
-    SNOWY_GENS = PISP.gen_inflow_sched(ts, tv, tc, paths.ispdata24)
+    PISP.gen_pmax_distpv(tc, ts, tv, paths.profiledata; refyear=refyear, poe=poe)
+    PISP.gen_pmax_solar(tc, ts, tv, paths.ispdata24, paths.outlookdata, paths.outlookAEMO, paths.profiledata; refyear=refyear)
+    PISP.gen_pmax_wind(tc, ts, tv, paths.ispdata24, paths.outlookdata, paths.outlookAEMO, paths.profiledata; refyear=refyear)
+    SNOWY_GENS = PISP.gen_inflow_sched(ts, tv, tc, paths.ispdata24, paths.ispmodel)
 
     PISP.ess_vpps(tc, ts, tv, paths.vpp_cap, paths.vpp_ene)
     PISP.ess_inflow_sched(ts, tv, tc, paths.ispdata24, SNOWY_GENS)
-    PISP.der_pred_sched(ts, tv, paths.dsp_data)
+    PISP.der_pred_sched(ts, tv, paths.ispdata24)
 end
 
 """
@@ -179,14 +179,19 @@ function write_time_data(
         arrow_varying_path::AbstractString  = "test-hydro/out-hydro-arrow/schedule-1w-new",
         write_static::Bool  = true,
         write_varying::Bool = true,
+        output_root::Union{Nothing,AbstractString} = nothing,
+        write_csv::Bool = true,
+        write_arrow::Bool = true
 )
+    to_path(p) = isnothing(output_root) ? p : normpath(output_root, p)
+
     if write_static
-        PISP.PISPwritedataCSV(ts, csv_static_path)
-        PISP.PISPwritedataArrow(ts, arrow_static_path)
+        if write_csv PISP.PISPwritedataCSV(ts, to_path(csv_static_path)) end
+        if write_arrow PISP.PISPwritedataArrow(ts, to_path(arrow_static_path)) end
     end
 
     if write_varying
-        PISP.PISPwritedataCSV(tv, csv_varying_path)
-        PISP.PISPwritedataArrow(tv, arrow_varying_path)
+        if write_csv PISP.PISPwritedataCSV(tv, to_path(csv_varying_path)) end
+        if write_arrow PISP.PISPwritedataArrow(tv, to_path(arrow_varying_path)) end
     end
-end 
+end

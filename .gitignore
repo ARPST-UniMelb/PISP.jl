@@ -17,3 +17,11 @@ test/
 test-*/
 !data-updated/
 !data-updated/**
+*.zip
+*.xml
+*.DS_Store
+*.xls*
+*.xml
+*.zip
+data*
+*.DS_Store
