@@ -155,3 +155,14 @@ name_ex = Dict(     "Ararat Wind Farm"                          => "ARWF1_RefYea
                     "Yaloak South Wind Farm"                    => "YSWF1_RefYear4006.csv",
                     "Yambuk Wind Farm"                          => "YAMBUKWF_RefYear4006.csv",
                     "Yendon Wind Farm" => "YENDWF1_RefYear4006.csv")
+
+# Generate a function that returns name_ex parameterised based on the year, replacing 4006 with the desired year
+function get_name_ex(year::Int)
+    year_str = string(year)
+    name_ex_year = Dict{String,String}()
+    for (key, value) in name_ex
+        new_value = replace(value, "4006" => year_str)
+        name_ex_year[key] = new_value
+    end
+    return name_ex_year
+end
