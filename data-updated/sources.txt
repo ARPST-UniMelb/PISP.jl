@@ -1,6 +1,0 @@
-# 2024 ISP Inputs and Assumptions workbook 
-https://www.aemo.com.au/-/media/files/major-publications/isp/2024/2024-isp-inputs-and-assumptions-workbook.xlsx?rev=c75116cf5a834eeaa6b4ed68cff9b117&sc_lang=en
-# 2019 Inputs and Assumptions workbook
-https://www.aemo.com.au/-/media/files/electricity/nem/planning_and_forecasting/inputs-assumptions-methodologies/2019/2019-input-and-assumptions-workbook-v1-3-dec-19.xlsx?rev=b6fb3a0d7bd849eea781e99f8c89544a&sc_lang=en
-# 2024 ISP generation and storage outlook
-https://www.aemo.com.au/-/media/files/major-publications/isp/2024/supporting-materials/2024-isp-generation-and-storage-outlook.zip?rev=986359059f934cc0bbbd94d0b5280e68&sc_lang=en
