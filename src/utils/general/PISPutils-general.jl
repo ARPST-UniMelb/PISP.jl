@@ -11,7 +11,7 @@ function default_data_paths(;filepath=@__DIR__)
     )
 end
 
-function fill_problem_table_year(tc::PISPtimeConfig, year::Int)
+function fill_problem_table_year(tc::PISPtimeConfig, year::Int; sce=keys(PISP.ID2SCE))
     # Generate date blocks from 2025 to 2035, with periods starting 01/01 and 01/07
     date_blocks = PISP.OrderedDict()
     block_id = 1
@@ -31,7 +31,7 @@ function fill_problem_table_year(tc::PISPtimeConfig, year::Int)
     # Create problem entries for each scenario and each date block
     row_id = 1
     for (block_num, (dstart, dend, year)) in date_blocks
-        for sc in keys(PISP.ID2SCE)
+        for sc in sce
             pbname = "$(PISP.ID2SCE[sc])_$(year)_$(month(dstart) == 1 ? "H1" : "H2")" # H1 for first half, H2 for second half   
             arr = [row_id, replace(pbname, " " => "_"), sc, 1, "UC", dstart, dend, 60]
             push!(tc.problem, arr)
@@ -50,6 +50,7 @@ function build_ISP24_datasets(;
     write_csv::Bool = true,
     write_arrow::Bool = true,
     download_from_AEMO::Bool = true,
+    scenarios::AbstractVector{<:String} = keys(PISP.ID2SCE),
 )
     if any(y -> y < 2025 || y > 2050, years)
         throw(ArgumentError("Years must be between 2025 and 2050 (got $(years))."))
@@ -64,7 +65,7 @@ function build_ISP24_datasets(;
 
     for year in years
         tc, ts, tv = PISP.initialise_time_structures()
-        @time fill_problem_table_year(tc, year)
+        @time fill_problem_table_year(tc, year, sce=scenarios)
         @time static_params = PISP.populate_time_static!(ts, tv, data_paths; refyear = reftrace, poe = poe)
         @info "Populating time-varying data from ISP 2024 - POE $(poe) - reference weather trace $(reftrace) - planning year $(year) ..."
         @time PISP.populate_time_varying!(tc, ts, tv, data_paths, static_params; refyear = reftrace, poe = poe)
