@@ -68,15 +68,19 @@ function filterSortTimeseriesData(timeseries_data, units::NamedTuple,
         end
         start_data = unstack(latest_until_start, [], filter_by, :value)
         start_data.date .= start_dt
+    else
+        start_data = DataFrame(date=start_dt)
     end
+
     # And add the missing columns with the default value
     # (in case there is a change within the time-window, but no value beforehand)
     for id in unique_ids
         if !(string(id) in names(start_data))
             if static_data_column == "" # if no static data provided, return missing
-                initial_value = Vector{Union{Missing, Int, Float64}}([missing])
+                error("No static/initial value found for $filter_by $id ! The required start date might be before the first available time-series demand data point.")
+                #initial_value = Vector{Union{Missing, Int64, Float64}}([missing])
             else
-                initial_value = static_data[static_data.id .== id, static_data_column]
+                initial_value = static_data[static_data[!,filter_by] .== id, static_data_column]
             end
             start_data[!, string(id)] = initial_value
         end
@@ -86,12 +90,7 @@ function filterSortTimeseriesData(timeseries_data, units::NamedTuple,
     resampled_data = DataFrame(date=start_dt:units.T(units.L):end_dt)
 
     # Step 4: Combine with start data
-    if nrow(until_start_data) > 0
-        # Add start values
-        result = leftjoin(resampled_data, start_data, on=:date)
-    else
-        result = copy(resampled_data)
-    end
+    result = leftjoin(resampled_data, start_data, on=:date)
 
     # Step 5: Now add the time-series data within the time-window
     filter!(row -> row[:date] >= start_dt, sorted_data)
