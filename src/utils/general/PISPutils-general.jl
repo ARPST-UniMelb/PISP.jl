@@ -59,7 +59,7 @@ function build_ISP24_datasets(;
     data_paths = PISP.default_data_paths(filepath=downloadpath)
 
     # Download/extract/build inputs once
-    PISP.build_pipeline(data_root = downloadpath, poe = poe, download_files = download_from_AEMO)
+    PISP.build_pipeline(data_root = downloadpath, poe = poe, download_files = download_from_AEMO, overwrite_extracts = false)
 
     base_name = "$(output_name)-ref$(reftrace)-poe$(poe)"
 
