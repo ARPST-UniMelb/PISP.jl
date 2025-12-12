@@ -98,9 +98,19 @@ module PISPScrapperUtils
         mkpath(abs_dest)
 
         if Sys.iswindows()
-            force_flag = overwrite ? "-Force" : ""
-            quiet_flag = quiet ? "-Verbose:\$false" : ""
-            cmd = `powershell -NoLogo -NoProfile -Command Expand-Archive -LiteralPath $(abs_zip) -DestinationPath $(abs_dest) $force_flag $quiet_flag`
+            force_flag = overwrite ? " -Force" : ""
+            quiet_flag = quiet ? " -Verbose:\$false" : ""
+            # Quote paths so PowerShell doesn't misread dashes/spaces as flags.
+            ps_quote(path) = "'$(replace(path, "'" => "''"))'"
+            ps_command = string(
+                "Expand-Archive -LiteralPath ",
+                ps_quote(abs_zip),
+                " -DestinationPath ",
+                ps_quote(abs_dest),
+                force_flag,
+                quiet_flag,
+            )
+            cmd = Cmd(["powershell", "-NoLogo", "-NoProfile", "-Command", ps_command])
             run(cmd)
         else
             args = ["unzip"]
