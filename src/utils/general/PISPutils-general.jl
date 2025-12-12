@@ -50,7 +50,7 @@ function build_ISP24_datasets(;
     write_csv::Bool = true,
     write_arrow::Bool = true,
     download_from_AEMO::Bool = true,
-    scenarios::AbstractVector{<:String} = keys(PISP.ID2SCE),
+    scenarios::AbstractVector{<:Int64} = keys(PISP.ID2SCE),
 )
     if any(y -> y < 2025 || y > 2050, years)
         throw(ArgumentError("Years must be between 2025 and 2050 (got $(years))."))
