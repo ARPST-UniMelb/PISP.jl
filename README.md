@@ -3,7 +3,9 @@
 [![Build Status](https://github.com/papablazad/PISP.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/papablazad/PISP.jl/actions/workflows/CI.yml?query=branch%3Amain)
 [![Coverage](https://codecov.io/gh/papablazad/PISP.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/papablazad/PISP.jl)
 
-**PISP** (short for *Julia Parser of the Integrated System Plan*) is an open-source toolkit for parsing and generating structured datasets for power system studies. It is built on publicly available information from the Integrated System Plan (ISP) released by the Australian Energy Market Operator (AEMO) for the Australian National Electricity Market (NEM)
+**PISP** (short for *Julia Parser of the Integrated System Plan*) is an open-source toolkit for parsing and generating structured datasets of the East Coast Australian Power System for power system studies. 
+
+The data parsing functionalities are built on publicly available information from the Integrated System Plan (ISP) released by the Australian Energy Market Operator (AEMO) for the Australian National Electricity Market (NEM).
 
 > [!CAUTION]
 > The current release is fully functional and has been extensively tested; however, bugs or other issues may still arise. We would greatly appreciate any feedback or bug reports submitted via https://github.com/ARPST-UniMelb/PISP.jl/issues 
