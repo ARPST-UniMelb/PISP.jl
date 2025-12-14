@@ -9,6 +9,6 @@ PISP.build_ISP24_datasets(
                         output_name  = "out",                 # Output folder name   
                         output_root  = normpath(@__DIR__, "../../", "PISP-outputs"),   # Root output path where the output folder will be created
                         write_csv    = true,                  # Whether to write CSV files
-                        write_arrow  = false,                 # Whether to write Arrow files
+                        write_arrow  = true,                 # Whether to write Arrow files
                         scenarios    = [1,2,3]                # Scenarios to include in the output: 1 for "Progressive Change", 2 for "Step Change", 3 for "Green Energy Exports"
                     )    
