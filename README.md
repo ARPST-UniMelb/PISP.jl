@@ -1,4 +1,5 @@
 # PISP.jl: Julia parser of the Integrated System Plan
+[![Build Status](https://github.com/ARPST-UniMelb/PISP.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/ARPST-UniMelb/PISP.jl/actions/workflows/CI.yml?query=branch%3Amain)
 
 **PISP** (short for *Julia Parser of the Integrated System Plan*) is an open-source toolkit for parsing and generating structured datasets of the East Coast Australian Power System for power system studies. 
 
