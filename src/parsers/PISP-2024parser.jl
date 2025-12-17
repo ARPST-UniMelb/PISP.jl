@@ -721,7 +721,7 @@ function generator_table(ts::PISPtimeStatic, ispdata19::String, ispdata24::Strin
     GENERATORS[!,:cvar] = SYNC4[!,Symbol("SRMC (\$/MWh)")]
     GENERATORS[!,:cfuel] = SYNC4[!, Symbol("Fuel cost (\$/GJ)")]
     GENERATORS[!,:cvom] = SYNC4[!, Symbol("VOM (\$/MWh sent-out)")]
-    GENERATORS[!,:cfom] = SYNC4[!, Symbol("FOM (\$/kW/annum)")]./1000
+    GENERATORS[!,:cfom] = SYNC4[!, Symbol("FOM (\$/kW/annum)")].*1000
     GENERATORS[!,:co2] = SYNC4[!,:Emissions]
     GENERATORS[!,:slope] = [slopear[GENERATORS[k,:tech]] for k in 1:nrow(SYNC4) ]
     GENERATORS[!,:hrate] = SYNC4[!, Symbol("Heat rate (GJ/MWh HHV s.o.)")]

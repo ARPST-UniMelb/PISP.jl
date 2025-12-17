@@ -44,11 +44,11 @@ There are multiple parameters that can be adjusted when generating the dataset f
 |`output_root`|nothing| Output folder path
 |`write_csv`|true| Whether to write CSV (.csv) files
 |`write_arrow`|true|Whether to write Arrow (.arrow) files 
-|`scenarios`|[1,2,3]|Scenarios to include in the output: 1 for "Progressive Change", 2 for "Step Change", 3 for "Green Energy Exports", from the 2024 ISP
+|`scenarios`|[1,2,3]|Scenarios to include in the output: 1 for `Progressive Change`, 2 for `Step Change`, 3 for `Green Energy Exports`, from the 2024 ISP
 
 
 ## Description of dataset formatting
-
+Below, an overview of each of the databases the parser produces is given.
 ## Files description
 > [!NOTE] 
 > **NEM12**: Time-static information
