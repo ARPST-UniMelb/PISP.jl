@@ -32,6 +32,13 @@ function filterSortTimeseriesData(timeseries_data, units::NamedTuple,
     end
 
     # ========================================
+    # If filter_values is empty (i.e. [], hence no values requested), return an empty DataFrame with the correct date range
+    if filter_values !== nothing && isempty(filter_values)
+        date_range = DataFrame(date=start_dt:units.T(units.L):end_dt)
+        return date_range
+    end
+
+    # ========================================
     # Filter the data based on the provided parameters
     filtered_data = filter(row -> row[:scenario] == scenario, timeseries_data)
 
