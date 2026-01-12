@@ -28,27 +28,27 @@ Retirements2024 = [
                         "Gladstone"     => [(1,7,2027,3),(1,7,2030,1),(1,7,2031,0)], 
                         #NNSW
                         #CNSW
-                        "Bayswater"     => [(1,7,2028,3), (1,7,2029,0)],#x4 OK PROGRESSIVE
-                        "Mt Piper"      => [(1,7,2040,0)],#x2 OK PROGRESSIVE
+                        "Bayswater"     => [(1,7,2028,3), (1,7,2029,0)],#x4 PROGRESSIVE
+                        "Mt Piper"      => [(1,7,2040,0)],#x2 PROGRESSIVE
                         #SNSW
                         #SNW
-                        "Eraring"       => [(1,7,2025,0)],#x4 OK PROGRESSIVE
-                        "Vales Point B" => [(1,7,2028,0)],#x2 OK PROGRESSIVE
+                        "Eraring"       => [(1,7,2025,0)],#x4 PROGRESSIVE
+                        "Vales Point B" => [(1,7,2028,0)],#x2 PROGRESSIVE
                     #BROWN COAL 
                         #VIC
-                        "Yallourn W"    => [(1,7,2028,0)],#x4 OK PROGRESSIVE
-                        "Loy Yang A Power Station"    => [(1,7,2033,0)],#x4 OK PROGRESSIVE
-                        "Loy Yang B"    => [(1,7,2034,1),(1,7,2047,0)],#x2 OK PROGRESSIVE
+                        "Yallourn W"    => [(1,7,2028,0)],#x4 PROGRESSIVE
+                        "Loy Yang A Power Station"    => [(1,7,2033,0)],#x4 PROGRESSIVE
+                        "Loy Yang B"    => [(1,7,2034,1),(1,7,2047,0)],#x2 PROGRESSIVE
                     #MIDMERIT GAS
                         #NQ
-                        "Townsville Power Station"  => [(1,7,2046,0)], #YABULU OK PROGRESSIVE
+                        "Townsville Power Station"  => [(1,7,2046,0)], #YABULU PROGRESSIVE
                         #CQ
                         #SQ
-                        "Condamine A"               => [(1,7,2039,0)],  #x3 OK PROGRESSIVE
-                        "Darling Downs"             => [(1,7,2045,0)],  #x4 OK PROGRESSIVE
-                        "Swanbank E GT"             => [(1,7,2036,0)],  #x1 OK PROGRESSIVE
+                        "Condamine A"               => [(1,7,2039,0)],  #x3 PROGRESSIVE
+                        "Darling Downs"             => [(1,7,2045,0)],  #x4 PROGRESSIVE
+                        "Swanbank E GT"             => [(1,7,2036,0)],  #x1 PROGRESSIVE
                         #GG
-                        "Yarwun Cogen"              => [(1,7,2050,0)], # OK PROGRESSIVE 
+                        "Yarwun Cogen"              => [(1,7,2050,0)], # PROGRESSIVE 
                         #NNSW
                         #CNSW
                         #SNSW
@@ -65,13 +65,13 @@ Retirements2024 = [
                         "Tamar Valley Combined Cycle"              => [(1,7,2027,0)], 
                     #FLEXIBLE GAS
                         #NQ
-                        "Mt Stuart"                 => [(1,7,2033,1),(1,7,2044,0)], #x3 OK PROGRESSIVE
+                        "Mt Stuart"                 => [(1,7,2033,1),(1,7,2044,0)], #x3 PROGRESSIVE
                         #CQ
                         "Barcaldine Power Station"  => [(1,7,2034,0)], 
                         #SQ
                         "Roma"                      => [(1,7,2034,0)], 
-                        "Braemar"                   => [(1,7,2046,0)],  #x3 OK PROGRESSIVE
-                        "Braemar 2 Power Station"   => [(1,7,2049,0)], #x3 OK PROGRESSIVE
+                        "Braemar"                   => [(1,7,2046,0)],  #x3 PROGRESSIVE
+                        "Braemar 2 Power Station"   => [(1,7,2049,0)], #x3 PROGRESSIVE
                         "Oakey Power Station"       => [(1,7,2050,0)], 
                         #GG
                         #NNSW
@@ -81,25 +81,25 @@ Retirements2024 = [
                         #SNW
                         "Smithfield Energy Facility" =>[(1,7,2044,0)], 
                         #VIC
-                        "Somerton"                      => [(1,7,2033,0)],  #x3 OK PROGRESSIVE
-                        "Jeeralang A"                   => [(1,7,2039,0)],  #x4 OK PROGRESSIVE
-                        "Jeeralang B"                   => [(1,7,2039,0)],  #x3 OK PROGRESSIVE
-                        "Bairnsdale"                    => [(1,7,2042,0)],  #x2 OK PROGRESSIVE
-                        "Mortlake"                      => [(1,7,2047,0)],  #x2 OK PROGRESSIVE
+                        "Somerton"                      => [(1,7,2033,0)],  #x3 PROGRESSIVE
+                        "Jeeralang A"                   => [(1,7,2039,0)],  #x4 PROGRESSIVE
+                        "Jeeralang B"                   => [(1,7,2039,0)],  #x3 PROGRESSIVE
+                        "Bairnsdale"                    => [(1,7,2042,0)],  #x2 PROGRESSIVE
+                        "Mortlake"                      => [(1,7,2047,0)],  #x2 PROGRESSIVE
                         #CSA
-                        "Port Lincoln GT"               => [(1,7,2027,0)],  #x2 OK PROGRESSIVE
-                        "Dry Creek GT"                  => [(1,7,2030,0)],  #x3 OK PROGRESSIVE
-                        "Mintaro GT"                    => [(1,7,2030,0)],  #x1 OK PROGRESSIVE
+                        "Port Lincoln GT"               => [(1,7,2027,0)],  #x2 PROGRESSIVE
+                        "Dry Creek GT"                  => [(1,7,2030,0)],  #x3 PROGRESSIVE
+                        "Mintaro GT"                    => [(1,7,2030,0)],  #x1 PROGRESSIVE
                         "Hallett GT"                    => [(1,7,2032,0)],   
                         "Barker Inlet Power Station"                  => [(1,7,2044,0)],  
-                        "Bolivar Power Station"         => [(1,7,2045,0)],  #x1 OK PROGRESSIVE
-                        "Snapper Point Power Station"   => [(1,7,2046,0)],  #x5 OK PROGRESSIVE
+                        "Bolivar Power Station"         => [(1,7,2045,0)],  #x1 PROGRESSIVE
+                        "Snapper Point Power Station"   => [(1,7,2046,0)],  #x5 PROGRESSIVE
                         #SESA
-                        "Snuggery" => [(1,7,2027,0)],           #x3 OK PROGRESSIVE
-                        "Ladbroke Grove" => [(1,7,2035,0)],     #x2 OK PROGRESSIVE
+                        "Snuggery" => [(1,7,2027,0)],           #x3 PROGRESSIVE
+                        "Ladbroke Grove" => [(1,7,2035,0)],     #x2 PROGRESSIVE
                         #TAS
-                        "Bell Bay Three" => [(1,7,2040,0)],     #x3 OK PROGRESSIVE
-                        "Tamar Valley Peaking" => [(1,7,2050,0)]#x1 OK PROGRESSIVE 
+                        "Bell Bay Three" => [(1,7,2040,0)],     #x3 PROGRESSIVE
+                        "Tamar Valley Peaking" => [(1,7,2050,0)]#x1 PROGRESSIVE 
                     ),
 
                     Dict(# STEP CHANGE ID 2
@@ -196,90 +196,90 @@ Retirements2024 = [
                     #BLACK COAL
                         #NQ
                         #CQ
-                        "Callide B" => [(1,7,2027,0)],                              #OK GREEN
-                        "Callide C" => [(1,7,2030,0)],                              #OK GREEN
-                        "Stanwell"  => [(1,7,2028,3), (1,7,2029,1), (1,7,2030,0)], #x4 OK GREEN
+                        "Callide B" => [(1,7,2027,0)],                              # GREEN
+                        "Callide C" => [(1,7,2030,0)],                              # GREEN
+                        "Stanwell"  => [(1,7,2028,3), (1,7,2029,1), (1,7,2030,0)], #x4  GREEN
                         #SQ
-                        "Tarong"        => [(1,7,2027,0)],               #OK GREEN
-                        "Tarong North"  => [(1,7,2027,0)],               #OK GREEN
-                        "Kogan Creek"   => [(1,7,2028,0)],               #OK GREEN
-                        "Millmerran"    => [(1,7,2030,1), (1,7,2033,0)], #OK GREEN 
+                        "Tarong"        => [(1,7,2027,0)],               # GREEN
+                        "Tarong North"  => [(1,7,2027,0)],               # GREEN
+                        "Kogan Creek"   => [(1,7,2028,0)],               # GREEN
+                        "Millmerran"    => [(1,7,2030,1), (1,7,2033,0)], # GREEN 
                         #GG
-                        "Gladstone"     => [(1,7,2029,4),(1,7,2030,0)],  #OK GREEN
+                        "Gladstone"     => [(1,7,2029,4),(1,7,2030,0)],  # GREEN
                         #NNSW
                         #CNSW
-                        "Bayswater"     => [(1,7,2028,3), (1,7,2029,0)],#x4 OK GREEN
-                        "Mt Piper"      => [(1,7,2030,1), (1,7,2031,0)],#x2 OK GREEN
+                        "Bayswater"     => [(1,7,2028,3), (1,7,2029,0)],#x4  GREEN
+                        "Mt Piper"      => [(1,7,2030,1), (1,7,2031,0)],#x2  GREEN
                         #SNSW
                         #SNW
-                        "Eraring"       => [(1,7,2025,0)],              #x4 OK GREEN
-                        "Vales Point B" => [(1,7,2027,1), (1,7,2028,0)],#x2 OK GREEN
+                        "Eraring"       => [(1,7,2025,0)],              #x4  GREEN
+                        "Vales Point B" => [(1,7,2027,1), (1,7,2028,0)],#x2  GREEN
                     #BROWN COAL 
                         #VIC
-                        "Yallourn W"    => [(1,7,2028,0)],#x4 OK GREEN
-                        "Loy Yang A Power Station"    => [(1,7,2027,0)],#x4 OK GREEN
-                        "Loy Yang B"    => [(1,7,2031,0)],#x2 OK GREEN
+                        "Yallourn W"    => [(1,7,2028,0)],#x4  GREEN
+                        "Loy Yang A Power Station"    => [(1,7,2027,0)],#x4  GREEN
+                        "Loy Yang B"    => [(1,7,2031,0)],#x2  GREEN
                     #MIDMERIT GAS
                         #NQ
-                        "Townsville Power Station"  => [(1,7,2046,0)], #YABULU OK GREEN
+                        "Townsville Power Station"  => [(1,7,2046,0)], #YABULU  GREEN
                         #CQ
                         #SQ
-                        "Condamine A"               => [(1,7,2039,0)],  #x3 OK GREEN
-                        "Darling Downs"             => [(1,7,2045,0)],  #x4 OK GREEN
-                        "Swanbank E GT"             => [(1,7,2036,0)],  #x1 OK GREEN
+                        "Condamine A"               => [(1,7,2039,0)],  #x3 GREEN
+                        "Darling Downs"             => [(1,7,2045,0)],  #x4 GREEN
+                        "Swanbank E GT"             => [(1,7,2036,0)],  #x1 GREEN
                         #GG
-                        "Yarwun Cogen"              => [(1,7,2050,0)], #OK GREEN
+                        "Yarwun Cogen"              => [(1,7,2050,0)], # GREEN
                         #NNSW
                         #CNSW
                         #SNSW
                         #SNW
-                        "Tallawarra"                => [(1,7,2043,0)], #OK GREEN
+                        "Tallawarra"                => [(1,7,2043,0)], # GREEN
                         #VIC
-                        "Newport"                   => [(1,7,2036,0)], #OK GREEN
+                        "Newport"                   => [(1,7,2036,0)], # GREEN
                         #CSA
-                        "Osborne"                   => [(1,7,2026,0)], #OK GREEN
-                        "Torrens Island B"          => [(1,7,2026,0)], #OK GREEN
-                        "Pelican Point"             => [(1,7,2037,0)], #OK GREEN
+                        "Osborne"                   => [(1,7,2026,0)], # GREEN
+                        "Torrens Island B"          => [(1,7,2026,0)], # GREEN
+                        "Pelican Point"             => [(1,7,2037,0)], # GREEN
                         #SESA
                         #TAS
-                        "Tamar Valley Combined Cycle"              => [(1,7,2027,0)], #OK GREEN
+                        "Tamar Valley Combined Cycle"              => [(1,7,2027,0)], # GREEN
                     #FLEXIBLE GAS
                         #NQ
-                        "Mt Stuart"                 => [(1,7,2033,1),(1,7,2044,0)], #x3 OK GREEN
+                        "Mt Stuart"                 => [(1,7,2033,1),(1,7,2044,0)], #x3  GREEN
                         #CQ
-                        "Barcaldine Power Station"  => [(1,7,2034,0)], #OK GREEN
+                        "Barcaldine Power Station"  => [(1,7,2034,0)], # GREEN
                         #SQ
-                        "Roma"                      => [(1,7,2034,0)],  #OK GREEN
-                        "Braemar"                   => [(1,7,2046,0)],  #x3 OK GREEN
-                        "Braemar 2 Power Station"   => [(1,7,2049,0)],  #x3 OK GREEN
-                        "Oakey Power Station"       => [(1,7,2050,0)],  #OK GREEN
+                        "Roma"                      => [(1,7,2034,0)],  # GREEN
+                        "Braemar"                   => [(1,7,2046,0)],  #x3  GREEN
+                        "Braemar 2 Power Station"   => [(1,7,2049,0)],  #x3  GREEN
+                        "Oakey Power Station"       => [(1,7,2050,0)],  # GREEN
                         #GG
                         #NNSW
                         #CNSW
                         #SNSW
-                        "Uranquinty"                  => [(1,7,2044,0)], #OK GREEN
+                        "Uranquinty"                  => [(1,7,2044,0)], # GREEN
                         #SNW
-                        "Smithfield Energy Facility" =>[(1,7,2044,0)],#OK GREEN
+                        "Smithfield Energy Facility" =>[(1,7,2044,0)],# GREEN
                         #VIC
-                        "Somerton"                      => [(1,7,2033,0)],  #x3 OK GREEN
-                        "Jeeralang A"                   => [(1,7,2039,0)],  #x4 OK GREEN
-                        "Jeeralang B"                   => [(1,7,2039,0)],  #x3 OK GREEN
-                        "Bairnsdale"                    => [(1,7,2042,0)],  #x2 OK GREEN
-                        "Mortlake"                      => [(1,7,2047,0)],  #x2 OK GREEN
+                        "Somerton"                      => [(1,7,2033,0)],  #x3  GREEN
+                        "Jeeralang A"                   => [(1,7,2039,0)],  #x4  GREEN
+                        "Jeeralang B"                   => [(1,7,2039,0)],  #x3  GREEN
+                        "Bairnsdale"                    => [(1,7,2042,0)],  #x2  GREEN
+                        "Mortlake"                      => [(1,7,2047,0)],  #x2  GREEN
                         #CSA
-                        "Port Lincoln GT"               => [(1,7,2027,0)],  #x2 OK GREEN
-                        "Dry Creek GT"                  => [(1,7,2030,0)],  #x3 OK GREEN
-                        "Mintaro GT"                    => [(1,7,2030,0)],  #x1 OK GREEN
-                        "Hallett GT"                    => [(1,7,2032,0)],  #OK GREEN
-                        "Barker Inlet Power Station"                  => [(1,7,2044,0)],  #OK GREEN
-                        "Bolivar Power Station"         => [(1,7,2045,0)],  #x1 OK GREEN
-                        "Snapper Point Power Station"   => [(1,7,2046,0)],  #x5 OK GREEN
+                        "Port Lincoln GT"               => [(1,7,2027,0)],  #x2  GREEN
+                        "Dry Creek GT"                  => [(1,7,2030,0)],  #x3  GREEN
+                        "Mintaro GT"                    => [(1,7,2030,0)],  #x1  GREEN
+                        "Hallett GT"                    => [(1,7,2032,0)],  # GREEN
+                        "Barker Inlet Power Station"                  => [(1,7,2044,0)],  # GREEN
+                        "Bolivar Power Station"         => [(1,7,2045,0)],  #x1  GREEN
+                        "Snapper Point Power Station"   => [(1,7,2046,0)],  #x5  GREEN
                         #SESA
-                        "Snuggery"          => [(1,7,2027,0)],  #x3 OK GREEN
-                        "Ladbroke Grove"    => [(1,7,2035,0)],  #x2 OK GREEN
+                        "Snuggery"          => [(1,7,2027,0)],  #x3  GREEN
+                        "Ladbroke Grove"    => [(1,7,2035,0)],  #x2  GREEN
                         #TAS
-                        "Bell Bay Three"        => [(1,7,2040,0)],  #x3 OK GREEN
-                        "Tamar Valley Peaking"  => [(1,7,2050,0)]   #x1 OK GREEN
+                        "Bell Bay Three"        => [(1,7,2040,0)],  #x3  GREEN
+                        "Tamar Valley Peaking"  => [(1,7,2050,0)]   #x1  GREEN
 
                     ),
 

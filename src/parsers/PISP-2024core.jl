@@ -173,10 +173,10 @@ overridden via keyword arguments.
 function write_time_data(
         ts::PISPtimeStatic,
         tv::PISPtimeVarying;
-        csv_static_path::AbstractString     = "test-hydro/out-hydro",
-        csv_varying_path::AbstractString    = "test-hydro/out-hydro/schedule-1w-new",
-        arrow_static_path::AbstractString   = "test-hydro/out-hydro-arrow",
-        arrow_varying_path::AbstractString  = "test-hydro/out-hydro-arrow/schedule-1w-new",
+        csv_static_path::AbstractString,
+        csv_varying_path::AbstractString,
+        arrow_static_path::AbstractString,
+        arrow_varying_path::AbstractString,
         write_static::Bool  = true,
         write_varying::Bool = true,
         output_root::Union{Nothing,AbstractString} = nothing,
