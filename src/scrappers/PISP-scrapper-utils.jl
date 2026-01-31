@@ -102,7 +102,7 @@ module PISPScrapperUtils
             quiet_flag = quiet ? " -Verbose:\$false" : ""
             # Quote paths so PowerShell doesn't misread dashes/spaces as flags.
             ps_quote(path) = "'$(replace(path, "'" => "''"))'"
-            ps_command = string(
+            expand_command = string(
                 "Expand-Archive -LiteralPath ",
                 ps_quote(abs_zip),
                 " -DestinationPath ",
@@ -110,6 +110,17 @@ module PISPScrapperUtils
                 force_flag,
                 quiet_flag,
             )
+            if overwrite
+                ps_command = expand_command
+            else
+                ps_command = string(
+                    "\$expandErrors = @(); ",
+                    expand_command,
+                    " -ErrorAction SilentlyContinue -ErrorVariable expandErrors; ",
+                    "\$filtered = \$expandErrors | Where-Object { \$_.FullyQualifiedErrorId -ne 'ExpandArchiveFileExists,ExpandArchiveHelper' }; ",
+                    "if (\$filtered) { \$filtered | ForEach-Object { Write-Error -ErrorRecord \$_ }; exit 1 }",
+                )
+            end
             cmd = Cmd(["powershell", "-NoLogo", "-NoProfile", "-Command", ps_command])
             run(cmd)
         else
