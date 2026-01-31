@@ -100,6 +100,7 @@ module PISPScrapperUtils
         if Sys.iswindows()
             force_flag = overwrite ? " -Force" : ""
             quiet_flag = quiet ? " -Verbose:\$false" : ""
+            progress_prefix = quiet ? "\$ProgressPreference = 'SilentlyContinue'; " : ""
             # Quote paths so PowerShell doesn't misread dashes/spaces as flags.
             ps_quote(path) = "'$(replace(path, "'" => "''"))'"
             expand_command = string(
@@ -111,9 +112,10 @@ module PISPScrapperUtils
                 quiet_flag,
             )
             if overwrite
-                ps_command = expand_command
+                ps_command = string(progress_prefix, expand_command)
             else
                 ps_command = string(
+                    progress_prefix,
                     "\$expandErrors = @(); ",
                     expand_command,
                     " -ErrorAction SilentlyContinue -ErrorVariable expandErrors; ",
