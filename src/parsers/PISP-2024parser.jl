@@ -779,16 +779,16 @@ function generator_table(ts::PISPtimeStatic, ispdata19::String, ispdata24::Strin
     # ====================================== #
 
     COMMITMENT = DataFrame(id = 1:nrow(SYNC4))
-    COMMITMENT[!,:gen_id] = 1:nrow(SYNC4)
-    COMMITMENT[!,:down_time] = zeros(nrow(SYNC4))
-    COMMITMENT[!,:up_time] = coalesce.(SYNC4[!,:MinUpTime], 0.0)
-    COMMITMENT[!,:last_state] = zeros(nrow(SYNC4))
+    COMMITMENT[!,:gen_id]            = 1:nrow(SYNC4)
+    COMMITMENT[!,:down_time]         = coalesce.(SYNC4[!,:MinUpTime], 0.0)
+    COMMITMENT[!,:up_time]           = coalesce.(SYNC4[!,:MinUpTime], 0.0)
+    COMMITMENT[!,:last_state]        = zeros(nrow(SYNC4))
     COMMITMENT[!,:last_state_period] = zeros(nrow(SYNC4))
     COMMITMENT[!,:last_state_output] = zeros(nrow(SYNC4))
-    COMMITMENT[!,:start_up_cost] = [GENERATORS[GENERATORS[!,:id_gen] .== k, :fuel][1] == "Coal" ? GENERATORS[GENERATORS[!,:id_gen] .== k, :cvar][1] * GENERATORS[GENERATORS[!,:id_gen] .== k, :pmax][1] * 4.0 : 0.0 for k in COMMITMENT[!,:gen_id] ] # 
-    COMMITMENT[!,:shut_down_cost] = zeros(nrow(SYNC4))
-    COMMITMENT[!,:start_up_time] = zeros(nrow(SYNC4))
-    COMMITMENT[!,:shut_down_time] = zeros(nrow(SYNC4))
+    COMMITMENT[!,:start_up_cost]     = [GENERATORS[GENERATORS[!,:id_gen] .== k, :fuel][1] == "Coal" ? GENERATORS[GENERATORS[!,:id_gen] .== k, :cvar][1] * GENERATORS[GENERATORS[!,:id_gen] .== k, :pmax][1] * 4.0 : 0.0 for k in COMMITMENT[!,:gen_id] ] # 
+    COMMITMENT[!,:shut_down_cost]    = zeros(nrow(SYNC4))
+    COMMITMENT[!,:start_up_time]     = zeros(nrow(SYNC4))
+    COMMITMENT[!,:shut_down_time]    = zeros(nrow(SYNC4))
 
     # MERGE GENERATOR AND COMMITMENT IN left `id` and right `gen_id`. Fill missing values in COMMITMENT with 0
     merged = leftjoin(GENERATORS, COMMITMENT, on = [:id_gen => :gen_id], makeunique=true)
