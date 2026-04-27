@@ -68,6 +68,52 @@ function fill_problem_table_year(tc::PISPtimeConfig, year::Int; sce=keys(PISP.ID
     end
 end
 
+function _to_datetime(d, bound::Symbol)
+    dt = d isa DateTime ? d :
+         d isa Date     ? DateTime(d) :
+         DateTime(Date(string(d), dateformat"dd-mm-yyyy"))
+    bound === :end ? DateTime(year(dt), month(dt), day(dt), 23, 0, 0) :
+                     DateTime(year(dt), month(dt), day(dt),  0, 0, 0)
+end
+
+"""
+    fill_problem_table_drange(tc, dstart, dend; sce = keys(PISP.ID2SCE))
+
+Populate `tc.problem` for an arbitrary date range. If the range crosses the
+July 1 half-year boundary it is automatically split into two blocks (H1/H2),
+matching the structure used by `fill_problem_table_year`. One problem row per
+block per scenario is created with a 60-minute time step, unit weight, and
+problem type `"UC"`.
+
+# Arguments
+- `tc::PISPtimeConfig`: Target time-configuration container mutated in place.
+- `dstart::DateTime`: Start of the date range (inclusive, at 00:00:00).
+- `dend::DateTime`: End of the date range (inclusive, at 23:00:00).
+
+# Keyword Arguments
+- `sce`: Iterable of scenario IDs to include (defaults to all `PISP.ID2SCE` keys).
+"""
+function fill_problem_table_drange(tc::PISPtimeConfig, dstart::DateTime, dend::DateTime; sce=keys(PISP.ID2SCE))
+    july1 = DateTime(year(dstart), 7, 1, 0, 0, 0)
+    blocks = if dstart < july1 && dend >= july1
+        [(dstart, DateTime(year(dstart), 6, 30, 23, 0, 0)),
+         (july1, dend)]
+    else
+        [(dstart, dend)]
+    end
+
+    row_id = 1
+    for (ds, de) in blocks
+        for sc in sce
+            start_str = Dates.format(ds, "ddmmyyyy")
+            end_str   = Dates.format(de, "ddmmyyyy")
+            pbname = replace("$(PISP.ID2SCE[sc])_$(start_str)-$(end_str)", " " => "_")
+            push!(tc.problem, [row_id, pbname, sc, 1, "UC", ds, de, 60])
+            row_id += 1
+        end
+    end
+end
+
 """
     build_ISP24_datasets(; kwargs...)
 
@@ -81,8 +127,15 @@ static/varying tables from the ISP inputs, and writes CSV/Arrow outputs under
   Base directory holding (or receiving) ISP inputs.
 - `poe::Integer = 10`: Probability of exceedance for demand (e.g., 10 or 50).
 - `reftrace::Integer = 4006`: Reference weather trace ID (2011–2023 or 4006).
-- `years::AbstractVector{<:Integer} = [2025]`: Planning years to build (must be
-  within 2025–2050).
+- `years::Union{Nothing,AbstractVector{<:Integer}} = nothing`: Planning years to
+  build (must be within 2025–2050). Defaults to `[2025]` when neither `years`
+  nor `drange` is given. Mutually exclusive with `drange`.
+- `drange::Union{Nothing,AbstractVector} = nothing`: Alternative to `years`. An
+  array of 2-tuples `(start, end)` where each element may be a `Date`,
+  `DateTime`, or `AbstractString` in `"DD-MM-YYYY"` format. One problem entry
+  is created per tuple per scenario. Ranges crossing July 1 are automatically
+  split into two half-year blocks. Output folders are named
+  `schedule-DDMMYYYY-DDMMYYYY`. Mutually exclusive with `years`.
 - `output_name::AbstractString = "out"`: Folder name prefix for outputs.
 - `output_root::Union{Nothing,AbstractString} = nothing`: Optional root path for
   outputs; when `nothing`, uses relative paths.
@@ -93,19 +146,26 @@ static/varying tables from the ISP inputs, and writes CSV/Arrow outputs under
 - `scenarios::AbstractVector{<:Int64} = keys(PISP.ID2SCE)`: Scenario IDs to
   include in the build.
 """
-function build_ISP24_datasets(; 
+function build_ISP24_datasets(;
     downloadpath::AbstractString = normpath(@__DIR__, "../../", "data-download"),
     poe::Integer = 10,
     reftrace::Integer = 4006,
-    years::AbstractVector{<:Integer} = [2025],
-    output_name::AbstractString = "out", # Output folder name
+    years::Union{Nothing,AbstractVector{<:Integer}} = nothing,
+    drange::Union{Nothing,AbstractVector} = nothing,
+    output_name::AbstractString = "out",
     output_root::Union{Nothing,AbstractString} = nothing,
     write_csv::Bool = true,
     write_arrow::Bool = true,
     download_from_AEMO::Bool = true,
     scenarios::AbstractVector{<:Int64} = keys(PISP.ID2SCE),
 )
-    if any(y -> y < 2025 || y > 2050, years)
+    if years !== nothing && drange !== nothing
+        throw(ArgumentError("Only one of `years` or `drange` may be specified, not both."))
+    end
+    if years === nothing && drange === nothing
+        throw(ArgumentError("At least one of `years` or `drange` must be specified."))
+    end
+    if years !== nothing && any(y -> y < 2025 || y > 2050, years)
         throw(ArgumentError("Years must be between 2025 and 2050 (got $(years))."))
     end
 
@@ -116,18 +176,32 @@ function build_ISP24_datasets(;
 
     base_name = "$(output_name)-ref$(reftrace)-poe$(poe)"
 
-    for year in years
+    items = years !== nothing ? years : drange
+    mode  = years !== nothing ? :year : :drange
+
+    for item in items
         tc, ts, tv = PISP.initialise_time_structures()
-        fill_problem_table_year(tc, year, sce=scenarios)
+
+        if mode === :year
+            fill_problem_table_year(tc, item, sce=scenarios)
+            tag = string(item)
+        else
+            (raw_start, raw_end) = item
+            ds = _to_datetime(raw_start, :start)
+            de = _to_datetime(raw_end,   :end)
+            fill_problem_table_drange(tc, ds, de, sce=scenarios)
+            tag = "$(Dates.format(ds, "ddmmyyyy"))-$(Dates.format(de, "ddmmyyyy"))"
+        end
+
         static_params = PISP.populate_time_static!(ts, tv, data_paths; refyear = reftrace, poe = poe)
-        @info "Populating time-varying data from ISP 2024 - POE $(poe) - reference weather trace $(reftrace) - planning year $(year) ..."
+        @info "Populating time-varying data from ISP 2024 - POE $(poe) - reference weather trace $(reftrace) - schedule $(tag) ..."
         PISP.populate_time_varying!(tc, ts, tv, data_paths, static_params; refyear = reftrace, poe = poe)
 
         PISP.write_time_data(ts, tv;
             csv_static_path    = "$(base_name)/csv",
-            csv_varying_path   = "$(base_name)/csv/schedule-$(year)",
+            csv_varying_path   = "$(base_name)/csv/schedule-$(tag)",
             arrow_static_path  = "$(base_name)/arrow",
-            arrow_varying_path = "$(base_name)/arrow/schedule-$(year)",
+            arrow_varying_path = "$(base_name)/arrow/schedule-$(tag)",
             write_static       = true,
             write_varying      = true,
             output_root        = output_root,
