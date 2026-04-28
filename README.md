@@ -9,7 +9,9 @@ The data parsing functionalities are built on publicly available information fro
 > The current release is fully functional and has been extensively tested; however, bugs or other issues may still arise. We would greatly appreciate any feedback or bug reports submitted via https://github.com/ARPST-UniMelb/PISP.jl/issues 
 
 ## Core function
-Dataset construction in PISP is performed through a single high-level function, `build_ISP24_datasets`. A usage example is shown below:
+Dataset construction in PISP is performed through a single high-level function, `build_ISP24_datasets`. Two usage examples are shown below.
+
+**By planning year** (original mode):
 ```julia
 using PISP
 
@@ -28,7 +30,23 @@ PISP.build_ISP24_datasets(
     write_arrow  = false,
     scenarios    = [1,2,3]
     )
+```
 
+**By arbitrary date range** (new `drange` mode):
+```julia
+using PISP
+
+# Build datasets for specific date windows instead of full calendar years
+PISP.build_ISP24_datasets(
+    downloadpath = joinpath(@__DIR__, "..", "data", "pisp-downloads"),
+    poe          = 10,
+    reftrace     = 4006,
+    drange       = [("01-01-2030", "31-03-2030"), ("01-07-2031", "30-09-2031")],
+    output_root  = joinpath(@__DIR__, "..", "data", "pisp-datasets"),
+    write_csv    = true,
+    write_arrow  = false,
+    scenarios    = [1,2,3]
+    )
 ```
 
 ## Optional parameters for PISP.build_ISP24_datasets()
@@ -39,7 +57,8 @@ There are multiple parameters that can be adjusted when generating the dataset f
 |`download_from_AEMO`|true| Whether to download files from AEMO's website
 |`poe`|10| Probability of exceedance (POE) for demand: 10% or 50%
 |`reftrace`|4006| Reference weather year trace: select among 2011 - 2023 or 4006 (trace for the Optimal Development Path, ODP from the 2024 ISP)
-|`years`|[2025]| Calendar years for which to build the time-varying schedules: select among 2025 - 2050
+|`years`|nothing| Planning years for which to build the time-varying schedules: select among 2025 - 2050. Mutually exclusive with `drange`. Defaults to `[2025]` when neither `years` nor `drange` is provided.
+|`drange`|nothing| Alternative to `years`. An array of 2-tuples `(start, end)` where each element may be a `Date`, `DateTime`, or `AbstractString` in `"DD-MM-YYYY"` format. One dataset is generated per tuple per scenario. Ranges that cross July 1 are automatically split into two half-year blocks. Output folders are named `schedule-DDMMYYYY-DDMMYYYY`. Mutually exclusive with `years`.
 |`output_name`|"out"| Output folder name
 |`output_root`|nothing| Output folder path
 |`write_csv`|true| Whether to write CSV (.csv) files
