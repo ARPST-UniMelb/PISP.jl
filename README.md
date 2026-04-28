@@ -58,7 +58,7 @@ There are multiple parameters that can be adjusted when generating the dataset f
 |`poe`|10| Probability of exceedance (POE) for demand: 10% or 50%
 |`reftrace`|4006| Reference weather year trace: select among 2011 - 2023 or 4006 (trace for the Optimal Development Path, ODP from the 2024 ISP)
 |`years`|nothing| Planning years for which to build the time-varying schedules: select among 2025 - 2050. Mutually exclusive with `drange`. Defaults to `[2025]` when neither `years` nor `drange` is provided.
-|`drange`|nothing| Alternative to `years`. An array of 2-tuples `(start, end)` where each element may be a `Date`, `DateTime`, or `AbstractString` in `"DD-MM-YYYY"` format. One dataset is generated per tuple per scenario. Ranges that cross July 1 are automatically split into two half-year blocks. Output folders are named `schedule-DDMMYYYY-DDMMYYYY`. Mutually exclusive with `years`.
+|`drange`|nothing| Alternative to `years`. An array of 2-tuples `(start, end)` where each element may be a `Date`, `DateTime`, or `AbstractString` in `"DD-MM-YYYY"` format. One dataset is generated per tuple per scenario. Output folders are named `schedule-DDMMYYYY-DDMMYYYY`. Mutually exclusive with `years`.
 |`output_name`|"out"| Output folder name
 |`output_root`|nothing| Output folder path
 |`write_csv`|true| Whether to write CSV (.csv) files
