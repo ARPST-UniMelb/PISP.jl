@@ -137,22 +137,32 @@ derived without recomputing inputs.
   post-processing utilities.
 """
 function populate_time_varying!(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying,
-        paths::NamedTuple, static_artifacts::NamedTuple; refyear::Int64=2011, poe::Int64=10)
+        paths::NamedTuple, static_artifacts::NamedTuple; refyear::Int64=2011, poe::Int64=10, skip_traces::Bool=false)
     txdata = static_artifacts.txdata
     generator_tables = static_artifacts.generator_tables
-    PISP.dem_load_sched(tc, tv, paths.profiledata; refyear=refyear, poe=poe)
+
+    # Light functions — always run
     PISP.line_sched_table(tc, tv, txdata)
     PISP.gen_n_sched_table(tv, generator_tables.SYNC4, generator_tables.GENERATORS)
     PISP.gen_retirements(ts, tv)
-    PISP.gen_pmax_distpv(tc, ts, tv, paths.profiledata; refyear=refyear, poe=poe)
-    PISP.gen_pmax_solar(tc, ts, tv, paths.ispdata24, paths.outlookdata, paths.outlookAEMO, paths.profiledata; refyear=refyear)
-    PISP.gen_pmax_wind(tc, ts, tv, paths.ispdata24, paths.outlookdata, paths.outlookAEMO, paths.profiledata; refyear=refyear)
-    SNOWY_GENS = PISP.gen_inflow_sched(ts, tv, tc, paths.ispdata24, paths.ispmodel)
 
-    PISP.ess_vpps(tc, ts, tv, paths.vpp_cap, paths.vpp_ene)
-    PISP.ess_inflow_sched(ts, tv, tc, paths.ispdata24, SNOWY_GENS)
-    PISP.der_pred_sched(ts, tv, paths.ispdata24)
-    PISP.ev_der_sched(tc, ts, tv, paths.ispdata24, paths.iasr23_ev_workbook)
+    if !skip_traces
+        PISP.dem_load_sched(tc, tv, paths.profiledata; refyear=refyear, poe=poe)
+    end
+
+    # Heavy functions with static side-effects — always run static part, skip tv when skip_traces
+    PISP.gen_pmax_distpv(tc, ts, tv, paths.profiledata; refyear=refyear, poe=poe, skip_traces=skip_traces)
+    PISP.gen_pmax_solar(tc, ts, tv, paths.ispdata24, paths.outlookdata, paths.outlookAEMO, paths.profiledata; refyear=refyear, skip_traces=skip_traces)
+    PISP.gen_pmax_wind(tc, ts, tv, paths.ispdata24, paths.outlookdata, paths.outlookAEMO, paths.profiledata; refyear=refyear, skip_traces=skip_traces)
+
+    PISP.ess_vpps(tc, ts, tv, paths.vpp_cap, paths.vpp_ene; skip_traces=skip_traces)
+
+    if !skip_traces
+        SNOWY_GENS = PISP.gen_inflow_sched(ts, tv, tc, paths.ispdata24, paths.ispmodel)
+        PISP.ess_inflow_sched(ts, tv, tc, paths.ispdata24, SNOWY_GENS)
+        PISP.der_pred_sched(ts, tv, paths.ispdata24)
+        PISP.ev_der_sched(tc, ts, tv, paths.ispdata24, paths.iasr23_ev_workbook)
+    end
 end
 
 """
@@ -195,5 +205,19 @@ function write_time_data(
     if write_varying
         if write_csv PISP.PISPwritedataCSV(tv, to_path(csv_varying_path)) end
         if write_arrow PISP.PISPwritedataArrow(tv, to_path(arrow_varying_path)) end
+    else
+        # Unit-count schedules are lightweight and always computed — write them regardless
+        if write_csv
+            csv_p = to_path(csv_varying_path)
+            isdir(csv_p) || mkpath(csv_p)
+            CSV.write(joinpath(csv_p, "$(alt_names[:gen_n]).csv"), tv.gen_n)
+            CSV.write(joinpath(csv_p, "$(alt_names[:ess_n]).csv"), tv.ess_n)
+        end
+        if write_arrow
+            arrow_p = to_path(arrow_varying_path)
+            isdir(arrow_p) || mkpath(arrow_p)
+            Arrow.write(joinpath(arrow_p, "$(alt_names[:gen_n]).arrow"), tv.gen_n)
+            Arrow.write(joinpath(arrow_p, "$(alt_names[:ess_n]).arrow"), tv.ess_n)
+        end
     end
 end

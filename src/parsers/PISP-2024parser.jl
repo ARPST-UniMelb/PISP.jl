@@ -1048,7 +1048,7 @@ time-varying fleet.
 - `tv::PISPtimeVarying`: Receives the computed pmax time series.
 - `profilespath::String`: Directory holding the DER traces.
 """
-function gen_pmax_distpv(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, profilespath::String; refyear::Int64=2011, poe::Int64=10)
+function gen_pmax_distpv(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, profilespath::String; refyear::Int64=2011, poe::Int64=10, skip_traces::Bool=false)
     probs = tc.problem;
     bust = ts.bus;
 
@@ -1063,6 +1063,7 @@ function gen_pmax_distpv(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVar
         bus_lon = bus_data[!, :longitude][1]
         arrgen = [gid,"RTPV_$(st)","RTPV_$(st)","Solar","RoofPV","RoofPV", 100.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, bus_id, 0.0, 100.0, 9999.9, 9999.9, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0, 1.0, bus_lat, bus_lon, 1, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         push!(ts.gen, arrgen)
+        if !skip_traces
         for p in 1:nrow(probs)
             scid = probs[p,:scenario][1]
             sc = PISP.ID2SCE[scid]
@@ -1080,6 +1081,7 @@ function gen_pmax_distpv(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVar
                 pmaxid += 1
                 push!(tv.gen_pmax, [pmaxid, gid, scid, dstart+Dates.Hour(h-1), data2[h]])
             end
+        end
         end
     end
 end
@@ -1168,7 +1170,7 @@ limits into `tv.gen_pmax` for every study block in `tc`.
 - `outlookAEMO::String`: Melted capacity outlook file providing scenario series.
 - `profilespath::String`: Directory with solar trace profiles.
 """
-function gen_pmax_solar(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, ispdata24::String, outlookdata::String, outlookAEMO::String, profilespath::String; refyear::Int64=2011)
+function gen_pmax_solar(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, ispdata24::String, outlookdata::String, outlookAEMO::String, profilespath::String; refyear::Int64=2011, skip_traces::Bool=false)
     probs = tc.problem
     bust = ts.bus
 
@@ -1197,6 +1199,7 @@ function gen_pmax_solar(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVary
         push!(ts.gen, arrgen)
     end
 
+    if !skip_traces
     name_ex = Dict()
 
     foldertech = string(profilespath, "solar_$(refyear)/")
@@ -1327,6 +1330,7 @@ function gen_pmax_solar(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVary
             end
         end
     end
+    end
 end
 
 """
@@ -1342,7 +1346,7 @@ scenario block.
 - `ispdata24::String`, `outlookdata::String`, `outlookAEMO::String`,
   `profilespath::String`: Data sources containing wind capacities and traces.
 """
-function gen_pmax_wind(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, ispdata24::String, outlookdata::String, outlookAEMO::String, profilespath::String; refyear::Int64=2011)
+function gen_pmax_wind(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, ispdata24::String, outlookdata::String, outlookAEMO::String, profilespath::String; refyear::Int64=2011, skip_traces::Bool=false)
     probs = tc.problem
     bust = ts.bus
 
@@ -1375,6 +1379,7 @@ function gen_pmax_wind(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVaryi
         push!(ts.gen, arrgen)
     end
 
+    if !skip_traces
     foldertech = string(profilespath, "wind_$(refyear)/")
 
     scid2cdp = Dict(1 => "CDP14", 2 => "CDP14", 3 => "CDP14", 4 => "CDP14")
@@ -1504,6 +1509,7 @@ function gen_pmax_wind(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVaryi
             end
         end
     end
+    end
 end
 
 """
@@ -1518,7 +1524,7 @@ VPP definitions with time-varying commissioning and power/energy trajectories.
 - `vpp_cap::String`: Path to the capacity outlook workbook.
 - `vpp_ene::String`: Path to the energy outlook workbook.
 """
-function ess_vpps(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, vpp_cap::String, vpp_ene::String)
+function ess_vpps(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, vpp_cap::String, vpp_ene::String; skip_traces::Bool=false)
     bust = ts.bus
     probs = tc.problem
 
@@ -1550,6 +1556,7 @@ function ess_vpps(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, v
         push!(ts.ess, arrbmss)
     end
 
+    if !skip_traces
     for p in 1:nrow(probs)
         scid = probs[p,:scenario][1]
         sc = PISP.ID2SCE[scid]
@@ -1583,6 +1590,7 @@ function ess_vpps(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, v
             push!(tv.ess_lmax, [bmlmid, BMBESSid[st][1], scid, dstart, data_cap])
             push!(tv.ess_emax, [bmemid, BMBESSid[st][1], scid, dstart, data_ene])
         end
+    end
     end
 end
 

@@ -158,6 +158,8 @@ function build_ISP24_datasets(;
     write_arrow::Bool = true,
     download_from_AEMO::Bool = true,
     scenarios::AbstractVector{<:Int64} = keys(PISP.ID2SCE),
+    write_traces::Bool = true,
+    check_exist_trace::Bool = false,
 )
     if years !== nothing && drange !== nothing
         throw(ArgumentError("Only one of `years` or `drange` may be specified, not both."))
@@ -176,6 +178,13 @@ function build_ISP24_datasets(;
 
     base_name = "$(output_name)-ref$(reftrace)-poe$(poe)"
 
+    function _traces_exist(tag::AbstractString)::Bool
+        to_path(p) = isnothing(output_root) ? p : normpath(output_root, p)
+        csv_ok   = !write_csv   || isfile(joinpath(to_path("$(base_name)/csv/schedule-$(tag)"),   "Generator_pmax_sched.csv"))
+        arrow_ok = !write_arrow || isfile(joinpath(to_path("$(base_name)/arrow/schedule-$(tag)"), "Generator_pmax_sched.arrow"))
+        return csv_ok && arrow_ok
+    end
+
     items = years !== nothing ? years : drange
     mode  = years !== nothing ? :year : :drange
 
@@ -193,9 +202,14 @@ function build_ISP24_datasets(;
             tag = "$(Dates.format(ds, "ddmmyyyy"))-$(Dates.format(de, "ddmmyyyy"))"
         end
 
+        skip_traces = !write_traces || (check_exist_trace && _traces_exist(tag))
+        if skip_traces
+            @info "Skipping heavy trace computation for schedule $(tag) (write_traces=$(write_traces), check_exist_trace=$(check_exist_trace))"
+        end
+
         static_params = PISP.populate_time_static!(ts, tv, data_paths; refyear = reftrace, poe = poe)
         @info "Populating time-varying data from ISP 2024 - POE $(poe) - reference weather trace $(reftrace) - schedule $(tag) ..."
-        PISP.populate_time_varying!(tc, ts, tv, data_paths, static_params; refyear = reftrace, poe = poe)
+        PISP.populate_time_varying!(tc, ts, tv, data_paths, static_params; refyear = reftrace, poe = poe, skip_traces = skip_traces)
 
         PISP.write_time_data(ts, tv;
             csv_static_path    = "$(base_name)/csv",
@@ -203,7 +217,7 @@ function build_ISP24_datasets(;
             arrow_static_path  = "$(base_name)/arrow",
             arrow_varying_path = "$(base_name)/arrow/schedule-$(tag)",
             write_static       = true,
-            write_varying      = true,
+            write_varying      = !skip_traces,
             output_root        = output_root,
             write_csv          = write_csv,
             write_arrow        = write_arrow,
