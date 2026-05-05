@@ -18,7 +18,7 @@ PISP.build_ISP24_datasets(
     poe                = poe,
     reftrace           = reftrace,
     years              = [2025, 2030],
-    output_name        = "out-buildout-uniform",
+    output_name        = "out-buildout",
     output_root        = output_root,
     write_csv          = write_csv,
     write_arrow        = write_arrow,
