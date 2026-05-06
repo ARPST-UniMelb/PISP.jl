@@ -227,12 +227,12 @@ function build_ISP24_datasets(;
 
         static_params = PISP.populate_time_static!(ts, tv, data_paths; refyear = reftrace, poe = poe)
 
+        @info "Populating time-varying data from ISP 2024 - POE $(poe) - reference weather trace $(reftrace) - schedule $(tag) ..."
+        PISP.populate_time_varying!(tc, ts, tv, data_paths, static_params; refyear = reftrace, poe = poe, skip_traces = skip_traces)
+
         if buildout_filepath !== nothing
             _apply_buildouts!(ts, tv, buildout_filepath, sc_buildouts)
         end
-
-        @info "Populating time-varying data from ISP 2024 - POE $(poe) - reference weather trace $(reftrace) - schedule $(tag) ..."
-        PISP.populate_time_varying!(tc, ts, tv, data_paths, static_params; refyear = reftrace, poe = poe, skip_traces = skip_traces)
 
         PISP.write_time_data(ts, tv;
             csv_static_path    = "$(base_name)/csv",
