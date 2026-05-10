@@ -27,10 +27,13 @@ function read_buildout_table(filepath::AbstractString; sheetname::AbstractString
 end
 
 # Internal tech-set constants
-const _BUILDOUT_ESS_TECHS    = Set(["bess_1h", "bess_2h", "bess_4h", "bess_8h"])
+const _BUILDOUT_ESS_TECHS    = Set(["bess_1h", "bess_2h", "bess_4h", "bess_8h",
+                                    "phsp_24h", "phsp_48h"])
 const _BUILDOUT_GEN_TECHS    = Set(["ccgt", "ocgt_l", "ocgt_s"])
 const _BUILDOUT_GEN_TECH_KEY = Dict("ccgt" => :ccgt, "ocgt_l" => :ocgt_large, "ocgt_s" => :ocgt_small)
-const _BESS_DURATION_H       = Dict("bess_1h" => 1.0, "bess_2h" => 2.0, "bess_4h" => 4.0, "bess_8h" => 8.0)
+const _BESS_DURATION_H       = Dict("bess_1h"  => 1.0,  "bess_2h"  => 2.0,
+                                    "bess_4h"  => 4.0,  "bess_8h"  => 8.0,
+                                    "phsp_24h" => 24.0, "phsp_48h" => 48.0)
 
 """
     add_buildout_ess!(ts, tv, static_data, tvarying_data)
