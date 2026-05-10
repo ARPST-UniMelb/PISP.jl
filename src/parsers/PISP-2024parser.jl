@@ -763,6 +763,12 @@ function generator_table(ts::PISPtimeStatic, ispdata19::String, ispdata24::Strin
         end
     end
     
+    # Manual fix for Quarantine pmin
+    if any(GENERATORS[!,:name] .== "Quarantine")
+        r = findfirst(GENERATORS[!,:name] .== "Quarantine")
+        GENERATORS[r,:pmin] = 3.0
+    end
+
     # Manual fix for Murray
     if any(GENERATORS[!,:name] .== "Murray 1")
         r = findfirst(GENERATORS[!,:name] .== "Murray 1")
