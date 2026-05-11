@@ -1324,6 +1324,9 @@ function gen_pmax_solar(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVary
             end
 
             data2 = [ (data[2*i-1]+data[2*i])/2 for i in 1:Int64(length(data)/2) ]
+            if maximum(data2) > 0.0 && (instcap - maximum(data2)) > 5.0
+                data2 .= data2 .* (instcap / maximum(data2))
+            end
             for h in 1:Int64(Dates.Hour(dend - dstart)/Dates.Hour(1)+1)
                 pmaxid += 1
                 push!(tv.gen_pmax, [pmaxid, genid[st][1], scid, dstart+Dates.Hour(h-1), data2[h]])
@@ -1503,6 +1506,9 @@ function gen_pmax_wind(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVaryi
             end
 
             data2 = [ (data[2*i-1]+data[2*i])/2 for i in 1:Int64(length(data)/2) ]
+            if maximum(data2) > 0.0 && (instcap - maximum(data2)) > 5.0
+                data2 .= data2 .* (instcap / maximum(data2))
+            end
             for h in 1:Int64(Dates.Hour(dend - dstart)/Dates.Hour(1)+1)
                 pmaxid += 1
                 push!(tv.gen_pmax, [pmaxid, genid[st][1], scid, dstart+Dates.Hour(h-1), data2[h]])
