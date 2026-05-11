@@ -1330,8 +1330,10 @@ function gen_pmax_solar(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVary
             end
 
             data2 = [ (data[2*i-1]+data[2*i])/2 for i in 1:Int64(length(data)/2) ]
-            if maximum(data2) > 0.0 && (instcap - maximum(data2)) > 5.0
-                data2 .= data2 .* (instcap / maximum(data2))
+            let _tc = TECH_CAP[(TECH_CAP[!,:Scenario].==sc).&(TECH_CAP[!,:Subregion].==st).&(TECH_CAP[!,:Technology].==tch_).&(year.(TECH_CAP[!,:date]).==y+1), 7]
+                if !isempty(_tc) && maximum(data2) > 0.0 && (Float64(_tc[1]) - maximum(data2)) > 5.0
+                    data2 .= data2 .* (Float64(_tc[1]) / maximum(data2))
+                end
             end
             for h in 1:Int64(Dates.Hour(dend - dstart)/Dates.Hour(1)+1)
                 pmaxid += 1
@@ -1512,8 +1514,12 @@ function gen_pmax_wind(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVaryi
             end
 
             data2 = [ (data[2*i-1]+data[2*i])/2 for i in 1:Int64(length(data)/2) ]
-            if maximum(data2) > 0.0 && (instcap - maximum(data2)) > 5.0
-                data2 .= data2 .* (instcap / maximum(data2))
+            let _tc_wind     = TECH_CAP[(TECH_CAP[!,:Scenario].==sc).&(TECH_CAP[!,:Subregion].==st).&(TECH_CAP[!,:Technology].=="Wind").&(year.(TECH_CAP[!,:date]).==y+1), 7],
+                _tc_offshore = TECH_CAP[(TECH_CAP[!,:Scenario].==sc).&(TECH_CAP[!,:Subregion].==st).&(TECH_CAP[!,:Technology].=="Offshore wind").&(year.(TECH_CAP[!,:date]).==y+1), 7]
+                _tc_total = (isempty(_tc_wind) ? 0.0 : Float64(_tc_wind[1])) + (isempty(_tc_offshore) ? 0.0 : Float64(_tc_offshore[1]))
+                if _tc_total > 0.0 && maximum(data2) > 0.0 && (_tc_total - maximum(data2)) > 5.0
+                    data2 .= data2 .* (_tc_total / maximum(data2))
+                end
             end
             for h in 1:Int64(Dates.Hour(dend - dstart)/Dates.Hour(1)+1)
                 pmaxid += 1
