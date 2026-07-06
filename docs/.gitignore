@@ -1,0 +1,4 @@
+# Regenerable Literate.jl output — rebuild with `julia --project=docs docs/make.jl`.
+# Not committed because it embeds full precompilation logs and is a build
+# artifact, not source.
+generated/

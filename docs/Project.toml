@@ -1,0 +1,6 @@
+[deps]
+Literate = "98b081ad-f1c9-55d3-8b20-4c87d4299306"
+PISP = "0cf86302-bd88-49fb-82d1-7e27fc78d6eb"
+
+[sources]
+PISP = {path = ".."}
