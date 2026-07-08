@@ -1,3 +1,6 @@
+# Generated from `docs/literate/problem_table.jl` — regenerate with
+# `julia --project=docs docs/render_literate.jl`.
+#
 # # Building a `PISPtimeConfig` problem table
 #
 # This is a Literate.jl source file. It is meant to be processed with

@@ -1,4 +1,11 @@
-# Regenerable Literate.jl output — rebuild with `julia --project=docs docs/make.jl`.
-# Not committed because it embeds full precompilation logs and is a build
+# Regenerable Documenter.jl site build — rebuild with
+# `julia --project=docs docs/make.jl`. Not committed; it's a build
 # artifact, not source.
-generated/
+#
+# `docs/src/generated/` (Literate.jl output, rebuilt with
+# `julia --project=docs docs/render_literate.jl`) is deliberately NOT
+# excluded here — it's committed, reviewable, diffable output, not a
+# throwaway artifact. See
+# `memories/decisions/adr/0009-documenter-jl-plus-literate-jl-docs-stack.md`
+# in the `arpst-unimelb-agents` workspace.
+build/
