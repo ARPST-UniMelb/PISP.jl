@@ -27,11 +27,20 @@ using Documenter
 using PISP
 
 const DOCS_DIR = @__DIR__
+const SRC = joinpath(DOCS_DIR, "src")
+const BUILD = joinpath(DOCS_DIR, "build")
+
+format = Documenter.HTML(;
+    prettyurls = get(ENV, "CI", "false") == "true",
+    inventory_version = "dev",
+    edit_link = "main",
+)
 
 makedocs(;
     sitename = "PISP.jl",
-    build = joinpath(DOCS_DIR, "build"),
-    source = joinpath(DOCS_DIR, "src"),
+    format = format,
+    build = BUILD,
+    source = SRC,
     pages = [
         "Home" => "index.md",
         "Tutorial" => "generated/problem_table.md",
