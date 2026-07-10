@@ -11,6 +11,9 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.dates import DateFormatter
 
+from table_utils import write_table
+
+SCRIPT_STEM = "04_seasonal_extremes"
 TRACES = Path("data/pisp-downloads/Traces")
 FIGURES = Path("eda/figures")
 FIGURES.mkdir(parents=True, exist_ok=True)
@@ -47,6 +50,7 @@ WIND_LOC = 'DUNDWF1'
 # ====== Figure 1: Hot vs Cool summer solar profiles ======
 fig, axes = plt.subplots(2, 1, figsize=(14, 10))
 
+hot_cool_summer_rows = []
 for ax, season_type, year_list, color in [
     (axes[0], 'Hot Summers', HOT_SUMMERS, 'darkred'),
     (axes[1], 'Cool Summers', COOL_SUMMERS, 'steelblue'),
@@ -59,6 +63,15 @@ for ax, season_type, year_list, color in [
         if len(summer) == 0:
             continue
         daily = summer[HH_COLS_SOL].mean(axis=1)
+        hot_cool_summer_rows.append({
+            "season_type": season_type,
+            "year": yr,
+            "n_days": len(daily),
+            "mean_daily_cf": daily.mean(),
+            "std_daily_cf": daily.std(),
+            "min_daily_cf": daily.min(),
+            "max_daily_cf": daily.max(),
+        })
         ax.plot(summer['datetime'], daily, linewidth=0.5, alpha=0.6,
                color=color, label=str(yr) if yr == year_list[0] else None)
         ax.plot(summer['datetime'], daily.rolling(3).mean(), linewidth=1.5,
@@ -76,9 +89,13 @@ plt.savefig(FIGURES / "04_hot_vs_cool_summer_solar.png", dpi=120, bbox_inches='t
 plt.close()
 print(f"Saved: 04_hot_vs_cool_summer_solar.png")
 
+hot_cool_path = write_table(pd.DataFrame(hot_cool_summer_rows), SCRIPT_STEM, "hot_cool_summer_solar_summary")
+print(f"Saved table: {hot_cool_path}")
+
 # ====== Figure 2: Extended low-output events (3+ consecutive days) ======
 fig2, axes2 = plt.subplots(2, 2, figsize=(14, 10))
 
+combined_low_events = []
 for ax, tech, loc, hh_cols in [
     (axes2[0, 0], 'solar', SOLAR_LOC, HH_COLS_SOL),
     (axes2[0, 1], 'wind', WIND_LOC, HH_COLS_WIND),
@@ -114,6 +131,8 @@ for ax, tech, loc, hh_cols in [
                     'tech': tech,
                 })
 
+    combined_low_events.extend(all_low_events)
+
     events_df = pd.DataFrame(all_low_events)
     if len(events_df) > 0:
         # Histogram of event duration
@@ -135,6 +154,9 @@ for ax, tech, loc, hh_cols in [
                ha='center', va='center', transform=ax.transAxes)
         ax.set_title(f"{tech.upper()} {loc} — No Extended Low Events")
 
+low_output_events_path = write_table(pd.DataFrame(combined_low_events), SCRIPT_STEM, "low_output_events")
+print(f"Saved table: {low_output_events_path}")
+
 # ====== Figure 3: Worst single-day solar events ======
 ax3 = axes2[1, 0]
 worst_solar_days = []
@@ -154,6 +176,19 @@ for yr in range(2011, 2024):
     })
 
 worst_df = pd.DataFrame(worst_solar_days).sort_values('cf')
+
+worst_solar_day_rows = [
+    {
+        "year": int(row['year']),
+        "date": row['date'].strftime("%Y-%m-%d"),
+        "cf": row['cf'],
+        "is_hot_summer": 1 if row['year'] in HOT_SUMMERS else 0,
+    }
+    for _, row in worst_df.iterrows()
+]
+worst_solar_day_path = write_table(pd.DataFrame(worst_solar_day_rows), SCRIPT_STEM, "worst_solar_day_summary")
+print(f"Saved table: {worst_solar_day_path}")
+
 colors = ['darkred' if y in HOT_SUMMERS else 'steelblue' for y in worst_df['year']]
 ax3.bar(range(len(worst_df)), worst_df['cf'], color=colors, alpha=0.7)
 ax3.set_xticks(range(len(worst_df)))
@@ -164,6 +199,7 @@ ax3.grid(True, alpha=0.3)
 
 # ====== Figure 4: Half-hourly profile of worst solar day ======
 ax4 = axes2[1, 1]
+worst_solar_day_profile_rows = []
 if len(worst_df) > 0:
     worst_row = worst_df.iloc[0]
     yr = int(worst_row['year'])
@@ -180,11 +216,23 @@ if len(worst_df) > 0:
             ax4.set_ylabel("Capacity Factor")
             ax4.set_ylim(0, 1)
             ax4.grid(True, alpha=0.3)
+            for hh, cf in zip(half_hours, worst_day.iloc[0, 3:51]):
+                worst_solar_day_profile_rows.append({
+                    "year": yr,
+                    "date": worst_date.strftime("%Y-%m-%d"),
+                    "half_hour": hh,
+                    "cf": cf,
+                })
 
 plt.tight_layout()
 plt.savefig(FIGURES / "04_low_output_events.png", dpi=120, bbox_inches='tight')
 plt.close()
 print(f"Saved: 04_low_output_events.png")
+
+worst_solar_day_profile_path = write_table(
+    pd.DataFrame(worst_solar_day_profile_rows), SCRIPT_STEM, "worst_solar_day_profile"
+)
+print(f"Saved table: {worst_solar_day_profile_path}")
 
 # ====== Figure 5: Hourly CF distribution by month (solar) ======
 fig5, ax5 = plt.subplots(figsize=(12, 6))
@@ -195,8 +243,8 @@ if df_all is not None:
     monthly_stats = df_all.groupby('month')[HH_COLS_SOL].agg(['mean', 'std', 'min', 'max'])
 
     months = range(1, 13)
-    means = [monthly_stats.loc[m, ('mean',)].mean() if m in monthly_stats.index else 0 for m in months]
-    stds = [monthly_stats.loc[m, ('mean', std)].mean() if m in monthly_stats.index else 0 for m in months]
+    means = [monthly_stats.loc[m].xs('mean', level=1).mean() if m in monthly_stats.index else 0 for m in months]
+    stds = [monthly_stats.loc[m].xs('std', level=1).mean() if m in monthly_stats.index else 0 for m in months]
 
     ax5.bar(months, means, yerr=stds, color='darkorange', alpha=0.6, edgecolor='black')
     ax5.set_title(f"Solar {SOLAR_LOC} 2019 — Monthly Mean CF ± Std")
@@ -212,14 +260,22 @@ plt.savefig(FIGURES / "04_monthly_cf_2019.png", dpi=120, bbox_inches='tight')
 plt.close()
 print(f"Saved: 04_monthly_cf_2019.png")
 
+monthly_cf_rows = [
+    {"month": m, "mean_cf": means[i], "std_cf": stds[i]}
+    for i, m in enumerate(months)
+]
+monthly_cf_path = write_table(pd.DataFrame(monthly_cf_rows), SCRIPT_STEM, "monthly_cf_2019_summary")
+print(f"Saved table: {monthly_cf_path}")
+
 # ====== Figure 6: Summer 2019 detailed — Black Summer ======
 fig6, ax6 = plt.subplots(figsize=(16, 5))
 df_2019 = load_trace('solar', 2019, SOLAR_LOC)
 if df_2019 is not None:
     summer_2019 = df_2019[df_2019['Month'].isin([12, 1, 2])]
     daily = summer_2019[HH_COLS_SOL].mean(axis=1)
+    rolling3_2019 = daily.rolling(3).mean()
     ax6.plot(summer_2019['datetime'], daily, linewidth=0.5, color='darkorange', alpha=0.7)
-    ax6.plot(summer_2019['datetime'], daily.rolling(3).mean(), linewidth=2, color='darkred')
+    ax6.plot(summer_2019['datetime'], rolling3_2019, linewidth=2, color='darkred')
     ax6.set_title(f"Solar {SOLAR_LOC} — Summer 2019 (Black Summer)")
     ax6.set_ylabel("Daily Mean CF")
     ax6.set_ylim(0, 0.5)
@@ -231,5 +287,17 @@ plt.tight_layout()
 plt.savefig(FIGURES / "04_summer_2019_black_summer.png", dpi=120, bbox_inches='tight')
 plt.close()
 print(f"Saved: 04_summer_2019_black_summer.png")
+
+if df_2019 is not None:
+    black_summer_rows = [
+        {
+            "date": d.strftime("%Y-%m-%d"),
+            "daily_mean_cf": daily_cf,
+            "rolling3_cf": rolling3_cf,
+        }
+        for d, daily_cf, rolling3_cf in zip(summer_2019['datetime'], daily, rolling3_2019)
+    ]
+    black_summer_path = write_table(pd.DataFrame(black_summer_rows), SCRIPT_STEM, "black_summer_2019_daily_cf")
+    print(f"Saved table: {black_summer_path}")
 
 print("\nDone.")

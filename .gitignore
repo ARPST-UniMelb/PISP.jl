@@ -1,6 +1,8 @@
 *.jl.*.cov
 *.jl.cov
 *.jl.mem
+*.pyc
+__pycache__/
 config/
 usr/usr-params.jl
 Manifest.toml
