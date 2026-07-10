@@ -12,6 +12,9 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.patches as mpatches
 
+from table_utils import write_table
+
+SCRIPT_STEM = "08_4006_composite_map"
 TRACES = Path("data/pisp-downloads/Traces")
 FIGURES = Path("eda/figures")
 FIGURES.mkdir(parents=True, exist_ok=True)
@@ -54,6 +57,7 @@ DATE_RANGES_REFYEARS = [
 mapping_df = pd.DataFrame(DATE_RANGES_REFYEARS, columns=['fy_start', 'fy_end', 'ref_year'])
 mapping_df['fy_label'] = mapping_df['fy_end'].apply(lambda x: f"FY{x[:4]}")
 mapping_df['ref_label'] = mapping_df['ref_year'].apply(lambda x: f"{x}")
+write_table(mapping_df, SCRIPT_STEM, "mapping_table")
 
 print("=== 4006 Composite Mapping ===")
 for _, row in mapping_df.iterrows():
@@ -117,6 +121,7 @@ for yr in sorted(mapping_df['ref_year'].unique()):
                 })
 
 stats_df = pd.DataFrame(year_stats)
+write_table(stats_df, SCRIPT_STEM, "historical_year_vre_stats")
 
 # Bar chart: summer CF by year for solar and wind
 fig2, axes2 = plt.subplots(1, 2, figsize=(14, 5))
@@ -171,6 +176,7 @@ def load_year_cf(years, tech, loc, hh_cols):
     return np.mean(all_cfs, axis=0) if all_cfs else None
 
 # Annual daily CF comparison
+near_far_rows = []
 for ax, tech, loc, hh_cols, color in [
     (axes3[0], 'solar', SOLAR_LOC, HH_COLS_SOL, 'darkorange'),
     (axes3[1], 'wind', WIND_LOC, HH_COLS_WIND, 'steelblue'),
@@ -182,11 +188,23 @@ for ax, tech, loc, hh_cols, color in [
         ax.plot(near_cf, color=color, linewidth=0.5, alpha=0.5, label=f'Near-term {near_years[0]}-{near_years[-1]}')
         ax.plot(pd.Series(near_cf).rolling(30).mean(), color=color, linewidth=2,
                linestyle='-', label='Near-term 30d avg')
+        near_far_rows.append(pd.DataFrame({
+            'tech': tech,
+            'term': 'near',
+            'day_of_year': range(1, len(near_cf) + 1),
+            'daily_cf': near_cf,
+        }))
 
     if far_cf is not None:
         ax.plot(far_cf, color='grey', linewidth=0.5, alpha=0.5, label=f'Far-term {far_years[0]}-{far_years[-1]}')
         ax.plot(pd.Series(far_cf).rolling(30).mean(), color='black', linewidth=2,
                linestyle='--', label='Far-term 30d avg')
+        near_far_rows.append(pd.DataFrame({
+            'tech': tech,
+            'term': 'far',
+            'day_of_year': range(1, len(far_cf) + 1),
+            'daily_cf': far_cf,
+        }))
 
     ax.set_title(f"{tech.upper()} {loc} — Near-term vs Far-term Daily CF")
     ax.set_ylabel("Daily Mean CF")
@@ -194,6 +212,8 @@ for ax, tech, loc, hh_cols, color in [
     ax.legend(fontsize=8)
     ax.grid(True, alpha=0.3)
     ax.set_ylim(0, 0.6)
+
+write_table(pd.concat(near_far_rows, ignore_index=True), SCRIPT_STEM, "near_vs_far_term_daily_cf")
 
 plt.tight_layout()
 plt.savefig(FIGURES / "08_near_vs_far_term.png", dpi=120, bbox_inches='tight')
@@ -219,6 +239,12 @@ for tech in techs:
         else:
             row_data.append(np.nan)
     heatmap_data[tech] = row_data
+
+heatmap_rows = []
+for tech in techs:
+    for yr, val in zip(years_unique, heatmap_data[tech]):
+        heatmap_rows.append({'tech': tech, 'ref_year': yr, 'annual_mean_cf': val})
+write_table(pd.DataFrame(heatmap_rows), SCRIPT_STEM, "vre_heatmap")
 
 # Plot heatmap
 import matplotlib.colors as mcolors
@@ -249,5 +275,14 @@ print("\n=== 4006 COMPOSITE STATS ===")
 print(f"Total years: {len(DATE_RANGES_REFYEARS)}")
 print(f"Unique historical years used: {sorted(mapping_df['ref_year'].unique())}")
 print(f"Most repeated: {mapping_df['ref_year'].value_counts().to_dict()}")
+
+ref_year_counts = (
+    mapping_df['ref_year'].value_counts()
+    .rename_axis('ref_year')
+    .reset_index(name='count')
+    .sort_values('ref_year')
+    .reset_index(drop=True)
+)
+write_table(ref_year_counts, SCRIPT_STEM, "ref_year_counts")
 
 print("\nDone.")
