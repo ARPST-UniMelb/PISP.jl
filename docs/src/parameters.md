@@ -82,6 +82,14 @@ Several parameter files contain large dictionaries that map AEMO names, unit IDs
 
 These files contain values that cannot be reconstructed from the output tables alone. When using PISP output for a study, review the relevant parameter file when the result depends on project naming, technology grouping, hydro treatment, storage classification, forced-outage parameters, or buildout templates.
 
+## Rooftop PV `pmax` placeholder
+
+Distributed (rooftop) PV generator rows (`RTPV_*`, `tech = "RoofPV"`) are written with a fixed `pmax` and `capacity` of `100.0` for every NEM subregion (`src/parsers/PISP-2024parser.jl`, `gen_pmax_distpv`). This value is a schema placeholder, not a real installed-capacity figure: the rooftop PV hourly trace for each subregion is read directly from AEMO's demand-side distributed-PV profile files and written to the schedule with no scaling relative to this placeholder. A downstream study that needs each subregion's true rooftop PV capacity should not read it from `Generator.pmax`/`Generator.capacity` for these rows.
+
+## Generator `pmax` for utility-scale solar and wind
+
+Utility-scale solar (`LargePV`) and wind generator rows record the sum of currently operating unit capacity for their subregion (`src/parsers/PISP-2024parser.jl`, `gen_pmax_wind` and the equivalent solar function), not any capacity growth planned for a future study year. A schedule built for a future planning year can draw on ISP outlook capacity that reflects planned build-out beyond what is currently operating, so a generator's scheduled output can legitimately exceed its static `Generator.pmax`/`Generator.capacity` value for that reason alone. See Assumptions for the capacity-factor implication.
+
 ## Forced-outage and reliability constants
 
 Forced-outage fields are static output columns, not time-varying schedules. Their interpretation differs by asset class:

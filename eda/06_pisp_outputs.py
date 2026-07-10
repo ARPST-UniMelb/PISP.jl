@@ -146,19 +146,19 @@ ax.grid(True, alpha=0.3)
 
 # Duration curve: solar vs wind
 ax = axes[1, 1]
-# Capacity factor is mean(scheduled value) / each generator's OWN scheduled
-# maximum, not Generator.csv's static `pmax`. PISP's static pmax is not a
-# usable capacity reference for these generators: RoofPV's is a hardcoded
-# 100.0 schema-filler (PISP.jl src/parsers/PISP-2024parser.jl:1070,
-# `gen_pmax_distpv`), and wind/LargePV's reflects only *existing* capacity
-# while a 2030 schedule can draw on ISP outlook (planned buildout) capacity
-# that legitimately exceeds it (same file, `gen_pmax_wind`, ~line 1386 vs.
-# ~1477). SiennaNEM.jl, a sibling project (same author) that builds a
-# Sienna System from this same PISP output, hits the identical problem and
-# solves it the same way: for `fuel in ("Solar", "Wind")` it treats each
-# generator's own scheduled-trace maximum as its capacity
-# (SiennaNEM.jl src/read_data.jl:214-229, `update_system_data_bound!`;
-# src/create_system.jl:342,368 call the static pmax "dummy" for this reason).
+# Capacity factor for solar and wind divides each generator's scheduled mean
+# output by that generator's own scheduled maximum, not by the static `pmax`
+# recorded in `Generator.csv`. The static field is not a reliable capacity
+# reference for these generators: rooftop PV rows carry a fixed placeholder
+# pmax (src/parsers/PISP-2024parser.jl:1070, `gen_pmax_distpv`), and
+# utility-scale solar/wind rows record only currently operating capacity,
+# which a future-year schedule can exceed once ISP-outlook build-out is
+# reflected in the trace (`gen_pmax_wind`, ~1386 vs. ~1477 in the same
+# file). SiennaNEM.jl, which builds unit-commitment models from this same
+# PISP output, applies the same convention (src/read_data.jl:214-229,
+# `update_system_data_bound!`) and calls the static pmax "dummy" for these
+# generators (src/create_system.jl:342,368). See PISP.jl's own
+# docs/src/parameters.md and docs/src/assumptions.md for the full caveat.
 sol_cf = sol_sched.groupby('id_gen')['value'].mean() / sol_sched.groupby('id_gen')['value'].max()
 wind_cf = wind_sched.groupby('id_gen')['value'].mean() / wind_sched.groupby('id_gen')['value'].max()
 ax.plot(np.sort(sol_cf.dropna().values)[::-1], color='darkorange', linewidth=1.5, label=f'Solar (n={len(sol_cf.dropna())})', alpha=0.7)

@@ -24,6 +24,10 @@ Generator, ESS, and line outage fields are not uniform across asset classes. Do 
 
 The `DER` table is narrower than the colloquial meaning of distributed energy resources. In PISP output it represents demand-side participation and EV-related rows linked to demand nodes. Rooftop PV appears in `Generator`, and storage appears in `ESS`.
 
+## Generator `pmax` is not a capacity-factor denominator for solar and wind
+
+A generator's static `pmax`/`capacity` field on the `Generator` table should not be used to compute capacity factor for solar or wind generators. Rooftop PV rows carry a fixed placeholder value rather than a true capacity figure, and utility-scale solar/wind rows record only currently operating capacity, which a future-year schedule can legitimately exceed once ISP-outlook build-out is reflected in the trace (see Parameters for the source of both). The correct capacity reference for these technologies is each generator's own scheduled maximum over the period being studied, not the static field — the same convention a downstream Sienna-based production-cost tool (`SiennaNEM.jl`) already applies when consuming this same output.
+
 ## Data vintage and external validation
 
 The parser and downloader target 2024 ISP material, with a targeted 2019 workbook input for selected thermal unit constraints and a 2023 IASR EV workbook input for EV-related data. PISP's source code identifies these files, but a reproducible study should still archive the exact downloaded files and record checksums.
