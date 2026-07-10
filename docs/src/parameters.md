@@ -46,7 +46,8 @@ The five market areas are encoded as `QLD = 1`, `NSW = 2`, `VIC = 3`, `TAS = 4`,
 
 Reference trace `4006` is a composite planning trace.
 It does not represent one historical weather year repeated across the horizon.
-Instead, each financial year is paired with a selected historical year:
+Instead, each financial year is paired with a selected historical year, based on AEMO's 2024 ISP PLEXOS model instructions (https://aemo.com.au/-/media/files/major-publications/isp/2024/supporting-materials/2024-isp-plexos-model-instructions.pdf?la=en, the same document `src/parameters/general2024ISP.jl`'s `WEATHER_YEARS_ISP` comment cites).
+The specific page or table within that document has not yet been identified; this page currently traces the mapping to PISP's own source comment and the table below, not to a page number in AEMO's document.
 
 | Financial-year window | Weather year |
 |---|---:|
@@ -110,6 +111,7 @@ Use an externally validated capacity source or a study-specific reconstruction i
 ## Utility-scale solar and wind `pmax`
 
 Utility-scale solar (`LargePV`) and wind rows record the sum of currently operating capacity assigned to the sub-region.
+Both technologies read the same two sheets of the 2024 ISP Inputs and Assumptions workbook: `Existing Gen Data Summary` (cell range `B11:K297`) for the operating-capacity figures, and `Renewable Energy Zones` (cell range `B7:G50`) for REZ-to-bus assignment.
 A future-year schedule can incorporate additional ISP-outlook build-out and can therefore exceed the static `Generator.pmax` or `Generator.capacity` value without implying a parser error.
 
 This distinction is why the static field is not a valid capacity-factor denominator for these technologies.

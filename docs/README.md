@@ -111,6 +111,7 @@ The following details are useful when changing parsers or writers, but are inten
 | Retirement mappings and assumptions | `src/parameters/retirements2024ISP.jl` |
 | Rooftop PV placeholder and utility-scale renewable capacity logic | `src/parsers/PISP-2024parser.jl` (`gen_pmax_distpv`, `gen_pmax_wind`, and the corresponding solar logic) |
 
+The rooftop-PV, wind, and solar capacity logic reads two sheets of the 2024 ISP Inputs and Assumptions workbook: `Existing Gen Data Summary` (`B11:K297`) for operating capacity, and `Renewable Energy Zones` (`B7:G50`) for REZ-to-bus assignment; both `gen_pmax_wind` and `gen_pmax_solar` use identical sheet names and ranges.
 The current trace scraper selects publication links with `div.field-link a` and recognises URL substrings `isp_demand_traces_`, `isp_solar_traces_`, and `isp_wind_traces_`.
 It sanitises the published link text, adds `.zip` when required, prefixes a two-digit download index, and defaults to `scrapped/ISP_2024_traces`.
 The exported DER schedule is named `DER_pred_sched`, while the internal schema is represented by `MOD_DER_PRED_MAX`.
