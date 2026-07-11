@@ -49,6 +49,18 @@ PISP.build_ISP24_datasets(
     )
 ```
 
+## Download 2024 ISP report PDFs
+
+Download the ten selected 2024 ISP report PDFs from AEMO with:
+
+```julia
+using PISP
+
+report_paths = PISP.download_isp_reports()
+```
+
+The PDFs are saved under `data/pisp-reports/` by default. Existing valid PDFs are skipped, while invalid files are re-downloaded; use `PISP.download_isp_reports(overwrite = true)` to refresh all ten reports. Pass `outdir = "..."` to use a different local directory.
+
 ## Optional parameters for PISP.build_ISP24_datasets()
 There are multiple parameters that can be adjusted when generating the dataset from the public 2024 Integrated System Plan (ISP) datafiles:
 | Parameter           | Default       | Description                                                                                                                        |
