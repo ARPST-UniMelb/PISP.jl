@@ -60,18 +60,9 @@ Download the ten selected 2024 ISP report PDFs from AEMO with:
 ```julia
 using PISP
 
-report_paths = PISP.download_isp_reports()
-```
-
-The PDFs are saved under `data/pisp-reports/` by default. Existing valid PDFs are skipped, while invalid files are re-downloaded; use `PISP.download_isp_reports(overwrite = true)` to refresh all ten reports. Pass `outdir = "..."` to use a different local directory:
-
-```julia
-using PISP
-
-# Refresh every report, saving to a custom directory
 report_paths = PISP.download_isp_reports(
     outdir    = joinpath(@__DIR__, "..", "data", "pisp-reports"),
-    overwrite = true,
+    overwrite = false,
     )
 ```
 

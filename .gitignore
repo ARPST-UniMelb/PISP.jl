@@ -25,6 +25,7 @@ test-*/
 *.zip
 data/
 *.DS_Store
+tmp/
 build/
 __pycache__/
 
