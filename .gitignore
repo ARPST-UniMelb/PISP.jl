@@ -25,6 +25,8 @@ test-*/
 *.zip
 data/
 *.DS_Store
+build/
+__pycache__/
 
 CLAUDE*
 AGENTS*
