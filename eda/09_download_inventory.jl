@@ -8,7 +8,7 @@ const SCRIPT_STEM = "09_download_inventory"
 const DOWNLOAD_ROOT = joinpath("data", "pisp-downloads")
 const TABLE_ROOT = joinpath(@__DIR__, "tables")
 const MAX_TREE_DEPTH = 3
-const MAX_TREE_CHILDREN_PER_DIR = 20
+const MAX_TREE_CHILDREN_PER_DIR = 3
 
 function table_dir(script_stem; producer = "julia", root = TABLE_ROOT)
     path = joinpath(root, producer, script_stem)

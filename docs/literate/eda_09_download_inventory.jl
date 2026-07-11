@@ -4,7 +4,7 @@
 # That page is hand-written and does not verify what is actually present in a given local checkout.
 # This page is the complementary, code-verified check: real Julia code walks the local `data/pisp-downloads/` tree (via `eda/09_download_inventory.jl`) and reports what is actually there, rather than what should be there.
 #
-# The evidence read below was written by that script, not read directly from the filesystem by this page, following the same evidence-table convention used by every other `eda_*` page in this set.
+# The evidence read below was computed from the local download tree by that script, not read live by this page.
 
 using CSV
 using DataFrames
@@ -16,10 +16,7 @@ const EDA09_EVIDENCE_DIR = joinpath(
 function read_eda09(table_name)
     path = joinpath(EDA09_EVIDENCE_DIR, "$(table_name).csv")
     isfile(path) || error("missing EDA evidence table: $path")
-    ## None of this page's evidence tables carry genuine `missing` values, only
-    ## intentionally empty strings (e.g. a plain file's `extensions` column, or
-    ## the download root's own `parent_relative_path`); disable CSV.jl's default
-    ## "" -> `missing` sentinel so those round-trip as empty strings, not `missing`.
+    ## keep empty-string cells as empty strings, not `missing`
     return CSV.read(path, DataFrame; missingstring = nothing)
 end
 
@@ -40,9 +37,12 @@ extension_summary
 
 # ## Directory tree (depth ≤ 3)
 #
-# The evidence table below is a flat, depth-limited listing (`depth`, `parent_relative_path`, `name`, `kind`).
-# Rendering it as an indented tree is a presentation transform over that already-collected evidence; it does not walk the filesystem again.
-# Depth alone does not bound how many files sit in one directory (a single `Traces/<tech>_<year>/` folder holds hundreds of per-location trace CSVs), so `eda/09_download_inventory.jl` also caps how many files it lists per directory and records a `kind = "note"` row (rendered below without a trailing `/` and not recursed into) noting how many were omitted, rather than listing every one.
+# The tree below mirrors the on-disk folder layout down to three levels deep.
+# Some folders hold far more files than are useful to list one by one — a single `Traces/<tech>_<year>/` folder holds hundreds of near-identical per-location trace CSVs — so a folder with many files shows only its first several, followed by a line stating how many more were left out.
+
+#md # ```@raw html
+#md # <details><summary>Show tree-rendering code</summary>
+#md # ```
 
 function render_tree(tree::DataFrame; root_label = "pisp-downloads")
     children_by_parent = Dict{String, Vector{Int}}()
@@ -70,27 +70,13 @@ function render_tree(tree::DataFrame; root_label = "pisp-downloads")
 end
 
 directory_tree = read_eda09("directory_tree")
-print(render_tree(directory_tree))
-
-# ## A collapsible code example
-#
-# One stated goal of this task was to find out whether Literate.jl / Documenter.jl rendering supports collapsible ("click to expand") Julia code blocks.
-# Literate.jl has no native collapse feature; the mechanism below layers Documenter's raw-HTML passthrough (a `#md`-prefixed `​```@raw html` fence) around an ordinary executed code cell, using the standard CommonMark `<details><summary>...</summary>` idiom.
-#
-# This cell is executed, not a static text sample: it shows a preview of the flattened file inventory, and the code fence plus its rendered output should both appear nested inside the collapsible `<details>` block below once built to HTML.
-
-#md # ```@raw html
-#md # <details><summary>Show code and a file inventory preview</summary>
-#md # ```
-
-file_inventory = read_eda09("file_inventory")
-first(file_inventory, 20)
+tree_text = render_tree(directory_tree);
 
 #md # ```@raw html
 #md # </details>
 #md # ```
 
-# This did render as collapsible HTML: building this page through Documenter and inspecting the emitted `generated/eda_09_download_inventory.html` showed a single, well-formed `<details>...</details>` element with the executed code fence and its rendered `DataFrame` table both nested inside it, not leaking out as literal tag text and not ending up outside the collapsible region. The executed-cell variant worked as-is; no static fallback was needed. See the task record for the concrete tag-balance check used to confirm this.
+print(tree_text) #hide
 
 # ## Interpretation after execution
 #
