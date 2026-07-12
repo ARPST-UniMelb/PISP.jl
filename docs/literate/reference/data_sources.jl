@@ -11,6 +11,7 @@ const REPO_ROOT = normpath(get(
     joinpath(@__DIR__, "..", "..", ".."),
 ))
 const INPUT_ROOT = normpath(get(ENV, "PISP_DATA_ROOT", joinpath(REPO_ROOT, "data", "pisp-downloads")))
+replace(relpath(INPUT_ROOT, REPO_ROOT), '\\' => '/')
 
 # ## Configured reference-file downloads
 #

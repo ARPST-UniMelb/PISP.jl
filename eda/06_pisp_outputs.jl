@@ -166,9 +166,9 @@ function write_build_metadata_table()
         DataFrame([
             (
                 generated_at_utc = generated_at_utc,
-                pisp_output_root = OUT,
+                pisp_output_root = replace(relpath(OUT, REPO_ROOT), '\\' => '/'),
                 schedule_tag = SCHEDULE_TAG,
-                schedule_directory = SCHEDULE_DIR,
+                schedule_directory = replace(relpath(SCHEDULE_DIR, REPO_ROOT), '\\' => '/'),
             ),
         ]),
         SCRIPT_STEM,
