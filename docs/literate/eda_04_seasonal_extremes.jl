@@ -1,7 +1,6 @@
 # # Examining seasonal renewable extremes
 #
-# Mean capacity factors do not describe the persistence, timing, or profile of low-output conditions.
-# This page organises the evidence from `eda/04_seasonal_extremes.jl` around hot-versus-cool summer comparisons, candidate multi-day low-output events, and detailed solar profiles for adverse days.
+# Mean capacity factors do not describe the persistence, timing, or profile of low-output conditions. This page presents grouped summer comparisons, candidate multi-day low-output events, and detailed solar profiles for adverse days.
 #
 # The analysis uses one Victorian solar location and one Victorian wind location.
 # Its event definitions are exploratory and should not be treated as a system-wide adequacy criterion.
@@ -10,7 +9,8 @@ using CSV
 using DataFrames
 
 const EDA04_EVIDENCE_DIR = joinpath(
-    @__DIR__, "..", "..", "..", "eda", "tables", "julia", "04_seasonal_extremes",
+    normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", ".."))),
+    "eda", "tables", "julia", "04_seasonal_extremes",
 )
 
 function read_eda04(table_name)
@@ -24,16 +24,14 @@ preview_eda04(table; rows = 16) = first(table, min(rows, nrow(table)))
 # ## Hot and cool summer groups
 #
 # The grouped summary compares preselected historical summers.
-# The labels encode an external classification used by the EDA; the table itself does not establish meteorological causality.
+# The labels encode an external classification used for the comparison; the table itself does not establish meteorological causality.
 
 hot_cool_summer_solar_summary = read_eda04("hot_cool_summer_solar_summary")
 hot_cool_summer_solar_summary
 
 # ## Candidate multi-day low-output events
 #
-# The current event detector deliberately reproduces the indexing behaviour of the earlier Python analysis.
-# Because the filtered summer rows retain original row labels, events crossing excluded months can receive inflated or otherwise misleading durations, and positional pairing can shift when start and end counts differ.
-# Treat this table as compatibility evidence until the event algorithm is replaced or independently validated.
+# The current event-duration calculation retains original row labels after summer filtering. Events crossing excluded months can therefore receive inflated or otherwise misleading durations, and positional pairing can shift when start and end counts differ. Do not use the reported durations as modelling inputs until this calculation is corrected.
 
 low_output_events = read_eda04("low_output_events")
 preview_eda04(low_output_events; rows = 20)
@@ -58,8 +56,3 @@ monthly_cf_2019_summary
 
 black_summer_2019_daily_cf = read_eda04("black_summer_2019_daily_cf")
 preview_eda04(black_summer_2019_daily_cf; rows = 20)
-
-# ## Interpretation after execution
-#
-# Replace this section after inspecting all event rows and profiles.
-# The final interpretation should separate robust observations from artefacts of the compatibility event detector, state the selected thresholds and locations, and avoid translating a renewable trace statistic directly into a reliability conclusion.

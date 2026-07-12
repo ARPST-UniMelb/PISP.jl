@@ -1,0 +1,185 @@
+[[page]]
+id = "data-sources"
+title = "Data sources"
+kind = "reference"
+data_layer = "source-data"
+source = "literate/reference/data_sources.jl"
+output = "generated/reference/data-sources.md"
+status = "published"
+nav_order = 10
+snapshot = false
+related_reference_pages = ["concepts.md", "assumptions.md"]
+
+[[page]]
+id = "output-tables"
+title = "Output tables"
+kind = "reference"
+data_layer = "pisp-dataset"
+source = "literate/reference/output_tables.jl"
+output = "generated/reference/output-tables.md"
+status = "published"
+nav_order = 20
+snapshot = false
+related_reference_pages = ["concepts.md", "assumptions.md"]
+
+[[page]]
+id = "parameters-and-mappings"
+title = "Parameters and mappings"
+kind = "reference"
+data_layer = "package-workflow"
+source = "literate/reference/parameters_and_mappings.jl"
+output = "generated/reference/parameters-and-mappings.md"
+status = "published"
+nav_order = 30
+snapshot = false
+related_reference_pages = ["concepts.md", "assumptions.md"]
+
+[[page]]
+id = "problem-table"
+title = "Building a problem table"
+kind = "tutorial"
+data_layer = "package-workflow"
+source = "literate/problem_table.jl"
+output = "generated/tutorials/building-problem-table.md"
+status = "published"
+nav_order = 10
+snapshot = false
+related_reference_pages = ["concepts.md", "generated/reference/output-tables.md"]
+
+[[page]]
+id = "working-with-pisp-outputs"
+title = "Working with PISP-generated outputs"
+kind = "tutorial"
+data_layer = "pisp-dataset"
+source = "literate/tutorials/working_with_pisp_outputs.jl"
+output = "generated/tutorials/working-with-pisp-outputs.md"
+status = "published"
+nav_order = 20
+snapshot = true
+related_reference_pages = ["concepts.md", "generated/reference/output-tables.md", "assumptions.md"]
+
+[[page]]
+id = "source-data-inventory"
+title = "Source-data inventory"
+kind = "validation"
+data_layer = "source-data"
+source = "literate/eda_09_download_inventory.jl"
+output = "generated/validation/source-data-inventory.md"
+status = "published"
+nav_order = 10
+evidence_dir = "eda/tables/julia/09_download_inventory"
+producer = "eda/09_download_inventory.jl"
+snapshot = true
+related_reference_pages = ["generated/reference/data-sources.md"]
+
+[[page]]
+id = "trace-coverage-and-schema"
+title = "Trace data availability and structure"
+kind = "validation"
+data_layer = "source-data"
+source = "literate/eda_01_data_loading.jl"
+output = "generated/validation/trace-coverage-and-schema.md"
+status = "published"
+nav_order = 20
+evidence_dir = "eda/tables/julia/01_data_loading"
+producer = "eda/01_data_loading.jl"
+snapshot = true
+related_reference_pages = ["generated/reference/data-sources.md", "concepts.md"]
+
+[[page]]
+id = "temperature-data-coverage"
+title = "Temperature-data coverage and climate-zone solar comparison"
+kind = "validation"
+data_layer = "cross-layer"
+source = "literate/eda_05_temperature_analysis.jl"
+output = "generated/validation/temperature-data-coverage.md"
+status = "published"
+nav_order = 30
+evidence_dir = "eda/tables/julia/05_temperature_analysis"
+producer = "eda/05_temperature_analysis.jl"
+snapshot = true
+related_reference_pages = ["generated/reference/data-sources.md", "assumptions.md"]
+
+[[page]]
+id = "generated-output-consistency"
+title = "Generated-output consistency"
+kind = "validation"
+data_layer = "pisp-dataset"
+source = "literate/validation/generated_output_consistency.jl"
+output = "generated/validation/generated-output-consistency.md"
+status = "published"
+nav_order = 40
+evidence_dir = "eda/tables/julia/06_pisp_outputs"
+producer = "eda/06_pisp_outputs.jl"
+snapshot = true
+related_reference_pages = ["generated/reference/output-tables.md", "assumptions.md"]
+
+[[page]]
+id = "reference-trace-profile"
+title = "Reference trace 4006 profiles"
+kind = "analysis"
+data_layer = "source-data"
+source = "literate/eda_02_plot_4006_traces.jl"
+output = "generated/analyses/reference-trace-4006-profiles.md"
+status = "published"
+nav_order = 10
+evidence_dir = "eda/tables/julia/02_plot_4006_traces"
+producer = "eda/02_plot_4006_traces.jl"
+snapshot = true
+related_reference_pages = ["generated/reference/data-sources.md", "concepts.md", "generated/reference/parameters-and-mappings.md"]
+
+[[page]]
+id = "historical-trace-years"
+title = "Historical trace-year comparison"
+kind = "analysis"
+data_layer = "source-data"
+source = "literate/eda_03_year_comparison.jl"
+output = "generated/analyses/historical-trace-year-comparison.md"
+status = "published"
+nav_order = 20
+evidence_dir = "eda/tables/julia/03_year_comparison"
+producer = "eda/03_year_comparison.jl"
+snapshot = true
+related_reference_pages = ["generated/reference/data-sources.md", "concepts.md"]
+
+[[page]]
+id = "seasonal-renewable-extremes"
+title = "Seasonal renewable extremes"
+kind = "analysis"
+data_layer = "source-data"
+source = "literate/eda_04_seasonal_extremes.jl"
+output = "generated/analyses/seasonal-renewable-extremes.md"
+status = "published"
+nav_order = 30
+evidence_dir = "eda/tables/julia/04_seasonal_extremes"
+producer = "eda/04_seasonal_extremes.jl"
+snapshot = true
+related_reference_pages = ["generated/reference/data-sources.md", "assumptions.md"]
+
+[[page]]
+id = "demand-stress-low-solar"
+title = "Demand stress and low-solar coincidence"
+kind = "analysis"
+data_layer = "cross-layer"
+source = "literate/eda_07_demand_heat_events.jl"
+output = "generated/analyses/demand-stress-low-solar.md"
+status = "published"
+nav_order = 40
+evidence_dir = "eda/tables/julia/07_demand_heat_events"
+producer = "eda/07_demand_heat_events.jl"
+snapshot = true
+related_reference_pages = ["generated/reference/output-tables.md", "assumptions.md"]
+
+[[page]]
+id = "reference-trace-4006-mapping"
+title = "Reference trace 4006 composite mapping"
+kind = "analysis"
+data_layer = "cross-layer"
+source = "literate/eda_08_4006_composite_map.jl"
+output = "generated/analyses/reference-trace-4006-composite-mapping.md"
+status = "published"
+nav_order = 50
+evidence_dir = "eda/tables/julia/08_4006_composite_map"
+producer = "eda/08_4006_composite_map.jl"
+snapshot = true
+related_reference_pages = ["generated/reference/parameters-and-mappings.md", "assumptions.md"]

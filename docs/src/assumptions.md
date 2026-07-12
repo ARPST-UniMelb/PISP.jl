@@ -15,7 +15,7 @@ The `problem_type = "UC"` value in the internal problem table describes the inte
 
 ## Network representation
 
-PISP uses an aggregated 12-bus representation of the East Coast Australian power system. Each bus has one representative coordinate and belongs to one of the five NEM market areas. This is suitable for aggregated planning-data preparation, but it is not a nodal transmission model and does not contain intra-sub-region topology.
+PISP uses a package-defined aggregated representation of the East Coast Australian power system. Each bus has one representative coordinate and belongs to a NEM market area. The current bus and area inventory is listed in [Parameters and mappings](@ref). This representation is suitable for aggregated planning-data preparation, but it is not a nodal transmission model and does not contain intra-sub-region topology.
 
 Line rows represent aggregated corridors and augmentation options. Downstream studies that need detailed AC network constraints, voltage behaviour, or intra-regional congestion must add or substitute a more detailed network model.
 
@@ -35,7 +35,7 @@ A generator's static `pmax`/`capacity` field on the `Generator` table should not
 
 ## Data vintage and external validation
 
-The parser and downloader target 2024 ISP material, with a targeted 2019 workbook input for selected thermal unit constraints and a 2023 IASR EV workbook input for EV-related data. PISP's source code identifies these files, but a reproducible study should still archive the exact downloaded files and record checksums.
+The parser and downloader combine several source vintages. [Data sources](@ref) lists the configured download targets and expected local inputs. A reproducible study should still archive the exact downloaded files and record checksums.
 
 Package constants such as bus coordinates, trace-year mappings, generator trace filename exceptions, hydro mappings, and buildout templates should be reviewed as modelling assumptions. Some of these values are code-derived or source-derived; others are pragmatic mappings needed to align published files with PISP's schema.
 
@@ -48,7 +48,7 @@ Before using PISP output in a downstream study, check:
 | Which `reftrace`, `poe`, scenario IDs, and schedule tags were used? | They define the time-varying demand and VRE inputs. |
 | Were the input files freshly downloaded or reused from an existing `downloadpath`? | Reused inputs may not match the intended source vintage. |
 | Are `write_traces`, `check_exist_trace`, CSV, and Arrow settings consistent with the files being consumed? | Some schedules may be skipped intentionally. |
-| Does the study require more network detail than the 12-bus representation? | PISP does not encode detailed nodal topology. |
+| Does the study require more network detail than the aggregated PISP representation? | PISP does not encode detailed nodal topology. |
 | Are forced-outage, cost, efficiency, hydro, and buildout constants acceptable for the study? | These values can materially affect downstream optimisation or reliability results. |
 | Are schedule values joined to the correct static table and scenario? | Schedule tables are overlays, not standalone assets. |
 

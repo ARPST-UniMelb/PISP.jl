@@ -77,8 +77,8 @@ The [Building a `PISPtimeConfig` problem table](@ref) tutorial shows how those s
 [Building a `PISPtimeConfig` problem table](@ref) explains the scenario/time index that PISP creates before reading AEMO files.
 It runs entirely in memory.
 
-[Validating PISP-produced outputs against demand](@ref) inspects a local PISP output build and relates generator and demand schedules back to the static asset tables.
-It requires a local 2030 CSV build at `data/pisp-datasets/out-ref4006-poe10/csv/`, including `schedule-2030/`.
+[Working with PISP-generated outputs](@ref) loads a local PISP output build and relates generator and demand schedules back to the static asset tables.
+The tutorial documents its default build path and the environment variables used to select another generated dataset.
 
 ## API reference
 

@@ -1,16 +1,13 @@
-# # What did the downloader actually put on disk?
+# # Source-data inventory
 #
-# [Data sources](@ref) describes what the PISP downloader is *configured* to fetch: which published artifacts it targets and which local filenames and folders it expects to produce.
-# That page is hand-written and does not verify what is actually present in a given local checkout.
-# This page is the complementary, code-verified check: real Julia code walks the local `data/pisp-downloads/` tree (via `eda/09_download_inventory.jl`) and reports what is actually there, rather than what should be there.
-#
-# The evidence read below was computed from the local download tree by that script, not read live by this page.
+# This page lists the files and directories present under the selected PISP download root. The snapshot metadata identifies the inspected path and generation time.
 
 using CSV
 using DataFrames
 
 const EDA09_EVIDENCE_DIR = joinpath(
-    @__DIR__, "..", "..", "..", "eda", "tables", "julia", "09_download_inventory",
+    normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", ".."))),
+    "eda", "tables", "julia", "09_download_inventory",
 )
 
 function read_eda09(table_name)
@@ -19,6 +16,11 @@ function read_eda09(table_name)
     ## keep empty-string cells as empty strings, not `missing`
     return CSV.read(path, DataFrame; missingstring = nothing)
 end
+
+# ## Inventory snapshot
+
+snapshot_metadata = read_eda09("snapshot_metadata")
+snapshot_metadata
 
 # ## Top-level summary
 #
@@ -39,10 +41,6 @@ extension_summary
 #
 # The tree below mirrors the on-disk folder layout down to three levels deep.
 # Some folders hold far more files than are useful to list one by one — a single `Traces/<tech>_<year>/` folder holds hundreds of near-identical per-location trace CSVs — so a folder with many files shows only its first several, followed by a line stating how many more were left out.
-
-#md # ```@raw html
-#md # <details><summary>Show tree-rendering code</summary>
-#md # ```
 
 function render_tree(tree::DataFrame; root_label = "pisp-downloads")
     children_by_parent = Dict{String, Vector{Int}}()
@@ -72,15 +70,17 @@ end
 directory_tree = read_eda09("directory_tree")
 tree_text = render_tree(directory_tree);
 
-#md # ```@raw html
-#md # </details>
-#md # ```
-
 print(tree_text) #hide
 
-# ## Interpretation after execution
-#
-# The download root (`data/pisp-downloads/`) contained 8,250 files totalling roughly 66.7 GB at the time this page was last regenerated.
-# `Traces/` is the largest top-level entry by both file count (8,074 files, almost entirely half-hourly demand/solar/wind CSVs) and size (~50.3 GB), followed by `zip/` (64 files, ~19.0 GB, the original downloaded archives retained alongside their extracted contents).
-# Everything else is comparatively small: the `2024 ISP Model` directory (~0.5 GB) is the only other top-level entry that mixes file types (`csv` and `xml`), reflecting the PLEXOS model files it holds alongside its own nested `Traces/` subfolder, and the remaining workbook files and `Auxiliary`/`Core`/`Sensitivities` directories are all `xlsx`-only and under 30 MB each.
-# All nine top-level entries documented in [Data sources](@ref)'s configured-artifact table were present in this checkout; this page does not itself compare filenames against that table row by row, so a genuinely missing or renamed artifact would need to be checked against that page directly.
+# ## Inventory totals
+
+inventory_summary = DataFrame([
+    (
+        total_files = snapshot_metadata.total_files[1],
+        total_bytes = snapshot_metadata.total_bytes[1],
+        top_level_entries = nrow(top_level_summary),
+        largest_entry = top_level_summary.name[argmax(top_level_summary.total_bytes)],
+        largest_entry_bytes = maximum(top_level_summary.total_bytes),
+    ),
+])
+inventory_summary

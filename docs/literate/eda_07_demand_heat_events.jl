@@ -1,16 +1,16 @@
 # # Demand stress and low-solar coincidence
 #
-# High demand can coincide with low renewable availability, but that relationship must be evaluated with aligned dates, explicit thresholds, and a clear event definition.
-# This page organises the evidence from `eda/07_demand_heat_events.jl` around Victorian demand distributions, demand-defined stress days, hourly demand profiles, and solar availability on selected high-demand dates.
+# High demand can coincide with low renewable availability, but that relationship depends on aligned dates, explicit thresholds, and the event definition. This page presents Victorian demand distributions, demand-defined stress days, hourly demand profiles, and solar availability on selected high-demand dates.
 #
-# The source EDA uses `heat event` as an operational label for days at or above the 95th percentile of demand.
+# Here, `heat event` is an operational label for days at or above the 95th percentile of demand.
 # It does not use air temperature, an excess-heat factor, or a meteorological heatwave definition.
 
 using CSV
 using DataFrames
 
 const EDA07_EVIDENCE_DIR = joinpath(
-    @__DIR__, "..", "..", "..", "eda", "tables", "julia", "07_demand_heat_events",
+    normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", ".."))),
+    "eda", "tables", "julia", "07_demand_heat_events",
 )
 
 function read_eda07(table_name)
@@ -76,8 +76,3 @@ preview_eda07(normalized_vre_demand_summary; rows = 20)
 
 hot_day_solar_cf_detail = read_eda07("hot_day_solar_cf_detail")
 hot_day_solar_cf_detail
-
-# ## Interpretation after execution
-#
-# Replace this section after inspecting the complete merged data and threshold tables.
-# The final interpretation should use `demand stress day` unless an external temperature series supports a meteorological heat-event definition, report the percentile thresholds explicitly, and avoid inferring system reliability from one solar site and one demand schedule alone.

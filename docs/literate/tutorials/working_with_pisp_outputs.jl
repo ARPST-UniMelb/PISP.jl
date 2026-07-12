@@ -1,8 +1,8 @@
-# # Validating PISP-produced outputs against demand
+# # Working with PISP-generated outputs
 #
-# This walkthrough inspects one local PISP output build and checks how the static tables relate to the time-varying schedules. It expects an existing CSV build at `data/pisp-datasets/out-ref4006-poe10/csv/`, including `schedule-2030/`.
+# This tutorial loads one local PISP output build and shows how the static tables relate to the time-varying schedules. By default it reads `data/pisp-datasets/out-ref4006-poe10/csv/` and `schedule-2030/`; set `PISP_OUTPUT_ROOT` or `PISP_SCHEDULE_TAG` to use another generated build.
 #
-# The focus is internal consistency: generator and demand schedules are joined back to `Generator.csv`, `Demand.csv`, and `Bus.csv`, then aggregated into daily solar PMax, wind PMax, and total demand series.
+# The workflow joins generator and demand schedules back to `Generator.csv`, `Demand.csv`, and `Bus.csv`, then aggregates daily solar PMax, wind PMax, and total demand series.
 
 ENV["GKSwstype"] = "100"
 
@@ -13,11 +13,28 @@ using Plots
 
 gr();
 
-const DATA_ROOT = joinpath(
-    @__DIR__, "..", "..", "..",
-    "data", "pisp-datasets", "out-ref4006-poe10", "csv",
-)
-const SCHEDULE_DIR = joinpath(DATA_ROOT, "schedule-2030");
+const REPO_ROOT = normpath(get(
+    ENV,
+    "PISP_DOCS_REPO_ROOT",
+    joinpath(@__DIR__, "..", "..", ".."),
+))
+const DATA_ROOT = normpath(get(
+    ENV,
+    "PISP_OUTPUT_ROOT",
+    joinpath(REPO_ROOT, "data", "pisp-datasets", "out-ref4006-poe10", "csv"),
+))
+const SCHEDULE_TAG = get(ENV, "PISP_SCHEDULE_TAG", "schedule-2030")
+const SCHEDULE_DIR = joinpath(DATA_ROOT, SCHEDULE_TAG)
+
+required_files = [
+    joinpath(DATA_ROOT, "Generator.csv"),
+    joinpath(DATA_ROOT, "Demand.csv"),
+    joinpath(DATA_ROOT, "Bus.csv"),
+    joinpath(SCHEDULE_DIR, "Generator_pmax_sched.csv"),
+    joinpath(SCHEDULE_DIR, "Demand_load_sched.csv"),
+]
+missing_files = filter(path -> !isfile(path), required_files)
+isempty(missing_files) || error("missing PISP output files: $(join(missing_files, ", "))")
 
 # ## Step 1 — load the static output tables
 #
@@ -39,7 +56,7 @@ fuel_counts = sort(combine(groupby(gen_df, :fuel), nrow => :count), :count; rev 
 
 tech_counts = sort(combine(groupby(gen_df, :tech), nrow => :count), :count; rev = true)
 
-# ## Step 2 — load the 2030 schedule output
+# ## Step 2 — load the schedule output
 #
 # `Generator_pmax_sched.csv` and `Demand_load_sched.csv` are time-varying companion tables for generator maximum output and demand load.
 
@@ -141,17 +158,20 @@ plot!(
 )
 xlabel!(fig, "Date")
 ylabel!(fig, "GW")
-title!(fig, "2030 — Daily Aggregate: Solar PMax, Wind PMax, Total Demand")
+title!(fig, "$(SCHEDULE_TAG) — Daily Aggregate: Solar PMax, Wind PMax, Total Demand")
 
-const FIGURE_PATH = joinpath(@__DIR__, "eda_06_pisp_outputs-timeseries.png")
+const FIGURE_PATH = joinpath(
+    normpath(get(ENV, "PISP_LITERATE_OUTPUT_DIR", @__DIR__)),
+    "working_with_pisp_outputs-timeseries.png",
+)
 savefig(fig, FIGURE_PATH)
 nothing #hide
 
-# ![2030 daily aggregate solar PMax, wind PMax, and total demand](eda_06_pisp_outputs-timeseries.png)
+# ![Daily aggregate solar PMax, wind PMax, and total demand](working_with_pisp_outputs-timeseries.png)
 
 # ## Summary
 #
 # - `Generator_pmax_sched.csv` carries hourly PMax schedules for generators whose maximum output varies across the year in this build, chiefly solar and wind.
 # - `Demand_load_sched.csv` carries hourly demand by demand node.
-# - The daily aggregates produce aligned 365-day solar, wind, and demand series for the 2030 schedule.
-# - This check validates relationships inside the generated PISP outputs. It does not independently compare them with raw AEMO trace files.
+# - The daily aggregates expose the overlapping date coverage of the selected solar, wind, and demand schedules.
+# - The static-table joins attach generator technology and bus-area information to the schedules before aggregation.

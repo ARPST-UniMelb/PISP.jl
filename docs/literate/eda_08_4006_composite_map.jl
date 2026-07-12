@@ -2,14 +2,13 @@
 #
 # Reference trace `4006` assigns historical weather years to successive financial years in the planning horizon.
 # Understanding that map is necessary before comparing near-term and far-term renewable profiles because a change in planning year can also change the historical trace being reused.
-#
-# This page uses the evidence from `eda/08_4006_composite_map.jl` to expose the mapping, its repeated historical years, and the renewable statistics associated with those years.
 
 using CSV
 using DataFrames
 
 const EDA08_EVIDENCE_DIR = joinpath(
-    @__DIR__, "..", "..", "..", "eda", "tables", "julia", "08_4006_composite_map",
+    normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", ".."))),
+    "eda", "tables", "julia", "08_4006_composite_map",
 )
 
 function read_eda08(table_name)
@@ -22,8 +21,7 @@ preview_eda08(table; rows = 16) = first(table, min(rows, nrow(table)))
 
 # ## Financial-year to historical-year mapping
 #
-# The mapping table is the primary evidence for interpreting the composite trace.
-# It should remain visible next to any planning-horizon comparison.
+# The mapping table lists the historical weather year assigned to each financial-year interval.
 
 mapping_table = read_eda08("mapping_table")
 mapping_table
@@ -53,12 +51,7 @@ preview_eda08(near_vs_far_term_daily_cf; rows = 20)
 
 # ## Historical-year renewable matrix
 #
-# The heatmap evidence provides a compact comparison across the unique historical years used by the composite.
+# The matrix provides a compact comparison across the unique historical years used by the composite.
 
 vre_heatmap = read_eda08("vre_heatmap")
 vre_heatmap
-
-# ## Interpretation after execution
-#
-# Replace this section after inspecting the complete mapping and renewable statistics.
-# The final interpretation should identify which historical years dominate each planning-period group, separate composition effects from planning-year effects, and avoid interpreting the composite sequence as a climate-change projection.
