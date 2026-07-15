@@ -14,5 +14,8 @@ module PISP
     include("PISPparsers.jl")
     include("PISPscrappers.jl")
 
-    export build_pipeline, download_isp_reports
+    export build_pipeline,
+        download_ISP24_reports,
+        download_ISP26_reports,
+        download_isp2026_assets
 end
