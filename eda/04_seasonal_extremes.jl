@@ -308,7 +308,8 @@ function main()
               ylim=(0, 0.5), grid=true, gridalpha=0.3)
         push!(plots_hot_cool, p)
     end
-    p_hc = plot(plots_hot_cool..., layout=(2,1), size=(1400, 800))
+    p_hc = plot(plots_hot_cool..., layout=(2,1), size=(1400, 800),
+                left_margin=5Plots.mm, bottom_margin=5Plots.mm)
     savefig(p_hc, figure_path(SCRIPT_STEM, "04_hot_vs_cool_summer_solar.png"))
     println("Saved: 04_hot_vs_cool_summer_solar.png")
 
@@ -362,11 +363,12 @@ function main()
                             legend=false, title="Wind $(WIND_LOC) — Duration of Low-Output Events (≥3 days)",
                             xlabel="Consecutive Days Below Threshold", ylabel="Count", grid=true, gridalpha=0.3)
 
-    # Worst days bar chart
-    worst_yrs = sort(collect(keys(worst_solar_days_data)))
+    # Worst days bar chart - sort by CF value, not by year
+    worst_yrs = collect(keys(worst_solar_days_data))
+    sort!(worst_yrs, by = yr -> worst_solar_days_data[yr].cf)
     worst_cfs = [worst_solar_days_data[yr].cf for yr in worst_yrs]
     p_worst_days = bar(string.(worst_yrs), worst_cfs, color=:darkorange, alpha=0.7, legend=false,
-                       title="Solar $(SOLAR_LOC) — Worst Summer Day by Year (sorted)",
+                       title="Solar $(SOLAR_LOC) — Worst Summer Day by Year (sorted by CF)",
                        ylabel="Daily Mean CF", grid=true, gridalpha=0.3)
 
     # Worst day profile
@@ -397,34 +399,23 @@ function main()
         p_worst_profile = plot(legend=false)
     end
 
-    p_low_out = plot(p_sol_hist, p_wind_hist, p_worst_days, p_worst_profile, layout=(2,2), size=(1400, 1000))
+    p_low_out = plot(p_sol_hist, p_wind_hist, p_worst_days, p_worst_profile, layout=(2,2), size=(1400, 1000),
+                     left_margin=5Plots.mm, bottom_margin=5Plots.mm)
     savefig(p_low_out, figure_path(SCRIPT_STEM, "04_low_output_events.png"))
     println("Saved: 04_low_output_events.png")
 
     # ====== Figure 3: Monthly CF 2019 ======
-    df_2019 = load_trace("solar", 2019, SOLAR_LOC)
-    if df_2019 !== nothing
-        monthly_means = Float64[]
-        monthly_stds = Float64[]
-        months = 1:12
-        for m in months
-            mask = df_2019.Month .== m
-            if any(mask)
-                sub = df_2019[mask, :]
-                col_means = [mean(skipmissing(Vector(sub[i, HH_COLS_SOL]))) for i in 1:nrow(sub)]
-                col_stds = [std(skipmissing(Vector(sub[i, HH_COLS_SOL]))) for i in 1:nrow(sub)]
-                push!(monthly_means, mean(col_means))
-                push!(monthly_stds, mean(col_stds))
-            else
-                push!(monthly_means, 0.0)
-                push!(monthly_stds, 0.0)
-            end
-        end
+    # Read the monthly summary table already written by write_monthly_cf_2019_table()
+    # This ensures the plot uses exactly the same aggregation as the table
+    monthly_table_path = table_path(SCRIPT_STEM, "monthly_cf_2019_summary")
+    if isfile(monthly_table_path)
+        monthly_df = CSV.read(monthly_table_path, DataFrame)
         month_labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-        p_monthly = bar(month_labels, monthly_means, yerror=monthly_stds, color=:darkorange, alpha=0.6,
+        p_monthly = bar(month_labels, monthly_df.mean_cf, yerror=monthly_df.std_cf, color=:darkorange, alpha=0.6,
                         edgecolor=:black, legend=false,
                         title="Solar $(SOLAR_LOC) 2019 — Monthly Mean CF ± Std",
-                        xlabel="Month", ylabel="Mean Capacity Factor", grid=true, gridalpha=0.3, size=(1200, 500))
+                        xlabel="Month", ylabel="Mean Capacity Factor", grid=true, gridalpha=0.3, size=(1200, 500),
+                        left_margin=5Plots.mm, bottom_margin=5Plots.mm)
         savefig(p_monthly, figure_path(SCRIPT_STEM, "04_monthly_cf_2019.png"))
         println("Saved: 04_monthly_cf_2019.png")
     end
@@ -438,7 +429,8 @@ function main()
         p_black = plot(summer_2019.datetime, daily, linewidth=0.5, color=:darkorange, alpha=0.7, legend=false)
         plot!(p_black, summer_2019.datetime, rolling3, linewidth=2, color=:darkred, label="")
         plot!(p_black, title="Solar $(SOLAR_LOC) — Summer 2019 (Black Summer)", ylabel="Daily Mean CF",
-              ylim=(0, 0.5), grid=true, gridalpha=0.3, size=(1600, 500))
+              ylim=(0, 0.5), grid=true, gridalpha=0.3, size=(1600, 500),
+              left_margin=5Plots.mm, bottom_margin=5Plots.mm)
         savefig(p_black, figure_path(SCRIPT_STEM, "04_summer_2019_black_summer.png"))
         println("Saved: 04_summer_2019_black_summer.png")
     end
