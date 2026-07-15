@@ -4,7 +4,7 @@ EditURL = "../../../literate/tutorials/working_with_pisp_outputs.jl"
 
 # Working with PISP-generated outputs
 
-This tutorial loads one local PISP output build and shows how the static tables relate to the time-varying schedules. By default it reads `data/pisp-datasets/out-ref4006-poe10/csv/` and `schedule-2030/`; set `PISP_OUTPUT_ROOT` or `PISP_SCHEDULE_TAG` to use another generated build.
+This tutorial loads one local PISP output build and shows how the static tables relate to the time-varying schedules. By default it reads `data/2024/pisp-datasets/out-ref4006-poe10/csv/` and `schedule-2030/`; set `PISP_OUTPUT_ROOT` or `PISP_SCHEDULE_TAG` to use another generated build.
 
 The workflow joins generator and demand schedules back to `Generator.csv`, `Demand.csv`, and `Bus.csv`, then aggregates daily solar PMax, wind PMax, and total demand series.
 
@@ -30,7 +30,7 @@ const REPO_ROOT = normpath(get(
 const DATA_ROOT = normpath(get(
     ENV,
     "PISP_OUTPUT_ROOT",
-    joinpath(REPO_ROOT, "data", "pisp-datasets", "out-ref4006-poe10", "csv"),
+    joinpath(REPO_ROOT, "data", "2024", "pisp-datasets", "out-ref4006-poe10", "csv"),
 ))
 const SCHEDULE_TAG = get(ENV, "PISP_SCHEDULE_TAG", "schedule-2030")
 const SCHEDULE_DIR = joinpath(DATA_ROOT, SCHEDULE_TAG)

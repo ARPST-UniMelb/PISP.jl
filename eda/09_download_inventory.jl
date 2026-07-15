@@ -43,6 +43,8 @@ function walk_download_root(root; max_tree_depth = MAX_TREE_DEPTH, max_children_
     tree_rows = NamedTuple[]
 
     for (dirpath, dirnames, filenames) in walkdir(root)
+        filter!(name -> !startswith(name, "."), dirnames)
+        filter!(name -> !startswith(name, "."), filenames)
         rel_dir = dirpath == root ? "" : to_forward_slashes(relpath(dirpath, root))
         dir_depth = isempty(rel_dir) ? 0 : length(splitpath(rel_dir))
         child_depth = dir_depth + 1
@@ -117,7 +119,7 @@ end
 # describes what is found *under* an entry, not the entry itself.
 function summarize_top_level(root, files)
     rows = NamedTuple[]
-    for name in sort(readdir(root))
+    for name in sort(filter(n -> !startswith(n, "."), readdir(root)))
         full_path = joinpath(root, name)
         if isdir(full_path)
             prefix = name * "/"
