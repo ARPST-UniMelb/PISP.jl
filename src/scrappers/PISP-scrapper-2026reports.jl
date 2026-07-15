@@ -2,6 +2,9 @@ module ISP2026ReportDownloader
 
     using PISP.ISPReportDownloader: ISPReportTarget, download_report_targets
 
+    export report_targets,
+        download_reports
+
     const DEFAULT_REPORTS_OUTDIR = "data/2026/pisp-reports"
 
     const ISP_REPORT_TARGETS = ISPReportTarget[
@@ -47,17 +50,17 @@ module ISP2026ReportDownloader
                         "https://www.aemo.com.au/-/media/files/major-publications/isp/2026/appendices/a7-system-security.pdf?la=en"),
     ]
 
-    isp_report_targets() = copy(ISP_REPORT_TARGETS)
+    report_targets() = copy(ISP_REPORT_TARGETS)
 
     """
-        download_isp_reports(; outdir = "data/2026/pisp-reports", overwrite = false, throttle_seconds = nothing)
+        download_reports(; outdir = "data/2026/pisp-reports", overwrite = false, throttle_seconds = nothing)
 
-    Download the ten selected 2026 ISP report PDFs from AEMO. The returned result
-    contains every successful path and any failures after all targets are attempted.
+    Download the ten selected 2026 ISP report PDFs from AEMO. The command returns
+    `nothing`; per-target failures are warned and do not stop later targets.
     """
-    function download_isp_reports(; outdir = DEFAULT_REPORTS_OUTDIR,
-                                  overwrite = false,
-                                  throttle_seconds = nothing)
+    function download_reports(; outdir = DEFAULT_REPORTS_OUTDIR,
+                              overwrite = false,
+                              throttle_seconds = nothing)
         download_report_targets(ISP_REPORT_TARGETS;
                                 outdir = outdir,
                                 overwrite = overwrite,

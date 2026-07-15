@@ -33,8 +33,9 @@ using Test
     end
 
     @testset "ISP 2024 report downloader" begin
-        report_downloader = PISP.ISPReportDownloader
-        targets = report_downloader.isp_report_targets()
+        core = PISP.ISPReportDownloader
+        report_downloader = PISP.ISP2024ReportDownloader
+        targets = report_downloader.report_targets()
         expected_targets = [
             (:plexos_model_instructions, "2024 ISP PLEXOS Model Instructions", "2024-isp-plexos-model-instructions.pdf", "https://www.aemo.com.au/-/media/files/major-publications/isp/2024/supporting-materials/2024-isp-plexos-model-instructions.pdf?la=en"),
             (:integrated_system_plan, "2024 Integrated System Plan", "2024-integrated-system-plan.pdf", "https://www.aemo.com.au/-/media/files/major-publications/isp/2024/2024-integrated-system-plan-isp.pdf?la=en"),
@@ -49,8 +50,9 @@ using Test
         ]
 
         @test isdefined(PISP, :download_ISP24_reports)
-        @test PISP.download_ISP24_reports === report_downloader.download_isp_reports
+        @test PISP.download_ISP24_reports !== report_downloader.download_reports
         @test !isdefined(PISP, :download_isp_reports)
+        @test !isdefined(PISP, :download_isp2026_reports)
         @test [(target.key, target.title, target.filename, target.url) for target in targets] == expected_targets
         @test all(target -> endswith(lowercase(target.filename), ".pdf"), targets)
         @test all(target -> startswith(target.url, "https://www.aemo.com.au/"), targets)
@@ -70,7 +72,7 @@ using Test
             write(destination, "%PDF-1.7\nexisting")
             calls = Ref(0)
 
-            result = report_downloader.download_report_targets([target];
+            result = core.download_report_targets([target];
                                                                 outdir = outdir,
                                                                 download_function = function (url, path; headers)
                                                                     calls[] += 1
@@ -91,7 +93,7 @@ using Test
             calls = Ref(0)
             received_headers = Ref{Any}(nothing)
 
-            result = report_downloader.download_report_targets([target];
+            result = core.download_report_targets([target];
                                                                 outdir = outdir,
                                                                 download_function = function (url, path; headers)
                                                                     calls[] += 1
@@ -115,7 +117,7 @@ using Test
             existing = "%PDF-1.7\nexisting"
             write(destination, existing)
 
-            result = report_downloader.download_report_targets([target];
+            result = core.download_report_targets([target];
                                                                 outdir = outdir,
                                                                 overwrite = true,
                                                                 download_function = (url, path; headers) -> write(path, "not a PDF"))
@@ -130,7 +132,7 @@ using Test
 
         mktempdir() do outdir
             target = targets[4]
-            result = report_downloader.download_report_targets([target];
+            result = core.download_report_targets([target];
                                                                 outdir = outdir,
                                                                 download_function = (url, path; headers) -> error("request failed"))
 
@@ -148,7 +150,7 @@ using Test
             write(destination, "%PDF-1.7\nexisting")
             calls = Ref(0)
 
-            result = report_downloader.download_report_targets([target];
+            result = core.download_report_targets([target];
                                                                 outdir = outdir,
                                                                 overwrite = true,
                                                                 download_function = function (url, path; headers)
@@ -168,7 +170,7 @@ using Test
             failed_target, successful_target = targets[1:2]
             successful_destination = joinpath(outdir, successful_target.filename)
 
-            result = report_downloader.download_report_targets([failed_target, successful_target];
+            result = core.download_report_targets([failed_target, successful_target];
                                                                 outdir = outdir,
                                                                 download_function = function (url, path; headers)
                                                                     url == failed_target.url && error("temporary upstream failure")
@@ -185,8 +187,9 @@ using Test
     end
 
     @testset "ISP 2026 report downloader" begin
+        core = PISP.ISPReportDownloader
         report_downloader = PISP.ISP2026ReportDownloader
-        targets = report_downloader.isp_report_targets()
+        targets = report_downloader.report_targets()
         expected_targets = [
             (:integrated_system_plan, "2026 Integrated System Plan", "2026-integrated-system-plan.pdf", "https://www.aemo.com.au/-/media/files/major-publications/isp/2026/2026-integrated-system-plan-isp.pdf?rev=7f5dfd18aa1b4a3aab704c424f75afd3&sc_lang=en"),
             (:plexos_model_instructions, "2026 ISP PLEXOS Model Instructions", "2026-isp-plexos-model-instructions.pdf", "https://www.aemo.com.au/-/media/files/major-publications/isp/2026/isp-model/2026-isp-plexos-model-instructions.pdf?la=en"),
@@ -201,7 +204,8 @@ using Test
         ]
 
         @test isdefined(PISP, :download_ISP26_reports)
-        @test PISP.download_ISP26_reports === report_downloader.download_isp_reports
+        @test PISP.download_ISP26_reports !== report_downloader.download_reports
+        @test !isdefined(PISP, :download_isp_reports)
         @test !isdefined(PISP, :download_isp2026_reports)
         @test [(target.key, target.title, target.filename, target.url) for target in targets] == expected_targets
 
@@ -220,7 +224,7 @@ using Test
             write(destination, "%PDF-1.7\nexisting")
             calls = Ref(0)
 
-            result = report_downloader.download_report_targets([target];
+            result = core.download_report_targets([target];
                                                                  outdir = outdir,
                                                                  download_function = function (url, path; headers)
                                                                      calls[] += 1
@@ -239,7 +243,7 @@ using Test
             write(destination, "not a PDF")
             calls = Ref(0)
 
-            result = report_downloader.download_report_targets([target];
+            result = core.download_report_targets([target];
                                                                  outdir = outdir,
                                                                  download_function = function (url, path; headers)
                                                                      calls[] += 1
@@ -260,7 +264,7 @@ using Test
             existing = "%PDF-1.7\nexisting"
             write(destination, existing)
 
-            result = report_downloader.download_report_targets([target];
+            result = core.download_report_targets([target];
                                                                 outdir = outdir,
                                                                 overwrite = true,
                                                                 download_function = (url, path; headers) -> write(path, "not a PDF"))
@@ -272,7 +276,7 @@ using Test
         mktempdir() do outdir
             target = targets[4]
 
-            result = report_downloader.download_report_targets([target];
+            result = core.download_report_targets([target];
                                                                 outdir = outdir,
                                                                 download_function = (url, path; headers) -> error("request failed"))
             @test isempty(result.paths)
@@ -287,7 +291,7 @@ using Test
             write(destination, "%PDF-1.7\nexisting")
             calls = Ref(0)
 
-            result = report_downloader.download_report_targets([target];
+            result = core.download_report_targets([target];
                                                                  outdir = outdir,
                                                                  overwrite = true,
                                                                  download_function = function (url, path; headers)
@@ -306,7 +310,7 @@ using Test
             failed_target, successful_target = targets[1:2]
             successful_destination = joinpath(outdir, successful_target.filename)
 
-            result = report_downloader.download_report_targets([failed_target, successful_target];
+            result = core.download_report_targets([failed_target, successful_target];
                                                                  outdir = outdir,
                                                                  download_function = function (url, path; headers)
                                                                      url == failed_target.url && error("temporary upstream failure")
