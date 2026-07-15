@@ -50,7 +50,7 @@ using Test
         ]
 
         @test isdefined(PISP, :download_ISP24_reports)
-        @test PISP.download_ISP24_reports !== report_downloader.download_reports
+        @test PISP.download_ISP24_reports === report_downloader.download_reports
         @test !isdefined(PISP, :download_isp_reports)
         @test !isdefined(PISP, :download_isp2026_reports)
         @test [(target.key, target.title, target.filename, target.url) for target in targets] == expected_targets
@@ -204,7 +204,7 @@ using Test
         ]
 
         @test isdefined(PISP, :download_ISP26_reports)
-        @test PISP.download_ISP26_reports !== report_downloader.download_reports
+        @test PISP.download_ISP26_reports === report_downloader.download_reports
         @test !isdefined(PISP, :download_isp_reports)
         @test !isdefined(PISP, :download_isp2026_reports)
         @test [(target.key, target.title, target.filename, target.url) for target in targets] == expected_targets
