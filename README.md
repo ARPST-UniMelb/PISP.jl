@@ -94,16 +94,6 @@ source_paths = PISP.download_isp2026_assets(
 
 The 2026 solar and wind trace archives are stored below `zip/Traces/` within the selected download directory. The downloader does not extract archives or build datasets.
 
-To inspect the six source targets without downloading anything:
-
-```julia
-using PISP
-
-for target in PISP.ISP2026FileDownloader.isp_file_targets()
-    println(target.key, " -> ", target.filename)
-end
-```
-
 ## Optional parameters for PISP.build_ISP24_datasets()
 
 There are multiple parameters that can be adjusted when generating the dataset from the public 2024 Integrated System Plan (ISP) datafiles:
