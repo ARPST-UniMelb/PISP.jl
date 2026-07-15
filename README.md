@@ -60,13 +60,11 @@ Download the ten selected 2024 ISP report PDFs from AEMO with:
 ```julia
 using PISP
 
-result = PISP.download_ISP24_reports(
+PISP.download_ISP24_reports(
     outdir    = joinpath(@__DIR__, "..", "data", "2024", "pisp-reports"),
     overwrite = false,
     )
 ```
-
-The returned `result.paths` contains successfully available or downloaded PDF paths. `result.failures` reports failures per target; a failure does not stop later targets from being attempted.
 
 ## Download 2026 ISP report PDFs
 
@@ -75,13 +73,11 @@ Download the ten selected 2026 ISP report PDFs from AEMO with:
 ```julia
 using PISP
 
-result = PISP.download_ISP26_reports(
+PISP.download_ISP26_reports(
     outdir    = joinpath(@__DIR__, "..", "data", "2026", "pisp-reports"),
     overwrite = false,
     )
 ```
-
-The returned `result.paths` contains successfully available or downloaded PDF paths. `result.failures` reports failures per target; a failure does not stop later targets from being attempted.
 
 ## Download 2026 ISP source data
 

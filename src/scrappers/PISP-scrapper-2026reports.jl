@@ -20,7 +20,7 @@ module ISP2026ReportDownloader
         ISPReportTarget(:iasr_2025_addendum,
                         "Addendum to the 2025 Inputs, Assumptions and Scenarios Report",
                         "addendum-to-2025-inputs-assumptions-and-scenarios-report.pdf",
-                        "https://www.aemo.com.au/-/media/files/major-publications/isp/draft-2026/addendum-to-2025-inputs-assumptions-and-scenarios-report.pdf?rev=00798523a25e42078034d1878c337f19&sc_lang=en"),
+                        "https://www.aemo.com.au/-/media/files/major-publications/isp/draft-2026/addendum-to-the-2025-inputs-assumptions-and-scenarios-report.pdf"),
         ISPReportTarget(:isp_methodology_2025,
                         "ISP Methodology (June 2025)",
                         "2025-isp-methodology.pdf",
@@ -58,10 +58,11 @@ module ISP2026ReportDownloader
     function download_isp_reports(; outdir = DEFAULT_REPORTS_OUTDIR,
                                   overwrite = false,
                                   throttle_seconds = nothing)
-        return download_report_targets(ISP_REPORT_TARGETS;
-                                       outdir = outdir,
-                                       overwrite = overwrite,
-                                       throttle_seconds = throttle_seconds)
+        download_report_targets(ISP_REPORT_TARGETS;
+                                outdir = outdir,
+                                overwrite = overwrite,
+                                throttle_seconds = throttle_seconds)
+        return nothing
     end
 
 end

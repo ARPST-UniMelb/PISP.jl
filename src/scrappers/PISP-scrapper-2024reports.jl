@@ -88,10 +88,11 @@ module ISPReportDownloader
     function download_isp_reports(; outdir = "data/pisp-reports",
                                   overwrite = false,
                                   throttle_seconds = nothing)
-        return download_report_targets(ISP_REPORT_TARGETS;
-                                       outdir = outdir,
-                                       overwrite = overwrite,
-                                       throttle_seconds = throttle_seconds)
+        download_report_targets(ISP_REPORT_TARGETS;
+                                outdir = outdir,
+                                overwrite = overwrite,
+                                throttle_seconds = throttle_seconds)
+        return nothing
     end
 
     function download_report_targets(targets::AbstractVector{ISPReportTarget};
