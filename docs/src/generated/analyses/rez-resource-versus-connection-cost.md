@@ -6,7 +6,7 @@ EditURL = "../../../literate/eda_11_rez_resource_vs_cost.jl"
 
 This analysis asks whether Renewable Energy Zones (REZs) with larger workbook-derived resource potential also have higher expected connection cost, or whether resource potential and connection cost are effectively separate dimensions.
 
-The evidence comes from the AEMO 2024 ISP Inputs and Assumptions workbook at `data/pisp-downloads/2024-isp-inputs-and-assumptions-workbook.xlsx`.
+The evidence comes from the AEMO 2024 ISP Inputs and Assumptions workbook at `data/2024/pisp-downloads/2024-isp-inputs-and-assumptions-workbook.xlsx`.
 The workbook sheets named most naturally for the question are not directly joinable: `Renewable Energy Zones` identifies REZ geography without numeric resource limits, while `REZ Costs forecast` gives named cost trajectories without REZ-level capacity figures.
 The evidence therefore uses `Build limits` for `total_resource_limit_mw` and `REZ Augmentations Options` for the primary option's `expected_cost_million`, joined by REZ identifier and name.
 

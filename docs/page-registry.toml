@@ -196,5 +196,5 @@ nav_order = 70
 snapshot = true
 evidence_dir = "eda/tables/julia/11_rez_resource_vs_cost"
 producer = "eda/11_rez_resource_vs_cost.jl"
-data_requirements = ["data/pisp-downloads/2024-isp-inputs-and-assumptions-workbook.xlsx"]
+data_requirements = ["data/2024/pisp-downloads/2024-isp-inputs-and-assumptions-workbook.xlsx"]
 related_reference_pages = ["generated/reference/data-sources.md", "generated/reference/parameters-and-mappings.md", "assumptions.md"]
