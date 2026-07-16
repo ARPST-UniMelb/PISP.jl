@@ -359,6 +359,8 @@ function main()
     # ====== Figure 4: Zero output days ======
     sol_low = Dict()
     wind_low = Dict()
+    sol_low_counts = Dict()
+    wind_low_counts = Dict()
 
     for yr in sort(collect(keys(sol_years)))
         df = sol_years[yr]
@@ -369,6 +371,7 @@ function main()
             n_low = count(<(0.05), midday_max)
             n_total = length(midday_max)
             sol_low[yr] = 100 * n_low / n_total
+            sol_low_counts[yr] = n_low
         end
     end
 
@@ -381,18 +384,30 @@ function main()
             n_low = count(<(0.05), daily)
             n_total = length(daily)
             wind_low[yr] = 100 * n_low / n_total
+            wind_low_counts[yr] = n_low
         end
     end
 
     yrs_sol_low = sort(collect(keys(sol_low)))
     yrs_wind_low = sort(collect(keys(wind_low)))
+    sol_low_values = [sol_low[yr] for yr in yrs_sol_low]
+    wind_low_values = [wind_low[yr] for yr in yrs_wind_low]
+    sol_label_offset = max(0.15, 0.025 * maximum(sol_low_values))
+    wind_label_offset = max(0.15, 0.025 * maximum(wind_low_values))
 
-    p_low1 = bar(string.(yrs_sol_low), [sol_low[yr] for yr in yrs_sol_low], color=:darkorange, alpha=0.7,
+    p_low1 = bar(string.(yrs_sol_low), sol_low_values, color=:darkorange, alpha=0.7,
                  legend=false, title="Solar $(SOLAR_LOC) — % Summer Days with Midday Max CF < 0.05",
-                 ylabel="% of Summer Days")
-    p_low2 = bar(string.(yrs_wind_low), [wind_low[yr] for yr in yrs_wind_low], color=:steelblue, alpha=0.7,
+                 ylabel="% of Summer Days", ylim=(0, maximum(sol_low_values) + 2 * sol_label_offset))
+    p_low2 = bar(string.(yrs_wind_low), wind_low_values, color=:steelblue, alpha=0.7,
                  legend=false, title="Wind $(WIND_LOC) — % Summer Days with Daily Mean CF < 0.05",
-                 ylabel="% of Summer Days")
+                 ylabel="% of Summer Days", ylim=(0, maximum(wind_low_values) + 2 * wind_label_offset))
+
+    for (idx, yr) in enumerate(yrs_sol_low)
+        annotate!(p_low1, idx, sol_low_values[idx] + sol_label_offset, text(string(sol_low_counts[yr]), 8, :center))
+    end
+    for (idx, yr) in enumerate(yrs_wind_low)
+        annotate!(p_low2, idx, wind_low_values[idx] + wind_label_offset, text(string(wind_low_counts[yr]), 8, :center))
+    end
 
     p_zero = plot(p_low1, p_low2, layout=(1,2), size=(1800, 600), left_margin=10Plots.mm, bottom_margin=10Plots.mm, top_margin=20Plots.mm)
     savefig(p_zero, figure_path(SCRIPT_STEM, "03_zero_output_days.png"))

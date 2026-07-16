@@ -367,7 +367,8 @@ function main()
     worst_yrs = collect(keys(worst_solar_days_data))
     sort!(worst_yrs, by = yr -> worst_solar_days_data[yr].cf)
     worst_cfs = [worst_solar_days_data[yr].cf for yr in worst_yrs]
-    p_worst_days = bar(string.(worst_yrs), worst_cfs, color=:darkorange, alpha=0.7, legend=false,
+    worst_colors = [yr in HOT_SUMMERS ? :darkred : :steelblue for yr in worst_yrs]
+    p_worst_days = bar(string.(worst_yrs), worst_cfs, color=worst_colors, alpha=0.7, legend=false,
                        title="Solar $(SOLAR_LOC) — Worst Summer Day by Year (sorted by CF)",
                        ylabel="Daily Mean CF", grid=true, gridalpha=0.3)
 
