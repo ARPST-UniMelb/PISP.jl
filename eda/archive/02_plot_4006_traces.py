@@ -1,5 +1,5 @@
 """
-eda/02_plot_4006_traces.py
+eda/archive/02_plot_4006_traces.py
 Plot AEMO ISP 4006 composite trace — solar and wind capacity factors by region/state.
 Shows diurnal, seasonal, and inter-annual patterns.
 """
@@ -10,6 +10,9 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from table_utils import write_table
 

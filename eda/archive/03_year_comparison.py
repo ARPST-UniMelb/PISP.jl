@@ -1,5 +1,5 @@
 """
-eda/03_year_comparison.py
+eda/archive/03_year_comparison.py
 Compare solar and wind capacity factors across historical reference years (2011-2023).
 Key question: do any years show patterns consistent with extreme heat derating?
 """
@@ -9,6 +9,9 @@ from pathlib import Path
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from table_utils import write_table
 

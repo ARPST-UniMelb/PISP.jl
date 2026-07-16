@@ -1,5 +1,5 @@
 """
-eda/07_demand_heat_events.py
+eda/archive/07_demand_heat_events.py
 Analyze demand patterns during summer heat events.
 Key: does demand spike when VRE output is lowest (hot calm days)?
 """
@@ -10,6 +10,9 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from table_utils import write_table
 

@@ -1,5 +1,5 @@
 """
-eda/08_4006_composite_map.py
+eda/archive/08_4006_composite_map.py
 Document which historical year maps to which financial year in the 4006 composite trace.
 Also show the VRE characteristics (solar/wind CF) for each mapped year.
 """
@@ -11,6 +11,9 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.patches as mpatches
+
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from table_utils import write_table
 

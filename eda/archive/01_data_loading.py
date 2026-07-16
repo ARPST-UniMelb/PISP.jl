@@ -1,5 +1,5 @@
 """
-eda/01_data_loading.py
+eda/archive/01_data_loading.py
 Load and inspect AEMO ISP solar/wind trace data structure.
 """
 import pandas as pd
@@ -8,6 +8,9 @@ from pathlib import Path
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from table_utils import write_table
 

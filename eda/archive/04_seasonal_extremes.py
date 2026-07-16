@@ -1,5 +1,5 @@
 """
-eda/04_seasonal_extremes.py
+eda/archive/04_seasonal_extremes.py
 Analyze summer extremes: zero-output events, extended low-output periods,
 and patterns that could indicate extreme heat derating.
 """
@@ -10,6 +10,9 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.dates import DateFormatter
+
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from table_utils import write_table
 

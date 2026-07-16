@@ -1,5 +1,5 @@
 """
-eda/05_temperature_analysis.py
+eda/archive/05_temperature_analysis.py
 Investigate whether AEMO ISP models temperature-dependent derating.
 Examines: ISP assumptions workbook, generator parameters, and trace patterns.
 """
@@ -10,6 +10,9 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import json
+
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from table_utils import write_table
 

@@ -1,5 +1,5 @@
 """
-eda/06_pisp_outputs.py
+eda/archive/06_pisp_outputs.py
 Inspect and plot the PISP-produced output: Generator_pmax_sched, Demand_load_sched, etc.
 Compare with the raw capacity factor traces.
 """
@@ -10,6 +10,9 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from table_utils import write_table
 
