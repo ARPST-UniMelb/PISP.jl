@@ -66,7 +66,7 @@ end
 ```
 
 ````
-Snapshot: PISP.jl commit 0d31fb4+dirty, generated 2026-07-16 — 2024 ISP inputs and assumptions workbook, 2024 ISP PISP output files (out-ref4006-poe10 schedule), and 2019 climate-zone summer solar traces
+Snapshot: PISP.jl commit 70ebf60+dirty, generated 2026-07-16 — 2024 ISP inputs and assumptions workbook, 2024 ISP PISP output files (out-ref4006-poe10 schedule), and 2019 climate-zone summer solar traces
 
 ````
 

@@ -52,7 +52,7 @@ const AREA_NAMES = Dict(1 => "QLD", 2 => "NSW", 3 => "VIC", 4 => "TAS", 5 => "SA
 ```
 
 ````
-Snapshot: PISP.jl commit 0d31fb4+dirty, generated 2026-07-16 — schedule-2030 generated PISP output (out-ref4006-poe10 build)
+Snapshot: PISP.jl commit 70ebf60+dirty, generated 2026-07-16 — schedule-2030 generated PISP output (out-ref4006-poe10 build)
 
 ````
 

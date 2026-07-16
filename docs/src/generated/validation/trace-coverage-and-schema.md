@@ -98,7 +98,7 @@ end
 ```
 
 ````
-Snapshot: PISP.jl commit 0d31fb4+dirty, generated 2026-07-16 — 2024 ISP raw trace downloads
+Snapshot: PISP.jl commit 70ebf60+dirty, generated 2026-07-16 — 2024 ISP raw trace downloads
 
 ````
 

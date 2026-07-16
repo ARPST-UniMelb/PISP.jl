@@ -72,7 +72,7 @@ row_max(df::DataFrame, cols) = [maximum(row[col] for col in cols) for row in eac
 ```
 
 ````
-Snapshot: PISP.jl commit 0d31fb4+dirty, generated 2026-07-16 — 2024 ISP raw trace downloads, historical years 2011-2023
+Snapshot: PISP.jl commit 70ebf60+dirty, generated 2026-07-16 — 2024 ISP raw trace downloads, historical years 2011-2023
 
 ````
 

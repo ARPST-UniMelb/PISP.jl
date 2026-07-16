@@ -53,7 +53,7 @@ const FAR_YEARS = [2045, 2046, 2047, 2048, 2049]
 ```
 
 ````
-Snapshot: PISP.jl commit 0d31fb4+dirty, generated 2026-07-16 — 2024 ISP PISP.WEATHER_YEARS_ISP weather-year mapping; historical solar and wind reference traces from the 2024 ISP raw trace downloads
+Snapshot: PISP.jl commit 70ebf60+dirty, generated 2026-07-16 — 2024 ISP PISP.WEATHER_YEARS_ISP weather-year mapping; historical solar and wind reference traces from the 2024 ISP raw trace downloads
 
 ````
 
