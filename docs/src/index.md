@@ -7,6 +7,12 @@ PISP.jl performs that data-preparation work for the 2024 Integrated System Plan.
 It converts the published material and package-defined mappings into a consistent set of power-system tables that downstream modelling tools can consume.
 PISP is a dataset builder, not a dispatch, unit-commitment, capacity-expansion, or power-flow model.
 
+## AEMO source context
+
+AEMO describes the ISP as a collection of supporting materials, including workbooks, outlook material, traces, and appendices ([2024 Integrated System Plan, p. 92](../../data/2024/pisp-reports/2024-integrated-system-plan.pdf#page=92)).
+The public market-model package includes PLEXOS model instructions ([2024 ISP PLEXOS Model Instructions, p. 2](../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=2)) and scenario-specific model data ([2024 ISP PLEXOS Model Instructions, p. 5](../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=5)).
+The source documents define reference-trace and network conventions ([2024 ISP PLEXOS Model Instructions, pp. 5–7](../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=5); [2023 Inputs, Assumptions and Scenarios Report, p. 141](../../data/2024/pisp-reports/2023-inputs-assumptions-and-scenarios-report.pdf#page=141)) and capacity-outlook probability-of-exceedance profiles ([ISP Methodology, p. 39](../../data/2024/pisp-reports/2023-isp-methodology.pdf#page=39)).
+
 ## What becomes available
 
 A PISP build produces three connected forms of information:

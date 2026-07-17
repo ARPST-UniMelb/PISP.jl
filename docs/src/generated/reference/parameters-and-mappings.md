@@ -102,7 +102,7 @@ markdown_table(bus_area_mappings)
 
 The composite trace maps each financial-year interval to a historical weather year. Repeated historical years are part of the mapping and should be considered when comparing planning periods.
 
-The mapping is based on AEMO's 2024 ISP PLEXOS model instructions (https://aemo.com.au/-/media/files/major-publications/isp/2024/supporting-materials/2024-isp-plexos-model-instructions.pdf?la=en), the same document `PISP.WEATHER_YEARS_ISP`'s own source comment cites in `src/parameters/general2024ISP.jl`. The specific page or table within that document has not yet been identified; this page traces the mapping to that source comment and the table below, not to a page number in AEMO's document.
+The mapping is based on AEMO's 2024 ISP PLEXOS model instructions ([2024 ISP PLEXOS Model Instructions, p. 5](../../../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=5)), the same document cited by `PISP.WEATHER_YEARS_ISP`'s source comment in `src/parameters/general2024ISP.jl`.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
