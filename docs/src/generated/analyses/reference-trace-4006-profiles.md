@@ -24,11 +24,7 @@ using Plots
 
 gr();
 
-const REPO_ROOT = normpath(get(
-    ENV,
-    "PISP_DOCS_REPO_ROOT",
-    joinpath(@__DIR__, "..", "..", ".."),
-))
+const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..")))
 
 include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
 using .EdaSupport
@@ -139,7 +135,7 @@ end
 ```
 
 ````
-Snapshot: PISP.jl commit 4b32060, generated 2026-07-17 — 2024 ISP raw trace downloads, trace year 4006
+Snapshot: PISP.jl commit bba8297+dirty, generated 2026-07-17 — 2024 ISP raw trace downloads, trace year 4006
 
 ````
 

@@ -14,11 +14,7 @@ PISP combines AEMO workbooks, model archives, development outlooks, and time-ser
 using PISP
 using DataFrames
 
-const REPO_ROOT = normpath(get(
-    ENV,
-    "PISP_DOCS_REPO_ROOT",
-    joinpath(@__DIR__, "..", "..", ".."),
-))
+const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..")))
 const INPUT_ROOT = normpath(get(ENV, "PISP_DATA_ROOT", joinpath(REPO_ROOT, "data", "2024", "pisp-downloads")))
 
 include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))

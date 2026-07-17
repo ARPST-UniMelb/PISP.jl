@@ -12,11 +12,7 @@ using DataFrames
 using Printf
 using XLSX
 
-const REPO_ROOT = normpath(get(
-    ENV,
-    "PISP_DOCS_REPO_ROOT",
-    joinpath(@__DIR__, "..", "..", ".."),
-))
+const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..")))
 
 include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
 using .EdaSupport

@@ -24,11 +24,7 @@ using StatsPlots
 
 gr();
 
-const REPO_ROOT = normpath(get(
-    ENV,
-    "PISP_DOCS_REPO_ROOT",
-    joinpath(@__DIR__, "..", "..", ".."),
-))
+const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..")))
 
 include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
 using .EdaSupport
@@ -72,7 +68,7 @@ row_max(df::DataFrame, cols) = [maximum(row[col] for col in cols) for row in eac
 ```
 
 ````
-Snapshot: PISP.jl commit 4b32060, generated 2026-07-17 — 2024 ISP raw trace downloads, historical years 2011-2023
+Snapshot: PISP.jl commit bba8297+dirty, generated 2026-07-17 — 2024 ISP raw trace downloads, historical years 2011-2023
 
 ````
 

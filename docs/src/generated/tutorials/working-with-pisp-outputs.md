@@ -22,11 +22,7 @@ using Plots
 
 gr();
 
-const REPO_ROOT = normpath(get(
-    ENV,
-    "PISP_DOCS_REPO_ROOT",
-    joinpath(@__DIR__, "..", "..", ".."),
-))
+const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..")))
 const DATA_ROOT = normpath(get(
     ENV,
     "PISP_OUTPUT_ROOT",

@@ -23,11 +23,7 @@ using XLSX
 using Printf
 using Statistics
 
-const REPO_ROOT = normpath(get(
-    ENV,
-    "PISP_DOCS_REPO_ROOT",
-    joinpath(@__DIR__, "..", "..", ".."),
-))
+const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..")))
 
 include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
 using .EdaSupport
@@ -66,7 +62,7 @@ as_float(x::Real) = Float64(x)
 ```
 
 ````
-Snapshot: PISP.jl commit 4b32060, generated 2026-07-17 — 2024 ISP Inputs and Assumptions workbook, Build limits + REZ Augmentations Options
+Snapshot: PISP.jl commit bba8297+dirty, generated 2026-07-17 — 2024 ISP Inputs and Assumptions workbook, Build limits + REZ Augmentations Options
 
 ````
 

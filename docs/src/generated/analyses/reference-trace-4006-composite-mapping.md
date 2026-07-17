@@ -23,11 +23,7 @@ using PISP
 
 gr();
 
-const REPO_ROOT = normpath(get(
-    ENV,
-    "PISP_DOCS_REPO_ROOT",
-    joinpath(@__DIR__, "..", "..", ".."),
-))
+const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..")))
 
 include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
 using .EdaSupport
@@ -53,7 +49,7 @@ const FAR_YEARS = [2045, 2046, 2047, 2048, 2049]
 ```
 
 ````
-Snapshot: PISP.jl commit 4b32060, generated 2026-07-17 — 2024 ISP PISP.WEATHER_YEARS_ISP weather-year mapping; historical solar and wind reference traces from the 2024 ISP raw trace downloads
+Snapshot: PISP.jl commit bba8297+dirty, generated 2026-07-17 — 2024 ISP PISP.WEATHER_YEARS_ISP weather-year mapping; historical solar and wind reference traces from the 2024 ISP raw trace downloads
 
 ````
 
