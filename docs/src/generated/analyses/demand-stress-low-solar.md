@@ -71,7 +71,7 @@ end
 ```
 
 ````
-Snapshot: PISP.jl commit 4b32060, generated 2026-07-17 — VIC demand schedule from the schedule-2030 generated PISP output; Bannerton 4006 solar reference trace from the 2024 ISP raw trace downloads
+Snapshot: PISP.jl commit 465f2cf+dirty, generated 2026-07-17 — VIC demand schedule from the schedule-2030 generated PISP output; Bannerton 4006 solar reference trace from the 2024 ISP raw trace downloads
 
 ````
 
@@ -116,7 +116,7 @@ markdown_table(demand_trace_inventory)
 
 ## Step 2 — load the demand schedule and aggregate daily demand by area
 
-The PISP model output records each network node's half-hourly demand schedule and its bus, and each bus's NEM area; joining these mappings lets the schedule be aggregated to a daily mean demand per area. The full daily-by-area table (one row per area per calendar date) is written in full below for regression evidence; the page displays one summary row per area instead of every row.
+The PISP model output records each network node's half-hourly demand schedule and its bus, and each bus's NEM area; joining these mappings lets the schedule be aggregated to a daily mean demand per area. The full daily-by-area table (one row per area per calendar date) is written to `demand_by_area_daily.csv`; the page displays one summary row per area instead of every row.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -208,7 +208,7 @@ sort!(vic_daily, :date_only)
 
 ## Step 5 — merge VIC demand with the Bannerton solar capacity factor by date
 
-Only calendar dates present in both the VIC demand schedule and the Bannerton 4006 solar trace are kept, so the merged sample can be smaller than either input series. The full merged series is written in full below for regression evidence; the page displays a single summary row describing its coverage and range instead of every day.
+Only calendar dates present in both the VIC demand schedule and the Bannerton 4006 solar trace are kept, so the merged sample can be smaller than either input series. The full merged series is written to `vic_demand_solar_merged.csv`; the page displays a single summary row describing its coverage and range instead of every day.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -379,7 +379,7 @@ markdown_table(heat_normal_hourly_profile)
 
 ## Step 9 — demand duration curve
 
-Sorting daily VIC demand from highest to lowest gives the demand duration curve, independent of chronology. The full 365-day curve is written in full below for regression evidence and shown as a figure in Step 16; the page displays the curve's value at a handful of quantile marks instead.
+Sorting daily VIC demand from highest to lowest gives the demand duration curve, independent of chronology. The full 365-day curve is written to `demand_duration_curve.csv` and shown as a figure in Step 16; the page displays the curve's value at a handful of quantile marks instead.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -422,7 +422,7 @@ markdown_table(duration_curve_quantile_marks)
 
 ## Step 10 — normalized VRE vs demand summary, sorted by demand
 
-Demand and Bannerton solar capacity factor from the merged sample are each normalized by their own maximum and ranked by ascending demand, so their relative shapes can be compared on the same 0-to-1 scale. The full 365-day normalized series is written in full below for regression evidence and shown as a figure in Step 16; the page instead reports how closely the two normalized series track each other.
+Demand and Bannerton solar capacity factor from the merged sample are each normalized by their own maximum and ranked by ascending demand, so their relative shapes can be compared on the same 0-to-1 scale. The full 365-day normalized series is written to `normalized_vre_demand_summary.csv` and shown as a figure in Step 16; the page instead reports how closely the two normalized series track each other.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>

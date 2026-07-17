@@ -328,7 +328,7 @@ markdown_table(demand_by_area_summary)
 
 # ## Step 10 — daily solar, wind, and demand aggregates in GW
 #
-# Generator schedules are joined to generator technology before summing solar and wind pmax separately by day; the demand schedule's daily total, already joined above, is combined alongside them and converted from MW to GW.
+# Generator schedules are joined to generator technology before summing solar and wind pmax separately by day; the demand schedule's daily total, already joined above, is combined alongside them and converted from MW to GW. The full daily series (one row per calendar date) is written to `daily_solar_wind_demand_gw.csv`; the page displays only the first 10 rows as a representative sample.
 
 gen_pmax_ts = build_gen_pmax_ts(gen_pmax, gen_df)
 
@@ -349,7 +349,7 @@ daily_gw = DataFrame(
     demand_gw = daily_joined.total_demand ./ 1000,
 )
 write_table(daily_gw, SCRIPT_STEM, "daily_solar_wind_demand_gw")
-markdown_table(daily_gw)
+markdown_table(first(daily_gw, 10))
 
 # ## Step 11 — hourly pmax profile for the first 30 days
 #

@@ -58,9 +58,9 @@ format = Documenter.HTML(;
     prettyurls = get(ENV, "CI", "false") == "true",
     inventory_version = "dev",
     edit_link = "main",
-    size_threshold = 4 * 2^20,
-    size_threshold_warn = 2 * 2^20,
-    search_size_threshold_warn = 6 * 2^20,
+    size_threshold = 512 * 2^10,
+    size_threshold_warn = 256 * 2^10,
+    search_size_threshold_warn = 2^20,
 )
 
 makedocs(;

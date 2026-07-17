@@ -145,55 +145,85 @@ function rolling_mean(values, window)
     end
     return result
 end
+````
 
+```@raw html
+</details>
+```
+
+````
+rolling_mean (generic function with 1 method)
+````
+
+Pushes one candidate event (>= 3 consecutive below-threshold calendar days) covering summer-filtered positions s_pos:e_pos into rows, computed from real calendar-day duration rather than array position, so it cannot span a non-summer gap.
+
+```@raw html
+<details class="source-code"><summary>Show source code</summary>
+```
+
+````julia
+function push_low_output_event!(rows, s_pos, e_pos, dates, daily, tech, yr)
+    duration = (dates[e_pos] - dates[s_pos]).value + 1
+    duration >= 3 || return nothing
+    vals = view(daily, s_pos:e_pos)
+    push!(
+        rows,
+        NamedTuple{(:year, :start, :end, :duration, :min_cf, :mean_cf, :tech)}(
+            (
+                yr,
+                Dates.format(dates[s_pos], "yyyy-mm-dd"),
+                Dates.format(dates[e_pos], "yyyy-mm-dd"),
+                duration,
+                minimum(vals),
+                mean(vals),
+                tech,
+            ),
+        ),
+    )
+    return nothing
+end
+````
+
+```@raw html
+</details>
+```
+
+````
+push_low_output_event! (generic function with 1 method)
+````
+
+Finds candidate multi-day low-output events within one technology/location/year's summer (Dec/Jan/Feb) days. A "December" row and a "January/February" row are both selected by the summer month filter, but a single reference-year trace file lists them roughly 9 months apart in calendar time (Jan-Feb near the top of the file, December near the bottom), so this only extends a run across two summer-filtered rows when their calendar dates are exactly one day apart -- otherwise it closes the current run and starts a new one, so an event can never silently bridge the excluded March-November gap.
+
+```@raw html
+<details class="source-code"><summary>Show source code</summary>
+```
+
+````julia
 function low_output_events_for(tech, loc, hh_cols, threshold, yr)
     df = load_trace(tech, yr, loc)
     df === nothing && return NamedTuple[]
     summer_mask = in.(df.Month, Ref((12, 1, 2)))
     any(summer_mask) || return NamedTuple[]
 
-    full_idx = findall(summer_mask)  # original row positions, in file order
-    dates = df.datetime[full_idx]
-    daily = row_mean(df[full_idx, :], hh_cols)
+    summer = df[summer_mask, :]
+    dates = summer.datetime
+    daily = row_mean(summer, hh_cols)
     below = daily .< threshold
     n = length(below)
 
-    starts = Int[]
-    ends = Int[]
+    rows = NamedTuple[]
+    run_start = below[1] ? 1 : nothing
     for i in 2:n
-        delta = Int(below[i]) - Int(below[i - 1])
-        if delta == 1
-            push!(starts, full_idx[i])
-        elseif delta == -1
-            push!(ends, full_idx[i])
+        contiguous = (dates[i] - dates[i - 1]) == Day(1)
+        if run_start !== nothing && (!below[i] || !contiguous)
+            push_low_output_event!(rows, run_start, i - 1, dates, daily, tech, yr)
+            run_start = nothing
+        end
+        if below[i] && run_start === nothing
+            run_start = i
         end
     end
-
-    rows = NamedTuple[]
-    for k in 1:min(length(starts), length(ends))
-        s = starts[k]
-        e = ends[k]
-        duration = (e - s) + 1
-        duration >= 3 || continue
-        mask_range = (full_idx .>= s) .& (full_idx .<= e)
-        vals = daily[mask_range]
-        s_pos = findfirst(==(s), full_idx)
-        e_pos = findfirst(==(e), full_idx)
-        push!(
-            rows,
-            NamedTuple{(:year, :start, :end, :duration, :min_cf, :mean_cf, :tech)}(
-                (
-                    yr,
-                    Dates.format(dates[s_pos], "yyyy-mm-dd"),
-                    Dates.format(dates[e_pos], "yyyy-mm-dd"),
-                    duration,
-                    minimum(vals),
-                    mean(vals),
-                    tech,
-                ),
-            ),
-        )
-    end
+    run_start !== nothing && push_low_output_event!(rows, run_start, n, dates, daily, tech, yr)
     return rows
 end
 
@@ -208,7 +238,7 @@ snapshot_metadata_line(
 ```
 
 ````
-Snapshot: PISP.jl commit 4b32060, generated 2026-07-17 — 2024 ISP raw trace downloads (data/2024/pisp-downloads/Traces), historical years 2011-2023, hot/cool summers fixed by HOT_SUMMERS/COOL_SUMMERS
+Snapshot: PISP.jl commit 465f2cf+dirty, generated 2026-07-17 — 2024 ISP raw trace downloads (data/2024/pisp-downloads/Traces), historical years 2011-2023, hot/cool summers fixed by HOT_SUMMERS/COOL_SUMMERS
 
 ````
 
@@ -268,9 +298,7 @@ markdown_table(hot_cool_summer_solar_summary)
 
 ## Step 2 — candidate multi-day low-output events
 
-The current event-duration calculation retains original row labels after summer filtering. Events crossing excluded months can therefore receive inflated or otherwise misleading durations, and positional pairing can shift when start and end counts differ. Do not use the reported durations as modelling inputs until this calculation is corrected.
-
-The full event-by-event table is written to `eda/tables/julia/04_seasonal_extremes/low_output_events.csv`; the page instead shows a compact per-technology-per-year summary of how many candidate events were found and how long they lasted.
+An event is a run of consecutive summer calendar days whose daily mean capacity factor stays below the technology's threshold for at least 3 days; a run never bridges the excluded March-November gap between a summer's December and the following January/February. The full event-by-event table is written to `eda/tables/julia/04_seasonal_extremes/low_output_events.csv`; the page instead shows a compact per-technology-per-year summary of how many candidate events were found and how long they lasted.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -313,22 +341,17 @@ markdown_table(low_output_event_summary)
 
 | **tech** | **year** | **n\_events** | **min\_duration** | **mean\_duration** | **max\_duration** |
 |--:|--:|--:|--:|--:|--:|
-| solar | 2011 | 42 | 3 | 3.9 | 4 |
-| solar | 2012 | 36 | 3 | 163.2 | 279 |
-| solar | 2014 | 34 | 3 | 3.0 | 3 |
-| solar | 2015 | 34 | 3 | 3.0 | 3 |
-| wind | 2011 | 207 | 3 | 27.8 | 282 |
-| wind | 2012 | 98 | 3 | 17.0 | 277 |
-| wind | 2013 | 140 | 3 | 3.6 | 4 |
-| wind | 2014 | 140 | 3 | 13.3 | 277 |
-| wind | 2015 | 173 | 3 | 34.8 | 278 |
-| wind | 2016 | 262 | 3 | 23.8 | 280 |
-| wind | 2017 | 275 | 3 | 4.4 | 278 |
-| wind | 2018 | 327 | 3 | 8.4 | 277 |
-| wind | 2019 | 272 | 3 | 5.1 | 279 |
-| wind | 2020 | 82 | 3 | 20.0 | 277 |
-| wind | 2021 | 131 | 3 | 21.9 | 278 |
-| wind | 2022 | 70 | 3 | 22.6 | 278 |
+| solar | 2011 | 37 | 3 | 3.0 | 3 |
+| solar | 2012 | 1 | 3 | 3.0 | 3 |
+| wind | 2011 | 83 | 3 | 4.1 | 6 |
+| wind | 2013 | 79 | 3 | 3.0 | 3 |
+| wind | 2014 | 34 | 4 | 4.0 | 4 |
+| wind | 2016 | 123 | 3 | 3.9 | 4 |
+| wind | 2017 | 94 | 3 | 3.2 | 5 |
+| wind | 2018 | 92 | 3 | 3.2 | 5 |
+| wind | 2019 | 190 | 3 | 3.5 | 5 |
+| wind | 2020 | 14 | 4 | 4.0 | 4 |
+| wind | 2023 | 89 | 3 | 3.4 | 5 |
 
 
 ## Step 3 — worst solar day and half-hourly profile
@@ -578,22 +601,24 @@ Each panel overlays every year in the group as a thin line with its own 3-day ro
 
 ````julia
 plots_hot_cool = []
-for (season_type, year_list, color) in [("Hot Summers", HOT_SUMMERS, :darkred), ("Cool Summers", COOL_SUMMERS, :steelblue)]
-    p = plot(legend=false, size=(1400, 400))
-    for yr in year_list
-        df = load_trace("solar", yr, SOLAR_LOC)
-        df === nothing && continue
-        summer_mask = in.(df.Month, Ref((12, 1, 2)))
-        any(summer_mask) || continue
-        summer = df[summer_mask, :]
-        daily = [mean(skipmissing(Vector(summer[i, HH_COLS_SOL]))) for i in 1:nrow(summer)]
-        rolling3 = rolling_mean(daily, 3)
-        plot!(p, summer.datetime, daily, linewidth=0.5, alpha=0.6, color=color, label="$yr")
-        plot!(p, summer.datetime, rolling3, linewidth=1.5, color=:black, alpha=0.8, label="")
+let
+    for (season_type, year_list, color) in [("Hot Summers", HOT_SUMMERS, :darkred), ("Cool Summers", COOL_SUMMERS, :steelblue)]
+        p = plot(legend=false, size=(1400, 400))
+        for yr in year_list
+            df = load_trace("solar", yr, SOLAR_LOC)
+            df === nothing && continue
+            summer_mask = in.(df.Month, Ref((12, 1, 2)))
+            any(summer_mask) || continue
+            summer = df[summer_mask, :]
+            daily = [mean(skipmissing(Vector(summer[i, HH_COLS_SOL]))) for i in 1:nrow(summer)]
+            rolling3 = rolling_mean(daily, 3)
+            plot!(p, summer.datetime, daily, linewidth=0.5, alpha=0.6, color=color, label="$yr")
+            plot!(p, summer.datetime, rolling3, linewidth=1.5, color=:black, alpha=0.8, label="")
+        end
+        plot!(p, title="Solar $(SOLAR_LOC) — $(season_type) Daily Mean CF", ylabel="Daily Mean CF",
+              ylim=(0, 0.5), grid=true, gridalpha=0.3)
+        push!(plots_hot_cool, p)
     end
-    plot!(p, title="Solar $(SOLAR_LOC) — $(season_type) Daily Mean CF", ylabel="Daily Mean CF",
-          ylim=(0, 0.5), grid=true, gridalpha=0.3)
-    push!(plots_hot_cool, p)
 end
 p_hc = plot(plots_hot_cool..., layout=(2,1), size=(1400, 800),
             left_margin=5Plots.mm, bottom_margin=5Plots.mm)
@@ -604,20 +629,6 @@ EdaSupport.embed_figure(figure_path(SCRIPT_STEM, "04_hot_vs_cool_summer_solar.pn
 ```@raw html
 </details>
 ```
-
-````
-┌ Warning: Assignment to `df` in soft scope is ambiguous because a global variable by the same name exists: `df` will be treated as a new local. Disambiguate by using `local df` to suppress this warning or `global df` to assign to the existing global variable.
-└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/.literate-staging-R1OdJV/src/generated/analyses/seasonal_renewable_extremes.md:5
-┌ Warning: Assignment to `summer_mask` in soft scope is ambiguous because a global variable by the same name exists: `summer_mask` will be treated as a new local. Disambiguate by using `local summer_mask` to suppress this warning or `global summer_mask` to assign to the existing global variable.
-└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/.literate-staging-R1OdJV/src/generated/analyses/seasonal_renewable_extremes.md:7
-┌ Warning: Assignment to `summer` in soft scope is ambiguous because a global variable by the same name exists: `summer` will be treated as a new local. Disambiguate by using `local summer` to suppress this warning or `global summer` to assign to the existing global variable.
-└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/.literate-staging-R1OdJV/src/generated/analyses/seasonal_renewable_extremes.md:9
-┌ Warning: Assignment to `daily` in soft scope is ambiguous because a global variable by the same name exists: `daily` will be treated as a new local. Disambiguate by using `local daily` to suppress this warning or `global daily` to assign to the existing global variable.
-└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/.literate-staging-R1OdJV/src/generated/analyses/seasonal_renewable_extremes.md:10
-┌ Warning: Assignment to `rolling3` in soft scope is ambiguous because a global variable by the same name exists: `rolling3` will be treated as a new local. Disambiguate by using `local rolling3` to suppress this warning or `global rolling3` to assign to the existing global variable.
-└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/.literate-staging-R1OdJV/src/generated/analyses/seasonal_renewable_extremes.md:11
-
-````
 
 ![Daily mean solar capacity factor across historical hot summers versus cool summers](04_hot_vs_cool_summer_solar.png)
 
@@ -634,34 +645,38 @@ solar_low_events = []
 wind_low_events = []
 worst_solar_days_data = Dict()
 
-for yr in 2011:2023
-    df = load_trace("solar", yr, SOLAR_LOC)
-    df === nothing && continue
-    summer_mask = in.(df.Month, Ref((12, 1, 2)))
-    any(summer_mask) || continue
-    summer = df[summer_mask, :]
-    daily = [mean(skipmissing(Vector(summer[i, HH_COLS_SOL]))) for i in 1:nrow(summer)]
+let
+    for yr in 2011:2023
+        df = load_trace("solar", yr, SOLAR_LOC)
+        df === nothing && continue
+        summer_mask = in.(df.Month, Ref((12, 1, 2)))
+        any(summer_mask) || continue
+        summer = df[summer_mask, :]
+        daily = [mean(skipmissing(Vector(summer[i, HH_COLS_SOL]))) for i in 1:nrow(summer)]
 
-    events = low_output_events_for("solar", SOLAR_LOC, HH_COLS_SOL, 0.1, yr)
-    for row in events
-        push!(solar_low_events, row.duration)
+        events = low_output_events_for("solar", SOLAR_LOC, HH_COLS_SOL, 0.1, yr)
+        for row in events
+            push!(solar_low_events, row.duration)
+        end
+
+        worst_pos = argmin(daily)
+        worst_solar_days_data[yr] = (date = summer.datetime[worst_pos], cf = daily[worst_pos])
     end
-
-    worst_pos = argmin(daily)
-    worst_solar_days_data[yr] = (date = summer.datetime[worst_pos], cf = daily[worst_pos])
 end
 
-for yr in 2011:2023
-    df = load_trace("wind", yr, WIND_LOC)
-    df === nothing && continue
-    summer_mask = in.(df.Month, Ref((12, 1, 2)))
-    any(summer_mask) || continue
-    summer = df[summer_mask, :]
-    daily = [mean(skipmissing(Vector(summer[i, HH_COLS_WIND]))) for i in 1:nrow(summer)]
+let
+    for yr in 2011:2023
+        df = load_trace("wind", yr, WIND_LOC)
+        df === nothing && continue
+        summer_mask = in.(df.Month, Ref((12, 1, 2)))
+        any(summer_mask) || continue
+        summer = df[summer_mask, :]
+        daily = [mean(skipmissing(Vector(summer[i, HH_COLS_WIND]))) for i in 1:nrow(summer)]
 
-    events = low_output_events_for("wind", WIND_LOC, HH_COLS_WIND, 0.15, yr)
-    for row in events
-        push!(wind_low_events, row.duration)
+        events = low_output_events_for("wind", WIND_LOC, HH_COLS_WIND, 0.15, yr)
+        for row in events
+            push!(wind_low_events, row.duration)
+        end
     end
 end
 
@@ -717,26 +732,6 @@ EdaSupport.embed_figure(figure_path(SCRIPT_STEM, "04_low_output_events.png"), "0
 ```@raw html
 </details>
 ```
-
-````
-┌ Warning: Assignment to `df` in soft scope is ambiguous because a global variable by the same name exists: `df` will be treated as a new local. Disambiguate by using `local df` to suppress this warning or `global df` to assign to the existing global variable.
-└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/.literate-staging-R1OdJV/src/generated/analyses/seasonal_renewable_extremes.md:6
-┌ Warning: Assignment to `summer_mask` in soft scope is ambiguous because a global variable by the same name exists: `summer_mask` will be treated as a new local. Disambiguate by using `local summer_mask` to suppress this warning or `global summer_mask` to assign to the existing global variable.
-└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/.literate-staging-R1OdJV/src/generated/analyses/seasonal_renewable_extremes.md:8
-┌ Warning: Assignment to `summer` in soft scope is ambiguous because a global variable by the same name exists: `summer` will be treated as a new local. Disambiguate by using `local summer` to suppress this warning or `global summer` to assign to the existing global variable.
-└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/.literate-staging-R1OdJV/src/generated/analyses/seasonal_renewable_extremes.md:10
-┌ Warning: Assignment to `daily` in soft scope is ambiguous because a global variable by the same name exists: `daily` will be treated as a new local. Disambiguate by using `local daily` to suppress this warning or `global daily` to assign to the existing global variable.
-└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/.literate-staging-R1OdJV/src/generated/analyses/seasonal_renewable_extremes.md:11
-┌ Warning: Assignment to `df` in soft scope is ambiguous because a global variable by the same name exists: `df` will be treated as a new local. Disambiguate by using `local df` to suppress this warning or `global df` to assign to the existing global variable.
-└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/.literate-staging-R1OdJV/src/generated/analyses/seasonal_renewable_extremes.md:23
-┌ Warning: Assignment to `summer_mask` in soft scope is ambiguous because a global variable by the same name exists: `summer_mask` will be treated as a new local. Disambiguate by using `local summer_mask` to suppress this warning or `global summer_mask` to assign to the existing global variable.
-└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/.literate-staging-R1OdJV/src/generated/analyses/seasonal_renewable_extremes.md:25
-┌ Warning: Assignment to `summer` in soft scope is ambiguous because a global variable by the same name exists: `summer` will be treated as a new local. Disambiguate by using `local summer` to suppress this warning or `global summer` to assign to the existing global variable.
-└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/.literate-staging-R1OdJV/src/generated/analyses/seasonal_renewable_extremes.md:27
-┌ Warning: Assignment to `daily` in soft scope is ambiguous because a global variable by the same name exists: `daily` will be treated as a new local. Disambiguate by using `local daily` to suppress this warning or `global daily` to assign to the existing global variable.
-└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/.literate-staging-R1OdJV/src/generated/analyses/seasonal_renewable_extremes.md:28
-
-````
 
 ![Low-output event durations, worst-day ranking, and the worst day's half-hourly profile](04_low_output_events.png)
 
@@ -802,6 +797,6 @@ end
 ## Summary
 
 - Hot and cool historical summers show visibly different daily mean solar capacity factor spreads once each year's series is overlaid with its own 3-day rolling mean.
-- The multi-day low-output event table retains the row-label/positional mismatch described in Step 2 rather than silently correcting it, so its durations should be read with that caveat in mind.
+- The multi-day low-output event table reports real calendar-day durations for each technology and year, split at any gap in summer coverage so an event can never bridge the excluded March-November months.
 - The 2019 monthly summary and Black Summer daily series both come from the same two-stage aggregation described in Step 4.
 
