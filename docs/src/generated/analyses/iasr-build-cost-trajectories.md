@@ -83,7 +83,7 @@ is_target_technology(tech) = any(kw -> occursin(kw, lowercase(tech)), TARGET_KEY
 </details>
 ```
 
-The sheet lays out one "Build cost by technology ($/kW)" master table: a header row ("Technology", "Scenario", then one column per financial year), followed by 19 technologies x 6 scenarios in 6-row blocks, each block preceded by a repeated copy of the same header row and followed by a blank separator row. This locates that header by literal content rather than a hardcoded row number, since earlier rows on the sheet hold unrelated GenCost-scenario-mapping tables with their own, differently-shaped blocks.
+The sheet lays out one "Build cost by technology (\$/kW)" master table: a header row ("Technology", "Scenario", then one column per financial year), followed by 19 technologies x 6 scenarios in 6-row blocks, each block preceded by a repeated copy of the same header row and followed by a blank separator row. This locates that header by literal content rather than a hardcoded row number, since earlier rows on the sheet hold unrelated GenCost-scenario-mapping tables with their own, differently-shaped blocks.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
