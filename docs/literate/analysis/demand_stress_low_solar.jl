@@ -423,3 +423,9 @@ println("\nDone.")
 #
 # - VIC daily demand and the Bannerton 4006 solar capacity factor are merged by date, then used to define demand-defined heat-event days (>=P95) and normal days (<P90) and to screen for high-demand, low-solar coincidence days.
 # - Three figures are built live on this page: the demand/solar time series, the demand-vs-solar scatter, and the combined heat-event overview panel.
+
+# ## Interpretation
+#
+# The demand schedule uses the 10% probability-of-exceedance (POE) demand-profile premise for capacity outlooks ([ISP Methodology, p. 39](../../../../data/2024/pisp-reports/2023-isp-methodology.pdf#page=39)). Across 365 date-matched daily-mean pairs, demand and solar capacity factor have a correlation of -0.257949. This indicates an inverse association in this sample, not causation. Nineteen of the 365 days meet the demand-defined heat-event threshold at or above P95. Peak daily mean demand is 9789.05 MW on 2030-01-09, and mean daily demand is 6295.69 MW.
+#
+# Here, heat event remains an operational label rather than a meteorological classification.
