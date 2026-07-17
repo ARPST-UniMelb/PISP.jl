@@ -5,6 +5,15 @@
 using PISP
 using DataFrames
 
+const REPO_ROOT = normpath(get(
+    ENV,
+    "PISP_DOCS_REPO_ROOT",
+    joinpath(@__DIR__, "..", "..", ".."),
+))
+
+include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
+using .EdaSupport
+
 function container_inventory(container)
     rows = NamedTuple[]
     for field in fieldnames(typeof(container))
@@ -35,14 +44,14 @@ _tc, static_container, schedule_container = PISP.initialise_time_structures()
 # Static tables define asset identity and time-invariant attributes. Schedule rows should be joined back to these tables through the relationship identifier shown in the generated schema.
 
 static_tables = container_inventory(static_container)
-static_tables
+markdown_table(static_tables)
 
 # ## Schedule tables
 #
 # Schedule tables carry scenario- and time-dependent values. The output filename is taken from the same `alt_names` mapping used by the CSV and Arrow writers.
 
 schedule_tables = container_inventory(schedule_container)
-schedule_tables
+markdown_table(schedule_tables)
 
 # ## Output directory pattern
 #

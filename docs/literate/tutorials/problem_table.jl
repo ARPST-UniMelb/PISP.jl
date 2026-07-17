@@ -7,12 +7,21 @@
 using PISP
 using Dates
 
+const REPO_ROOT = normpath(get(
+    ENV,
+    "PISP_DOCS_REPO_ROOT",
+    joinpath(@__DIR__, "..", "..", ".."),
+))
+
+include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
+using .EdaSupport
+
 # ## Step 1 — start with an empty problem table
 #
 # `PISP.initialise_time_structures()` returns three containers. The first, `tc::PISPtimeConfig`, owns the `problem` table.
 
 tc, _ts, _tv = PISP.initialise_time_structures()
-tc.problem
+markdown_table(tc.problem)
 
 # The table schema comes from `MOD_PROBLEM` in `src/datamodel/PISPdata-config.jl`.
 
@@ -23,7 +32,7 @@ names(tc.problem)
 # `fill_problem_table_year` splits a planning year into January-June and July-December blocks. With all three ISP scenarios, this produces 6 rows.
 
 PISP.fill_problem_table_year(tc, 2030)
-tc.problem
+markdown_table(tc.problem)
 
 # The generated names encode scenario and half-year so later schedules remain distinguishable.
 
@@ -49,7 +58,7 @@ PISP.fill_problem_table_drange(
     DateTime(2030, 4, 1, 0, 0, 0),
     DateTime(2030, 9, 30, 23, 0, 0),
 )
-tc3.problem[:, [:name, :dstart, :dend]]
+markdown_table(tc3.problem[:, [:name, :dstart, :dend]])
 
 # The first block ends at 30 June and the second starts at 1 July.
 

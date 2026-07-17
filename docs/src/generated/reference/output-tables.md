@@ -14,6 +14,15 @@ A PISP build writes static asset tables once per build and time-varying schedule
 using PISP
 using DataFrames
 
+const REPO_ROOT = normpath(get(
+    ENV,
+    "PISP_DOCS_REPO_ROOT",
+    joinpath(@__DIR__, "..", "..", ".."),
+))
+
+include(joinpath(REPO_ROOT, "eda", "eda_support.jl"))
+using .EdaSupport
+
 function container_inventory(container)
     rows = NamedTuple[]
     for field in fieldnames(typeof(container))
@@ -115,16 +124,22 @@ Static tables define asset identity and time-invariant attributes. Schedule rows
 
 ````julia
 static_tables = container_inventory(static_container)
-static_tables
+markdown_table(static_tables)
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>6×5 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">output_table</th><th style = "text-align: left;">container_field</th><th style = "text-align: left;">primary_id</th><th style = "text-align: left;">relationship_ids</th><th style = "text-align: left;">columns</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "String" style = "text-align: left;">String</th><th title = "String" style = "text-align: left;">String</th><th title = "String" style = "text-align: left;">String</th><th title = "String" style = "text-align: left;">String</th><th title = "String" style = "text-align: left;">String</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: left;">Bus</td><td style = "text-align: left;">bus</td><td style = "text-align: left;">id_bus</td><td style = "text-align: left;">id_area</td><td style = "text-align: left;">id_bus, name, alias, active, latitude, longitude, id_area</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: left;">Demand</td><td style = "text-align: left;">dem</td><td style = "text-align: left;">id_dem</td><td style = "text-align: left;">id_bus</td><td style = "text-align: left;">id_dem, name, load_, id_bus, active, controllable, voll, contingency</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">3</td><td style = "text-align: left;">ESS</td><td style = "text-align: left;">ess</td><td style = "text-align: left;">id_ess</td><td style = "text-align: left;">id_bus</td><td style = "text-align: left;">id_ess, name, alias, tech, type, capacity, investment, active, id_bus, ch_eff, dch_eff, eini, emin, emax, pmin, pmax, lmin, lmax, fullout, partialout, mttrfull, mttrpart, inertia, powerfactor, ffr, pfr, res2, res3, fr_db, fr_ad, fr_dt, fr_frt, fr_fr, longitude, latitude, n, contingency</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">4</td><td style = "text-align: left;">Generator</td><td style = "text-align: left;">gen</td><td style = "text-align: left;">id_gen</td><td style = "text-align: left;">id_bus</td><td style = "text-align: left;">id_gen, name, alias, fuel, tech, type, capacity, forate, fullout, partialout, derate, mttrfull, mttrpart, id_bus, pmin, pmax, rup, rdw, investment, active, cvar, cfuel, cvom, cfom, co2, slope, hrate, pfrmax, g, inertia, ffr, pfr, res2, res3, powerfactor, latitude, longitude, n, contingency, down_time, up_time, last_state, last_state_period, last_state_output, start_up_cost, shut_down_cost, start_up_time, shut_down_time</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">5</td><td style = "text-align: left;">Line</td><td style = "text-align: left;">line</td><td style = "text-align: left;">id_lin</td><td style = "text-align: left;">id_bus_from, id_bus_to</td><td style = "text-align: left;">id_lin, name, alias, tech, capacity, id_bus_from, id_bus_to, investment, active, r, x, rvcap, fwcap, fullout, mttrfull, voltage, segments, latitude, longitude, length, n, contingency</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">6</td><td style = "text-align: left;">DER</td><td style = "text-align: left;">der</td><td style = "text-align: left;">id_der</td><td style = "text-align: left;">id_dem</td><td style = "text-align: left;">id_der, name, tech, id_dem, active, investment, capacity, reduct, pred_max, cost_red, n</td></tr></tbody></table></div>
-```
+| **output\_table** | **container\_field** | **primary\_id** | **relationship\_ids** | **columns** |
+|--:|--:|--:|--:|--:|
+| Bus | bus | id\_bus | id\_area | id\_bus, name, alias, active, latitude, longitude, id\_area |
+| Demand | dem | id\_dem | id\_bus | id\_dem, name, load\_, id\_bus, active, controllable, voll, contingency |
+| ESS | ess | id\_ess | id\_bus | id\_ess, name, alias, tech, type, capacity, investment, active, id\_bus, ch\_eff, dch\_eff, eini, emin, emax, pmin, pmax, lmin, lmax, fullout, partialout, mttrfull, mttrpart, inertia, powerfactor, ffr, pfr, res2, res3, fr\_db, fr\_ad, fr\_dt, fr\_frt, fr\_fr, longitude, latitude, n, contingency |
+| Generator | gen | id\_gen | id\_bus | id\_gen, name, alias, fuel, tech, type, capacity, forate, fullout, partialout, derate, mttrfull, mttrpart, id\_bus, pmin, pmax, rup, rdw, investment, active, cvar, cfuel, cvom, cfom, co2, slope, hrate, pfrmax, g, inertia, ffr, pfr, res2, res3, powerfactor, latitude, longitude, n, contingency, down\_time, up\_time, last\_state, last\_state\_period, last\_state\_output, start\_up\_cost, shut\_down\_cost, start\_up\_time, shut\_down\_time |
+| Line | line | id\_lin | id\_bus\_from, id\_bus\_to | id\_lin, name, alias, tech, capacity, id\_bus\_from, id\_bus\_to, investment, active, r, x, rvcap, fwcap, fullout, mttrfull, voltage, segments, latitude, longitude, length, n, contingency |
+| DER | der | id\_der | id\_dem | id\_der, name, tech, id\_dem, active, investment, capacity, reduct, pred\_max, cost\_red, n |
+
 
 ## Schedule tables
 
@@ -136,16 +151,28 @@ Schedule tables carry scenario- and time-dependent values. The output filename i
 
 ````julia
 schedule_tables = container_inventory(schedule_container)
-schedule_tables
+markdown_table(schedule_tables)
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>12×5 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">output_table</th><th style = "text-align: left;">container_field</th><th style = "text-align: left;">primary_id</th><th style = "text-align: left;">relationship_ids</th><th style = "text-align: left;">columns</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "String" style = "text-align: left;">String</th><th title = "String" style = "text-align: left;">String</th><th title = "String" style = "text-align: left;">String</th><th title = "String" style = "text-align: left;">String</th><th title = "String" style = "text-align: left;">String</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: left;">Demand_load_sched</td><td style = "text-align: left;">dem_load</td><td style = "text-align: left;">id</td><td style = "text-align: left;">id_dem</td><td style = "text-align: left;">id, id_dem, scenario, date, value</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: left;">ESS_emax_sched</td><td style = "text-align: left;">ess_emax</td><td style = "text-align: left;">id</td><td style = "text-align: left;">id_ess</td><td style = "text-align: left;">id, id_ess, scenario, date, value</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">3</td><td style = "text-align: left;">ESS_lmax_sched</td><td style = "text-align: left;">ess_lmax</td><td style = "text-align: left;">id</td><td style = "text-align: left;">id_ess</td><td style = "text-align: left;">id, id_ess, scenario, date, value</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">4</td><td style = "text-align: left;">ESS_n_sched</td><td style = "text-align: left;">ess_n</td><td style = "text-align: left;">id</td><td style = "text-align: left;">id_ess</td><td style = "text-align: left;">id, id_ess, scenario, date, value</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">5</td><td style = "text-align: left;">ESS_pmax_sched</td><td style = "text-align: left;">ess_pmax</td><td style = "text-align: left;">id</td><td style = "text-align: left;">id_ess</td><td style = "text-align: left;">id, id_ess, scenario, date, value</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">6</td><td style = "text-align: left;">ESS_inflow_sched</td><td style = "text-align: left;">ess_inflow</td><td style = "text-align: left;">id</td><td style = "text-align: left;">id_ess</td><td style = "text-align: left;">id, id_ess, scenario, date, value</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">7</td><td style = "text-align: left;">Generator_n_sched</td><td style = "text-align: left;">gen_n</td><td style = "text-align: left;">id</td><td style = "text-align: left;">id_gen</td><td style = "text-align: left;">id, id_gen, scenario, date, value</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">8</td><td style = "text-align: left;">Generator_pmax_sched</td><td style = "text-align: left;">gen_pmax</td><td style = "text-align: left;">id</td><td style = "text-align: left;">id_gen</td><td style = "text-align: left;">id, id_gen, scenario, date, value</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">9</td><td style = "text-align: left;">Generator_inflow_sched</td><td style = "text-align: left;">gen_inflow</td><td style = "text-align: left;">id</td><td style = "text-align: left;">id_gen</td><td style = "text-align: left;">id, id_gen, scenario, date, value</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">10</td><td style = "text-align: left;">Line_fwcap_sched</td><td style = "text-align: left;">line_fwcap</td><td style = "text-align: left;">id</td><td style = "text-align: left;">id_lin</td><td style = "text-align: left;">id, id_lin, scenario, date, value</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">11</td><td style = "text-align: left;">Line_rvcap_sched</td><td style = "text-align: left;">line_rvcap</td><td style = "text-align: left;">id</td><td style = "text-align: left;">id_lin</td><td style = "text-align: left;">id, id_lin, scenario, date, value</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">12</td><td style = "text-align: left;">DER_pred_sched</td><td style = "text-align: left;">der_pred</td><td style = "text-align: left;">id</td><td style = "text-align: left;">id_der</td><td style = "text-align: left;">id, id_der, scenario, date, value</td></tr></tbody></table></div>
-```
+| **output\_table** | **container\_field** | **primary\_id** | **relationship\_ids** | **columns** |
+|--:|--:|--:|--:|--:|
+| Demand\_load\_sched | dem\_load | id | id\_dem | id, id\_dem, scenario, date, value |
+| ESS\_emax\_sched | ess\_emax | id | id\_ess | id, id\_ess, scenario, date, value |
+| ESS\_lmax\_sched | ess\_lmax | id | id\_ess | id, id\_ess, scenario, date, value |
+| ESS\_n\_sched | ess\_n | id | id\_ess | id, id\_ess, scenario, date, value |
+| ESS\_pmax\_sched | ess\_pmax | id | id\_ess | id, id\_ess, scenario, date, value |
+| ESS\_inflow\_sched | ess\_inflow | id | id\_ess | id, id\_ess, scenario, date, value |
+| Generator\_n\_sched | gen\_n | id | id\_gen | id, id\_gen, scenario, date, value |
+| Generator\_pmax\_sched | gen\_pmax | id | id\_gen | id, id\_gen, scenario, date, value |
+| Generator\_inflow\_sched | gen\_inflow | id | id\_gen | id, id\_gen, scenario, date, value |
+| Line\_fwcap\_sched | line\_fwcap | id | id\_lin | id, id\_lin, scenario, date, value |
+| Line\_rvcap\_sched | line\_rvcap | id | id\_lin | id, id\_lin, scenario, date, value |
+| DER\_pred\_sched | der\_pred | id | id\_der | id, id\_der, scenario, date, value |
+
 
 ## Output directory pattern
 

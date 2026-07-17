@@ -21,7 +21,7 @@ const REPO_ROOT = normpath(get(
     joinpath(@__DIR__, "..", "..", ".."),
 ))
 
-include(joinpath(REPO_ROOT, "eda", "eda_support.jl"))
+include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
 using .EdaSupport
 
 EdaSupport.snapshot_metadata_line(REPO_ROOT; context = "2024 ISP raw trace downloads, historical years 2011-2023")
@@ -119,7 +119,7 @@ for (tech, loc, hh_cols, data) in (
 end
 seasonal_cf_by_year = DataFrame(seasonal_cf_rows)
 write_table(seasonal_cf_by_year, SCRIPT_STEM, "seasonal_cf_by_year")
-seasonal_cf_by_year
+markdown_table(seasonal_cf_by_year)
 
 # ## Step 3 — annual capacity factor by year
 #
@@ -137,7 +137,7 @@ for (tech, loc, hh_cols, data) in (
 end
 annual_cf_by_year = DataFrame(annual_cf_rows)
 write_table(annual_cf_by_year, SCRIPT_STEM, "annual_cf_by_year")
-annual_cf_by_year
+markdown_table(annual_cf_by_year)
 
 # ## Step 4 — worst summer solar day per year
 #
@@ -157,7 +157,7 @@ for yr in sort(collect(keys(sol_years)))
 end
 worst_summer_day_by_year = DataFrame(worst_summer_day_rows)
 write_table(worst_summer_day_by_year, SCRIPT_STEM, "worst_summer_day_by_year")
-worst_summer_day_by_year
+markdown_table(worst_summer_day_by_year)
 
 # ## Step 5 — low-output day frequency
 #
@@ -210,7 +210,7 @@ for yr in sort(collect(keys(wind_years)))
 end
 low_output_days_by_year = DataFrame(low_output_days_rows)
 write_table(low_output_days_by_year, SCRIPT_STEM, "low_output_days_by_year")
-low_output_days_by_year
+markdown_table(low_output_days_by_year)
 
 # ## Step 6 — annual CF variability summary
 #
@@ -236,7 +236,7 @@ for (tech, loc, hh_cols, data) in (
 end
 annual_cf_variability_summary = DataFrame(variability_rows)
 write_table(annual_cf_variability_summary, SCRIPT_STEM, "annual_cf_variability_summary")
-annual_cf_variability_summary
+markdown_table(annual_cf_variability_summary)
 
 # ## Step 7 — figure: year-over-year boxplot of summer and winter daily mean CF
 #

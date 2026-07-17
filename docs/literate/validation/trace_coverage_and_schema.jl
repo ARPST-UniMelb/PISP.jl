@@ -19,7 +19,7 @@ const REPO_ROOT = normpath(get(
     joinpath(@__DIR__, "..", "..", ".."),
 ))
 
-include(joinpath(REPO_ROOT, "eda", "eda_support.jl"))
+include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
 using .EdaSupport
 
 EdaSupport.snapshot_metadata_line(REPO_ROOT; context = "2024 ISP raw trace downloads")
@@ -110,13 +110,13 @@ println("Date range: ", first_three_text(df_wind, 1), " to ", first_three_text(d
 traces = [("solar", sol_file, df_sol), ("wind", wind_file, df_wind)]
 trace_shape_columns = DataFrame([trace_shape_row(t...) for t in traces])
 write_table(trace_shape_columns, SCRIPT_STEM, "trace_shape_columns")
-trace_shape_columns
+markdown_table(trace_shape_columns)
 
 #-
 
 trace_date_ranges = DataFrame([trace_date_range_row(t...) for t in traces])
 write_table(trace_date_ranges, SCRIPT_STEM, "trace_date_ranges")
-trace_date_ranges
+markdown_table(trace_date_ranges)
 
 # ## Step 3 — value ranges and the solar low-output threshold
 #
@@ -124,7 +124,7 @@ trace_date_ranges
 
 trace_value_ranges = DataFrame([trace_value_range_row(t...) for t in traces])
 write_table(trace_value_ranges, SCRIPT_STEM, "trace_value_ranges")
-trace_value_ranges
+markdown_table(trace_value_ranges)
 
 #-
 
@@ -146,7 +146,7 @@ solar_midday_low_days = DataFrame([
     ),
 ])
 write_table(solar_midday_low_days, SCRIPT_STEM, "solar_midday_low_days")
-solar_midday_low_days
+markdown_table(solar_midday_low_days)
 
 # ## Step 4 — a demand-trace example
 #
@@ -191,7 +191,7 @@ else
     ])
 end
 write_table(demand_sample_metadata, SCRIPT_STEM, "demand_sample_metadata")
-demand_sample_metadata
+markdown_table(demand_sample_metadata)
 
 # ## Step 5 — which reference years are available
 #
@@ -215,7 +215,7 @@ end
 
 available_year_checks = DataFrame(available_year_rows)
 write_table(available_year_checks, SCRIPT_STEM, "available_year_checks")
-available_year_checks
+markdown_table(available_year_checks)
 
 # ## Step 6 — plot the first 30 days of each trace
 #

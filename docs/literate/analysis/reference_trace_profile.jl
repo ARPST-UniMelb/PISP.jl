@@ -21,7 +21,7 @@ const REPO_ROOT = normpath(get(
     joinpath(@__DIR__, "..", "..", ".."),
 ))
 
-include(joinpath(REPO_ROOT, "eda", "eda_support.jl"))
+include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
 using .EdaSupport
 
 EdaSupport.snapshot_metadata_line(REPO_ROOT; context = "2024 ISP raw trace downloads, trace year 4006")
@@ -96,8 +96,7 @@ end
 """
     fy_year(date, n = 6)
 
-Buckets a day into an Australian financial year (ending June), returned as
-the ending year. A date that already falls on the last day of its month
+Buckets a day into an Australian financial year (ending June), returned as the ending year. A date that already falls on the last day of its month
 advances `n` month-ends forward; any other date first rolls forward to its
 own month's end (consuming one step), then advances `n - 1` more
 month-ends. The bucket year is the year of that final month-end.
@@ -167,7 +166,7 @@ end
 
 loaded_locations = DataFrame(loaded_location_rows)
 write_table(loaded_locations, SCRIPT_STEM, "loaded_locations")
-loaded_locations
+markdown_table(loaded_locations)
 
 # ## Step 3 — daily capacity-factor summary
 #
@@ -187,7 +186,7 @@ end
 
 daily_cf_summary = DataFrame(daily_cf_summary_rows)
 write_table(daily_cf_summary, SCRIPT_STEM, "daily_cf_summary")
-daily_cf_summary
+markdown_table(daily_cf_summary)
 
 # ## Step 4 — solar diurnal profile at the Victorian representative location
 #
@@ -217,7 +216,7 @@ end
 
 solar_diurnal_profile = DataFrame(solar_diurnal_profile_rows)
 write_table(solar_diurnal_profile, SCRIPT_STEM, "solar_diurnal_profile")
-solar_diurnal_profile
+markdown_table(solar_diurnal_profile)
 
 # ## Step 5 — wind monthly diurnal profile at the Victorian representative location
 #
@@ -242,7 +241,7 @@ end
 
 wind_monthly_diurnal_profile = DataFrame(wind_monthly_diurnal_profile_rows)
 write_table(wind_monthly_diurnal_profile, SCRIPT_STEM, "wind_monthly_diurnal_profile")
-first(wind_monthly_diurnal_profile, 48)
+markdown_table(first(wind_monthly_diurnal_profile, 48))
 
 # ## Step 6 — wind monthly mean capacity factor
 #
@@ -261,7 +260,7 @@ wind_monthly_mean_cf_rows = [
 ]
 wind_monthly_mean_cf = DataFrame(wind_monthly_mean_cf_rows)
 write_table(wind_monthly_mean_cf, SCRIPT_STEM, "wind_monthly_mean_cf")
-first(wind_monthly_mean_cf, 24)
+markdown_table(first(wind_monthly_mean_cf, 24))
 
 # ## Step 7 — annual capacity factor by financial year
 #
@@ -293,7 +292,7 @@ end
 
 annual_cf_by_fy = DataFrame(annual_cf_by_fy_rows)
 write_table(annual_cf_by_fy, SCRIPT_STEM, "annual_cf_by_fy")
-annual_cf_by_fy
+markdown_table(annual_cf_by_fy)
 
 # ## Step 8 — figure: solar daily capacity factor by state
 #

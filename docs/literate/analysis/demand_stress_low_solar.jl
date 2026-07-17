@@ -21,7 +21,7 @@ const REPO_ROOT = normpath(get(
     joinpath(@__DIR__, "..", "..", ".."),
 ))
 
-include(joinpath(REPO_ROOT, "eda", "eda_support.jl"))
+include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
 using .EdaSupport
 
 EdaSupport.snapshot_metadata_line(REPO_ROOT; context = "VIC demand schedule from the schedule-2030 generated PISP output; Bannerton 4006 solar reference trace from the 2024 ISP raw trace downloads")
@@ -49,8 +49,7 @@ end
 """
     solar_cf_by_date(df)
 
-Maps each exact calendar date in a composite RefYear4006 trace to its
-half-hourly-mean solar capacity factor for that date.
+Maps each exact calendar date in a composite RefYear4006 trace to its half-hourly-mean solar capacity factor for that date.
 """
 function solar_cf_by_date(df::DataFrame)
     cfs = daily_cf(df, HH_COLS_SOL)
@@ -68,7 +67,7 @@ println("Found $(length(dem_files)) demand trace files")
 
 demand_trace_inventory = DataFrame(file = dem_files)
 write_table(demand_trace_inventory, SCRIPT_STEM, "demand_trace_inventory")
-demand_trace_inventory
+markdown_table(demand_trace_inventory)
 
 # ## Step 2 — load the demand schedule and aggregate daily demand by area
 #
@@ -96,7 +95,7 @@ area_demand_summary = combine(
     nrow => :n_days,
 )
 sort!(area_demand_summary, :area)
-area_demand_summary
+markdown_table(area_demand_summary)
 
 # ## Step 3 — load the solar 4006 reference traces for candidate VIC solar sites
 #
@@ -144,7 +143,7 @@ merged_summary = DataFrame(
     solar_cf_min = isempty(merged.solar_cf) ? missing : minimum(merged.solar_cf),
     solar_cf_max = isempty(merged.solar_cf) ? missing : maximum(merged.solar_cf),
 )
-merged_summary
+markdown_table(merged_summary)
 
 # ## Step 6 — high-demand and low-solar threshold screen
 #
@@ -166,7 +165,7 @@ if haskey(sol_4006, "Bannerton_SAT")
         total_day_count = nrow(merged),
     )
     write_table(high_demand_low_solar_summary, SCRIPT_STEM, "high_demand_low_solar_summary")
-    high_demand_low_solar_summary
+    markdown_table(high_demand_low_solar_summary)
 end
 
 # ## Step 7 — heat-event and normal-day demand thresholds
@@ -202,7 +201,7 @@ heat_normal_hourly_profile = DataFrame(
     normal_mean_demand_mw = [get(normal_hourly, h, missing) for h in 0:23],
 )
 write_table(heat_normal_hourly_profile, SCRIPT_STEM, "heat_normal_hourly_profile")
-heat_normal_hourly_profile
+markdown_table(heat_normal_hourly_profile)
 
 # ## Step 9 — demand duration curve
 #
@@ -224,7 +223,7 @@ duration_curve_quantile_marks = DataFrame(
         minimum(vic_daily.demand),
     ],
 )
-duration_curve_quantile_marks
+markdown_table(duration_curve_quantile_marks)
 
 # ## Step 10 — normalized VRE vs demand summary, sorted by demand
 #
@@ -243,7 +242,7 @@ if nrow(merged) > 0
         day_count = nrow(normalized_vre_demand_summary),
         demand_solar_correlation = cor(normalized_vre_demand_summary.demand_norm, normalized_vre_demand_summary.solar_norm),
     )
-    normalized_demand_solar_correlation
+    markdown_table(normalized_demand_solar_correlation)
 end
 
 # ## Step 11 — key summary statistics
@@ -281,7 +280,7 @@ if haskey(sol_4006, "Bannerton_SAT")
         mean_solar_cf_top10 = fill(mean_cf, length(hot_day_cfs)),
     )
     write_table(hot_day_solar_cf_detail, SCRIPT_STEM, "hot_day_solar_cf_detail")
-    hot_day_solar_cf_detail
+    markdown_table(hot_day_solar_cf_detail)
 end
 
 # ## Step 13 — demand heat event summary
@@ -300,7 +299,7 @@ demand_heat_event_summary = DataFrame(
     mean_demand_mw = mean(vic_daily.demand),
 )
 write_table(demand_heat_event_summary, SCRIPT_STEM, "demand_heat_event_summary")
-demand_heat_event_summary
+markdown_table(demand_heat_event_summary)
 
 # ## Step 14 — figure: VIC demand and solar CF time series
 #

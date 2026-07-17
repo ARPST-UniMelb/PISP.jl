@@ -18,7 +18,7 @@ const REPO_ROOT = normpath(get(
     joinpath(@__DIR__, "..", "..", ".."),
 ))
 
-include(joinpath(REPO_ROOT, "eda", "eda_support.jl"))
+include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
 using .EdaSupport
 
 EdaSupport.snapshot_metadata_line(REPO_ROOT; context = "2024 ISP Inputs and Assumptions workbook, Storage properties + Build limits - PHES")
@@ -316,31 +316,31 @@ nothing #hide
 
 battery_df = battery_properties(storage_matrix)
 write_table(battery_df, SCRIPT_STEM, "battery_properties")
-battery_df
+markdown_table(battery_df)
 
 #-
 
 phes_scheme_df = phes_scheme_properties(storage_matrix)
 write_table(phes_scheme_df, SCRIPT_STEM, "phes_scheme_properties")
-phes_scheme_df
+markdown_table(phes_scheme_df)
 
 # ## Step 3 — PHES regional build limits
 
 phes_limits_df = phes_build_limits(phes_limit_matrix)
 write_table(phes_limits_df, SCRIPT_STEM, "phes_build_limits")
-phes_limits_df
+markdown_table(phes_limits_df)
 
 # ## Step 4 — storage-class comparison summary
 
 comparison_df = comparison_summary(battery_df, phes_scheme_df, phes_limits_df)
 write_table(comparison_df, SCRIPT_STEM, "storage_class_availability_summary")
-comparison_df
+markdown_table(comparison_df)
 
 # ## Step 5 — regional and category concentration of PHES build limits
 
 concentration_df = phes_concentration(phes_limits_df)
 write_table(concentration_df, SCRIPT_STEM, "phes_regional_category_concentration")
-concentration_df
+markdown_table(concentration_df)
 
 # ## Interpreting the evidence
 

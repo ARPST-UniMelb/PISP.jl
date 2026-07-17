@@ -21,7 +21,7 @@ const REPO_ROOT = normpath(get(
     joinpath(@__DIR__, "..", "..", ".."),
 ))
 
-include(joinpath(REPO_ROOT, "eda", "eda_support.jl"))
+include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
 using .EdaSupport
 
 EdaSupport.snapshot_metadata_line(
@@ -52,13 +52,7 @@ function is_reliability_match(name)
 end
 nothing #hide
 
-# Trim a raw XLSX matrix down to the bounding box of non-missing cells. A
-# worksheet's declared dimension (and hence XLSX.jl's `sheet[:]`) can report
-# extra trailing all-empty rows/columns beyond the sheet's real content, so
-# this drops trailing rows/columns that hold no value before reporting a
-# sheet's shape. Verified against this workbook: e.g. "Rooftop PV" has a raw
-# shape of (64, 35) but a trimmed shape of (62, 33) — rows 63-64 and columns
-# 34-35 are entirely `missing`.
+# Trim a raw XLSX matrix down to the bounding box of non-missing cells. A worksheet's declared dimension (and hence XLSX.jl's `sheet[:]`) can report extra trailing all-empty rows/columns beyond the sheet's real content, so this drops trailing rows/columns that hold no value before reporting a sheet's shape. Verified against this workbook: e.g. "Rooftop PV" has a raw shape of (64, 35) but a trimmed shape of (62, 33) — rows 63-64 and columns 34-35 are entirely `missing`.
 function trim_sheet(matrix)
     nrows, ncols = size(matrix)
     last_row = 0
@@ -170,7 +164,7 @@ workbook_sheet_inventory = isempty(sheet_inventory_rows) ?
     empty_df([:sheet_index => Int, :sheet_name => String, :is_keyword_match => Int, :is_rooftop_match => Int, :is_reliability_match => Int]) :
     DataFrame(sheet_inventory_rows)
 write_table(workbook_sheet_inventory, SCRIPT_STEM, "workbook_sheet_inventory")
-workbook_sheet_inventory
+markdown_table(workbook_sheet_inventory)
 
 #-
 
@@ -178,7 +172,7 @@ workbook_relevant_sheet_shapes = isempty(relevant_shape_rows) ?
     empty_df([:sheet_name => String, :n_rows => Int, :n_cols => Int, :read_ok => Int]) :
     DataFrame(relevant_shape_rows)
 write_table(workbook_relevant_sheet_shapes, SCRIPT_STEM, "workbook_relevant_sheet_shapes")
-workbook_relevant_sheet_shapes
+markdown_table(workbook_relevant_sheet_shapes)
 
 #-
 
@@ -186,7 +180,7 @@ workbook_rooftop_sheet_summary = isempty(rooftop_rows) ?
     empty_df([:sheet_name => String, :n_rows => Int, :n_cols => Int, :columns_preview => String]) :
     DataFrame(rooftop_rows)
 write_table(workbook_rooftop_sheet_summary, SCRIPT_STEM, "workbook_rooftop_sheet_summary")
-workbook_rooftop_sheet_summary
+markdown_table(workbook_rooftop_sheet_summary)
 
 #-
 
@@ -194,7 +188,7 @@ workbook_reliability_sheet_shapes = isempty(reliability_shape_rows) ?
     empty_df([:sheet_name => String, :n_rows => Int, :n_cols => Int]) :
     DataFrame(reliability_shape_rows)
 write_table(workbook_reliability_sheet_shapes, SCRIPT_STEM, "workbook_reliability_sheet_shapes")
-workbook_reliability_sheet_shapes
+markdown_table(workbook_reliability_sheet_shapes)
 
 # ## Step 2 — which temperature-related fields reach the PISP output dataset?
 #
@@ -223,7 +217,7 @@ end
 
 pisp_output_inventory = isempty(output_inventory_rows) ? empty_df([:kind => String, :name => String]) : DataFrame(output_inventory_rows)
 write_table(pisp_output_inventory, SCRIPT_STEM, "pisp_output_inventory")
-pisp_output_inventory
+markdown_table(pisp_output_inventory)
 
 #-
 
@@ -277,13 +271,13 @@ generator_solar_wind_details = isempty(generator_details_rows) ?
     empty_df([:category => String, :id_gen => Int, :name => String, :tech => String, :forate => Float64, :derate => Float64, :pmin => Float64, :pmax => Float64, :n => Int]) :
     DataFrame(generator_details_rows)
 write_table(generator_solar_wind_details, SCRIPT_STEM, "generator_solar_wind_details")
-generator_solar_wind_details
+markdown_table(generator_solar_wind_details)
 
 #-
 
 generator_temperature_columns = DataFrame([generator_temp_row])
 write_table(generator_temperature_columns, SCRIPT_STEM, "generator_temperature_columns")
-generator_temperature_columns
+markdown_table(generator_temperature_columns)
 
 # ## Step 3 — how do selected climate-zone solar traces differ in summer?
 #
@@ -332,7 +326,7 @@ climate_zone_summer_cf_summary = isempty(zone_summary_rows) ?
     empty_df([:zone => String, :location => String, :n_summer_days => Int, :mean_daily_cf => Float64, :mean_midday_cf => Float64, :min_midday_cf => Float64, :p5_midday_cf => Float64]) :
     DataFrame(zone_summary_rows)
 write_table(climate_zone_summer_cf_summary, SCRIPT_STEM, "climate_zone_summer_cf_summary")
-climate_zone_summer_cf_summary
+markdown_table(climate_zone_summer_cf_summary)
 
 # ## Step 4 — plot the summer daily capacity-factor distribution by climate zone
 #

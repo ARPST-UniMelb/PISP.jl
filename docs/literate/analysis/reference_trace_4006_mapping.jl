@@ -20,7 +20,7 @@ const REPO_ROOT = normpath(get(
     joinpath(@__DIR__, "..", "..", ".."),
 ))
 
-include(joinpath(REPO_ROOT, "eda", "eda_support.jl"))
+include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
 using .EdaSupport
 
 EdaSupport.snapshot_metadata_line(REPO_ROOT; context = "2024 ISP PISP.WEATHER_YEARS_ISP weather-year mapping; historical solar and wind reference traces from the 2024 ISP raw trace downloads")
@@ -98,7 +98,7 @@ mapping_table = DataFrame(
     ref_label = ref_label,
 )
 write_table(mapping_table, SCRIPT_STEM, "mapping_table")
-mapping_table
+markdown_table(mapping_table)
 
 #-
 
@@ -135,7 +135,7 @@ for yr in sort(unique(mapping_table.ref_year))
 end
 historical_year_vre_stats = DataFrame(historical_year_vre_stats_rows)
 write_table(historical_year_vre_stats, SCRIPT_STEM, "historical_year_vre_stats")
-historical_year_vre_stats
+markdown_table(historical_year_vre_stats)
 
 # ## Step 3 — near-term vs far-term daily capacity factor
 #
@@ -167,7 +167,7 @@ near_vs_far_term_summary = combine(
     nrow => :n_days,
 )
 sort!(near_vs_far_term_summary, [:tech, :term])
-near_vs_far_term_summary
+markdown_table(near_vs_far_term_summary)
 
 # ## Step 4 — year-by-year renewable matrix
 #
@@ -184,7 +184,7 @@ for (tech, loc, hh_cols) in (("solar", SOLAR_LOC, HH_COLS_SOL), ("wind", WIND_LO
 end
 vre_heatmap = DataFrame(vre_heatmap_rows)
 write_table(vre_heatmap, SCRIPT_STEM, "vre_heatmap")
-vre_heatmap
+markdown_table(vre_heatmap)
 
 # ## Step 5 — how often each historical year is reused
 #
@@ -197,7 +197,7 @@ println("Unique historical years used: ", sort(unique(mapping_table.ref_year)))
 ref_year_counts = combine(groupby(mapping_table, :ref_year), nrow => :count)
 sort!(ref_year_counts, :ref_year)
 write_table(ref_year_counts, SCRIPT_STEM, "ref_year_counts")
-ref_year_counts
+markdown_table(ref_year_counts)
 
 # ## Step 6 — timeline of historical years across the planning horizon
 #

@@ -29,7 +29,7 @@ const REPO_ROOT = normpath(get(
     joinpath(@__DIR__, "..", "..", ".."),
 ))
 
-include(joinpath(REPO_ROOT, "eda", "eda_support.jl"))
+include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
 using .EdaSupport
 
 const SCRIPT_STEM = "04_seasonal_extremes"
@@ -130,8 +130,7 @@ row_mean(df::DataFrame, cols) = [mean(row[col] for col in cols) for row in eachr
 </details>
 ```
 
-A simple trailing rolling mean: the first `window - 1` entries have no full
-window of preceding values yet, so they are left `missing`.
+A simple trailing rolling mean: the first `window - 1` entries have no full window of preceding values yet, so they are left `missing`.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -209,7 +208,7 @@ snapshot_metadata_line(
 ```
 
 ````
-Snapshot: PISP.jl commit fb28c62+dirty, generated 2026-07-17 — 2024 ISP raw trace downloads (data/2024/pisp-downloads/Traces), historical years 2011-2023, hot/cool summers fixed by HOT_SUMMERS/COOL_SUMMERS
+Snapshot: PISP.jl commit a429ab9+dirty, generated 2026-07-17 — 2024 ISP raw trace downloads (data/2024/pisp-downloads/Traces), historical years 2011-2023, hot/cool summers fixed by HOT_SUMMERS/COOL_SUMMERS
 
 ````
 
@@ -247,16 +246,25 @@ end
 
 hot_cool_summer_solar_summary = DataFrame(rows)
 write_table(hot_cool_summer_solar_summary, SCRIPT_STEM, "hot_cool_summer_solar_summary")
-hot_cool_summer_solar_summary
+markdown_table(hot_cool_summer_solar_summary)
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>9×7 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">season_type</th><th style = "text-align: left;">year</th><th style = "text-align: left;">n_days</th><th style = "text-align: left;">mean_daily_cf</th><th style = "text-align: left;">std_daily_cf</th><th style = "text-align: left;">min_daily_cf</th><th style = "text-align: left;">max_daily_cf</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "String" style = "text-align: left;">String</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Float64" style = "text-align: left;">Float64</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: left;">Hot Summers</td><td style = "text-align: right;">2019</td><td style = "text-align: right;">3068</td><td style = "text-align: right;">0.404872</td><td style = "text-align: right;">0.089915</td><td style = "text-align: right;">0.0890162</td><td style = "text-align: right;">0.497658</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: left;">Hot Summers</td><td style = "text-align: right;">2013</td><td style = "text-align: right;">3068</td><td style = "text-align: right;">0.404471</td><td style = "text-align: right;">0.114939</td><td style = "text-align: right;">0.0175779</td><td style = "text-align: right;">0.500016</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">3</td><td style = "text-align: left;">Hot Summers</td><td style = "text-align: right;">2017</td><td style = "text-align: right;">3068</td><td style = "text-align: right;">0.382376</td><td style = "text-align: right;">0.116568</td><td style = "text-align: right;">0.0515059</td><td style = "text-align: right;">0.496493</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">4</td><td style = "text-align: left;">Hot Summers</td><td style = "text-align: right;">2015</td><td style = "text-align: right;">3068</td><td style = "text-align: right;">0.394685</td><td style = "text-align: right;">0.118126</td><td style = "text-align: right;">0.0329821</td><td style = "text-align: right;">0.500514</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">5</td><td style = "text-align: left;">Hot Summers</td><td style = "text-align: right;">2023</td><td style = "text-align: right;">3068</td><td style = "text-align: right;">0.426174</td><td style = "text-align: right;">0.0863665</td><td style = "text-align: right;">0.0907033</td><td style = "text-align: right;">0.498261</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">6</td><td style = "text-align: left;">Cool Summers</td><td style = "text-align: right;">2011</td><td style = "text-align: right;">3068</td><td style = "text-align: right;">0.361699</td><td style = "text-align: right;">0.138521</td><td style = "text-align: right;">0.0145063</td><td style = "text-align: right;">0.499403</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">7</td><td style = "text-align: left;">Cool Summers</td><td style = "text-align: right;">2016</td><td style = "text-align: right;">3068</td><td style = "text-align: right;">0.393496</td><td style = "text-align: right;">0.0995262</td><td style = "text-align: right;">0.110095</td><td style = "text-align: right;">0.494742</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">8</td><td style = "text-align: left;">Cool Summers</td><td style = "text-align: right;">2020</td><td style = "text-align: right;">3068</td><td style = "text-align: right;">0.403192</td><td style = "text-align: right;">0.0968427</td><td style = "text-align: right;">0.0773021</td><td style = "text-align: right;">0.492177</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">9</td><td style = "text-align: left;">Cool Summers</td><td style = "text-align: right;">2022</td><td style = "text-align: right;">3068</td><td style = "text-align: right;">0.410353</td><td style = "text-align: right;">0.0854116</td><td style = "text-align: right;">0.158083</td><td style = "text-align: right;">0.498602</td></tr></tbody></table></div>
-```
+| **season\_type** | **year** | **n\_days** | **mean\_daily\_cf** | **std\_daily\_cf** | **min\_daily\_cf** | **max\_daily\_cf** |
+|--:|--:|--:|--:|--:|--:|--:|
+| Hot Summers | 2019 | 3068 | 0.404872 | 0.089915 | 0.0890162 | 0.497658 |
+| Hot Summers | 2013 | 3068 | 0.404471 | 0.114939 | 0.0175779 | 0.500016 |
+| Hot Summers | 2017 | 3068 | 0.382376 | 0.116568 | 0.0515059 | 0.496493 |
+| Hot Summers | 2015 | 3068 | 0.394685 | 0.118126 | 0.0329821 | 0.500514 |
+| Hot Summers | 2023 | 3068 | 0.426174 | 0.0863665 | 0.0907033 | 0.498261 |
+| Cool Summers | 2011 | 3068 | 0.361699 | 0.138521 | 0.0145063 | 0.499403 |
+| Cool Summers | 2016 | 3068 | 0.393496 | 0.0995262 | 0.110095 | 0.494742 |
+| Cool Summers | 2020 | 3068 | 0.403192 | 0.0968427 | 0.0773021 | 0.492177 |
+| Cool Summers | 2022 | 3068 | 0.410353 | 0.0854116 | 0.158083 | 0.498602 |
+
 
 ## Step 2 — candidate multi-day low-output events
 
@@ -296,16 +304,32 @@ else
         [:tech, :year],
     )
 end
-low_output_event_summary
+markdown_table(low_output_event_summary)
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>16×6 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">tech</th><th style = "text-align: left;">year</th><th style = "text-align: left;">n_events</th><th style = "text-align: left;">min_duration</th><th style = "text-align: left;">mean_duration</th><th style = "text-align: left;">max_duration</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "String" style = "text-align: left;">String</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Int64" style = "text-align: left;">Int64</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: left;">solar</td><td style = "text-align: right;">2011</td><td style = "text-align: right;">42</td><td style = "text-align: right;">3</td><td style = "text-align: right;">3.9</td><td style = "text-align: right;">4</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: left;">solar</td><td style = "text-align: right;">2012</td><td style = "text-align: right;">36</td><td style = "text-align: right;">3</td><td style = "text-align: right;">163.2</td><td style = "text-align: right;">279</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">3</td><td style = "text-align: left;">solar</td><td style = "text-align: right;">2014</td><td style = "text-align: right;">34</td><td style = "text-align: right;">3</td><td style = "text-align: right;">3.0</td><td style = "text-align: right;">3</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">4</td><td style = "text-align: left;">solar</td><td style = "text-align: right;">2015</td><td style = "text-align: right;">34</td><td style = "text-align: right;">3</td><td style = "text-align: right;">3.0</td><td style = "text-align: right;">3</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">5</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">2011</td><td style = "text-align: right;">207</td><td style = "text-align: right;">3</td><td style = "text-align: right;">27.8</td><td style = "text-align: right;">282</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">6</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">2012</td><td style = "text-align: right;">98</td><td style = "text-align: right;">3</td><td style = "text-align: right;">17.0</td><td style = "text-align: right;">277</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">7</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">2013</td><td style = "text-align: right;">140</td><td style = "text-align: right;">3</td><td style = "text-align: right;">3.6</td><td style = "text-align: right;">4</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">8</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">2014</td><td style = "text-align: right;">140</td><td style = "text-align: right;">3</td><td style = "text-align: right;">13.3</td><td style = "text-align: right;">277</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">9</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">2015</td><td style = "text-align: right;">173</td><td style = "text-align: right;">3</td><td style = "text-align: right;">34.8</td><td style = "text-align: right;">278</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">10</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">2016</td><td style = "text-align: right;">262</td><td style = "text-align: right;">3</td><td style = "text-align: right;">23.8</td><td style = "text-align: right;">280</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">11</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">2017</td><td style = "text-align: right;">275</td><td style = "text-align: right;">3</td><td style = "text-align: right;">4.4</td><td style = "text-align: right;">278</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">12</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">2018</td><td style = "text-align: right;">327</td><td style = "text-align: right;">3</td><td style = "text-align: right;">8.4</td><td style = "text-align: right;">277</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">13</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">2019</td><td style = "text-align: right;">272</td><td style = "text-align: right;">3</td><td style = "text-align: right;">5.1</td><td style = "text-align: right;">279</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">14</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">2020</td><td style = "text-align: right;">82</td><td style = "text-align: right;">3</td><td style = "text-align: right;">20.0</td><td style = "text-align: right;">277</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">15</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">2021</td><td style = "text-align: right;">131</td><td style = "text-align: right;">3</td><td style = "text-align: right;">21.9</td><td style = "text-align: right;">278</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">16</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">2022</td><td style = "text-align: right;">70</td><td style = "text-align: right;">3</td><td style = "text-align: right;">22.6</td><td style = "text-align: right;">278</td></tr></tbody></table></div>
-```
+| **tech** | **year** | **n\_events** | **min\_duration** | **mean\_duration** | **max\_duration** |
+|--:|--:|--:|--:|--:|--:|
+| solar | 2011 | 42 | 3 | 3.9 | 4 |
+| solar | 2012 | 36 | 3 | 163.2 | 279 |
+| solar | 2014 | 34 | 3 | 3.0 | 3 |
+| solar | 2015 | 34 | 3 | 3.0 | 3 |
+| wind | 2011 | 207 | 3 | 27.8 | 282 |
+| wind | 2012 | 98 | 3 | 17.0 | 277 |
+| wind | 2013 | 140 | 3 | 3.6 | 4 |
+| wind | 2014 | 140 | 3 | 13.3 | 277 |
+| wind | 2015 | 173 | 3 | 34.8 | 278 |
+| wind | 2016 | 262 | 3 | 23.8 | 280 |
+| wind | 2017 | 275 | 3 | 4.4 | 278 |
+| wind | 2018 | 327 | 3 | 8.4 | 277 |
+| wind | 2019 | 272 | 3 | 5.1 | 279 |
+| wind | 2020 | 82 | 3 | 20.0 | 277 |
+| wind | 2021 | 131 | 3 | 21.9 | 278 |
+| wind | 2022 | 70 | 3 | 22.6 | 278 |
+
 
 ## Step 3 — worst solar day and half-hourly profile
 
@@ -338,16 +362,29 @@ end
 
 worst_solar_day_summary = DataFrame(worst_rows)
 write_table(worst_solar_day_summary, SCRIPT_STEM, "worst_solar_day_summary")
-worst_solar_day_summary
+markdown_table(worst_solar_day_summary)
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>13×4 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">year</th><th style = "text-align: left;">date</th><th style = "text-align: left;">cf</th><th style = "text-align: left;">is_hot_summer</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "String" style = "text-align: left;">String</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Int64" style = "text-align: left;">Int64</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">0.0145063</td><td style = "text-align: right;">0</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: right;">2012</td><td style = "text-align: left;">2048-02-29</td><td style = "text-align: right;">0.0311683</td><td style = "text-align: right;">0</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">3</td><td style = "text-align: right;">2013</td><td style = "text-align: left;">2021-12-17</td><td style = "text-align: right;">0.0175779</td><td style = "text-align: right;">1</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">4</td><td style = "text-align: right;">2014</td><td style = "text-align: left;">2022-02-11</td><td style = "text-align: right;">0.0167056</td><td style = "text-align: right;">0</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">5</td><td style = "text-align: right;">2015</td><td style = "text-align: left;">2022-01-07</td><td style = "text-align: right;">0.0329821</td><td style = "text-align: right;">1</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">6</td><td style = "text-align: right;">2016</td><td style = "text-align: left;">2022-01-13</td><td style = "text-align: right;">0.110095</td><td style = "text-align: right;">0</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">7</td><td style = "text-align: right;">2017</td><td style = "text-align: left;">2022-02-07</td><td style = "text-align: right;">0.0515059</td><td style = "text-align: right;">1</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">8</td><td style = "text-align: right;">2018</td><td style = "text-align: left;">2021-12-04</td><td style = "text-align: right;">0.0689566</td><td style = "text-align: right;">0</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">9</td><td style = "text-align: right;">2019</td><td style = "text-align: left;">2021-12-16</td><td style = "text-align: right;">0.0890162</td><td style = "text-align: right;">1</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">10</td><td style = "text-align: right;">2020</td><td style = "text-align: left;">2022-01-02</td><td style = "text-align: right;">0.0773021</td><td style = "text-align: right;">0</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">11</td><td style = "text-align: right;">2021</td><td style = "text-align: left;">2021-12-20</td><td style = "text-align: right;">0.0689535</td><td style = "text-align: right;">0</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">12</td><td style = "text-align: right;">2022</td><td style = "text-align: left;">2021-12-15</td><td style = "text-align: right;">0.158083</td><td style = "text-align: right;">0</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">13</td><td style = "text-align: right;">2023</td><td style = "text-align: left;">2022-01-30</td><td style = "text-align: right;">0.0907033</td><td style = "text-align: right;">1</td></tr></tbody></table></div>
-```
+| **year** | **date** | **cf** | **is\_hot\_summer** |
+|--:|--:|--:|--:|
+| 2011 | 2022-01-09 | 0.0145063 | 0 |
+| 2012 | 2048-02-29 | 0.0311683 | 0 |
+| 2013 | 2021-12-17 | 0.0175779 | 1 |
+| 2014 | 2022-02-11 | 0.0167056 | 0 |
+| 2015 | 2022-01-07 | 0.0329821 | 1 |
+| 2016 | 2022-01-13 | 0.110095 | 0 |
+| 2017 | 2022-02-07 | 0.0515059 | 1 |
+| 2018 | 2021-12-04 | 0.0689566 | 0 |
+| 2019 | 2021-12-16 | 0.0890162 | 1 |
+| 2020 | 2022-01-02 | 0.0773021 | 0 |
+| 2021 | 2021-12-20 | 0.0689535 | 0 |
+| 2022 | 2021-12-15 | 0.158083 | 0 |
+| 2023 | 2022-01-30 | 0.0907033 | 1 |
+
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -375,16 +412,64 @@ end
 
 worst_solar_day_profile = DataFrame(rows)
 write_table(worst_solar_day_profile, SCRIPT_STEM, "worst_solar_day_profile")
-worst_solar_day_profile
+markdown_table(worst_solar_day_profile)
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>48×4 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">year</th><th style = "text-align: left;">date</th><th style = "text-align: left;">half_hour</th><th style = "text-align: left;">cf</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "String" style = "text-align: left;">String</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Float64" style = "text-align: left;">Float64</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">0.5</td><td style = "text-align: right;">0.0</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">1.0</td><td style = "text-align: right;">0.0</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">3</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">1.5</td><td style = "text-align: right;">0.0</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">4</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">2.0</td><td style = "text-align: right;">0.0</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">5</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">2.5</td><td style = "text-align: right;">0.0</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">6</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">3.0</td><td style = "text-align: right;">0.0</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">7</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">3.5</td><td style = "text-align: right;">0.0</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">8</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">4.0</td><td style = "text-align: right;">0.0</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">9</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">4.5</td><td style = "text-align: right;">0.0</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">10</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">5.0</td><td style = "text-align: right;">0.0</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">11</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">5.5</td><td style = "text-align: right;">0.0</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">12</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">6.0</td><td style = "text-align: right;">0.00428803</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">13</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">6.5</td><td style = "text-align: right;">0.0101904</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">14</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">7.0</td><td style = "text-align: right;">0.0126238</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">15</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">7.5</td><td style = "text-align: right;">0.0105536</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">16</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">8.0</td><td style = "text-align: right;">0.00773084</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">17</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">8.5</td><td style = "text-align: right;">0.00935496</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">18</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">9.0</td><td style = "text-align: right;">0.0122468</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">19</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">9.5</td><td style = "text-align: right;">0.0178283</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">20</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">10.0</td><td style = "text-align: right;">0.0239241</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">21</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">10.5</td><td style = "text-align: right;">0.0251329</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">22</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">11.0</td><td style = "text-align: right;">0.0243254</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">23</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">11.5</td><td style = "text-align: right;">0.0252249</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">24</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">12.0</td><td style = "text-align: right;">0.0268889</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">25</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">12.5</td><td style = "text-align: right;">0.0282818</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">26</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">13.0</td><td style = "text-align: right;">0.0293787</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">27</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">13.5</td><td style = "text-align: right;">0.0358903</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">28</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">14.0</td><td style = "text-align: right;">0.0440908</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">29</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">14.5</td><td style = "text-align: right;">0.0455812</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">30</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">15.0</td><td style = "text-align: right;">0.0456214</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">31</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">15.5</td><td style = "text-align: right;">0.0453891</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">32</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">16.0</td><td style = "text-align: right;">0.0440116</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">33</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">16.5</td><td style = "text-align: right;">0.0318094</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">34</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">17.0</td><td style = "text-align: right;">0.0203476</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">35</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">17.5</td><td style = "text-align: right;">0.0295542</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">36</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">18.0</td><td style = "text-align: right;">0.043779</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">37</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">18.5</td><td style = "text-align: right;">0.0297961</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">38</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">19.0</td><td style = "text-align: right;">0.0102454</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">39</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">19.5</td><td style = "text-align: right;">0.00221341</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">40</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">20.0</td><td style = "text-align: right;">0.0</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">41</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">20.5</td><td style = "text-align: right;">0.0</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">42</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">21.0</td><td style = "text-align: right;">0.0</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">43</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">21.5</td><td style = "text-align: right;">0.0</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">44</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">22.0</td><td style = "text-align: right;">0.0</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">45</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">22.5</td><td style = "text-align: right;">0.0</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">46</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">23.0</td><td style = "text-align: right;">0.0</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">47</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">23.5</td><td style = "text-align: right;">0.0</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">48</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">2022-01-09</td><td style = "text-align: right;">24.0</td><td style = "text-align: right;">0.0</td></tr></tbody></table></div>
-```
+| **year** | **date** | **half\_hour** | **cf** |
+|--:|--:|--:|--:|
+| 2011 | 2022-01-09 | 0.5 | 0.0 |
+| 2011 | 2022-01-09 | 1.0 | 0.0 |
+| 2011 | 2022-01-09 | 1.5 | 0.0 |
+| 2011 | 2022-01-09 | 2.0 | 0.0 |
+| 2011 | 2022-01-09 | 2.5 | 0.0 |
+| 2011 | 2022-01-09 | 3.0 | 0.0 |
+| 2011 | 2022-01-09 | 3.5 | 0.0 |
+| 2011 | 2022-01-09 | 4.0 | 0.0 |
+| 2011 | 2022-01-09 | 4.5 | 0.0 |
+| 2011 | 2022-01-09 | 5.0 | 0.0 |
+| 2011 | 2022-01-09 | 5.5 | 0.0 |
+| 2011 | 2022-01-09 | 6.0 | 0.00428803 |
+| 2011 | 2022-01-09 | 6.5 | 0.0101904 |
+| 2011 | 2022-01-09 | 7.0 | 0.0126238 |
+| 2011 | 2022-01-09 | 7.5 | 0.0105536 |
+| 2011 | 2022-01-09 | 8.0 | 0.00773084 |
+| 2011 | 2022-01-09 | 8.5 | 0.00935496 |
+| 2011 | 2022-01-09 | 9.0 | 0.0122468 |
+| 2011 | 2022-01-09 | 9.5 | 0.0178283 |
+| 2011 | 2022-01-09 | 10.0 | 0.0239241 |
+| 2011 | 2022-01-09 | 10.5 | 0.0251329 |
+| 2011 | 2022-01-09 | 11.0 | 0.0243254 |
+| 2011 | 2022-01-09 | 11.5 | 0.0252249 |
+| 2011 | 2022-01-09 | 12.0 | 0.0268889 |
+| 2011 | 2022-01-09 | 12.5 | 0.0282818 |
+| 2011 | 2022-01-09 | 13.0 | 0.0293787 |
+| 2011 | 2022-01-09 | 13.5 | 0.0358903 |
+| 2011 | 2022-01-09 | 14.0 | 0.0440908 |
+| 2011 | 2022-01-09 | 14.5 | 0.0455812 |
+| 2011 | 2022-01-09 | 15.0 | 0.0456214 |
+| 2011 | 2022-01-09 | 15.5 | 0.0453891 |
+| 2011 | 2022-01-09 | 16.0 | 0.0440116 |
+| 2011 | 2022-01-09 | 16.5 | 0.0318094 |
+| 2011 | 2022-01-09 | 17.0 | 0.0203476 |
+| 2011 | 2022-01-09 | 17.5 | 0.0295542 |
+| 2011 | 2022-01-09 | 18.0 | 0.043779 |
+| 2011 | 2022-01-09 | 18.5 | 0.0297961 |
+| 2011 | 2022-01-09 | 19.0 | 0.0102454 |
+| 2011 | 2022-01-09 | 19.5 | 0.00221341 |
+| 2011 | 2022-01-09 | 20.0 | 0.0 |
+| 2011 | 2022-01-09 | 20.5 | 0.0 |
+| 2011 | 2022-01-09 | 21.0 | 0.0 |
+| 2011 | 2022-01-09 | 21.5 | 0.0 |
+| 2011 | 2022-01-09 | 22.0 | 0.0 |
+| 2011 | 2022-01-09 | 22.5 | 0.0 |
+| 2011 | 2022-01-09 | 23.0 | 0.0 |
+| 2011 | 2022-01-09 | 23.5 | 0.0 |
+| 2011 | 2022-01-09 | 24.0 | 0.0 |
+
 
 ## Step 4 — 2019 monthly and Black Summer detail
 
@@ -413,22 +498,30 @@ end
 
 monthly_cf_2019_summary = DataFrame(rows)
 write_table(monthly_cf_2019_summary, SCRIPT_STEM, "monthly_cf_2019_summary")
-monthly_cf_2019_summary
+markdown_table(monthly_cf_2019_summary)
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>12×3 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">month</th><th style = "text-align: left;">mean_cf</th><th style = "text-align: left;">std_cf</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Float64" style = "text-align: left;">Float64</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">0.427211</td><td style = "text-align: right;">0.102535</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: right;">2</td><td style = "text-align: right;">0.409629</td><td style = "text-align: right;">0.0914764</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">3</td><td style = "text-align: right;">3</td><td style = "text-align: right;">0.326171</td><td style = "text-align: right;">0.10768</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">4</td><td style = "text-align: right;">4</td><td style = "text-align: right;">0.255254</td><td style = "text-align: right;">0.0934389</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">5</td><td style = "text-align: right;">5</td><td style = "text-align: right;">0.190201</td><td style = "text-align: right;">0.0668752</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">6</td><td style = "text-align: right;">6</td><td style = "text-align: right;">0.162797</td><td style = "text-align: right;">0.0605264</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">7</td><td style = "text-align: right;">7</td><td style = "text-align: right;">0.170442</td><td style = "text-align: right;">0.0630134</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">8</td><td style = "text-align: right;">8</td><td style = "text-align: right;">0.221814</td><td style = "text-align: right;">0.0857514</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">9</td><td style = "text-align: right;">9</td><td style = "text-align: right;">0.317571</td><td style = "text-align: right;">0.0859169</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">10</td><td style = "text-align: right;">10</td><td style = "text-align: right;">0.342657</td><td style = "text-align: right;">0.131934</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">11</td><td style = "text-align: right;">11</td><td style = "text-align: right;">0.36839</td><td style = "text-align: right;">0.144209</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">12</td><td style = "text-align: right;">12</td><td style = "text-align: right;">0.3782</td><td style = "text-align: right;">0.15342</td></tr></tbody></table></div>
-```
+| **month** | **mean\_cf** | **std\_cf** |
+|--:|--:|--:|
+| 1 | 0.427211 | 0.102535 |
+| 2 | 0.409629 | 0.0914764 |
+| 3 | 0.326171 | 0.10768 |
+| 4 | 0.255254 | 0.0934389 |
+| 5 | 0.190201 | 0.0668752 |
+| 6 | 0.162797 | 0.0605264 |
+| 7 | 0.170442 | 0.0630134 |
+| 8 | 0.221814 | 0.0857514 |
+| 9 | 0.317571 | 0.0859169 |
+| 10 | 0.342657 | 0.131934 |
+| 11 | 0.36839 | 0.144209 |
+| 12 | 0.3782 | 0.15342 |
 
-The `RefYear2019` trace reuses the 2019 (Black Summer) historical weather
-pattern across the entire projected planning horizon, not just the single
-2018-19 season, so the daily series below has one row per summer day in
-every simulated year. The table previews the first 15 rows; the complete
-series is written to `eda/tables/julia/04_seasonal_extremes/black_summer_2019_daily_cf.csv`.
+
+The `RefYear2019` trace reuses the 2019 (Black Summer) historical weather pattern across the entire projected planning horizon, not just the single 2018-19 season, so the daily series below has one row per summer day in every simulated year. The table previews the first 15 rows; the complete series is written to `eda/tables/julia/04_seasonal_extremes/black_summer_2019_daily_cf.csv`.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -449,16 +542,31 @@ end
 
 black_summer_2019_daily_cf = DataFrame(rows)
 write_table(black_summer_2019_daily_cf, SCRIPT_STEM, "black_summer_2019_daily_cf")
-first(black_summer_2019_daily_cf, 15)
+markdown_table(first(black_summer_2019_daily_cf, 15))
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>15×3 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">date</th><th style = "text-align: left;">daily_mean_cf</th><th style = "text-align: left;">rolling3_cf</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "String" style = "text-align: left;">String</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Union{Missing, Float64}" style = "text-align: left;">Float64?</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: left;">2021-12-01</td><td style = "text-align: right;">0.469144</td><td style = "font-style: italic; text-align: right;">missing</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: left;">2021-12-02</td><td style = "text-align: right;">0.478529</td><td style = "font-style: italic; text-align: right;">missing</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">3</td><td style = "text-align: left;">2021-12-03</td><td style = "text-align: right;">0.480572</td><td style = "text-align: right;">0.476081</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">4</td><td style = "text-align: left;">2021-12-04</td><td style = "text-align: right;">0.40653</td><td style = "text-align: right;">0.45521</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">5</td><td style = "text-align: left;">2021-12-05</td><td style = "text-align: right;">0.4805</td><td style = "text-align: right;">0.455867</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">6</td><td style = "text-align: left;">2021-12-06</td><td style = "text-align: right;">0.45622</td><td style = "text-align: right;">0.44775</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">7</td><td style = "text-align: left;">2021-12-07</td><td style = "text-align: right;">0.48078</td><td style = "text-align: right;">0.4725</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">8</td><td style = "text-align: left;">2021-12-08</td><td style = "text-align: right;">0.47843</td><td style = "text-align: right;">0.47181</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">9</td><td style = "text-align: left;">2021-12-09</td><td style = "text-align: right;">0.454311</td><td style = "text-align: right;">0.471174</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">10</td><td style = "text-align: left;">2021-12-10</td><td style = "text-align: right;">0.354046</td><td style = "text-align: right;">0.428929</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">11</td><td style = "text-align: left;">2021-12-11</td><td style = "text-align: right;">0.21802</td><td style = "text-align: right;">0.342126</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">12</td><td style = "text-align: left;">2021-12-12</td><td style = "text-align: right;">0.161514</td><td style = "text-align: right;">0.244527</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">13</td><td style = "text-align: left;">2021-12-13</td><td style = "text-align: right;">0.36446</td><td style = "text-align: right;">0.247998</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">14</td><td style = "text-align: left;">2021-12-14</td><td style = "text-align: right;">0.429491</td><td style = "text-align: right;">0.318488</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">15</td><td style = "text-align: left;">2021-12-15</td><td style = "text-align: right;">0.234228</td><td style = "text-align: right;">0.342726</td></tr></tbody></table></div>
-```
+| **date** | **daily\_mean\_cf** | **rolling3\_cf** |
+|--:|--:|--:|
+| 2021-12-01 | 0.469144 | missing |
+| 2021-12-02 | 0.478529 | missing |
+| 2021-12-03 | 0.480572 | 0.476081 |
+| 2021-12-04 | 0.40653 | 0.45521 |
+| 2021-12-05 | 0.4805 | 0.455867 |
+| 2021-12-06 | 0.45622 | 0.44775 |
+| 2021-12-07 | 0.48078 | 0.4725 |
+| 2021-12-08 | 0.47843 | 0.47181 |
+| 2021-12-09 | 0.454311 | 0.471174 |
+| 2021-12-10 | 0.354046 | 0.428929 |
+| 2021-12-11 | 0.21802 | 0.342126 |
+| 2021-12-12 | 0.161514 | 0.244527 |
+| 2021-12-13 | 0.36446 | 0.247998 |
+| 2021-12-14 | 0.429491 | 0.318488 |
+| 2021-12-15 | 0.234228 | 0.342726 |
+
 
 ## Step 5 — hot vs cool summer solar profiles (figure)
 
@@ -499,15 +607,15 @@ EdaSupport.embed_figure(figure_path(SCRIPT_STEM, "04_hot_vs_cool_summer_solar.pn
 
 ````
 ┌ Warning: Assignment to `df` in soft scope is ambiguous because a global variable by the same name exists: `df` will be treated as a new local. Disambiguate by using `local df` to suppress this warning or `global df` to assign to the existing global variable.
-└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/.literate-staging-CAjrlD/src/generated/analyses/seasonal_renewable_extremes.md:5
+└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/src/generated/analyses/seasonal_renewable_extremes.md:5
 ┌ Warning: Assignment to `summer_mask` in soft scope is ambiguous because a global variable by the same name exists: `summer_mask` will be treated as a new local. Disambiguate by using `local summer_mask` to suppress this warning or `global summer_mask` to assign to the existing global variable.
-└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/.literate-staging-CAjrlD/src/generated/analyses/seasonal_renewable_extremes.md:7
+└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/src/generated/analyses/seasonal_renewable_extremes.md:7
 ┌ Warning: Assignment to `summer` in soft scope is ambiguous because a global variable by the same name exists: `summer` will be treated as a new local. Disambiguate by using `local summer` to suppress this warning or `global summer` to assign to the existing global variable.
-└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/.literate-staging-CAjrlD/src/generated/analyses/seasonal_renewable_extremes.md:9
+└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/src/generated/analyses/seasonal_renewable_extremes.md:9
 ┌ Warning: Assignment to `daily` in soft scope is ambiguous because a global variable by the same name exists: `daily` will be treated as a new local. Disambiguate by using `local daily` to suppress this warning or `global daily` to assign to the existing global variable.
-└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/.literate-staging-CAjrlD/src/generated/analyses/seasonal_renewable_extremes.md:10
+└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/src/generated/analyses/seasonal_renewable_extremes.md:10
 ┌ Warning: Assignment to `rolling3` in soft scope is ambiguous because a global variable by the same name exists: `rolling3` will be treated as a new local. Disambiguate by using `local rolling3` to suppress this warning or `global rolling3` to assign to the existing global variable.
-└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/.literate-staging-CAjrlD/src/generated/analyses/seasonal_renewable_extremes.md:11
+└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/src/generated/analyses/seasonal_renewable_extremes.md:11
 
 ````
 
@@ -612,21 +720,21 @@ EdaSupport.embed_figure(figure_path(SCRIPT_STEM, "04_low_output_events.png"), "0
 
 ````
 ┌ Warning: Assignment to `df` in soft scope is ambiguous because a global variable by the same name exists: `df` will be treated as a new local. Disambiguate by using `local df` to suppress this warning or `global df` to assign to the existing global variable.
-└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/.literate-staging-CAjrlD/src/generated/analyses/seasonal_renewable_extremes.md:6
+└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/src/generated/analyses/seasonal_renewable_extremes.md:6
 ┌ Warning: Assignment to `summer_mask` in soft scope is ambiguous because a global variable by the same name exists: `summer_mask` will be treated as a new local. Disambiguate by using `local summer_mask` to suppress this warning or `global summer_mask` to assign to the existing global variable.
-└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/.literate-staging-CAjrlD/src/generated/analyses/seasonal_renewable_extremes.md:8
+└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/src/generated/analyses/seasonal_renewable_extremes.md:8
 ┌ Warning: Assignment to `summer` in soft scope is ambiguous because a global variable by the same name exists: `summer` will be treated as a new local. Disambiguate by using `local summer` to suppress this warning or `global summer` to assign to the existing global variable.
-└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/.literate-staging-CAjrlD/src/generated/analyses/seasonal_renewable_extremes.md:10
+└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/src/generated/analyses/seasonal_renewable_extremes.md:10
 ┌ Warning: Assignment to `daily` in soft scope is ambiguous because a global variable by the same name exists: `daily` will be treated as a new local. Disambiguate by using `local daily` to suppress this warning or `global daily` to assign to the existing global variable.
-└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/.literate-staging-CAjrlD/src/generated/analyses/seasonal_renewable_extremes.md:11
+└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/src/generated/analyses/seasonal_renewable_extremes.md:11
 ┌ Warning: Assignment to `df` in soft scope is ambiguous because a global variable by the same name exists: `df` will be treated as a new local. Disambiguate by using `local df` to suppress this warning or `global df` to assign to the existing global variable.
-└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/.literate-staging-CAjrlD/src/generated/analyses/seasonal_renewable_extremes.md:23
+└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/src/generated/analyses/seasonal_renewable_extremes.md:23
 ┌ Warning: Assignment to `summer_mask` in soft scope is ambiguous because a global variable by the same name exists: `summer_mask` will be treated as a new local. Disambiguate by using `local summer_mask` to suppress this warning or `global summer_mask` to assign to the existing global variable.
-└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/.literate-staging-CAjrlD/src/generated/analyses/seasonal_renewable_extremes.md:25
+└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/src/generated/analyses/seasonal_renewable_extremes.md:25
 ┌ Warning: Assignment to `summer` in soft scope is ambiguous because a global variable by the same name exists: `summer` will be treated as a new local. Disambiguate by using `local summer` to suppress this warning or `global summer` to assign to the existing global variable.
-└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/.literate-staging-CAjrlD/src/generated/analyses/seasonal_renewable_extremes.md:27
+└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/src/generated/analyses/seasonal_renewable_extremes.md:27
 ┌ Warning: Assignment to `daily` in soft scope is ambiguous because a global variable by the same name exists: `daily` will be treated as a new local. Disambiguate by using `local daily` to suppress this warning or `global daily` to assign to the existing global variable.
-└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/.literate-staging-CAjrlD/src/generated/analyses/seasonal_renewable_extremes.md:28
+└ @ ~/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/docs/src/generated/analyses/seasonal_renewable_extremes.md:28
 
 ````
 

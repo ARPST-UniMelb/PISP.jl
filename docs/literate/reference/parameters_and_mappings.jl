@@ -6,6 +6,15 @@ using PISP
 using DataFrames
 using Dates
 
+const REPO_ROOT = normpath(get(
+    ENV,
+    "PISP_DOCS_REPO_ROOT",
+    joinpath(@__DIR__, "..", "..", ".."),
+))
+
+include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
+using .EdaSupport
+
 # ## Scenario identifiers and source labels
 
 scenario_mappings = DataFrame([
@@ -17,7 +26,7 @@ scenario_mappings = DataFrame([
     )
     for (scenario_id, scenario_name) in PISP.ID2SCE
 ])
-scenario_mappings
+markdown_table(scenario_mappings)
 
 # ## Bus and area constants
 
@@ -34,7 +43,7 @@ bus_area_mappings = DataFrame([
     )
     for (index, alias) in enumerate(bus_aliases)
 ])
-bus_area_mappings
+markdown_table(bus_area_mappings)
 
 # ## Reference trace 4006 weather-year mapping
 #
@@ -51,7 +60,7 @@ weather_year_mapping = DataFrame([
     for (window, weather_year) in PISP.WEATHER_YEARS_ISP
 ])
 sort!(weather_year_mapping, :financial_year_start)
-weather_year_mapping
+markdown_table(weather_year_mapping)
 
 # ## Reliability fields represented in static schemas
 
@@ -69,7 +78,7 @@ reliability_schema = DataFrame([
     (asset_table = table_name, fields = reliability_fields(table_name))
     for table_name in ("Generator", "ESS", "Line")
 ])
-reliability_schema
+markdown_table(reliability_schema)
 
 # ## Using the mappings
 #

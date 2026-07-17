@@ -19,7 +19,7 @@ const REPO_ROOT = normpath(get(
     joinpath(@__DIR__, "..", "..", ".."),
 ))
 
-include(joinpath(REPO_ROOT, "eda", "eda_support.jl"))
+include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
 using .EdaSupport
 
 const SCRIPT_STEM = "06_pisp_outputs"
@@ -139,7 +139,7 @@ build_metadata = DataFrame([
     ),
 ])
 write_table(build_metadata, SCRIPT_STEM, "build_metadata")
-build_metadata
+markdown_table(build_metadata)
 
 # ## Step 3 — generator table shape and classification counts
 #
@@ -150,13 +150,13 @@ println("Shape: ", (nrow(gen_df), ncol(gen_df)))
 
 generator_fuel_counts = combine(groupby(gen_df, :fuel), nrow => :count)
 write_table(generator_fuel_counts, SCRIPT_STEM, "generator_fuel_counts")
-generator_fuel_counts
+markdown_table(generator_fuel_counts)
 
 #-
 
 generator_tech_counts = combine(groupby(gen_df, :tech), nrow => :count)
 write_table(generator_tech_counts, SCRIPT_STEM, "generator_tech_counts")
-generator_tech_counts
+markdown_table(generator_tech_counts)
 
 # ## Step 4 — schedule shapes and time coverage
 #
@@ -172,7 +172,7 @@ schedule_shapes = DataFrame([
     (schedule = "Demand_load_sched", n_rows = nrow(dem_load), n_cols = ncol(dem_load)),
 ])
 write_table(schedule_shapes, SCRIPT_STEM, "schedule_shapes")
-schedule_shapes
+markdown_table(schedule_shapes)
 
 #-
 
@@ -195,7 +195,7 @@ for (schedule_name, schedule) in [
 end
 schedule_time_coverage = DataFrame(schedule_time_coverage_rows)
 write_table(schedule_time_coverage, SCRIPT_STEM, "schedule_time_coverage")
-schedule_time_coverage
+markdown_table(schedule_time_coverage)
 
 # ## Step 5 — join coverage between schedules, static tables, and the bus table
 #
@@ -243,13 +243,13 @@ append_relationship_diagnostics!(
 
 join_coverage = DataFrame(join_summary_rows)
 write_table(join_coverage, SCRIPT_STEM, "join_coverage")
-join_coverage
+markdown_table(join_coverage)
 
 #-
 
 unmatched_ids = isempty(join_detail_rows) ? DataFrame(relationship = String[], unmatched_side = String[], id = String[]) : DataFrame(join_detail_rows)
 write_table(unmatched_ids, SCRIPT_STEM, "unmatched_ids")
-unmatched_ids
+markdown_table(unmatched_ids)
 
 # ## Step 6 — identify the solar and wind generators
 #
@@ -265,7 +265,7 @@ solar_wind_generator_counts = DataFrame([
     (category = "wind", n_generators = nrow(wind_gens)),
 ])
 write_table(solar_wind_generator_counts, SCRIPT_STEM, "solar_wind_generator_counts")
-solar_wind_generator_counts
+markdown_table(solar_wind_generator_counts)
 
 #-
 
@@ -275,7 +275,7 @@ solar_wind_tech_counts_wind = combine(groupby(wind_gens, :tech), nrow => :count)
 solar_wind_tech_counts_wind.category .= "wind"
 solar_wind_tech_counts = vcat(solar_wind_tech_counts_solar, solar_wind_tech_counts_wind)[:, [:category, :tech, :count]]
 write_table(solar_wind_tech_counts, SCRIPT_STEM, "solar_wind_tech_counts")
-solar_wind_tech_counts
+markdown_table(solar_wind_tech_counts)
 
 # ## Step 7 — annual mean pmax per generator
 #
@@ -294,7 +294,7 @@ wind_annual.tech .= "wind"
 
 annual_mean_pmax = vcat(sol_annual, wind_annual)[:, [:tech, :id_gen, :mean_pmax]]
 write_table(annual_mean_pmax, SCRIPT_STEM, "annual_mean_pmax")
-annual_mean_pmax
+markdown_table(annual_mean_pmax)
 
 # ## Step 8 — capacity factor duration curve
 #
@@ -305,7 +305,7 @@ capacity_factor_duration = vcat(
     capacity_factor_duration_frame(gen_pmax, wind_gens, "wind"),
 )
 write_table(capacity_factor_duration, SCRIPT_STEM, "capacity_factor_duration")
-capacity_factor_duration
+markdown_table(capacity_factor_duration)
 
 # ## Step 9 — demand by area
 #
@@ -324,7 +324,7 @@ demand_by_area_summary = combine(
     :total_demand_mw => minimum => :min_daily_mw,
     :total_demand_mw => maximum => :max_daily_mw,
 )
-demand_by_area_summary
+markdown_table(demand_by_area_summary)
 
 # ## Step 10 — daily solar, wind, and demand aggregates in GW
 #
@@ -349,7 +349,7 @@ daily_gw = DataFrame(
     demand_gw = daily_joined.total_demand ./ 1000,
 )
 write_table(daily_gw, SCRIPT_STEM, "daily_solar_wind_demand_gw")
-daily_gw
+markdown_table(daily_gw)
 
 # ## Step 11 — hourly pmax profile for the first 30 days
 #
@@ -375,7 +375,7 @@ hourly_pmax_profile_fleet_mean = combine(
     groupby(hourly_pmax_profile, [:tech, :hour]),
     :mean_pmax => mean => :fleet_mean_pmax,
 )
-hourly_pmax_profile_fleet_mean
+markdown_table(hourly_pmax_profile_fleet_mean)
 
 # ## Step 12 — VRE-vs-demand and demand-distribution summaries
 #
@@ -394,7 +394,7 @@ vre_vs_demand_summary = DataFrame([(
     corr_demand_vre = cor(demand_daily, vre_daily),
 )])
 write_table(vre_vs_demand_summary, SCRIPT_STEM, "vre_vs_demand_summary")
-vre_vs_demand_summary
+markdown_table(vre_vs_demand_summary)
 
 #-
 
@@ -407,7 +407,7 @@ demand_distribution_summary = DataFrame([(
     median_mw = median(dem_daily_ts.total_demand),
 )])
 write_table(demand_distribution_summary, SCRIPT_STEM, "demand_distribution_summary")
-demand_distribution_summary
+markdown_table(demand_distribution_summary)
 
 # ## Step 13 — figure: PISP outputs overview
 #

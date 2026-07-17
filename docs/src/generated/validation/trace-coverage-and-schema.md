@@ -98,7 +98,7 @@ end
 ```
 
 ````
-Snapshot: PISP.jl commit fb28c62+dirty, generated 2026-07-17 — 2024 ISP raw trace downloads
+Snapshot: PISP.jl commit a429ab9+dirty, generated 2026-07-17 — 2024 ISP raw trace downloads
 
 ````
 
@@ -155,16 +155,18 @@ Both traces share the same layout: three metadata columns (`Year`, `Month`, `Day
 traces = [("solar", sol_file, df_sol), ("wind", wind_file, df_wind)]
 trace_shape_columns = DataFrame([trace_shape_row(t...) for t in traces])
 write_table(trace_shape_columns, SCRIPT_STEM, "trace_shape_columns")
-trace_shape_columns
+markdown_table(trace_shape_columns)
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>2×10 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">trace_type</th><th style = "text-align: left;">file</th><th style = "text-align: left;">file_name</th><th style = "text-align: left;">rows</th><th style = "text-align: left;">columns</th><th style = "text-align: left;">metadata_columns</th><th style = "text-align: left;">value_columns</th><th style = "text-align: left;">first_value_column</th><th style = "text-align: left;">last_value_column</th><th style = "text-align: left;">columns_preview</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "String" style = "text-align: left;">String</th><th title = "String" style = "text-align: left;">String</th><th title = "String" style = "text-align: left;">String</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "String" style = "text-align: left;">String</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "String" style = "text-align: left;">String</th><th title = "String" style = "text-align: left;">String</th><th title = "String" style = "text-align: left;">String</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: left;">solar</td><td style = "text-align: left;">data/2024/pisp-downloads/Traces/solar_4006/Bannerton_SAT_RefYear4006.csv</td><td style = "text-align: left;">Bannerton_SAT_RefYear4006.csv</td><td style = "text-align: right;">10227</td><td style = "text-align: right;">51</td><td style = "text-align: left;">Year,Month,Day</td><td style = "text-align: right;">48</td><td style = "text-align: left;">1</td><td style = "text-align: left;">48</td><td style = "text-align: left;">Year|Month|Day|1|2|3|4|5|6|7</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: left;">wind</td><td style = "text-align: left;">data/2024/pisp-downloads/Traces/wind_4006/ARWF1_RefYear4006.csv</td><td style = "text-align: left;">ARWF1_RefYear4006.csv</td><td style = "text-align: right;">10227</td><td style = "text-align: right;">51</td><td style = "text-align: left;">Year,Month,Day</td><td style = "text-align: right;">48</td><td style = "text-align: left;">01</td><td style = "text-align: left;">48</td><td style = "text-align: left;">Year|Month|Day|01|02|03|04|05|06|07</td></tr></tbody></table></div>
-```
+| **trace\_type** | **file** | **file\_name** | **rows** | **columns** | **metadata\_columns** | **value\_columns** | **first\_value\_column** | **last\_value\_column** | **columns\_preview** |
+|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| solar | data/2024/pisp-downloads/Traces/solar\_4006/Bannerton\_SAT\_RefYear4006.csv | Bannerton\_SAT\_RefYear4006.csv | 10227 | 51 | Year,Month,Day | 48 | 1 | 48 | Year\|Month\|Day\|1\|2\|3\|4\|5\|6\|7 |
+| wind | data/2024/pisp-downloads/Traces/wind\_4006/ARWF1\_RefYear4006.csv | ARWF1\_RefYear4006.csv | 10227 | 51 | Year,Month,Day | 48 | 01 | 48 | Year\|Month\|Day\|01\|02\|03\|04\|05\|06\|07 |
+
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -173,16 +175,18 @@ trace_shape_columns
 ````julia
 trace_date_ranges = DataFrame([trace_date_range_row(t...) for t in traces])
 write_table(trace_date_ranges, SCRIPT_STEM, "trace_date_ranges")
-trace_date_ranges
+markdown_table(trace_date_ranges)
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>2×8 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">trace_type</th><th style = "text-align: left;">file_name</th><th style = "text-align: left;">first_year</th><th style = "text-align: left;">first_month</th><th style = "text-align: left;">first_day</th><th style = "text-align: left;">last_year</th><th style = "text-align: left;">last_month</th><th style = "text-align: left;">last_day</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "String" style = "text-align: left;">String</th><th title = "String" style = "text-align: left;">String</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: left;">solar</td><td style = "text-align: left;">Bannerton_SAT_RefYear4006.csv</td><td style = "text-align: right;">2024</td><td style = "text-align: right;">7</td><td style = "text-align: right;">1</td><td style = "text-align: right;">2052</td><td style = "text-align: right;">6</td><td style = "text-align: right;">30</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: left;">wind</td><td style = "text-align: left;">ARWF1_RefYear4006.csv</td><td style = "text-align: right;">2024</td><td style = "text-align: right;">7</td><td style = "text-align: right;">1</td><td style = "text-align: right;">2052</td><td style = "text-align: right;">6</td><td style = "text-align: right;">30</td></tr></tbody></table></div>
-```
+| **trace\_type** | **file\_name** | **first\_year** | **first\_month** | **first\_day** | **last\_year** | **last\_month** | **last\_day** |
+|--:|--:|--:|--:|--:|--:|--:|--:|
+| solar | Bannerton\_SAT\_RefYear4006.csv | 2024 | 7 | 1 | 2052 | 6 | 30 |
+| wind | ARWF1\_RefYear4006.csv | 2024 | 7 | 1 | 2052 | 6 | 30 |
+
 
 ## Step 3 — value ranges and the solar low-output threshold
 
@@ -195,16 +199,18 @@ The minimum and maximum values describe the numeric range in each sampled trace.
 ````julia
 trace_value_ranges = DataFrame([trace_value_range_row(t...) for t in traces])
 write_table(trace_value_ranges, SCRIPT_STEM, "trace_value_ranges")
-trace_value_ranges
+markdown_table(trace_value_ranges)
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>2×4 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">trace_type</th><th style = "text-align: left;">file_name</th><th style = "text-align: left;">min_value</th><th style = "text-align: left;">max_value</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "String" style = "text-align: left;">String</th><th title = "String" style = "text-align: left;">String</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Float64" style = "text-align: left;">Float64</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: left;">solar</td><td style = "text-align: left;">Bannerton_SAT_RefYear4006.csv</td><td style = "text-align: right;">0.0</td><td style = "text-align: right;">1.0</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: left;">wind</td><td style = "text-align: left;">ARWF1_RefYear4006.csv</td><td style = "text-align: right;">-0.0</td><td style = "text-align: right;">1.0</td></tr></tbody></table></div>
-```
+| **trace\_type** | **file\_name** | **min\_value** | **max\_value** |
+|--:|--:|--:|--:|
+| solar | Bannerton\_SAT\_RefYear4006.csv | 0.0 | 1.0 |
+| wind | ARWF1\_RefYear4006.csv | -0.0 | 1.0 |
+
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -229,16 +235,17 @@ solar_midday_low_days = DataFrame([
     ),
 ])
 write_table(solar_midday_low_days, SCRIPT_STEM, "solar_midday_low_days")
-solar_midday_low_days
+markdown_table(solar_midday_low_days)
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>1×7 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">trace_type</th><th style = "text-align: left;">file_name</th><th style = "text-align: left;">midday_columns</th><th style = "text-align: left;">low_threshold</th><th style = "text-align: left;">low_days</th><th style = "text-align: left;">total_days</th><th style = "text-align: left;">low_percent</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "String" style = "text-align: left;">String</th><th title = "String" style = "text-align: left;">String</th><th title = "String" style = "text-align: left;">String</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Float64" style = "text-align: left;">Float64</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: left;">solar</td><td style = "text-align: left;">Bannerton_SAT_RefYear4006.csv</td><td style = "text-align: left;">24|25|26|27|28|29|30|31|32|33|34|35</td><td style = "text-align: right;">0.1</td><td style = "text-align: right;">67</td><td style = "text-align: right;">10227</td><td style = "text-align: right;">0.655129</td></tr></tbody></table></div>
-```
+| **trace\_type** | **file\_name** | **midday\_columns** | **low\_threshold** | **low\_days** | **total\_days** | **low\_percent** |
+|--:|--:|--:|--:|--:|--:|--:|
+| solar | Bannerton\_SAT\_RefYear4006.csv | 24\|25\|26\|27\|28\|29\|30\|31\|32\|33\|34\|35 | 0.1 | 67 | 10227 | 0.655129 |
+
 
 ## Step 4 — a demand-trace example
 
@@ -288,16 +295,17 @@ else
     ])
 end
 write_table(demand_sample_metadata, SCRIPT_STEM, "demand_sample_metadata")
-demand_sample_metadata
+markdown_table(demand_sample_metadata)
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>1×10 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">demand_dir</th><th style = "text-align: left;">file_count</th><th style = "text-align: left;">sample_file</th><th style = "text-align: left;">sample_rows</th><th style = "text-align: left;">sample_columns</th><th style = "text-align: left;">metadata_columns</th><th style = "text-align: left;">value_columns</th><th style = "text-align: left;">first_value_column</th><th style = "text-align: left;">last_value_column</th><th style = "text-align: left;">columns_list</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "String" style = "text-align: left;">String</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "String" style = "text-align: left;">String</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "String" style = "text-align: left;">String</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "String" style = "text-align: left;">String</th><th title = "String" style = "text-align: left;">String</th><th title = "String" style = "text-align: left;">String</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: left;">data/2024/pisp-downloads/Traces/demand_VIC_Step Change</td><td style = "text-align: right;">27</td><td style = "text-align: left;">VIC_RefYear_2011_STEP_CHANGE_POE10_PV_TOT.csv</td><td style = "text-align: right;">11323</td><td style = "text-align: right;">51</td><td style = "text-align: left;">Year,Month,Day</td><td style = "text-align: right;">48</td><td style = "text-align: left;">01</td><td style = "text-align: left;">48</td><td style = "text-align: left;">Year|Month|Day|01|02|03|04|05|06|07|08|09|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48</td></tr></tbody></table></div>
-```
+| **demand\_dir** | **file\_count** | **sample\_file** | **sample\_rows** | **sample\_columns** | **metadata\_columns** | **value\_columns** | **first\_value\_column** | **last\_value\_column** | **columns\_list** |
+|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| data/2024/pisp-downloads/Traces/demand\_VIC\_Step Change | 27 | VIC\_RefYear\_2011\_STEP\_CHANGE\_POE10\_PV\_TOT.csv | 11323 | 51 | Year,Month,Day | 48 | 01 | 48 | Year\|Month\|Day\|01\|02\|03\|04\|05\|06\|07\|08\|09\|10\|11\|12\|13\|14\|15\|16\|17\|18\|19\|20\|21\|22\|23\|24\|25\|26\|27\|28\|29\|30\|31\|32\|33\|34\|35\|36\|37\|38\|39\|40\|41\|42\|43\|44\|45\|46\|47\|48 |
+
 
 ## Step 5 — which reference years are available
 
@@ -326,16 +334,20 @@ end
 
 available_year_checks = DataFrame(available_year_rows)
 write_table(available_year_checks, SCRIPT_STEM, "available_year_checks")
-available_year_checks
+markdown_table(available_year_checks)
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>4×6 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">year</th><th style = "text-align: left;">solar_file</th><th style = "text-align: left;">exists</th><th style = "text-align: left;">first_year</th><th style = "text-align: left;">first_month</th><th style = "text-align: left;">first_day</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "String" style = "text-align: left;">String</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">data/2024/pisp-downloads/Traces/solar_2011/Bannerton_SAT_RefYear2011.csv</td><td style = "text-align: right;">1</td><td style = "text-align: right;">2021</td><td style = "text-align: right;">7</td><td style = "text-align: right;">1</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: right;">2015</td><td style = "text-align: left;">data/2024/pisp-downloads/Traces/solar_2015/Bannerton_SAT_RefYear2015.csv</td><td style = "text-align: right;">1</td><td style = "text-align: right;">2021</td><td style = "text-align: right;">7</td><td style = "text-align: right;">1</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">3</td><td style = "text-align: right;">2019</td><td style = "text-align: left;">data/2024/pisp-downloads/Traces/solar_2019/Bannerton_SAT_RefYear2019.csv</td><td style = "text-align: right;">1</td><td style = "text-align: right;">2021</td><td style = "text-align: right;">7</td><td style = "text-align: right;">1</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">4</td><td style = "text-align: right;">2023</td><td style = "text-align: left;">data/2024/pisp-downloads/Traces/solar_2023/Bannerton_SAT_RefYear2023.csv</td><td style = "text-align: right;">1</td><td style = "text-align: right;">2021</td><td style = "text-align: right;">7</td><td style = "text-align: right;">1</td></tr></tbody></table></div>
-```
+| **year** | **solar\_file** | **exists** | **first\_year** | **first\_month** | **first\_day** |
+|--:|--:|--:|--:|--:|--:|
+| 2011 | data/2024/pisp-downloads/Traces/solar\_2011/Bannerton\_SAT\_RefYear2011.csv | 1 | 2021 | 7 | 1 |
+| 2015 | data/2024/pisp-downloads/Traces/solar\_2015/Bannerton\_SAT\_RefYear2015.csv | 1 | 2021 | 7 | 1 |
+| 2019 | data/2024/pisp-downloads/Traces/solar\_2019/Bannerton\_SAT\_RefYear2019.csv | 1 | 2021 | 7 | 1 |
+| 2023 | data/2024/pisp-downloads/Traces/solar\_2023/Bannerton\_SAT\_RefYear2023.csv | 1 | 2021 | 7 | 1 |
+
 
 ## Step 6 — plot the first 30 days of each trace
 

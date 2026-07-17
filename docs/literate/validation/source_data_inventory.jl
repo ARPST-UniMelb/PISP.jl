@@ -12,7 +12,7 @@ const REPO_ROOT = normpath(get(
     joinpath(@__DIR__, "..", "..", ".."),
 ))
 
-include(joinpath(REPO_ROOT, "eda", "eda_support.jl"))
+include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
 using .EdaSupport
 
 EdaSupport.snapshot_metadata_line(REPO_ROOT; context = "local PISP download tree inventory")
@@ -31,9 +31,7 @@ function lowercase_extension(name)
 end
 nothing #hide
 
-# Single recursive walk of the download tree that produces both a flat file
-# inventory (every depth) and a depth-limited directory-tree listing, so the
-# tree structure does not need a second filesystem walk.
+# Single recursive walk of the download tree that produces both a flat file inventory (every depth) and a depth-limited directory-tree listing, so the tree structure does not need a second filesystem walk.
 function walk_download_root(root; max_tree_depth = MAX_TREE_DEPTH, max_children_per_dir = MAX_TREE_CHILDREN_PER_DIR)
     files = NamedTuple[]
     tree_rows = NamedTuple[]
@@ -52,11 +50,7 @@ function walk_download_root(root; max_tree_depth = MAX_TREE_DEPTH, max_children_
                     (depth = child_depth, parent_relative_path = rel_dir, name = name, kind = "directory"),
                 )
             end
-            ## Depth alone does not bound how many files sit in one directory
-            ## (e.g. a single Traces/<tech>_<year>/ folder holds hundreds of
-            ## per-location trace CSVs); cap the listed files per directory so
-            ## the rendered tree stays readable, and record how many were
-            ## omitted rather than silently truncating.
+            ## Depth alone does not bound how many files sit in one directory (e.g. a single Traces/<tech>_<year>/ folder holds hundreds of per-location trace CSVs); cap the listed files per directory so the rendered tree stays readable, and record how many were omitted rather than silently truncating.
             sorted_filenames = sort(filenames)
             shown_filenames = first(sorted_filenames, min(length(sorted_filenames), max_children_per_dir))
             for name in shown_filenames
@@ -110,10 +104,7 @@ function summarize_extensions(files)
 end
 nothing #hide
 
-# One row per immediate child of the download root, whether a file or a
-# directory. Directory rows aggregate recursively over `files`; a plain
-# file's own extension is not repeated in `extensions` since that column
-# describes what is found *under* an entry, not the entry itself.
+# One row per immediate child of the download root, whether a file or a directory. Directory rows aggregate recursively over `files`; a plain file's own extension is not repeated in `extensions` since that column describes what is found *under* an entry, not the entry itself.
 function summarize_top_level(root, files)
     rows = NamedTuple[]
     for name in sort(filter(n -> !startswith(n, "."), readdir(root)))
@@ -199,19 +190,19 @@ write_table(file_inventory, SCRIPT_STEM, "file_inventory")
 println("Full file inventory written: ", nrow(file_inventory), " rows (previewing the ten largest files below)")
 
 largest_files = first(sort(file_inventory, :size_bytes; rev = true), 10)
-largest_files
+markdown_table(largest_files)
 
 #-
 
 top_level_summary = summarize_top_level(abs_path(DOWNLOAD_ROOT), files)
 write_table(top_level_summary, SCRIPT_STEM, "top_level_summary")
-top_level_summary
+markdown_table(top_level_summary)
 
 #-
 
 extension_summary = summarize_extensions(files)
 write_table(extension_summary, SCRIPT_STEM, "extension_summary")
-extension_summary
+markdown_table(extension_summary)
 
 # ## Step 3 — directory tree (depth ≤ 3)
 #
@@ -243,7 +234,7 @@ inventory_summary = DataFrame([
     ),
 ])
 write_table(inventory_summary, SCRIPT_STEM, "inventory_summary")
-inventory_summary
+markdown_table(inventory_summary)
 
 #-
 

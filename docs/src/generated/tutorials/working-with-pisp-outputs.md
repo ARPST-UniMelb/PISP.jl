@@ -35,6 +35,9 @@ const DATA_ROOT = normpath(get(
 const SCHEDULE_TAG = get(ENV, "PISP_SCHEDULE_TAG", "schedule-2030")
 const SCHEDULE_DIR = joinpath(DATA_ROOT, SCHEDULE_TAG)
 
+include(joinpath(REPO_ROOT, "eda", "eda_support.jl"))
+using .EdaSupport
+
 required_files = [
     joinpath(DATA_ROOT, "Generator.csv"),
     joinpath(DATA_ROOT, "Demand.csv"),
@@ -91,15 +94,23 @@ Fuel and technology counts show the asset mix represented in the generated outpu
 
 ````julia
 fuel_counts = sort(combine(groupby(gen_df, :fuel), nrow => :count), :count; rev = true)
+markdown_table(fuel_counts)
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>7×2 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">fuel</th><th style = "text-align: left;">count</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "InlineStrings.String15" style = "text-align: left;">String15</th><th title = "Int64" style = "text-align: left;">Int64</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: left;">Natural Gas</td><td style = "text-align: right;">37</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: left;">Hydro</td><td style = "text-align: right;">30</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">3</td><td style = "text-align: left;">Solar</td><td style = "text-align: right;">22</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">4</td><td style = "text-align: left;">Coal</td><td style = "text-align: right;">15</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">5</td><td style = "text-align: left;">Wind</td><td style = "text-align: right;">11</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">6</td><td style = "text-align: left;">Diesel</td><td style = "text-align: right;">7</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">7</td><td style = "text-align: left;">Hydrogen</td><td style = "text-align: right;">2</td></tr></tbody></table></div>
-```
+| **fuel** | **count** |
+|--:|--:|
+| Natural Gas | 37 |
+| Hydro | 30 |
+| Solar | 22 |
+| Coal | 15 |
+| Wind | 11 |
+| Diesel | 7 |
+| Hydrogen | 2 |
+
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -107,15 +118,29 @@ fuel_counts = sort(combine(groupby(gen_df, :fuel), nrow => :count), :count; rev 
 
 ````julia
 tech_counts = sort(combine(groupby(gen_df, :tech), nrow => :count), :count; rev = true)
+markdown_table(tech_counts)
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>13×2 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">tech</th><th style = "text-align: left;">count</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "InlineStrings.String31" style = "text-align: left;">String31</th><th title = "Int64" style = "text-align: left;">Int64</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: left;">Reservoir</td><td style = "text-align: right;">28</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: left;">OCGT</td><td style = "text-align: right;">28</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">3</td><td style = "text-align: left;">RoofPV</td><td style = "text-align: right;">12</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">4</td><td style = "text-align: left;">Wind</td><td style = "text-align: right;">11</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">5</td><td style = "text-align: left;">LargePV</td><td style = "text-align: right;">10</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">6</td><td style = "text-align: left;">CCGT</td><td style = "text-align: right;">9</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">7</td><td style = "text-align: left;">Black Coal QLD</td><td style = "text-align: right;">8</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">8</td><td style = "text-align: left;">Diesel</td><td style = "text-align: right;">7</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">9</td><td style = "text-align: left;">Black Coal NSW</td><td style = "text-align: right;">4</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">10</td><td style = "text-align: left;">Brown Coal VIC</td><td style = "text-align: right;">2</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">11</td><td style = "text-align: left;">Run-of-River</td><td style = "text-align: right;">2</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">12</td><td style = "text-align: left;">Hydrogen-based gas turbines</td><td style = "text-align: right;">2</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">13</td><td style = "text-align: left;">Brown Coal</td><td style = "text-align: right;">1</td></tr></tbody></table></div>
-```
+| **tech** | **count** |
+|--:|--:|
+| Reservoir | 28 |
+| OCGT | 28 |
+| RoofPV | 12 |
+| Wind | 11 |
+| LargePV | 10 |
+| CCGT | 9 |
+| Black Coal QLD | 8 |
+| Diesel | 7 |
+| Black Coal NSW | 4 |
+| Brown Coal VIC | 2 |
+| Run-of-River | 2 |
+| Hydrogen-based gas turbines | 2 |
+| Brown Coal | 1 |
+
 
 ## Step 2 — load the schedule output
 
@@ -153,16 +178,21 @@ The first rows make the schedule schema concrete.
 ```
 
 ````julia
-first(gen_pmax, 5)
+markdown_table(first(gen_pmax, 5))
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>5×5 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">id</th><th style = "text-align: left;">id_gen</th><th style = "text-align: left;">scenario</th><th style = "text-align: left;">date</th><th style = "text-align: left;">value</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Dates.DateTime" style = "text-align: left;">DateTime</th><th title = "Float64" style = "text-align: left;">Float64</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">78</td><td style = "text-align: right;">1</td><td style = "text-align: left;">2044-07-01T00:00:00</td><td style = "text-align: right;">106.0</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: right;">2</td><td style = "text-align: right;">78</td><td style = "text-align: right;">2</td><td style = "text-align: left;">2044-07-01T00:00:00</td><td style = "text-align: right;">106.0</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">3</td><td style = "text-align: right;">3</td><td style = "text-align: right;">78</td><td style = "text-align: right;">3</td><td style = "text-align: left;">2044-07-01T00:00:00</td><td style = "text-align: right;">106.0</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">4</td><td style = "text-align: right;">4</td><td style = "text-align: right;">92</td><td style = "text-align: right;">2</td><td style = "text-align: left;">2030-01-01T00:00:00</td><td style = "text-align: right;">0.0</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">5</td><td style = "text-align: right;">5</td><td style = "text-align: right;">92</td><td style = "text-align: right;">2</td><td style = "text-align: left;">2030-01-01T01:00:00</td><td style = "text-align: right;">0.0</td></tr></tbody></table></div>
-```
+| **id** | **id\_gen** | **scenario** | **date** | **value** |
+|--:|--:|--:|--:|--:|
+| 1 | 78 | 1 | 2044-07-01T00:00:00 | 106.0 |
+| 2 | 78 | 2 | 2044-07-01T00:00:00 | 106.0 |
+| 3 | 78 | 3 | 2044-07-01T00:00:00 | 106.0 |
+| 4 | 92 | 2 | 2030-01-01T00:00:00 | 0.0 |
+| 5 | 92 | 2 | 2030-01-01T01:00:00 | 0.0 |
+
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -189,16 +219,21 @@ Shape: (105120, 5)
 ```
 
 ````julia
-first(dem_load, 5)
+markdown_table(first(dem_load, 5))
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>5×5 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">id</th><th style = "text-align: left;">id_dem</th><th style = "text-align: left;">scenario</th><th style = "text-align: left;">date</th><th style = "text-align: left;">value</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Dates.DateTime" style = "text-align: left;">DateTime</th><th title = "Float64" style = "text-align: left;">Float64</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">2</td><td style = "text-align: left;">2030-01-01T00:00:00</td><td style = "text-align: right;">749.427</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: right;">2</td><td style = "text-align: right;">1</td><td style = "text-align: right;">2</td><td style = "text-align: left;">2030-01-01T01:00:00</td><td style = "text-align: right;">717.852</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">3</td><td style = "text-align: right;">3</td><td style = "text-align: right;">1</td><td style = "text-align: right;">2</td><td style = "text-align: left;">2030-01-01T02:00:00</td><td style = "text-align: right;">674.352</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">4</td><td style = "text-align: right;">4</td><td style = "text-align: right;">1</td><td style = "text-align: right;">2</td><td style = "text-align: left;">2030-01-01T03:00:00</td><td style = "text-align: right;">649.815</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">5</td><td style = "text-align: right;">5</td><td style = "text-align: right;">1</td><td style = "text-align: right;">2</td><td style = "text-align: left;">2030-01-01T04:00:00</td><td style = "text-align: right;">641.313</td></tr></tbody></table></div>
-```
+| **id** | **id\_dem** | **scenario** | **date** | **value** |
+|--:|--:|--:|--:|--:|
+| 1 | 1 | 2 | 2030-01-01T00:00:00 | 749.427 |
+| 2 | 1 | 2 | 2030-01-01T01:00:00 | 717.852 |
+| 3 | 1 | 2 | 2030-01-01T02:00:00 | 674.352 |
+| 4 | 1 | 2 | 2030-01-01T03:00:00 | 649.815 |
+| 5 | 1 | 2 | 2030-01-01T04:00:00 | 641.313 |
+
 
 ## Step 3 — map generators to buses and identify solar/wind generators
 
@@ -243,15 +278,18 @@ Wind generators: 11
 solar_tech_counts = sort(
     combine(groupby(solar_gens, :tech), nrow => :count), :count; rev = true,
 )
+markdown_table(solar_tech_counts)
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>2×2 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">tech</th><th style = "text-align: left;">count</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "InlineStrings.String31" style = "text-align: left;">String31</th><th title = "Int64" style = "text-align: left;">Int64</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: left;">RoofPV</td><td style = "text-align: right;">12</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: left;">LargePV</td><td style = "text-align: right;">10</td></tr></tbody></table></div>
-```
+| **tech** | **count** |
+|--:|--:|
+| RoofPV | 12 |
+| LargePV | 10 |
+
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -261,15 +299,17 @@ solar_tech_counts = sort(
 wind_tech_counts = sort(
     combine(groupby(wind_gens, :tech), nrow => :count), :count; rev = true,
 )
+markdown_table(wind_tech_counts)
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>1×2 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">tech</th><th style = "text-align: left;">count</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "InlineStrings.String31" style = "text-align: left;">String31</th><th title = "Int64" style = "text-align: left;">Int64</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: left;">Wind</td><td style = "text-align: right;">11</td></tr></tbody></table></div>
-```
+| **tech** | **count** |
+|--:|--:|
+| Wind | 11 |
+
 
 ## Step 4 — prepare daily aggregate series
 

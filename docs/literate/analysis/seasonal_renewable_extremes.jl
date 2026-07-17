@@ -20,7 +20,7 @@ const REPO_ROOT = normpath(get(
     joinpath(@__DIR__, "..", "..", ".."),
 ))
 
-include(joinpath(REPO_ROOT, "eda", "eda_support.jl"))
+include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
 using .EdaSupport
 
 const SCRIPT_STEM = "04_seasonal_extremes"
@@ -54,8 +54,7 @@ end
 row_mean(df::DataFrame, cols) = [mean(row[col] for col in cols) for row in eachrow(df)]
 nothing #hide
 
-# A simple trailing rolling mean: the first `window - 1` entries have no full
-# window of preceding values yet, so they are left `missing`.
+# A simple trailing rolling mean: the first `window - 1` entries have no full window of preceding values yet, so they are left `missing`.
 function rolling_mean(values, window)
     n = length(values)
     result = Vector{Union{Missing, Float64}}(missing, n)
@@ -150,7 +149,7 @@ end
 
 hot_cool_summer_solar_summary = DataFrame(rows)
 write_table(hot_cool_summer_solar_summary, SCRIPT_STEM, "hot_cool_summer_solar_summary")
-hot_cool_summer_solar_summary
+markdown_table(hot_cool_summer_solar_summary)
 
 # ## Step 2 — candidate multi-day low-output events
 #
@@ -185,7 +184,7 @@ else
         [:tech, :year],
     )
 end
-low_output_event_summary
+markdown_table(low_output_event_summary)
 
 # ## Step 3 — worst solar day and half-hourly profile
 #
@@ -213,7 +212,7 @@ end
 
 worst_solar_day_summary = DataFrame(worst_rows)
 write_table(worst_solar_day_summary, SCRIPT_STEM, "worst_solar_day_summary")
-worst_solar_day_summary
+markdown_table(worst_solar_day_summary)
 
 #-
 
@@ -238,7 +237,7 @@ end
 
 worst_solar_day_profile = DataFrame(rows)
 write_table(worst_solar_day_profile, SCRIPT_STEM, "worst_solar_day_profile")
-worst_solar_day_profile
+markdown_table(worst_solar_day_profile)
 
 # ## Step 4 — 2019 monthly and Black Summer detail
 #
@@ -262,15 +261,11 @@ end
 
 monthly_cf_2019_summary = DataFrame(rows)
 write_table(monthly_cf_2019_summary, SCRIPT_STEM, "monthly_cf_2019_summary")
-monthly_cf_2019_summary
+markdown_table(monthly_cf_2019_summary)
 
 #-
 
-# The `RefYear2019` trace reuses the 2019 (Black Summer) historical weather
-# pattern across the entire projected planning horizon, not just the single
-# 2018-19 season, so the daily series below has one row per summer day in
-# every simulated year. The table previews the first 15 rows; the complete
-# series is written to `eda/tables/julia/04_seasonal_extremes/black_summer_2019_daily_cf.csv`.
+# The `RefYear2019` trace reuses the 2019 (Black Summer) historical weather pattern across the entire projected planning horizon, not just the single 2018-19 season, so the daily series below has one row per summer day in every simulated year. The table previews the first 15 rows; the complete series is written to `eda/tables/julia/04_seasonal_extremes/black_summer_2019_daily_cf.csv`.
 
 df = load_trace("solar", 2019, SOLAR_LOC)
 rows = NamedTuple[]
@@ -286,7 +281,7 @@ end
 
 black_summer_2019_daily_cf = DataFrame(rows)
 write_table(black_summer_2019_daily_cf, SCRIPT_STEM, "black_summer_2019_daily_cf")
-first(black_summer_2019_daily_cf, 15)
+markdown_table(first(black_summer_2019_daily_cf, 15))
 
 # ## Step 5 — hot vs cool summer solar profiles (figure)
 #

@@ -53,7 +53,7 @@ const FAR_YEARS = [2045, 2046, 2047, 2048, 2049]
 ```
 
 ````
-Snapshot: PISP.jl commit fb28c62+dirty, generated 2026-07-17 — 2024 ISP PISP.WEATHER_YEARS_ISP weather-year mapping; historical solar and wind reference traces from the 2024 ISP raw trace downloads
+Snapshot: PISP.jl commit a429ab9+dirty, generated 2026-07-17 — 2024 ISP PISP.WEATHER_YEARS_ISP weather-year mapping; historical solar and wind reference traces from the 2024 ISP raw trace downloads
 
 ````
 
@@ -141,16 +141,44 @@ mapping_table = DataFrame(
     ref_label = ref_label,
 )
 write_table(mapping_table, SCRIPT_STEM, "mapping_table")
-mapping_table
+markdown_table(mapping_table)
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>28×5 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">fy_start</th><th style = "text-align: left;">fy_end</th><th style = "text-align: left;">ref_year</th><th style = "text-align: left;">fy_label</th><th style = "text-align: left;">ref_label</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "String" style = "text-align: left;">String</th><th title = "String" style = "text-align: left;">String</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "String" style = "text-align: left;">String</th><th title = "String" style = "text-align: left;">String</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: left;">2024-07-01</td><td style = "text-align: left;">2025-06-30</td><td style = "text-align: right;">2019</td><td style = "text-align: left;">FY2025</td><td style = "text-align: left;">2019</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: left;">2025-07-01</td><td style = "text-align: left;">2026-06-30</td><td style = "text-align: right;">2020</td><td style = "text-align: left;">FY2026</td><td style = "text-align: left;">2020</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">3</td><td style = "text-align: left;">2026-07-01</td><td style = "text-align: left;">2027-06-30</td><td style = "text-align: right;">2021</td><td style = "text-align: left;">FY2027</td><td style = "text-align: left;">2021</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">4</td><td style = "text-align: left;">2027-07-01</td><td style = "text-align: left;">2028-06-30</td><td style = "text-align: right;">2022</td><td style = "text-align: left;">FY2028</td><td style = "text-align: left;">2022</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">5</td><td style = "text-align: left;">2028-07-01</td><td style = "text-align: left;">2029-06-30</td><td style = "text-align: right;">2023</td><td style = "text-align: left;">FY2029</td><td style = "text-align: left;">2023</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">6</td><td style = "text-align: left;">2029-07-01</td><td style = "text-align: left;">2030-06-30</td><td style = "text-align: right;">2015</td><td style = "text-align: left;">FY2030</td><td style = "text-align: left;">2015</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">7</td><td style = "text-align: left;">2030-07-01</td><td style = "text-align: left;">2031-06-30</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">FY2031</td><td style = "text-align: left;">2011</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">8</td><td style = "text-align: left;">2031-07-01</td><td style = "text-align: left;">2032-06-30</td><td style = "text-align: right;">2012</td><td style = "text-align: left;">FY2032</td><td style = "text-align: left;">2012</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">9</td><td style = "text-align: left;">2032-07-01</td><td style = "text-align: left;">2033-06-30</td><td style = "text-align: right;">2013</td><td style = "text-align: left;">FY2033</td><td style = "text-align: left;">2013</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">10</td><td style = "text-align: left;">2033-07-01</td><td style = "text-align: left;">2034-06-30</td><td style = "text-align: right;">2014</td><td style = "text-align: left;">FY2034</td><td style = "text-align: left;">2014</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">11</td><td style = "text-align: left;">2034-07-01</td><td style = "text-align: left;">2035-06-30</td><td style = "text-align: right;">2015</td><td style = "text-align: left;">FY2035</td><td style = "text-align: left;">2015</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">12</td><td style = "text-align: left;">2035-07-01</td><td style = "text-align: left;">2036-06-30</td><td style = "text-align: right;">2016</td><td style = "text-align: left;">FY2036</td><td style = "text-align: left;">2016</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">13</td><td style = "text-align: left;">2036-07-01</td><td style = "text-align: left;">2037-06-30</td><td style = "text-align: right;">2017</td><td style = "text-align: left;">FY2037</td><td style = "text-align: left;">2017</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">14</td><td style = "text-align: left;">2037-07-01</td><td style = "text-align: left;">2038-06-30</td><td style = "text-align: right;">2018</td><td style = "text-align: left;">FY2038</td><td style = "text-align: left;">2018</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">15</td><td style = "text-align: left;">2038-07-01</td><td style = "text-align: left;">2039-06-30</td><td style = "text-align: right;">2019</td><td style = "text-align: left;">FY2039</td><td style = "text-align: left;">2019</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">16</td><td style = "text-align: left;">2039-07-01</td><td style = "text-align: left;">2040-06-30</td><td style = "text-align: right;">2020</td><td style = "text-align: left;">FY2040</td><td style = "text-align: left;">2020</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">17</td><td style = "text-align: left;">2040-07-01</td><td style = "text-align: left;">2041-06-30</td><td style = "text-align: right;">2021</td><td style = "text-align: left;">FY2041</td><td style = "text-align: left;">2021</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">18</td><td style = "text-align: left;">2041-07-01</td><td style = "text-align: left;">2042-06-30</td><td style = "text-align: right;">2022</td><td style = "text-align: left;">FY2042</td><td style = "text-align: left;">2022</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">19</td><td style = "text-align: left;">2042-07-01</td><td style = "text-align: left;">2043-06-30</td><td style = "text-align: right;">2023</td><td style = "text-align: left;">FY2043</td><td style = "text-align: left;">2023</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">20</td><td style = "text-align: left;">2043-07-01</td><td style = "text-align: left;">2044-06-30</td><td style = "text-align: right;">2015</td><td style = "text-align: left;">FY2044</td><td style = "text-align: left;">2015</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">21</td><td style = "text-align: left;">2044-07-01</td><td style = "text-align: left;">2045-06-30</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">FY2045</td><td style = "text-align: left;">2011</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">22</td><td style = "text-align: left;">2045-07-01</td><td style = "text-align: left;">2046-06-30</td><td style = "text-align: right;">2012</td><td style = "text-align: left;">FY2046</td><td style = "text-align: left;">2012</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">23</td><td style = "text-align: left;">2046-07-01</td><td style = "text-align: left;">2047-06-30</td><td style = "text-align: right;">2013</td><td style = "text-align: left;">FY2047</td><td style = "text-align: left;">2013</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">24</td><td style = "text-align: left;">2047-07-01</td><td style = "text-align: left;">2048-06-30</td><td style = "text-align: right;">2014</td><td style = "text-align: left;">FY2048</td><td style = "text-align: left;">2014</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">25</td><td style = "text-align: left;">2048-07-01</td><td style = "text-align: left;">2049-06-30</td><td style = "text-align: right;">2015</td><td style = "text-align: left;">FY2049</td><td style = "text-align: left;">2015</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">26</td><td style = "text-align: left;">2049-07-01</td><td style = "text-align: left;">2050-06-30</td><td style = "text-align: right;">2016</td><td style = "text-align: left;">FY2050</td><td style = "text-align: left;">2016</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">27</td><td style = "text-align: left;">2050-07-01</td><td style = "text-align: left;">2051-06-30</td><td style = "text-align: right;">2017</td><td style = "text-align: left;">FY2051</td><td style = "text-align: left;">2017</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">28</td><td style = "text-align: left;">2051-07-01</td><td style = "text-align: left;">2052-06-30</td><td style = "text-align: right;">2018</td><td style = "text-align: left;">FY2052</td><td style = "text-align: left;">2018</td></tr></tbody></table></div>
-```
+| **fy\_start** | **fy\_end** | **ref\_year** | **fy\_label** | **ref\_label** |
+|--:|--:|--:|--:|--:|
+| 2024-07-01 | 2025-06-30 | 2019 | FY2025 | 2019 |
+| 2025-07-01 | 2026-06-30 | 2020 | FY2026 | 2020 |
+| 2026-07-01 | 2027-06-30 | 2021 | FY2027 | 2021 |
+| 2027-07-01 | 2028-06-30 | 2022 | FY2028 | 2022 |
+| 2028-07-01 | 2029-06-30 | 2023 | FY2029 | 2023 |
+| 2029-07-01 | 2030-06-30 | 2015 | FY2030 | 2015 |
+| 2030-07-01 | 2031-06-30 | 2011 | FY2031 | 2011 |
+| 2031-07-01 | 2032-06-30 | 2012 | FY2032 | 2012 |
+| 2032-07-01 | 2033-06-30 | 2013 | FY2033 | 2013 |
+| 2033-07-01 | 2034-06-30 | 2014 | FY2034 | 2014 |
+| 2034-07-01 | 2035-06-30 | 2015 | FY2035 | 2015 |
+| 2035-07-01 | 2036-06-30 | 2016 | FY2036 | 2016 |
+| 2036-07-01 | 2037-06-30 | 2017 | FY2037 | 2017 |
+| 2037-07-01 | 2038-06-30 | 2018 | FY2038 | 2018 |
+| 2038-07-01 | 2039-06-30 | 2019 | FY2039 | 2019 |
+| 2039-07-01 | 2040-06-30 | 2020 | FY2040 | 2020 |
+| 2040-07-01 | 2041-06-30 | 2021 | FY2041 | 2021 |
+| 2041-07-01 | 2042-06-30 | 2022 | FY2042 | 2022 |
+| 2042-07-01 | 2043-06-30 | 2023 | FY2043 | 2023 |
+| 2043-07-01 | 2044-06-30 | 2015 | FY2044 | 2015 |
+| 2044-07-01 | 2045-06-30 | 2011 | FY2045 | 2011 |
+| 2045-07-01 | 2046-06-30 | 2012 | FY2046 | 2012 |
+| 2046-07-01 | 2047-06-30 | 2013 | FY2047 | 2013 |
+| 2047-07-01 | 2048-06-30 | 2014 | FY2048 | 2014 |
+| 2048-07-01 | 2049-06-30 | 2015 | FY2049 | 2015 |
+| 2049-07-01 | 2050-06-30 | 2016 | FY2050 | 2016 |
+| 2050-07-01 | 2051-06-30 | 2017 | FY2051 | 2017 |
+| 2051-07-01 | 2052-06-30 | 2018 | FY2052 | 2018 |
+
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -233,16 +261,42 @@ for yr in sort(unique(mapping_table.ref_year))
 end
 historical_year_vre_stats = DataFrame(historical_year_vre_stats_rows)
 write_table(historical_year_vre_stats, SCRIPT_STEM, "historical_year_vre_stats")
-historical_year_vre_stats
+markdown_table(historical_year_vre_stats)
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>26×6 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">ref_year</th><th style = "text-align: left;">tech</th><th style = "text-align: left;">annual_mean_cf</th><th style = "text-align: left;">summer_mean_cf</th><th style = "text-align: left;">summer_min_cf</th><th style = "text-align: left;">summer_p5_cf</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "String" style = "text-align: left;">String</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Float64" style = "text-align: left;">Float64</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">solar</td><td style = "text-align: right;">0.257362</td><td style = "text-align: right;">0.361699</td><td style = "text-align: right;">0.0145063</td><td style = "text-align: right;">0.0377352</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: right;">2011</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">0.361648</td><td style = "text-align: right;">0.307114</td><td style = "text-align: right;">0.020218</td><td style = "text-align: right;">0.0412972</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">3</td><td style = "text-align: right;">2012</td><td style = "text-align: left;">solar</td><td style = "text-align: right;">0.274037</td><td style = "text-align: right;">0.38577</td><td style = "text-align: right;">0.0311683</td><td style = "text-align: right;">0.102937</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">4</td><td style = "text-align: right;">2012</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">0.390979</td><td style = "text-align: right;">0.34782</td><td style = "text-align: right;">0.0419995</td><td style = "text-align: right;">0.120625</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">5</td><td style = "text-align: right;">2013</td><td style = "text-align: left;">solar</td><td style = "text-align: right;">0.287337</td><td style = "text-align: right;">0.404471</td><td style = "text-align: right;">0.0175779</td><td style = "text-align: right;">0.149914</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">6</td><td style = "text-align: right;">2013</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">0.374104</td><td style = "text-align: right;">0.323963</td><td style = "text-align: right;">0.0140656</td><td style = "text-align: right;">0.0776668</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">7</td><td style = "text-align: right;">2014</td><td style = "text-align: left;">solar</td><td style = "text-align: right;">0.274026</td><td style = "text-align: right;">0.395343</td><td style = "text-align: right;">0.0167056</td><td style = "text-align: right;">0.119831</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">8</td><td style = "text-align: right;">2014</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">0.421323</td><td style = "text-align: right;">0.337852</td><td style = "text-align: right;">0.0472683</td><td style = "text-align: right;">0.0970499</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">9</td><td style = "text-align: right;">2015</td><td style = "text-align: left;">solar</td><td style = "text-align: right;">0.29051</td><td style = "text-align: right;">0.394685</td><td style = "text-align: right;">0.0329821</td><td style = "text-align: right;">0.109433</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">10</td><td style = "text-align: right;">2015</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">0.363536</td><td style = "text-align: right;">0.305119</td><td style = "text-align: right;">0.0250786</td><td style = "text-align: right;">0.0803984</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">11</td><td style = "text-align: right;">2016</td><td style = "text-align: left;">solar</td><td style = "text-align: right;">0.28018</td><td style = "text-align: right;">0.393496</td><td style = "text-align: right;">0.110095</td><td style = "text-align: right;">0.152268</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">12</td><td style = "text-align: right;">2016</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">0.362167</td><td style = "text-align: right;">0.28348</td><td style = "text-align: right;">0.0494088</td><td style = "text-align: right;">0.0812237</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">13</td><td style = "text-align: right;">2017</td><td style = "text-align: left;">solar</td><td style = "text-align: right;">0.280107</td><td style = "text-align: right;">0.382376</td><td style = "text-align: right;">0.0515059</td><td style = "text-align: right;">0.120608</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">14</td><td style = "text-align: right;">2017</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">0.375569</td><td style = "text-align: right;">0.296865</td><td style = "text-align: right;">0.0357853</td><td style = "text-align: right;">0.0484888</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">15</td><td style = "text-align: right;">2018</td><td style = "text-align: left;">solar</td><td style = "text-align: right;">0.289739</td><td style = "text-align: right;">0.385712</td><td style = "text-align: right;">0.0689566</td><td style = "text-align: right;">0.170206</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">16</td><td style = "text-align: right;">2018</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">0.395895</td><td style = "text-align: right;">0.305462</td><td style = "text-align: right;">0.0543059</td><td style = "text-align: right;">0.0746259</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">17</td><td style = "text-align: right;">2019</td><td style = "text-align: left;">solar</td><td style = "text-align: right;">0.296915</td><td style = "text-align: right;">0.404872</td><td style = "text-align: right;">0.0890162</td><td style = "text-align: right;">0.204355</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">18</td><td style = "text-align: right;">2019</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">0.394096</td><td style = "text-align: right;">0.26196</td><td style = "text-align: right;">0.0309094</td><td style = "text-align: right;">0.0619373</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">19</td><td style = "text-align: right;">2020</td><td style = "text-align: left;">solar</td><td style = "text-align: right;">0.297859</td><td style = "text-align: right;">0.403192</td><td style = "text-align: right;">0.0773021</td><td style = "text-align: right;">0.182836</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">20</td><td style = "text-align: right;">2020</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">0.412785</td><td style = "text-align: right;">0.344116</td><td style = "text-align: right;">0.0156713</td><td style = "text-align: right;">0.0933679</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">21</td><td style = "text-align: right;">2021</td><td style = "text-align: left;">solar</td><td style = "text-align: right;">0.284485</td><td style = "text-align: right;">0.409647</td><td style = "text-align: right;">0.0689535</td><td style = "text-align: right;">0.174614</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">22</td><td style = "text-align: right;">2021</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">0.401134</td><td style = "text-align: right;">0.368448</td><td style = "text-align: right;">0.0474335</td><td style = "text-align: right;">0.0892812</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">23</td><td style = "text-align: right;">2022</td><td style = "text-align: left;">solar</td><td style = "text-align: right;">0.281107</td><td style = "text-align: right;">0.410353</td><td style = "text-align: right;">0.158083</td><td style = "text-align: right;">0.229602</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">24</td><td style = "text-align: right;">2022</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">0.404672</td><td style = "text-align: right;">0.355404</td><td style = "text-align: right;">0.0125</td><td style = "text-align: right;">0.105401</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">25</td><td style = "text-align: right;">2023</td><td style = "text-align: left;">solar</td><td style = "text-align: right;">0.276166</td><td style = "text-align: right;">0.426174</td><td style = "text-align: right;">0.0907033</td><td style = "text-align: right;">0.168359</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">26</td><td style = "text-align: right;">2023</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">0.369846</td><td style = "text-align: right;">0.321152</td><td style = "text-align: right;">0.0375621</td><td style = "text-align: right;">0.094468</td></tr></tbody></table></div>
-```
+| **ref\_year** | **tech** | **annual\_mean\_cf** | **summer\_mean\_cf** | **summer\_min\_cf** | **summer\_p5\_cf** |
+|--:|--:|--:|--:|--:|--:|
+| 2011 | solar | 0.257362 | 0.361699 | 0.0145063 | 0.0377352 |
+| 2011 | wind | 0.361648 | 0.307114 | 0.020218 | 0.0412972 |
+| 2012 | solar | 0.274037 | 0.38577 | 0.0311683 | 0.102937 |
+| 2012 | wind | 0.390979 | 0.34782 | 0.0419995 | 0.120625 |
+| 2013 | solar | 0.287337 | 0.404471 | 0.0175779 | 0.149914 |
+| 2013 | wind | 0.374104 | 0.323963 | 0.0140656 | 0.0776668 |
+| 2014 | solar | 0.274026 | 0.395343 | 0.0167056 | 0.119831 |
+| 2014 | wind | 0.421323 | 0.337852 | 0.0472683 | 0.0970499 |
+| 2015 | solar | 0.29051 | 0.394685 | 0.0329821 | 0.109433 |
+| 2015 | wind | 0.363536 | 0.305119 | 0.0250786 | 0.0803984 |
+| 2016 | solar | 0.28018 | 0.393496 | 0.110095 | 0.152268 |
+| 2016 | wind | 0.362167 | 0.28348 | 0.0494088 | 0.0812237 |
+| 2017 | solar | 0.280107 | 0.382376 | 0.0515059 | 0.120608 |
+| 2017 | wind | 0.375569 | 0.296865 | 0.0357853 | 0.0484888 |
+| 2018 | solar | 0.289739 | 0.385712 | 0.0689566 | 0.170206 |
+| 2018 | wind | 0.395895 | 0.305462 | 0.0543059 | 0.0746259 |
+| 2019 | solar | 0.296915 | 0.404872 | 0.0890162 | 0.204355 |
+| 2019 | wind | 0.394096 | 0.26196 | 0.0309094 | 0.0619373 |
+| 2020 | solar | 0.297859 | 0.403192 | 0.0773021 | 0.182836 |
+| 2020 | wind | 0.412785 | 0.344116 | 0.0156713 | 0.0933679 |
+| 2021 | solar | 0.284485 | 0.409647 | 0.0689535 | 0.174614 |
+| 2021 | wind | 0.401134 | 0.368448 | 0.0474335 | 0.0892812 |
+| 2022 | solar | 0.281107 | 0.410353 | 0.158083 | 0.229602 |
+| 2022 | wind | 0.404672 | 0.355404 | 0.0125 | 0.105401 |
+| 2023 | solar | 0.276166 | 0.426174 | 0.0907033 | 0.168359 |
+| 2023 | wind | 0.369846 | 0.321152 | 0.0375621 | 0.094468 |
+
 
 ## Step 3 — near-term vs far-term daily capacity factor
 
@@ -279,16 +333,20 @@ near_vs_far_term_summary = combine(
     nrow => :n_days,
 )
 sort!(near_vs_far_term_summary, [:tech, :term])
-near_vs_far_term_summary
+markdown_table(near_vs_far_term_summary)
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>4×6 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">tech</th><th style = "text-align: left;">term</th><th style = "text-align: left;">mean_cf</th><th style = "text-align: left;">min_cf</th><th style = "text-align: left;">max_cf</th><th style = "text-align: left;">n_days</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "String" style = "text-align: left;">String</th><th title = "String" style = "text-align: left;">String</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Int64" style = "text-align: left;">Int64</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: left;">solar</td><td style = "text-align: left;">far</td><td style = "text-align: right;">0.276654</td><td style = "text-align: right;">0.0462443</td><td style = "text-align: right;">0.495946</td><td style = "text-align: right;">12418</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: left;">solar</td><td style = "text-align: left;">near</td><td style = "text-align: right;">0.287307</td><td style = "text-align: right;">0.0886683</td><td style = "text-align: right;">0.491964</td><td style = "text-align: right;">12418</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">3</td><td style = "text-align: left;">wind</td><td style = "text-align: left;">far</td><td style = "text-align: right;">0.382318</td><td style = "text-align: right;">0.0602974</td><td style = "text-align: right;">0.748947</td><td style = "text-align: right;">12418</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">4</td><td style = "text-align: left;">wind</td><td style = "text-align: left;">near</td><td style = "text-align: right;">0.396507</td><td style = "text-align: right;">0.0745325</td><td style = "text-align: right;">0.828956</td><td style = "text-align: right;">12418</td></tr></tbody></table></div>
-```
+| **tech** | **term** | **mean\_cf** | **min\_cf** | **max\_cf** | **n\_days** |
+|--:|--:|--:|--:|--:|--:|
+| solar | far | 0.276654 | 0.0462443 | 0.495946 | 12418 |
+| solar | near | 0.287307 | 0.0886683 | 0.491964 | 12418 |
+| wind | far | 0.382318 | 0.0602974 | 0.748947 | 12418 |
+| wind | near | 0.396507 | 0.0745325 | 0.828956 | 12418 |
+
 
 ## Step 4 — year-by-year renewable matrix
 
@@ -310,16 +368,42 @@ for (tech, loc, hh_cols) in (("solar", SOLAR_LOC, HH_COLS_SOL), ("wind", WIND_LO
 end
 vre_heatmap = DataFrame(vre_heatmap_rows)
 write_table(vre_heatmap, SCRIPT_STEM, "vre_heatmap")
-vre_heatmap
+markdown_table(vre_heatmap)
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>26×3 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">tech</th><th style = "text-align: left;">ref_year</th><th style = "text-align: left;">annual_mean_cf</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "String" style = "text-align: left;">String</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Float64" style = "text-align: left;">Float64</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: left;">solar</td><td style = "text-align: right;">2011</td><td style = "text-align: right;">0.257362</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: left;">solar</td><td style = "text-align: right;">2012</td><td style = "text-align: right;">0.274037</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">3</td><td style = "text-align: left;">solar</td><td style = "text-align: right;">2013</td><td style = "text-align: right;">0.287337</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">4</td><td style = "text-align: left;">solar</td><td style = "text-align: right;">2014</td><td style = "text-align: right;">0.274026</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">5</td><td style = "text-align: left;">solar</td><td style = "text-align: right;">2015</td><td style = "text-align: right;">0.29051</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">6</td><td style = "text-align: left;">solar</td><td style = "text-align: right;">2016</td><td style = "text-align: right;">0.28018</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">7</td><td style = "text-align: left;">solar</td><td style = "text-align: right;">2017</td><td style = "text-align: right;">0.280107</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">8</td><td style = "text-align: left;">solar</td><td style = "text-align: right;">2018</td><td style = "text-align: right;">0.289739</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">9</td><td style = "text-align: left;">solar</td><td style = "text-align: right;">2019</td><td style = "text-align: right;">0.296915</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">10</td><td style = "text-align: left;">solar</td><td style = "text-align: right;">2020</td><td style = "text-align: right;">0.297859</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">11</td><td style = "text-align: left;">solar</td><td style = "text-align: right;">2021</td><td style = "text-align: right;">0.284485</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">12</td><td style = "text-align: left;">solar</td><td style = "text-align: right;">2022</td><td style = "text-align: right;">0.281107</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">13</td><td style = "text-align: left;">solar</td><td style = "text-align: right;">2023</td><td style = "text-align: right;">0.276166</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">14</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">2011</td><td style = "text-align: right;">0.361648</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">15</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">2012</td><td style = "text-align: right;">0.390979</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">16</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">2013</td><td style = "text-align: right;">0.374104</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">17</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">2014</td><td style = "text-align: right;">0.421323</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">18</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">2015</td><td style = "text-align: right;">0.363536</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">19</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">2016</td><td style = "text-align: right;">0.362167</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">20</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">2017</td><td style = "text-align: right;">0.375569</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">21</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">2018</td><td style = "text-align: right;">0.395895</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">22</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">2019</td><td style = "text-align: right;">0.394096</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">23</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">2020</td><td style = "text-align: right;">0.412785</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">24</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">2021</td><td style = "text-align: right;">0.401134</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">25</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">2022</td><td style = "text-align: right;">0.404672</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">26</td><td style = "text-align: left;">wind</td><td style = "text-align: right;">2023</td><td style = "text-align: right;">0.369846</td></tr></tbody></table></div>
-```
+| **tech** | **ref\_year** | **annual\_mean\_cf** |
+|--:|--:|--:|
+| solar | 2011 | 0.257362 |
+| solar | 2012 | 0.274037 |
+| solar | 2013 | 0.287337 |
+| solar | 2014 | 0.274026 |
+| solar | 2015 | 0.29051 |
+| solar | 2016 | 0.28018 |
+| solar | 2017 | 0.280107 |
+| solar | 2018 | 0.289739 |
+| solar | 2019 | 0.296915 |
+| solar | 2020 | 0.297859 |
+| solar | 2021 | 0.284485 |
+| solar | 2022 | 0.281107 |
+| solar | 2023 | 0.276166 |
+| wind | 2011 | 0.361648 |
+| wind | 2012 | 0.390979 |
+| wind | 2013 | 0.374104 |
+| wind | 2014 | 0.421323 |
+| wind | 2015 | 0.363536 |
+| wind | 2016 | 0.362167 |
+| wind | 2017 | 0.375569 |
+| wind | 2018 | 0.395895 |
+| wind | 2019 | 0.394096 |
+| wind | 2020 | 0.412785 |
+| wind | 2021 | 0.401134 |
+| wind | 2022 | 0.404672 |
+| wind | 2023 | 0.369846 |
+
 
 ## Step 5 — how often each historical year is reused
 
@@ -337,16 +421,29 @@ println("Unique historical years used: ", sort(unique(mapping_table.ref_year)))
 ref_year_counts = combine(groupby(mapping_table, :ref_year), nrow => :count)
 sort!(ref_year_counts, :ref_year)
 write_table(ref_year_counts, SCRIPT_STEM, "ref_year_counts")
-ref_year_counts
+markdown_table(ref_year_counts)
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>13×2 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">ref_year</th><th style = "text-align: left;">count</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: right;">2011</td><td style = "text-align: right;">2</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: right;">2012</td><td style = "text-align: right;">2</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">3</td><td style = "text-align: right;">2013</td><td style = "text-align: right;">2</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">4</td><td style = "text-align: right;">2014</td><td style = "text-align: right;">2</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">5</td><td style = "text-align: right;">2015</td><td style = "text-align: right;">4</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">6</td><td style = "text-align: right;">2016</td><td style = "text-align: right;">2</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">7</td><td style = "text-align: right;">2017</td><td style = "text-align: right;">2</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">8</td><td style = "text-align: right;">2018</td><td style = "text-align: right;">2</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">9</td><td style = "text-align: right;">2019</td><td style = "text-align: right;">2</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">10</td><td style = "text-align: right;">2020</td><td style = "text-align: right;">2</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">11</td><td style = "text-align: right;">2021</td><td style = "text-align: right;">2</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">12</td><td style = "text-align: right;">2022</td><td style = "text-align: right;">2</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">13</td><td style = "text-align: right;">2023</td><td style = "text-align: right;">2</td></tr></tbody></table></div>
-```
+| **ref\_year** | **count** |
+|--:|--:|
+| 2011 | 2 |
+| 2012 | 2 |
+| 2013 | 2 |
+| 2014 | 2 |
+| 2015 | 4 |
+| 2016 | 2 |
+| 2017 | 2 |
+| 2018 | 2 |
+| 2019 | 2 |
+| 2020 | 2 |
+| 2021 | 2 |
+| 2022 | 2 |
+| 2023 | 2 |
+
 
 ## Step 6 — timeline of historical years across the planning horizon
 

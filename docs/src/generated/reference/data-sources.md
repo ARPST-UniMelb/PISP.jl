@@ -20,6 +20,10 @@ const REPO_ROOT = normpath(get(
     joinpath(@__DIR__, "..", "..", ".."),
 ))
 const INPUT_ROOT = normpath(get(ENV, "PISP_DATA_ROOT", joinpath(REPO_ROOT, "data", "2024", "pisp-downloads")))
+
+include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
+using .EdaSupport
+
 replace(relpath(INPUT_ROOT, REPO_ROOT), '\\' => '/')
 ````
 
@@ -47,16 +51,21 @@ configured_downloads = DataFrame(
     local_filename = [something(target.filename, "derived from URL") for target in targets],
     subdirectory = [something(target.subdir, "") for target in targets],
 )
-configured_downloads
+markdown_table(configured_downloads)
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>5×4 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">key</th><th style = "text-align: left;">published_artifact</th><th style = "text-align: left;">local_filename</th><th style = "text-align: left;">subdirectory</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "String" style = "text-align: left;">String</th><th title = "String" style = "text-align: left;">String</th><th title = "String" style = "text-align: left;">String</th><th title = "String" style = "text-align: left;">String</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: left;">isp24_inputs</td><td style = "text-align: left;">2024 ISP Inputs and Assumptions workbook</td><td style = "text-align: left;">2024-isp-inputs-and-assumptions-workbook.xlsx</td><td style = "text-align: left;"></td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: left;">iasr23_ev_workbook</td><td style = "text-align: left;">2023 IASR EV workbook</td><td style = "text-align: left;">2023-iasr-ev-workbook.xlsx</td><td style = "text-align: left;"></td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">3</td><td style = "text-align: left;">isp24_model</td><td style = "text-align: left;">2024 ISP Model</td><td style = "text-align: left;">2024-isp-model.zip</td><td style = "text-align: left;"></td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">4</td><td style = "text-align: left;">isp24_outlook</td><td style = "text-align: left;">2024 ISP generation and storage outlook</td><td style = "text-align: left;">2024-isp-generation-and-storage-outlook.zip</td><td style = "text-align: left;"></td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">5</td><td style = "text-align: left;">isp19_inputs_v13</td><td style = "text-align: left;">2019 input and assumptions workbook v1.3</td><td style = "text-align: left;">2019-input-and-assumptions-workbook-v1-3-dec-19.xlsx</td><td style = "text-align: left;"></td></tr></tbody></table></div>
-```
+| **key** | **published\_artifact** | **local\_filename** | **subdirectory** |
+|--:|--:|--:|--:|
+| isp24\_inputs | 2024 ISP Inputs and Assumptions workbook | 2024-isp-inputs-and-assumptions-workbook.xlsx |  |
+| iasr23\_ev\_workbook | 2023 IASR EV workbook | 2023-iasr-ev-workbook.xlsx |  |
+| isp24\_model | 2024 ISP Model | 2024-isp-model.zip |  |
+| isp24\_outlook | 2024 ISP generation and storage outlook | 2024-isp-generation-and-storage-outlook.zip |  |
+| isp19\_inputs\_v13 | 2019 input and assumptions workbook v1.3 | 2019-input-and-assumptions-workbook-v1-3-dec-19.xlsx |  |
+
 
 Demand, solar, and wind traces are discovered from the configured ISP publication page and downloaded separately from the fixed reference-file targets.
 
@@ -72,16 +81,17 @@ trace_downloader = DataFrame([
         link_selector = string(PISP.ISPTraceDownloader.TRACE_SELECTOR),
     ),
 ])
-trace_downloader
+markdown_table(trace_downloader)
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>1×3 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">publication_page</th><th style = "text-align: left;">output_directory</th><th style = "text-align: left;">link_selector</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "String" style = "text-align: left;">String</th><th title = "String" style = "text-align: left;">String</th><th title = "String" style = "text-align: left;">String</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: left;">https://www.aemo.com.au/energy-systems/major-publications/integrated-system-plan-isp/2024-integrated-system-plan-isp</td><td style = "text-align: left;">scrapped/ISP_2024_traces</td><td style = "text-align: left;">Cascadia.Selector(Cascadia.var&quot;#descendantSelector##0#descendantSelector##1&quot;{Cascadia.Selector, Cascadia.Selector}(Cascadia.Selector(Cascadia.var&quot;#intersectionSelector##0#intersectionSelector##1&quot;{Cascadia.Selector, Cascadia.Selector}(Cascadia.Selector(Cascadia.var&quot;#typeSelector##0#typeSelector##1&quot;{String}(&quot;div&quot;)), Cascadia.Selector(Cascadia.var&quot;#attributeSelector##0#attributeSelector##1&quot;{Cascadia.var&quot;#attributeIncludesSelector##0#attributeIncludesSelector##1&quot;{String}, String}(Cascadia.var&quot;#attributeIncludesSelector##0#attributeIncludesSelector##1&quot;{String}(&quot;field-link&quot;), &quot;class&quot;)))), Cascadia.Selector(Cascadia.var&quot;#typeSelector##0#typeSelector##1&quot;{String}(&quot;a&quot;))))</td></tr></tbody></table></div>
-```
+| **publication\_page** | **output\_directory** | **link\_selector** |
+|--:|--:|--:|
+| https://www.aemo.com.au/energy-systems/major-publications/integrated-system-plan-isp/2024-integrated-system-plan-isp | scrapped/ISP\_2024\_traces | Cascadia.Selector(Cascadia.var"#descendantSelector##0#descendantSelector##1"{Cascadia.Selector, Cascadia.Selector}(Cascadia.Selector(Cascadia.var"#intersectionSelector##0#intersectionSelector##1"{Cascadia.Selector, Cascadia.Selector}(Cascadia.Selector(Cascadia.var"#typeSelector##0#typeSelector##1"{String}("div")), Cascadia.Selector(Cascadia.var"#attributeSelector##0#attributeSelector##1"{Cascadia.var"#attributeIncludesSelector##0#attributeIncludesSelector##1"{String}, String}(Cascadia.var"#attributeIncludesSelector##0#attributeIncludesSelector##1"{String}("field-link"), "class")))), Cascadia.Selector(Cascadia.var"#typeSelector##0#typeSelector##1"{String}("a")))) |
+
 
 ## Expected build inputs
 
@@ -102,16 +112,25 @@ expected_input_status = DataFrame([
     )
     for (name, path) in pairs(expected_paths)
 ])
-expected_input_status
+markdown_table(expected_input_status)
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>9×4 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">input</th><th style = "text-align: left;">relative_path</th><th style = "text-align: left;">observed_kind</th><th style = "text-align: left;">exists</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "String" style = "text-align: left;">String</th><th title = "String" style = "text-align: left;">String</th><th title = "String" style = "text-align: left;">String</th><th title = "Bool" style = "text-align: left;">Bool</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: left;">ispdata19</td><td style = "text-align: left;">2019-input-and-assumptions-workbook-v1-3-dec-19.xlsx</td><td style = "text-align: left;">file</td><td style = "text-align: right;">true</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: left;">ispdata24</td><td style = "text-align: left;">2024-isp-inputs-and-assumptions-workbook.xlsx</td><td style = "text-align: left;">file</td><td style = "text-align: right;">true</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">3</td><td style = "text-align: left;">iasr23_ev_workbook</td><td style = "text-align: left;">2023-iasr-ev-workbook.xlsx</td><td style = "text-align: left;">file</td><td style = "text-align: right;">true</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">4</td><td style = "text-align: left;">ispmodel</td><td style = "text-align: left;">2024 ISP Model</td><td style = "text-align: left;">directory</td><td style = "text-align: right;">true</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">5</td><td style = "text-align: left;">profiledata</td><td style = "text-align: left;">Traces</td><td style = "text-align: left;">directory</td><td style = "text-align: right;">true</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">6</td><td style = "text-align: left;">outlookdata</td><td style = "text-align: left;">Core</td><td style = "text-align: left;">directory</td><td style = "text-align: right;">true</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">7</td><td style = "text-align: left;">outlookAEMO</td><td style = "text-align: left;">Auxiliary/CapacityOutlook2024_Condensed.xlsx</td><td style = "text-align: left;">file</td><td style = "text-align: right;">true</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">8</td><td style = "text-align: left;">vpp_cap</td><td style = "text-align: left;">Auxiliary/StorageCapacityOutlook_2024_ISP.xlsx</td><td style = "text-align: left;">file</td><td style = "text-align: right;">true</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">9</td><td style = "text-align: left;">vpp_ene</td><td style = "text-align: left;">Auxiliary/StorageEnergyOutlook_2024_ISP.xlsx</td><td style = "text-align: left;">file</td><td style = "text-align: right;">true</td></tr></tbody></table></div>
-```
+| **input** | **relative\_path** | **observed\_kind** | **exists** |
+|--:|--:|--:|--:|
+| ispdata19 | 2019-input-and-assumptions-workbook-v1-3-dec-19.xlsx | file | true |
+| ispdata24 | 2024-isp-inputs-and-assumptions-workbook.xlsx | file | true |
+| iasr23\_ev\_workbook | 2023-iasr-ev-workbook.xlsx | file | true |
+| ispmodel | 2024 ISP Model | directory | true |
+| profiledata | Traces | directory | true |
+| outlookdata | Core | directory | true |
+| outlookAEMO | Auxiliary/CapacityOutlook2024\_Condensed.xlsx | file | true |
+| vpp\_cap | Auxiliary/StorageCapacityOutlook\_2024\_ISP.xlsx | file | true |
+| vpp\_ene | Auxiliary/StorageEnergyOutlook\_2024\_ISP.xlsx | file | true |
+
 
 ## Source roles
 

@@ -18,7 +18,7 @@ const REPO_ROOT = normpath(get(
     joinpath(@__DIR__, "..", "..", ".."),
 ))
 
-include(joinpath(REPO_ROOT, "eda", "eda_support.jl"))
+include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
 using .EdaSupport
 
 EdaSupport.snapshot_metadata_line(REPO_ROOT; context = "2024 ISP Inputs and Assumptions workbook, Build costs sheet")
@@ -30,10 +30,7 @@ const SHEET_NAME = "Build costs"
 abs_path(relative_path) = joinpath(REPO_ROOT, relative_path)  # resolves a DOWNLOADS-relative path to an absolute location for reading
 nothing #hide
 
-# Trim a raw XLSX matrix down to the bounding box of non-missing cells: this
-# workbook's declared sheet dimension carries trailing all-missing rows/columns
-# beyond its real content (this sheet reports max_row 1191 but its last
-# populated row is 223).
+# Trim a raw XLSX matrix down to the bounding box of non-missing cells: this workbook's declared sheet dimension carries trailing all-missing rows/columns beyond its real content (this sheet reports max_row 1191 but its last populated row is 223).
 function trim_sheet(matrix)
     nrows, ncols = size(matrix)
     last_row = 0
@@ -53,24 +50,13 @@ function trim_sheet(matrix)
 end
 nothing #hide
 
-# The sheet keyword-matches "utility-scale solar" to Large scale Solar PV
-# only (not Solar Thermal, a distinct CSP technology), "onshore/offshore
-# wind" to all 3 Wind rows, and "battery storage" to all 4 duration
-# variants. Pumped hydro/BOTN rows are excluded here: they are pumped-hydro
-# storage, the subject of the separate PHES-versus-battery storage
-# characteristics page.
+# The sheet keyword-matches "utility-scale solar" to Large scale Solar PV only (not Solar Thermal, a distinct CSP technology), "onshore/offshore wind" to all 3 Wind rows, and "battery storage" to all 4 duration variants. Pumped hydro/BOTN rows are excluded here: they are pumped-hydro storage, the subject of the separate PHES-versus-battery storage characteristics page.
 const TARGET_KEYWORDS = ["solar pv", "wind", "battery storage"]
 
 is_target_technology(tech) = any(kw -> occursin(kw, lowercase(tech)), TARGET_KEYWORDS)
 nothing #hide
 
-# The sheet lays out one "Build cost by technology ($/kW)" master table: a
-# header row ("Technology", "Scenario", then one column per financial year),
-# followed by 19 technologies x 6 scenarios in 6-row blocks, each block
-# preceded by a repeated copy of the same header row and followed by a blank
-# separator row. This locates that header by literal content rather than a
-# hardcoded row number, since earlier rows on the sheet hold unrelated
-# GenCost-scenario-mapping tables with their own, differently-shaped blocks.
+# The sheet lays out one "Build cost by technology ($/kW)" master table: a header row ("Technology", "Scenario", then one column per financial year), followed by 19 technologies x 6 scenarios in 6-row blocks, each block preceded by a repeated copy of the same header row and followed by a blank separator row. This locates that header by literal content rather than a hardcoded row number, since earlier rows on the sheet hold unrelated GenCost-scenario-mapping tables with their own, differently-shaped blocks.
 function find_master_header_row(matrix)
     nrows = size(matrix, 1)
     for r in 1:nrows
@@ -119,10 +105,7 @@ function build_cost_long_table(matrix, header_row, years, col_indices)
 end
 nothing #hide
 
-# Per (technology, scenario): first/last available projection year and cost,
-# the annualized (CAGR-style) decline rate between them, and the total
-# percentage change -- directly answers whether the rate of decline differs
-# materially by technology.
+# Per (technology, scenario): first/last available projection year and cost, the annualized (CAGR-style) decline rate between them, and the total percentage change -- directly answers whether the rate of decline differs materially by technology.
 function decline_summary(long_table)
     rows = NamedTuple[]
     for key_df in groupby(long_table, [:technology, :scenario])
@@ -188,21 +171,21 @@ technology_match = DataFrame(
     is_target_technology = [is_target_technology(t) ? 1 : 0 for t in all_technologies],
 )
 write_table(technology_match, SCRIPT_STEM, "technology_match")
-technology_match
+markdown_table(technology_match)
 
 #-
 
 target_long = filter(:technology => is_target_technology, long_table)
 write_table(target_long, SCRIPT_STEM, "build_cost_trajectory")
 println("Target-technology long-format rows written as evidence: ", nrow(target_long))
-first(target_long, 8)
+markdown_table(first(target_long, 8))
 
 # ## Step 4 — annualized decline rate by technology and scenario
 
 decline = decline_summary(target_long)
 decline = sort(decline, :annualized_decline_rate_pct)
 write_table(decline, SCRIPT_STEM, "build_cost_decline_summary")
-decline
+markdown_table(decline)
 
 # ## Interpreting the evidence
 #

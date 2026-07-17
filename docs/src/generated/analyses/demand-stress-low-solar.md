@@ -30,7 +30,7 @@ const REPO_ROOT = normpath(get(
     joinpath(@__DIR__, "..", "..", ".."),
 ))
 
-include(joinpath(REPO_ROOT, "eda", "eda_support.jl"))
+include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
 using .EdaSupport
 
 EdaSupport.snapshot_metadata_line(REPO_ROOT; context = "VIC demand schedule from the schedule-2030 generated PISP output; Bannerton 4006 solar reference trace from the 2024 ISP raw trace downloads")
@@ -58,8 +58,7 @@ end
 """
     solar_cf_by_date(df)
 
-Maps each exact calendar date in a composite RefYear4006 trace to its
-half-hourly-mean solar capacity factor for that date.
+Maps each exact calendar date in a composite RefYear4006 trace to its half-hourly-mean solar capacity factor for that date.
 """
 function solar_cf_by_date(df::DataFrame)
     cfs = daily_cf(df, HH_COLS_SOL)
@@ -72,7 +71,7 @@ end
 ```
 
 ````
-Snapshot: PISP.jl commit fb28c62+dirty, generated 2026-07-17 — VIC demand schedule from the schedule-2030 generated PISP output; Bannerton 4006 solar reference trace from the 2024 ISP raw trace downloads
+Snapshot: PISP.jl commit a429ab9+dirty, generated 2026-07-17 — VIC demand schedule from the schedule-2030 generated PISP output; Bannerton 4006 solar reference trace from the 2024 ISP raw trace downloads
 
 ````
 
@@ -91,16 +90,29 @@ println("Found $(length(dem_files)) demand trace files")
 
 demand_trace_inventory = DataFrame(file = dem_files)
 write_table(demand_trace_inventory, SCRIPT_STEM, "demand_trace_inventory")
-demand_trace_inventory
+markdown_table(demand_trace_inventory)
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>13×1 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">file</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "String" style = "text-align: left;">String</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: left;">VIC_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING.csv</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: left;">VIC_RefYear_2012_STEP_CHANGE_POE10_OPSO_MODELLING.csv</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">3</td><td style = "text-align: left;">VIC_RefYear_2013_STEP_CHANGE_POE10_OPSO_MODELLING.csv</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">4</td><td style = "text-align: left;">VIC_RefYear_2014_STEP_CHANGE_POE10_OPSO_MODELLING.csv</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">5</td><td style = "text-align: left;">VIC_RefYear_2015_STEP_CHANGE_POE10_OPSO_MODELLING.csv</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">6</td><td style = "text-align: left;">VIC_RefYear_2016_STEP_CHANGE_POE10_OPSO_MODELLING.csv</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">7</td><td style = "text-align: left;">VIC_RefYear_2017_STEP_CHANGE_POE10_OPSO_MODELLING.csv</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">8</td><td style = "text-align: left;">VIC_RefYear_2018_STEP_CHANGE_POE10_OPSO_MODELLING.csv</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">9</td><td style = "text-align: left;">VIC_RefYear_2019_STEP_CHANGE_POE10_OPSO_MODELLING.csv</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">10</td><td style = "text-align: left;">VIC_RefYear_2020_STEP_CHANGE_POE10_OPSO_MODELLING.csv</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">11</td><td style = "text-align: left;">VIC_RefYear_2021_STEP_CHANGE_POE10_OPSO_MODELLING.csv</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">12</td><td style = "text-align: left;">VIC_RefYear_2022_STEP_CHANGE_POE10_OPSO_MODELLING.csv</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">13</td><td style = "text-align: left;">VIC_RefYear_2023_STEP_CHANGE_POE10_OPSO_MODELLING.csv</td></tr></tbody></table></div>
-```
+| **file** |
+|--:|
+| VIC\_RefYear\_2011\_STEP\_CHANGE\_POE10\_OPSO\_MODELLING.csv |
+| VIC\_RefYear\_2012\_STEP\_CHANGE\_POE10\_OPSO\_MODELLING.csv |
+| VIC\_RefYear\_2013\_STEP\_CHANGE\_POE10\_OPSO\_MODELLING.csv |
+| VIC\_RefYear\_2014\_STEP\_CHANGE\_POE10\_OPSO\_MODELLING.csv |
+| VIC\_RefYear\_2015\_STEP\_CHANGE\_POE10\_OPSO\_MODELLING.csv |
+| VIC\_RefYear\_2016\_STEP\_CHANGE\_POE10\_OPSO\_MODELLING.csv |
+| VIC\_RefYear\_2017\_STEP\_CHANGE\_POE10\_OPSO\_MODELLING.csv |
+| VIC\_RefYear\_2018\_STEP\_CHANGE\_POE10\_OPSO\_MODELLING.csv |
+| VIC\_RefYear\_2019\_STEP\_CHANGE\_POE10\_OPSO\_MODELLING.csv |
+| VIC\_RefYear\_2020\_STEP\_CHANGE\_POE10\_OPSO\_MODELLING.csv |
+| VIC\_RefYear\_2021\_STEP\_CHANGE\_POE10\_OPSO\_MODELLING.csv |
+| VIC\_RefYear\_2022\_STEP\_CHANGE\_POE10\_OPSO\_MODELLING.csv |
+| VIC\_RefYear\_2023\_STEP\_CHANGE\_POE10\_OPSO\_MODELLING.csv |
+
 
 ## Step 2 — load the demand schedule and aggregate daily demand by area
 
@@ -133,16 +145,21 @@ area_demand_summary = combine(
     nrow => :n_days,
 )
 sort!(area_demand_summary, :area)
-area_demand_summary
+markdown_table(area_demand_summary)
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>5×5 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">area</th><th style = "text-align: left;">mean_demand_mw</th><th style = "text-align: left;">min_demand_mw</th><th style = "text-align: left;">max_demand_mw</th><th style = "text-align: left;">n_days</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Int64" style = "text-align: left;">Int64</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1971.82</td><td style = "text-align: right;">1720.08</td><td style = "text-align: right;">2601.81</td><td style = "text-align: right;">365</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: right;">2</td><td style = "text-align: right;">2439.4</td><td style = "text-align: right;">2044.34</td><td style = "text-align: right;">3528.19</td><td style = "text-align: right;">365</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">3</td><td style = "text-align: right;">3</td><td style = "text-align: right;">6295.69</td><td style = "text-align: right;">4727.52</td><td style = "text-align: right;">9789.05</td><td style = "text-align: right;">365</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">4</td><td style = "text-align: right;">4</td><td style = "text-align: right;">1335.16</td><td style = "text-align: right;">1115.71</td><td style = "text-align: right;">1625.82</td><td style = "text-align: right;">365</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">5</td><td style = "text-align: right;">5</td><td style = "text-align: right;">1038.86</td><td style = "text-align: right;">822.857</td><td style = "text-align: right;">1659.72</td><td style = "text-align: right;">365</td></tr></tbody></table></div>
-```
+| **area** | **mean\_demand\_mw** | **min\_demand\_mw** | **max\_demand\_mw** | **n\_days** |
+|--:|--:|--:|--:|--:|
+| 1 | 1971.82 | 1720.08 | 2601.81 | 365 |
+| 2 | 2439.4 | 2044.34 | 3528.19 | 365 |
+| 3 | 6295.69 | 4727.52 | 9789.05 | 365 |
+| 4 | 1335.16 | 1115.71 | 1625.82 | 365 |
+| 5 | 1038.86 | 822.857 | 1659.72 | 365 |
+
 
 ## Step 3 — load the solar 4006 reference traces for candidate VIC solar sites
 
@@ -219,16 +236,17 @@ merged_summary = DataFrame(
     solar_cf_min = isempty(merged.solar_cf) ? missing : minimum(merged.solar_cf),
     solar_cf_max = isempty(merged.solar_cf) ? missing : maximum(merged.solar_cf),
 )
-merged_summary
+markdown_table(merged_summary)
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>1×9 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">matched_days</th><th style = "text-align: left;">date_min</th><th style = "text-align: left;">date_max</th><th style = "text-align: left;">demand_mean_mw</th><th style = "text-align: left;">demand_min_mw</th><th style = "text-align: left;">demand_max_mw</th><th style = "text-align: left;">solar_cf_mean</th><th style = "text-align: left;">solar_cf_min</th><th style = "text-align: left;">solar_cf_max</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Dates.Date" style = "text-align: left;">Date</th><th title = "Dates.Date" style = "text-align: left;">Date</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Float64" style = "text-align: left;">Float64</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: right;">365</td><td style = "text-align: left;">2030-01-01</td><td style = "text-align: left;">2030-12-31</td><td style = "text-align: right;">6295.69</td><td style = "text-align: right;">4727.52</td><td style = "text-align: right;">9789.05</td><td style = "text-align: right;">0.26346</td><td style = "text-align: right;">0.0095789</td><td style = "text-align: right;">0.499403</td></tr></tbody></table></div>
-```
+| **matched\_days** | **date\_min** | **date\_max** | **demand\_mean\_mw** | **demand\_min\_mw** | **demand\_max\_mw** | **solar\_cf\_mean** | **solar\_cf\_min** | **solar\_cf\_max** |
+|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| 365 | 2030-01-01 | 2030-12-31 | 6295.69 | 4727.52 | 9789.05 | 0.26346 | 0.0095789 | 0.499403 |
+
 
 ## Step 6 — high-demand and low-solar threshold screen
 
@@ -255,7 +273,7 @@ if haskey(sol_4006, "Bannerton_SAT")
         total_day_count = nrow(merged),
     )
     write_table(high_demand_low_solar_summary, SCRIPT_STEM, "high_demand_low_solar_summary")
-    high_demand_low_solar_summary
+    markdown_table(high_demand_low_solar_summary)
 end
 ````
 
@@ -263,9 +281,10 @@ end
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>1×6 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">demand_quantile</th><th style = "text-align: left;">solar_quantile</th><th style = "text-align: left;">threshold_demand_mw</th><th style = "text-align: left;">threshold_solar_cf</th><th style = "text-align: left;">bad_day_count</th><th style = "text-align: left;">total_day_count</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: right;">0.9</td><td style = "text-align: right;">0.1</td><td style = "text-align: right;">7139.93</td><td style = "text-align: right;">0.0912422</td><td style = "text-align: right;">3</td><td style = "text-align: right;">365</td></tr></tbody></table></div>
-```
+| **demand\_quantile** | **solar\_quantile** | **threshold\_demand\_mw** | **threshold\_solar\_cf** | **bad\_day\_count** | **total\_day\_count** |
+|--:|--:|--:|--:|--:|--:|
+| 0.9 | 0.1 | 7139.93 | 0.0912422 | 3 | 365 |
+
 
 ## Step 7 — heat-event and normal-day demand thresholds
 
@@ -323,16 +342,40 @@ heat_normal_hourly_profile = DataFrame(
     normal_mean_demand_mw = [get(normal_hourly, h, missing) for h in 0:23],
 )
 write_table(heat_normal_hourly_profile, SCRIPT_STEM, "heat_normal_hourly_profile")
-heat_normal_hourly_profile
+markdown_table(heat_normal_hourly_profile)
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>24×3 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">hour</th><th style = "text-align: left;">heat_mean_demand_mw</th><th style = "text-align: left;">normal_mean_demand_mw</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Float64" style = "text-align: left;">Float64</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: right;">0</td><td style = "text-align: right;">6422.62</td><td style = "text-align: right;">5424.77</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: right;">1</td><td style = "text-align: right;">6301.45</td><td style = "text-align: right;">5226.55</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">3</td><td style = "text-align: right;">2</td><td style = "text-align: right;">5921.9</td><td style = "text-align: right;">4870.9</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">4</td><td style = "text-align: right;">3</td><td style = "text-align: right;">5684.41</td><td style = "text-align: right;">4683.32</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">5</td><td style = "text-align: right;">4</td><td style = "text-align: right;">5686.27</td><td style = "text-align: right;">4705.25</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">6</td><td style = "text-align: right;">5</td><td style = "text-align: right;">6059.81</td><td style = "text-align: right;">5041.43</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">7</td><td style = "text-align: right;">6</td><td style = "text-align: right;">7054.82</td><td style = "text-align: right;">5721.08</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">8</td><td style = "text-align: right;">7</td><td style = "text-align: right;">8047.01</td><td style = "text-align: right;">6217.16</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">9</td><td style = "text-align: right;">8</td><td style = "text-align: right;">8703.03</td><td style = "text-align: right;">6635.65</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">10</td><td style = "text-align: right;">9</td><td style = "text-align: right;">9027.88</td><td style = "text-align: right;">6867.61</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">11</td><td style = "text-align: right;">10</td><td style = "text-align: right;">9138.19</td><td style = "text-align: right;">6982.72</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">12</td><td style = "text-align: right;">11</td><td style = "text-align: right;">9198.58</td><td style = "text-align: right;">7023.56</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">13</td><td style = "text-align: right;">12</td><td style = "text-align: right;">9233.39</td><td style = "text-align: right;">6997.17</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">14</td><td style = "text-align: right;">13</td><td style = "text-align: right;">9248.78</td><td style = "text-align: right;">6933.84</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">15</td><td style = "text-align: right;">14</td><td style = "text-align: right;">9094.69</td><td style = "text-align: right;">6796.92</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">16</td><td style = "text-align: right;">15</td><td style = "text-align: right;">8991.5</td><td style = "text-align: right;">6717.16</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">17</td><td style = "text-align: right;">16</td><td style = "text-align: right;">9076.8</td><td style = "text-align: right;">6708.16</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">18</td><td style = "text-align: right;">17</td><td style = "text-align: right;">9251.63</td><td style = "text-align: right;">6750.31</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">19</td><td style = "text-align: right;">18</td><td style = "text-align: right;">9136.51</td><td style = "text-align: right;">6747.13</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">20</td><td style = "text-align: right;">19</td><td style = "text-align: right;">8749.59</td><td style = "text-align: right;">6628.25</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">21</td><td style = "text-align: right;">20</td><td style = "text-align: right;">8389.32</td><td style = "text-align: right;">6422.13</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">22</td><td style = "text-align: right;">21</td><td style = "text-align: right;">7834.15</td><td style = "text-align: right;">6030.69</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">23</td><td style = "text-align: right;">22</td><td style = "text-align: right;">7209.96</td><td style = "text-align: right;">5690.17</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">24</td><td style = "text-align: right;">23</td><td style = "text-align: right;">6945.96</td><td style = "text-align: right;">5797.04</td></tr></tbody></table></div>
-```
+| **hour** | **heat\_mean\_demand\_mw** | **normal\_mean\_demand\_mw** |
+|--:|--:|--:|
+| 0 | 6422.62 | 5424.77 |
+| 1 | 6301.45 | 5226.55 |
+| 2 | 5921.9 | 4870.9 |
+| 3 | 5684.41 | 4683.32 |
+| 4 | 5686.27 | 4705.25 |
+| 5 | 6059.81 | 5041.43 |
+| 6 | 7054.82 | 5721.08 |
+| 7 | 8047.01 | 6217.16 |
+| 8 | 8703.03 | 6635.65 |
+| 9 | 9027.88 | 6867.61 |
+| 10 | 9138.19 | 6982.72 |
+| 11 | 9198.58 | 7023.56 |
+| 12 | 9233.39 | 6997.17 |
+| 13 | 9248.78 | 6933.84 |
+| 14 | 9094.69 | 6796.92 |
+| 15 | 8991.5 | 6717.16 |
+| 16 | 9076.8 | 6708.16 |
+| 17 | 9251.63 | 6750.31 |
+| 18 | 9136.51 | 6747.13 |
+| 19 | 8749.59 | 6628.25 |
+| 20 | 8389.32 | 6422.13 |
+| 21 | 7834.15 | 6030.69 |
+| 22 | 7209.96 | 5690.17 |
+| 23 | 6945.96 | 5797.04 |
+
 
 ## Step 9 — demand duration curve
 
@@ -359,16 +402,23 @@ duration_curve_quantile_marks = DataFrame(
         minimum(vic_daily.demand),
     ],
 )
-duration_curve_quantile_marks
+markdown_table(duration_curve_quantile_marks)
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>7×2 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">quantile_label</th><th style = "text-align: left;">demand_mw</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "String" style = "text-align: left;">String</th><th title = "Float64" style = "text-align: left;">Float64</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: left;">max</td><td style = "text-align: right;">9789.05</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: left;">p95</td><td style = "text-align: right;">7277.23</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">3</td><td style = "text-align: left;">p90</td><td style = "text-align: right;">7139.93</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">4</td><td style = "text-align: left;">p75</td><td style = "text-align: right;">6752.21</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">5</td><td style = "text-align: left;">median</td><td style = "text-align: right;">6191.03</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">6</td><td style = "text-align: left;">p25</td><td style = "text-align: right;">5908.9</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">7</td><td style = "text-align: left;">min</td><td style = "text-align: right;">4727.52</td></tr></tbody></table></div>
-```
+| **quantile\_label** | **demand\_mw** |
+|--:|--:|
+| max | 9789.05 |
+| p95 | 7277.23 |
+| p90 | 7139.93 |
+| p75 | 6752.21 |
+| median | 6191.03 |
+| p25 | 5908.9 |
+| min | 4727.52 |
+
 
 ## Step 10 — normalized VRE vs demand summary, sorted by demand
 
@@ -392,7 +442,7 @@ if nrow(merged) > 0
         day_count = nrow(normalized_vre_demand_summary),
         demand_solar_correlation = cor(normalized_vre_demand_summary.demand_norm, normalized_vre_demand_summary.solar_norm),
     )
-    normalized_demand_solar_correlation
+    markdown_table(normalized_demand_solar_correlation)
 end
 ````
 
@@ -400,9 +450,10 @@ end
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>1×2 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">day_count</th><th style = "text-align: left;">demand_solar_correlation</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Float64" style = "text-align: left;">Float64</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: right;">365</td><td style = "text-align: right;">-0.257949</td></tr></tbody></table></div>
-```
+| **day\_count** | **demand\_solar\_correlation** |
+|--:|--:|
+| 365 | -0.257949 |
+
 
 ## Step 11 — key summary statistics
 
@@ -464,7 +515,7 @@ if haskey(sol_4006, "Bannerton_SAT")
         mean_solar_cf_top10 = fill(mean_cf, length(hot_day_cfs)),
     )
     write_table(hot_day_solar_cf_detail, SCRIPT_STEM, "hot_day_solar_cf_detail")
-    hot_day_solar_cf_detail
+    markdown_table(hot_day_solar_cf_detail)
 end
 ````
 
@@ -472,9 +523,19 @@ end
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>10×4 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">rank</th><th style = "text-align: left;">date</th><th style = "text-align: left;">solar_cf</th><th style = "text-align: left;">mean_solar_cf_top10</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Dates.Date" style = "text-align: left;">Date</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Float64" style = "text-align: left;">Float64</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: left;">2030-01-02</td><td style = "text-align: right;">0.483717</td><td style = "text-align: right;">0.294279</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: right;">2</td><td style = "text-align: left;">2030-01-09</td><td style = "text-align: right;">0.483717</td><td style = "text-align: right;">0.294279</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">3</td><td style = "text-align: right;">3</td><td style = "text-align: left;">2030-01-24</td><td style = "text-align: right;">0.47003</td><td style = "text-align: right;">0.294279</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">4</td><td style = "text-align: right;">4</td><td style = "text-align: left;">2030-02-13</td><td style = "text-align: right;">0.42786</td><td style = "text-align: right;">0.294279</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">5</td><td style = "text-align: right;">5</td><td style = "text-align: left;">2030-05-15</td><td style = "text-align: right;">0.217938</td><td style = "text-align: right;">0.294279</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">6</td><td style = "text-align: right;">6</td><td style = "text-align: left;">2030-06-03</td><td style = "text-align: right;">0.211081</td><td style = "text-align: right;">0.294279</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">7</td><td style = "text-align: right;">7</td><td style = "text-align: left;">2030-06-04</td><td style = "text-align: right;">0.148711</td><td style = "text-align: right;">0.294279</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">8</td><td style = "text-align: right;">8</td><td style = "text-align: left;">2030-06-05</td><td style = "text-align: right;">0.186725</td><td style = "text-align: right;">0.294279</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">9</td><td style = "text-align: right;">9</td><td style = "text-align: left;">2030-06-06</td><td style = "text-align: right;">0.140501</td><td style = "text-align: right;">0.294279</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">10</td><td style = "text-align: right;">10</td><td style = "text-align: left;">2030-06-14</td><td style = "text-align: right;">0.172506</td><td style = "text-align: right;">0.294279</td></tr></tbody></table></div>
-```
+| **rank** | **date** | **solar\_cf** | **mean\_solar\_cf\_top10** |
+|--:|--:|--:|--:|
+| 1 | 2030-01-02 | 0.483717 | 0.294279 |
+| 2 | 2030-01-09 | 0.483717 | 0.294279 |
+| 3 | 2030-01-24 | 0.47003 | 0.294279 |
+| 4 | 2030-02-13 | 0.42786 | 0.294279 |
+| 5 | 2030-05-15 | 0.217938 | 0.294279 |
+| 6 | 2030-06-03 | 0.211081 | 0.294279 |
+| 7 | 2030-06-04 | 0.148711 | 0.294279 |
+| 8 | 2030-06-05 | 0.186725 | 0.294279 |
+| 9 | 2030-06-06 | 0.140501 | 0.294279 |
+| 10 | 2030-06-14 | 0.172506 | 0.294279 |
+
 
 ## Step 13 — demand heat event summary
 
@@ -497,16 +558,17 @@ demand_heat_event_summary = DataFrame(
     mean_demand_mw = mean(vic_daily.demand),
 )
 write_table(demand_heat_event_summary, SCRIPT_STEM, "demand_heat_event_summary")
-demand_heat_event_summary
+markdown_table(demand_heat_event_summary)
 ````
 
 ```@raw html
 </details>
 ```
 
-```@raw html
-<div><div style = "float: left;"><span>1×9 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">total_days</th><th style = "text-align: left;">demand_p90_mw</th><th style = "text-align: left;">demand_p95_mw</th><th style = "text-align: left;">heat_day_count</th><th style = "text-align: left;">normal_day_count</th><th style = "text-align: left;">heat_event_pct</th><th style = "text-align: left;">peak_demand_mw</th><th style = "text-align: left;">peak_date</th><th style = "text-align: left;">mean_demand_mw</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Float64" style = "text-align: left;">Float64</th><th title = "Dates.Date" style = "text-align: left;">Date</th><th title = "Float64" style = "text-align: left;">Float64</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: right;">365</td><td style = "text-align: right;">7139.93</td><td style = "text-align: right;">7277.23</td><td style = "text-align: right;">19</td><td style = "text-align: right;">328</td><td style = "text-align: right;">5.20548</td><td style = "text-align: right;">9789.05</td><td style = "text-align: left;">2030-01-09</td><td style = "text-align: right;">6295.69</td></tr></tbody></table></div>
-```
+| **total\_days** | **demand\_p90\_mw** | **demand\_p95\_mw** | **heat\_day\_count** | **normal\_day\_count** | **heat\_event\_pct** | **peak\_demand\_mw** | **peak\_date** | **mean\_demand\_mw** |
+|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| 365 | 7139.93 | 7277.23 | 19 | 328 | 5.20548 | 9789.05 | 2030-01-09 | 6295.69 |
+
 
 ## Step 14 — figure: VIC demand and solar CF time series
 

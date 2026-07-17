@@ -11,6 +11,10 @@ const REPO_ROOT = normpath(get(
     joinpath(@__DIR__, "..", "..", ".."),
 ))
 const INPUT_ROOT = normpath(get(ENV, "PISP_DATA_ROOT", joinpath(REPO_ROOT, "data", "2024", "pisp-downloads")))
+
+include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
+using .EdaSupport
+
 replace(relpath(INPUT_ROOT, REPO_ROOT), '\\' => '/')
 
 # ## Configured reference-file downloads
@@ -24,7 +28,7 @@ configured_downloads = DataFrame(
     local_filename = [something(target.filename, "derived from URL") for target in targets],
     subdirectory = [something(target.subdir, "") for target in targets],
 )
-configured_downloads
+markdown_table(configured_downloads)
 
 # Demand, solar, and wind traces are discovered from the configured ISP publication page and downloaded separately from the fixed reference-file targets.
 
@@ -35,7 +39,7 @@ trace_downloader = DataFrame([
         link_selector = string(PISP.ISPTraceDownloader.TRACE_SELECTOR),
     ),
 ])
-trace_downloader
+markdown_table(trace_downloader)
 
 # ## Expected build inputs
 #
@@ -51,7 +55,7 @@ expected_input_status = DataFrame([
     )
     for (name, path) in pairs(expected_paths)
 ])
-expected_input_status
+markdown_table(expected_input_status)
 
 # ## Source roles
 #

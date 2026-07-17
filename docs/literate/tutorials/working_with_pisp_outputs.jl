@@ -26,6 +26,9 @@ const DATA_ROOT = normpath(get(
 const SCHEDULE_TAG = get(ENV, "PISP_SCHEDULE_TAG", "schedule-2030")
 const SCHEDULE_DIR = joinpath(DATA_ROOT, SCHEDULE_TAG)
 
+include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
+using .EdaSupport
+
 required_files = [
     joinpath(DATA_ROOT, "Generator.csv"),
     joinpath(DATA_ROOT, "Demand.csv"),
@@ -51,10 +54,12 @@ println("Columns: ", names(gen_df))
 # Fuel and technology counts show the asset mix represented in the generated output.
 
 fuel_counts = sort(combine(groupby(gen_df, :fuel), nrow => :count), :count; rev = true)
+markdown_table(fuel_counts)
 
 #-
 
 tech_counts = sort(combine(groupby(gen_df, :tech), nrow => :count), :count; rev = true)
+markdown_table(tech_counts)
 
 # ## Step 2 — load the schedule output
 #
@@ -71,7 +76,7 @@ println("Columns: ", names(gen_pmax))
 
 #-
 
-first(gen_pmax, 5)
+markdown_table(first(gen_pmax, 5))
 
 #-
 
@@ -80,7 +85,7 @@ println("Shape: ", size(dem_load))
 
 #-
 
-first(dem_load, 5)
+markdown_table(first(dem_load, 5))
 
 # ## Step 3 — map generators to buses and identify solar/wind generators
 #
@@ -105,12 +110,14 @@ println("Wind generators: ", nrow(wind_gens))
 solar_tech_counts = sort(
     combine(groupby(solar_gens, :tech), nrow => :count), :count; rev = true,
 )
+markdown_table(solar_tech_counts)
 
 #-
 
 wind_tech_counts = sort(
     combine(groupby(wind_gens, :tech), nrow => :count), :count; rev = true,
 )
+markdown_table(wind_tech_counts)
 
 # ## Step 4 — prepare daily aggregate series
 #
