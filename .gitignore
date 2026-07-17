@@ -17,6 +17,8 @@ out/
 out-*/
 test/
 test-*/
+!docs/test/
+!docs/test/**
 !data-updated/
 !data-updated/**
 *.zip

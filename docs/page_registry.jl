@@ -2,16 +2,35 @@ module PISPDocsPageRegistry
 
 using TOML
 
-export PageSpec, load_page_registry
+export DataRequirement,
+    PageSpec,
+    is_draft,
+    is_published,
+    is_renderable,
+    load_page_registry,
+    validate_data_requirements
 
 const VALID_KINDS = Set(["reference", "tutorial", "validation", "analysis"])
 const VALID_DATA_LAYERS = Set(["package-workflow", "source-data", "pisp-dataset", "cross-layer"])
 const VALID_STATUSES = Set(["draft", "published", "archived"])
+const VALID_TRACKS = Set(["shared", "isp2024", "isp2026", "comparison"])
+const VALID_EDITIONS = Set(["2024", "2026"])
+const VALID_REQUIREMENT_ROOTS = Set(["repo", "download", "output"])
+const VALID_REQUIREMENT_TYPES = Set(["file", "directory", "path"])
+
+struct DataRequirement
+    root::String
+    edition::Union{Nothing, String}
+    path::String
+    type::String
+end
 
 Base.@kwdef struct PageSpec
     id::String
     title::String
     kind::String
+    track::String
+    editions::Vector{String}
     data_layer::String
     source::String
     output::String
@@ -20,10 +39,14 @@ Base.@kwdef struct PageSpec
     snapshot::Bool
     evidence_dir::Union{Nothing, String} = nothing
     producer::Union{Nothing, String} = nothing
-    data_requirements::Vector{String} = String[]
+    data_requirements::Vector{DataRequirement} = DataRequirement[]
     related_reference_pages::Vector{String} = String[]
     notes::Union{Nothing, String} = nothing
 end
+
+is_published(page::PageSpec) = page.status == "published"
+is_draft(page::PageSpec) = page.status == "draft"
+is_renderable(page::PageSpec) = is_published(page) || is_draft(page)
 
 function required_string(entry, key, page_number)
     value = get(entry, key, nothing)
@@ -57,10 +80,82 @@ function relative_path(value, field, page_id)
     return normalized
 end
 
+function validate_track_editions(track, editions, page_id)
+    track in VALID_TRACKS || error("page \"$page_id\" has unsupported track \"$track\"")
+    length(editions) == length(unique(editions)) ||
+        error("page \"$page_id\" has duplicate editions")
+    all(edition -> edition in VALID_EDITIONS, editions) ||
+        error("page \"$page_id\" has an unknown edition")
+
+    if track == "isp2024"
+        editions == ["2024"] || error("page \"$page_id\" in track isp2024 must use editions = [\"2024\"]")
+    elseif track == "isp2026"
+        editions == ["2026"] || error("page \"$page_id\" in track isp2026 must use editions = [\"2026\"]")
+    elseif track == "comparison"
+        length(editions) >= 2 ||
+            error("page \"$page_id\" in track comparison must declare at least two editions")
+    end
+end
+
+function parse_data_requirement(entry, page_id, requirement_number, page_editions)
+    entry isa AbstractDict || error(
+        "page \"$page_id\" data requirement $requirement_number must be an inline table",
+    )
+
+    root = required_string(entry, "root", "\"$page_id\" data requirement $requirement_number")
+    path = relative_path(
+        required_string(entry, "path", "\"$page_id\" data requirement $requirement_number"),
+        "data_requirements.path",
+        page_id,
+    )
+    requirement_type = required_string(
+        entry,
+        "type",
+        "\"$page_id\" data requirement $requirement_number",
+    )
+    root in VALID_REQUIREMENT_ROOTS || error(
+        "page \"$page_id\" data requirement $requirement_number has unsupported root \"$root\"",
+    )
+    requirement_type in VALID_REQUIREMENT_TYPES || error(
+        "page \"$page_id\" data requirement $requirement_number has unsupported type \"$requirement_type\"",
+    )
+
+    edition = get(entry, "edition", nothing)
+    if root == "repo"
+        edition === nothing || error(
+            "page \"$page_id\" data requirement $requirement_number may not set edition for root repo",
+        )
+    else
+        edition isa String && !isempty(strip(edition)) || error(
+            "page \"$page_id\" data requirement $requirement_number requires an edition for root $root",
+        )
+        edition in VALID_EDITIONS || error(
+            "page \"$page_id\" data requirement $requirement_number has unknown edition \"$edition\"",
+        )
+        edition in page_editions || error(
+            "page \"$page_id\" data requirement $requirement_number uses edition \"$edition\" outside the page edition scope",
+        )
+    end
+
+    return DataRequirement(root, edition, path, requirement_type)
+end
+
+function parse_data_requirements(entry, page_id, page_number, page_editions)
+    requirements = get(entry, "data_requirements", Any[])
+    requirements isa AbstractVector ||
+        error("page $page_number field \"data_requirements\" must be an array")
+    return [
+        parse_data_requirement(requirement, page_id, requirement_number, page_editions)
+        for (requirement_number, requirement) in enumerate(requirements)
+    ]
+end
+
 function parse_page(entry, page_number)
     id = required_string(entry, "id", page_number)
     title = required_string(entry, "title", page_number)
     kind = required_string(entry, "kind", page_number)
+    track = required_string(entry, "track", page_number)
+    editions = string_vector(entry, "editions", page_number)
     data_layer = required_string(entry, "data_layer", page_number)
     source = relative_path(required_string(entry, "source", page_number), "source", id)
     output = relative_path(required_string(entry, "output", page_number), "output", id)
@@ -69,6 +164,7 @@ function parse_page(entry, page_number)
     kind in VALID_KINDS || error("page \"$id\" has unsupported kind \"$kind\"")
     data_layer in VALID_DATA_LAYERS || error("page \"$id\" has unsupported data_layer \"$data_layer\"")
     status in VALID_STATUSES || error("page \"$id\" has unsupported status \"$status\"")
+    validate_track_editions(track, editions, id)
     startswith(source, "literate/") || error("page \"$id\" source must be under docs/literate/")
     endswith(source, ".jl") || error("page \"$id\" source must be a Julia Literate file")
     endswith(output, ".md") || error("page \"$id\" output must be Markdown")
@@ -88,11 +184,6 @@ function parse_page(entry, page_number)
     evidence_dir !== nothing && producer === nothing &&
         error("page \"$id\" requires a producer when evidence_dir is set")
 
-    data_requirements = [
-        relative_path(path, "data_requirements", id)
-        for path in string_vector(entry, "data_requirements", page_number)
-    ]
-
     related_reference_pages = [
         relative_path(path, "related_reference_pages", id)
         for path in string_vector(entry, "related_reference_pages", page_number)
@@ -102,6 +193,8 @@ function parse_page(entry, page_number)
         id = id,
         title = title,
         kind = kind,
+        track = track,
+        editions = editions,
         data_layer = data_layer,
         source = source,
         output = output,
@@ -110,7 +203,7 @@ function parse_page(entry, page_number)
         snapshot = snapshot,
         evidence_dir = evidence_dir,
         producer = producer,
-        data_requirements = data_requirements,
+        data_requirements = parse_data_requirements(entry, id, page_number, editions),
         related_reference_pages = related_reference_pages,
         notes = optional_string(entry, "notes", page_number),
     )
@@ -126,12 +219,12 @@ function reject_duplicates(pages, field, label)
 end
 
 function validate_navigation_positions(pages)
-    seen = Dict{Tuple{String, Int}, String}()
+    seen = Dict{Tuple{String, String, Int}, String}()
     for page in pages
-        page.status == "archived" && continue
-        key = (page.kind, page.nav_order)
+        is_renderable(page) || continue
+        key = (page.track, page.kind, page.nav_order)
         haskey(seen, key) && error(
-            "duplicate navigation position $(page.nav_order) in $(page.kind) pages " *
+            "duplicate navigation position $(page.nav_order) in $(page.track)/$(page.kind) pages " *
             "\"$(seen[key])\" and \"$(page.id)\"",
         )
         seen[key] = page.id
@@ -165,9 +258,9 @@ function validate_files(
             )
         end
 
-        if require_published_outputs && page.status != "archived"
+        if require_published_outputs && is_published(page)
             output_path = joinpath(src_root, page.output)
-            isfile(output_path) || error("active page \"$(page.id)\" output does not exist: $output_path")
+            isfile(output_path) || error("published page \"$(page.id)\" output does not exist: $output_path")
         end
     end
 
@@ -203,6 +296,47 @@ function validate_files(
             "generated Markdown without a page-registry entry: $(join(orphan_generated_outputs, ", "))",
         )
     end
+end
+
+function resolve_requirement_path(requirement; repo_root, profile_for)
+    root = if requirement.root == "repo"
+        repo_root
+    else
+        profile = profile_for(requirement.edition)
+        candidate = requirement.root == "download" ?
+            getproperty(profile, :download_root) : getproperty(profile, :output_root)
+        candidate === nothing && error(
+            "edition $(requirement.edition) does not define a $(requirement.root) root for requirement $(requirement.path)",
+        )
+        candidate
+    end
+
+    resolved = normpath(joinpath(root, requirement.path))
+    containment = replace(relpath(resolved, root), '\\' => '/')
+    any(part -> part == "..", splitpath(containment)) && error(
+        "data requirement path escapes its configured root: $(requirement.path)",
+    )
+    return resolved
+end
+
+function validate_data_requirements(page; repo_root, profile_for)
+    resolved_paths = String[]
+    for requirement in page.data_requirements
+        resolved = resolve_requirement_path(requirement; repo_root, profile_for)
+        exists = if requirement.type == "file"
+            isfile(resolved)
+        elseif requirement.type == "directory"
+            isdir(resolved)
+        else
+            ispath(resolved)
+        end
+        exists || error(
+            "page \"$(page.id)\" requires $(requirement.type) at \"$resolved\" " *
+            "(root=$(requirement.root), edition=$(something(requirement.edition, "none")))",
+        )
+        push!(resolved_paths, resolved)
+    end
+    return resolved_paths
 end
 
 function load_page_registry(

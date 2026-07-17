@@ -6,12 +6,14 @@
 using Literate
 
 include(joinpath(@__DIR__, "page_registry.jl"))
-using .PISPDocsPageRegistry
+include(joinpath(@__DIR__, "edition_profiles.jl"))
 
 const DOCS_DIR = @__DIR__
 const SRC_DIR = joinpath(DOCS_DIR, "src")
 const REPO_ROOT = normpath(joinpath(DOCS_DIR, ".."))
 const REGISTRY_PATH = joinpath(DOCS_DIR, "page-registry.toml")
+const TRACK_ORDER = Dict("shared" => 1, "isp2024" => 2, "isp2026" => 3, "comparison" => 4)
+const KIND_ORDER = Dict("reference" => 1, "tutorial" => 2, "validation" => 3, "analysis" => 4)
 
 function env_flag(name, default)
     value = lowercase(strip(get(ENV, name, default ? "true" : "false")))
@@ -22,33 +24,115 @@ end
 
 function select_pages(registry_pages)
     explicit_ids = strip(get(ENV, "PISP_LITERATE_PAGES", ""))
+    source_set = lowercase(strip(get(ENV, "PISP_LITERATE_SET", "published")))
+    requested_track = lowercase(strip(get(ENV, "PISP_DOCS_TRACK", "")))
+
     if !isempty(explicit_ids)
+        source_set == "published" || error(
+            "PISP_LITERATE_PAGES cannot be combined with PISP_LITERATE_SET=$source_set; " *
+            "use the default published set when selecting explicit page IDs",
+        )
+        isempty(requested_track) || error(
+            "PISP_LITERATE_PAGES cannot be combined with PISP_DOCS_TRACK=$requested_track",
+        )
         requested_ids = String.(filter(id -> !isempty(id), strip.(split(explicit_ids, ","))))
+        isempty(requested_ids) && error("PISP_LITERATE_PAGES must name at least one page ID")
         length(requested_ids) == length(unique(requested_ids)) ||
             error("PISP_LITERATE_PAGES contains duplicate page IDs")
 
         pages_by_id = Dict(page.id => page for page in registry_pages)
         unknown_ids = filter(id -> !haskey(pages_by_id, id), requested_ids)
         isempty(unknown_ids) || error("unknown page IDs in PISP_LITERATE_PAGES: $(join(unknown_ids, ", "))")
-        return [pages_by_id[id] for id in requested_ids]
+        selected = [pages_by_id[id] for id in requested_ids]
+        archived_ids = [
+            page.id for page in selected if !PISPDocsPageRegistry.is_renderable(page)
+        ]
+        isempty(archived_ids) || error("PISP_LITERATE_PAGES cannot render archived page IDs: $(join(archived_ids, ", "))")
+        return sort(selected; by = page -> (TRACK_ORDER[page.track], KIND_ORDER[page.kind], page.nav_order, page.id))
     end
 
-    source_set = lowercase(strip(get(ENV, "PISP_LITERATE_SET", "all")))
     selected = if source_set == "published"
-        filter(page -> page.status == "published", registry_pages)
+        filter(PISPDocsPageRegistry.is_published, registry_pages)
     elseif source_set == "draft" || source_set == "eda-drafts"
-        filter(page -> page.status == "draft", registry_pages)
+        filter(PISPDocsPageRegistry.is_draft, registry_pages)
     elseif source_set == "all"
-        filter(page -> page.status != "archived", registry_pages)
+        filter(PISPDocsPageRegistry.is_renderable, registry_pages)
     else
         error(
             "unsupported PISP_LITERATE_SET=\"$source_set\"; " *
-            "use \"published\", \"draft\" (or legacy \"eda-drafts\"), or \"all\", or set PISP_LITERATE_PAGES",
+            "use \"published\", \"draft\", or \"all\", or set PISP_LITERATE_PAGES",
         )
     end
 
-    kind_order = Dict("reference" => 1, "tutorial" => 2, "validation" => 3, "analysis" => 4)
-    return sort(selected; by = page -> (kind_order[page.kind], page.nav_order, page.id))
+    if !isempty(requested_track)
+        requested_track in keys(TRACK_ORDER) || error(
+            "unsupported PISP_DOCS_TRACK=\"$requested_track\"; " *
+            "use \"shared\", \"isp2024\", \"isp2026\", or \"comparison\"",
+        )
+        selected = filter(page -> page.track == requested_track, selected)
+    end
+
+    isempty(selected) && error(
+        "no renderable pages matched PISP_LITERATE_SET=$source_set and " *
+        "PISP_DOCS_TRACK=$(isempty(requested_track) ? "all" : requested_track)",
+    )
+    return sort(selected; by = page -> (TRACK_ORDER[page.track], KIND_ORDER[page.kind], page.nav_order, page.id))
+end
+
+function profile_lookup()
+    profiles = PISPDocsEditionProfiles.edition_profiles(REPO_ROOT)
+    return Dict(profile.edition => profile for profile in profiles)
+end
+
+function profile_for(profiles, edition)
+    haskey(profiles, edition) || error("no documentation profile exists for edition $edition")
+    return profiles[edition]
+end
+
+function requirement_root(requirement, profiles)
+    requirement.root == "repo" && return REPO_ROOT
+    profile = profile_for(profiles, requirement.edition)
+    root = requirement.root == "download" ? profile.download_root : profile.output_root
+    root === nothing && error(
+        "edition $(requirement.edition) does not define a $(requirement.root) root for requirement $(requirement.path)",
+    )
+    return root
+end
+
+function print_render_plan(pages, profiles)
+    println("Selected Literate pages:")
+    for page in pages
+        editions = isempty(page.editions) ? "none" : join(page.editions, ", ")
+        println("  - $(page.id) [track=$(page.track), editions=$editions]")
+    end
+
+    selected_editions = sort!(unique(vcat([page.editions for page in pages]...)))
+    println("Resolved edition profiles:")
+    if isempty(selected_editions)
+        println("  - none")
+    else
+        for edition in selected_editions
+            profile = profile_for(profiles, edition)
+            output_root = something(profile.output_root, "not configured")
+            schedule_tag = something(profile.schedule_tag, "not configured")
+            println("  - $(profile.label): download=$(profile.download_root)")
+            println("    output=$output_root; schedule=$schedule_tag")
+        end
+    end
+
+    println("Structured data requirements:")
+    requirements_found = false
+    for page in pages
+        for requirement in page.data_requirements
+            requirements_found = true
+            root = requirement_root(requirement, profiles)
+            resolved = normpath(joinpath(root, requirement.path))
+            edition = something(requirement.edition, "none")
+            println("  - $(page.id): root=$(requirement.root), edition=$edition, " *
+                    "type=$(requirement.type), path=$resolved")
+        end
+    end
+    requirements_found || println("  - none")
 end
 
 function selected_producers(pages)
@@ -158,10 +242,14 @@ function validate_render_preconditions(page)
         )
     end
 
-    for requirement in page.data_requirements
-        requirement_path = joinpath(REPO_ROOT, requirement)
-        ispath(requirement_path) || error(
-            "page \"$(page.id)\" requires local data at \"$requirement_path\"",
+end
+
+function validate_selected_requirements(pages, profiles)
+    for page in pages
+        PISPDocsPageRegistry.validate_data_requirements(
+            page;
+            repo_root = REPO_ROOT,
+            profile_for = edition -> profile_for(profiles, edition),
         )
     end
 end
@@ -292,7 +380,7 @@ function discard_generated_backup(backup_root)
     ispath(backup_root) && rm(backup_root; recursive = true, force = true)
 end
 
-function render_all_active(pages)
+function render_all_published(pages)
     generated_root = joinpath(SRC_DIR, "generated")
     had_existing_tree = isdir(generated_root)
 
@@ -306,7 +394,10 @@ function render_all_active(pages)
 
             backup_root = install_generated_tree(staged_src_dir)
             try
-                load_page_registry(REGISTRY_PATH; require_published_outputs = true)
+                PISPDocsPageRegistry.load_page_registry(
+                    REGISTRY_PATH;
+                    require_published_outputs = true,
+                )
             catch
                 rollback_generated_tree(backup_root)
                 rethrow()
@@ -326,17 +417,26 @@ function render_all_active(pages)
 end
 
 function main()
-    registry_pages = load_page_registry(REGISTRY_PATH; check_generated_outputs = false)
+    registry_pages = PISPDocsPageRegistry.load_page_registry(
+        REGISTRY_PATH;
+        check_generated_outputs = false,
+    )
     selected_pages = select_pages(registry_pages)
-    isempty(selected_pages) && error("no Literate pages matched the requested selection")
+    profiles = profile_lookup()
+    print_render_plan(selected_pages, profiles)
+    validate_selected_requirements(selected_pages, profiles)
 
-    rendering_all_active = length(selected_pages) == count(page -> page.status != "archived", registry_pages)
+    published_ids = Set(
+        page.id for page in registry_pages if PISPDocsPageRegistry.is_published(page)
+    )
+    selected_ids = Set(page.id for page in selected_pages)
+    rendering_all_published = selected_ids == published_ids
     try
         run_selected_producers(selected_pages)
 
-        if rendering_all_active
-            render_all_active(selected_pages)
-            println("Validated all active generated outputs against the page registry.")
+        if rendering_all_published
+            render_all_published(selected_pages)
+            println("Validated all published generated outputs against the page registry.")
         else
             for page in selected_pages
                 render_page(page)
@@ -344,7 +444,7 @@ function main()
         end
     catch
         println(stderr, "\nERROR: Documentation regeneration stopped.")
-        if rendering_all_active
+        if rendering_all_published
             generated_root = joinpath(SRC_DIR, "generated")
             if isdir(generated_root)
                 println(stderr, "The installed docs/src/generated/ tree was not replaced by the failed complete render.")
@@ -359,4 +459,6 @@ function main()
     end
 end
 
-main()
+if abspath(PROGRAM_FILE) == @__FILE__
+    main()
+end

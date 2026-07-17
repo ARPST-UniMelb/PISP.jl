@@ -3,19 +3,27 @@
 AEMO publishes the Integrated System Plan as a collection of workbooks, model archives, outlook files, and time-series traces.
 Using those materials in a power-system study requires more than downloading them: scenario labels must be reconciled, assets must be assigned to a common network representation, financial-year conventions must be handled, and time-varying traces must remain linked to the static assets they describe.
 
-PISP.jl performs that data-preparation work for the 2024 Integrated System Plan.
-It converts the published material and package-defined mappings into a consistent set of power-system tables that downstream modelling tools can consume.
+PISP.jl implements that data-preparation work for the 2024 Integrated System Plan.
+It converts supported 2024 material and package-defined mappings into a consistent set of power-system tables that downstream modelling tools can consume.
+PISP also downloads selected ISP 2026 source assets and report PDFs, but it does not parse those materials or build a 2026 dataset.
 PISP is a dataset builder, not a dispatch, unit-commitment, capacity-expansion, or power-flow model.
 
-## AEMO source context
+## Choose an entry point
+
+- [Supported ISP editions](editions/supported-editions.md) is the support authority for acquisition, parsing, build, output, validation, and analysis boundaries.
+- [ISP 2024](editions/isp2024.md) leads to the implemented source, build, output, validation, and analysis documentation.
+- [ISP 2026](editions/isp2026.md) defines the available source-acquisition support and its limits.
+- [Compare ISP 2024 and ISP 2026](editions/comparison.md) describes the evidence and crosswalks required before comparing releases.
+
+## ISP 2024 source context
 
 AEMO describes the ISP as a collection of supporting materials, including workbooks, outlook material, traces, and appendices ([2024 Integrated System Plan, p. 92](../../data/2024/pisp-reports/2024-integrated-system-plan.pdf#page=92)).
 The public market-model package includes PLEXOS model instructions ([2024 ISP PLEXOS Model Instructions, p. 2](../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=2)) and scenario-specific model data ([2024 ISP PLEXOS Model Instructions, p. 5](../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=5)).
 The source documents define reference-trace and network conventions ([2024 ISP PLEXOS Model Instructions, pp. 5–7](../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=5); [2023 Inputs, Assumptions and Scenarios Report, p. 141](../../data/2024/pisp-reports/2023-inputs-assumptions-and-scenarios-report.pdf#page=141)) and capacity-outlook probability-of-exceedance profiles ([ISP Methodology, p. 39](../../data/2024/pisp-reports/2023-isp-methodology.pdf#page=39)).
 
-## What becomes available
+## ISP 2024 output model
 
-A PISP build produces three connected forms of information:
+An ISP 2024 PISP build produces three connected forms of information:
 
 | Dataset layer | What it provides | Typical use |
 |---|---|---|
@@ -25,23 +33,23 @@ A PISP build produces three connected forms of information:
 
 The static tables and schedules form one dataset model.
 A schedule should be joined to its corresponding static table rather than interpreted as an independent asset inventory.
-See [Domain concepts](@ref) for the relationships and [Output tables](@ref) for the exported files.
+See [Domain concepts](concepts.md) for the relationships and [ISP 2024 output tables](generated/isp2024/reference/output-tables.md) for the exported files.
 
 ## Who the package is for
 
-PISP is intended for researchers and model developers who need a structured NEM planning dataset before running a downstream optimisation, simulation, or reliability workflow.
+PISP is intended for researchers and model developers who need a structured ISP 2024 NEM planning dataset before running a downstream optimisation, simulation, or reliability workflow.
 It is particularly useful when a study needs to preserve the distinctions among ISP scenario, planning period, reference trace, probability of exceedance, and asset identity.
 
 The package does not remove the need for modelling judgement.
 Users still need to review the aggregated network representation, hard-coded mappings, source vintage, reliability assumptions, and technology-specific caveats before treating the generated data as study-ready.
 
-## Dataset workflow
+## ISP 2024 dataset workflow
 
 ```text
-AEMO ISP source material
+AEMO ISP 2024 source material
           |
           v
-PISP parsing, reconciliation, and package mappings
+PISP 2024 parsing, reconciliation, and package mappings
           |
           +-----------------------+
           |                       |
@@ -54,7 +62,7 @@ static asset tables        schedule tables
 downstream power-system model or data analysis
 ```
 
-A typical workflow is:
+A typical ISP 2024 workflow is:
 
 1. Select the ISP scenarios, planning years or date ranges, reference trace, and demand probability of exceedance.
 2. Provide or download the required source material.
@@ -68,24 +76,24 @@ The high-level entry point is `PISP.build_ISP24_datasets(; kwargs...)`.
 It accepts whole planning years through `years` or explicit time windows through `drange`.
 Where the underlying ISP inputs use Australian financial years, PISP splits the requested period at 1 July so each problem block remains aligned with the source convention.
 
-The [Building a `PISPtimeConfig` problem table](@ref) tutorial shows how those scenario/time blocks are constructed before source files are parsed.
+The [Building a `PISPtimeConfig` problem table](generated/isp2024/tutorials/building-problem-table.md) tutorial shows how those scenario/time blocks are constructed before source files are parsed.
 
-## Understand the data before using it
+## Understand ISP 2024 data before using it
 
-- [Data sources](@ref) explains why several source vintages and source families are required, and identifies the local input layout.
-- [Domain concepts](@ref) explains the asset relationships, scenario model, trace selection, and static-versus-schedule design.
-- [Output tables](@ref) documents the exported files, join keys, units, and reconstruction rules.
-- [Parameters and mappings](@ref) records package-defined values that materially affect the dataset.
-- [Assumptions and scope](@ref) defines the modelling boundaries and validation responsibilities that remain with the user.
+- [Data sources](generated/isp2024/reference/data-sources.md) explains why several source vintages and source families are required, and identifies the local input layout.
+- [Domain concepts](concepts.md) explains the asset relationships, scenario model, trace selection, and static-versus-schedule design.
+- [Output tables](generated/isp2024/reference/output-tables.md) documents the exported files, join keys, units, and reconstruction rules.
+- [Parameters and mappings](generated/isp2024/reference/parameters-and-mappings.md) records package-defined values that materially affect the dataset.
+- [Assumptions and scope](assumptions.md) defines the modelling boundaries and validation responsibilities that remain with the user.
 
-## Tutorials
+## ISP 2024 tutorials
 
-[Building a `PISPtimeConfig` problem table](@ref) explains the scenario/time index that PISP creates before reading AEMO files.
+[Building a `PISPtimeConfig` problem table](generated/isp2024/tutorials/building-problem-table.md) explains the scenario/time index that PISP creates before reading AEMO files.
 It runs entirely in memory.
 
-[Working with PISP-generated outputs](@ref) loads a local PISP output build and relates generator and demand schedules back to the static asset tables.
+[Working with PISP-generated outputs](generated/isp2024/tutorials/working-with-pisp-outputs.md) loads a local ISP 2024 PISP output build and relates generator and demand schedules back to the static asset tables.
 The tutorial documents its default build path and the environment variables used to select another generated dataset.
 
 ## API reference
 
-See [API Reference](@ref) for the public build entry point and the problem-table helpers used by the tutorials.
+See the [API reference](api.md) for the public ISP 2024 build entry point, problem-table helpers, and source-acquisition helpers.

@@ -1,206 +1,240 @@
 [[page]]
-id = "data-sources"
-title = "Data sources"
+id = "isp2024-data-sources"
+title = "ISP 2024: Data sources"
 kind = "reference"
+track = "isp2024"
+editions = ["2024"]
 data_layer = "source-data"
-source = "literate/reference/data_sources.jl"
-output = "generated/reference/data-sources.md"
+source = "literate/isp2024/reference/data_sources.jl"
+output = "generated/isp2024/reference/data-sources.md"
 status = "published"
 nav_order = 10
 snapshot = false
 related_reference_pages = ["concepts.md", "assumptions.md"]
 
 [[page]]
-id = "output-tables"
-title = "Output tables"
+id = "isp2024-output-tables"
+title = "ISP 2024: Output tables"
 kind = "reference"
+track = "isp2024"
+editions = ["2024"]
 data_layer = "pisp-dataset"
-source = "literate/reference/output_tables.jl"
-output = "generated/reference/output-tables.md"
+source = "literate/isp2024/reference/output_tables.jl"
+output = "generated/isp2024/reference/output-tables.md"
 status = "published"
 nav_order = 20
 snapshot = false
 related_reference_pages = ["concepts.md", "assumptions.md"]
 
 [[page]]
-id = "parameters-and-mappings"
-title = "Parameters and mappings"
+id = "isp2024-parameters-and-mappings"
+title = "ISP 2024: Parameters and mappings"
 kind = "reference"
+track = "isp2024"
+editions = ["2024"]
 data_layer = "package-workflow"
-source = "literate/reference/parameters_and_mappings.jl"
-output = "generated/reference/parameters-and-mappings.md"
+source = "literate/isp2024/reference/parameters_and_mappings.jl"
+output = "generated/isp2024/reference/parameters-and-mappings.md"
 status = "published"
 nav_order = 30
 snapshot = false
 related_reference_pages = ["concepts.md", "assumptions.md"]
 
 [[page]]
-id = "problem-table"
-title = "Building a problem table"
+id = "isp2024-problem-table"
+title = "ISP 2024: Building a problem table"
 kind = "tutorial"
+track = "isp2024"
+editions = ["2024"]
 data_layer = "package-workflow"
-source = "literate/tutorials/problem_table.jl"
-output = "generated/tutorials/building-problem-table.md"
+source = "literate/isp2024/tutorials/problem_table.jl"
+output = "generated/isp2024/tutorials/building-problem-table.md"
 status = "published"
 nav_order = 10
 snapshot = false
-related_reference_pages = ["concepts.md", "generated/reference/output-tables.md"]
+related_reference_pages = ["concepts.md", "generated/isp2024/reference/output-tables.md"]
 
 [[page]]
-id = "working-with-pisp-outputs"
-title = "Working with PISP-generated outputs"
+id = "isp2024-working-with-pisp-outputs"
+title = "ISP 2024: Working with PISP-generated outputs"
 kind = "tutorial"
+track = "isp2024"
+editions = ["2024"]
 data_layer = "pisp-dataset"
-source = "literate/tutorials/working_with_pisp_outputs.jl"
-output = "generated/tutorials/working-with-pisp-outputs.md"
+source = "literate/isp2024/tutorials/working_with_pisp_outputs.jl"
+output = "generated/isp2024/tutorials/working-with-pisp-outputs.md"
 status = "published"
 nav_order = 20
 snapshot = true
-related_reference_pages = ["concepts.md", "generated/reference/output-tables.md", "assumptions.md"]
+related_reference_pages = ["concepts.md", "generated/isp2024/reference/output-tables.md", "assumptions.md"]
 
 [[page]]
-id = "source-data-inventory"
-title = "Source-data inventory"
+id = "isp2024-source-data-inventory"
+title = "ISP 2024: Source-data inventory"
 kind = "validation"
+track = "isp2024"
+editions = ["2024"]
 data_layer = "source-data"
-source = "literate/validation/source_data_inventory.jl"
-output = "generated/validation/source-data-inventory.md"
+source = "literate/isp2024/validation/source_data_inventory.jl"
+output = "generated/isp2024/validation/source-data-inventory.md"
 status = "published"
 nav_order = 10
 snapshot = true
-related_reference_pages = ["generated/reference/data-sources.md"]
+related_reference_pages = ["generated/isp2024/reference/data-sources.md"]
 
 [[page]]
-id = "trace-coverage-and-schema"
-title = "Trace data availability and structure"
+id = "isp2024-trace-coverage-and-schema"
+title = "ISP 2024: Trace data availability and structure"
 kind = "validation"
+track = "isp2024"
+editions = ["2024"]
 data_layer = "source-data"
-source = "literate/validation/trace_coverage_and_schema.jl"
-output = "generated/validation/trace-coverage-and-schema.md"
+source = "literate/isp2024/validation/trace_coverage_and_schema.jl"
+output = "generated/isp2024/validation/trace-coverage-and-schema.md"
 status = "published"
 nav_order = 20
 snapshot = true
-related_reference_pages = ["generated/reference/data-sources.md", "concepts.md"]
+related_reference_pages = ["generated/isp2024/reference/data-sources.md", "concepts.md"]
 
 [[page]]
-id = "temperature-data-coverage"
-title = "Temperature-data coverage and climate-zone solar comparison"
+id = "isp2024-temperature-data-coverage"
+title = "ISP 2024: Temperature-data coverage and climate-zone solar comparison"
 kind = "validation"
+track = "isp2024"
+editions = ["2024"]
 data_layer = "cross-layer"
-source = "literate/validation/temperature_data_coverage.jl"
-output = "generated/validation/temperature-data-coverage.md"
+source = "literate/isp2024/validation/temperature_data_coverage.jl"
+output = "generated/isp2024/validation/temperature-data-coverage.md"
 status = "published"
 nav_order = 30
 snapshot = true
-related_reference_pages = ["generated/reference/data-sources.md", "assumptions.md"]
+related_reference_pages = ["generated/isp2024/reference/data-sources.md", "assumptions.md"]
 
 [[page]]
-id = "generated-output-consistency"
-title = "Generated-output consistency"
+id = "isp2024-generated-output-consistency"
+title = "ISP 2024: Generated-output consistency"
 kind = "validation"
+track = "isp2024"
+editions = ["2024"]
 data_layer = "pisp-dataset"
-source = "literate/validation/generated_output_consistency.jl"
-output = "generated/validation/generated-output-consistency.md"
+source = "literate/isp2024/validation/generated_output_consistency.jl"
+output = "generated/isp2024/validation/generated-output-consistency.md"
 status = "published"
 nav_order = 40
 snapshot = true
-related_reference_pages = ["generated/reference/output-tables.md", "assumptions.md"]
+related_reference_pages = ["generated/isp2024/reference/output-tables.md", "assumptions.md"]
 
 [[page]]
-id = "reference-trace-profile"
-title = "Reference trace 4006 profiles"
+id = "isp2024-reference-trace-profile"
+title = "ISP 2024: Reference trace 4006 profiles"
 kind = "analysis"
+track = "isp2024"
+editions = ["2024"]
 data_layer = "source-data"
-source = "literate/analysis/reference_trace_profile.jl"
-output = "generated/analyses/reference-trace-4006-profiles.md"
+source = "literate/isp2024/analysis/reference_trace_profile.jl"
+output = "generated/isp2024/analyses/reference-trace-4006-profiles.md"
 status = "published"
 nav_order = 10
 snapshot = true
-related_reference_pages = ["generated/reference/data-sources.md", "concepts.md", "generated/reference/parameters-and-mappings.md"]
+related_reference_pages = ["generated/isp2024/reference/data-sources.md", "concepts.md", "generated/isp2024/reference/parameters-and-mappings.md"]
 
 [[page]]
-id = "historical-trace-years"
-title = "Historical trace-year comparison"
+id = "isp2024-historical-trace-years"
+title = "ISP 2024: Historical trace-year comparison"
 kind = "analysis"
+track = "isp2024"
+editions = ["2024"]
 data_layer = "source-data"
-source = "literate/analysis/historical_trace_years.jl"
-output = "generated/analyses/historical-trace-year-comparison.md"
+source = "literate/isp2024/analysis/historical_trace_years.jl"
+output = "generated/isp2024/analyses/historical-trace-year-comparison.md"
 status = "published"
 nav_order = 20
 snapshot = true
-related_reference_pages = ["generated/reference/data-sources.md", "concepts.md"]
+related_reference_pages = ["generated/isp2024/reference/data-sources.md", "concepts.md"]
 
 [[page]]
-id = "seasonal-renewable-extremes"
-title = "Seasonal renewable extremes"
+id = "isp2024-seasonal-renewable-extremes"
+title = "ISP 2024: Seasonal renewable extremes"
 kind = "analysis"
+track = "isp2024"
+editions = ["2024"]
 data_layer = "source-data"
-source = "literate/analysis/seasonal_renewable_extremes.jl"
-output = "generated/analyses/seasonal-renewable-extremes.md"
+source = "literate/isp2024/analysis/seasonal_renewable_extremes.jl"
+output = "generated/isp2024/analyses/seasonal-renewable-extremes.md"
 status = "published"
 nav_order = 30
 snapshot = true
-related_reference_pages = ["generated/reference/data-sources.md", "assumptions.md"]
+related_reference_pages = ["generated/isp2024/reference/data-sources.md", "assumptions.md"]
 
 [[page]]
-id = "demand-stress-low-solar"
-title = "Demand stress and low-solar coincidence"
+id = "isp2024-demand-stress-low-solar"
+title = "ISP 2024: Demand stress and low-solar coincidence"
 kind = "analysis"
+track = "isp2024"
+editions = ["2024"]
 data_layer = "cross-layer"
-source = "literate/analysis/demand_stress_low_solar.jl"
-output = "generated/analyses/demand-stress-low-solar.md"
+source = "literate/isp2024/analysis/demand_stress_low_solar.jl"
+output = "generated/isp2024/analyses/demand-stress-low-solar.md"
 status = "published"
 nav_order = 40
 snapshot = true
-related_reference_pages = ["generated/reference/output-tables.md", "assumptions.md"]
+related_reference_pages = ["generated/isp2024/reference/output-tables.md", "assumptions.md"]
 
 [[page]]
-id = "reference-trace-4006-mapping"
-title = "Reference trace 4006 composite mapping"
+id = "isp2024-reference-trace-4006-mapping"
+title = "ISP 2024: Reference trace 4006 composite mapping"
 kind = "analysis"
+track = "isp2024"
+editions = ["2024"]
 data_layer = "cross-layer"
-source = "literate/analysis/reference_trace_4006_mapping.jl"
-output = "generated/analyses/reference-trace-4006-composite-mapping.md"
+source = "literate/isp2024/analysis/reference_trace_4006_mapping.jl"
+output = "generated/isp2024/analyses/reference-trace-4006-composite-mapping.md"
 status = "published"
 nav_order = 50
 snapshot = true
-related_reference_pages = ["generated/reference/parameters-and-mappings.md", "assumptions.md"]
+related_reference_pages = ["generated/isp2024/reference/parameters-and-mappings.md", "assumptions.md"]
 
 [[page]]
-id = "iasr-build-cost-trajectories"
-title = "IASR build-cost trajectories by technology"
+id = "isp2024-iasr-build-cost-trajectories"
+title = "ISP 2024: IASR build-cost trajectories by technology"
 kind = "analysis"
+track = "isp2024"
+editions = ["2024"]
 data_layer = "source-data"
-source = "literate/analysis/iasr_build_cost_trajectories.jl"
-output = "generated/analyses/iasr-build-cost-trajectories.md"
+source = "literate/isp2024/analysis/iasr_build_cost_trajectories.jl"
+output = "generated/isp2024/analyses/iasr-build-cost-trajectories.md"
 status = "published"
 nav_order = 60
 snapshot = true
-data_requirements = ["data/2024/pisp-downloads/2024-isp-inputs-and-assumptions-workbook.xlsx"]
-related_reference_pages = ["generated/reference/data-sources.md", "generated/reference/parameters-and-mappings.md", "assumptions.md"]
+data_requirements = [{ root = "download", edition = "2024", path = "2024-isp-inputs-and-assumptions-workbook.xlsx", type = "file" }]
+related_reference_pages = ["generated/isp2024/reference/data-sources.md", "generated/isp2024/reference/parameters-and-mappings.md", "assumptions.md"]
 
 [[page]]
-id = "rez-resource-versus-connection-cost"
-title = "REZ resource potential versus connection cost"
+id = "isp2024-rez-resource-versus-connection-cost"
+title = "ISP 2024: REZ resource potential versus connection cost"
 kind = "analysis"
+track = "isp2024"
+editions = ["2024"]
 data_layer = "source-data"
-source = "literate/analysis/rez_resource_versus_connection_cost.jl"
-output = "generated/analyses/rez-resource-versus-connection-cost.md"
+source = "literate/isp2024/analysis/rez_resource_versus_connection_cost.jl"
+output = "generated/isp2024/analyses/rez-resource-versus-connection-cost.md"
 status = "published"
 nav_order = 70
 snapshot = true
-data_requirements = ["data/2024/pisp-downloads/2024-isp-inputs-and-assumptions-workbook.xlsx"]
-related_reference_pages = ["generated/reference/data-sources.md", "generated/reference/parameters-and-mappings.md", "assumptions.md"]
+data_requirements = [{ root = "download", edition = "2024", path = "2024-isp-inputs-and-assumptions-workbook.xlsx", type = "file" }]
+related_reference_pages = ["generated/isp2024/reference/data-sources.md", "generated/isp2024/reference/parameters-and-mappings.md", "assumptions.md"]
 
 [[page]]
-id = "storage-characteristics"
-title = "PHES and battery storage characteristics"
+id = "isp2024-storage-characteristics"
+title = "ISP 2024: PHES and battery storage characteristics"
 kind = "analysis"
+track = "isp2024"
+editions = ["2024"]
 data_layer = "source-data"
-source = "literate/analysis/storage_characteristics.jl"
-output = "generated/analyses/storage-characteristics.md"
+source = "literate/isp2024/analysis/storage_characteristics.jl"
+output = "generated/isp2024/analyses/storage-characteristics.md"
 status = "published"
 nav_order = 80
 snapshot = true
-data_requirements = ["data/2024/pisp-downloads/2024-isp-inputs-and-assumptions-workbook.xlsx"]
-related_reference_pages = ["generated/reference/data-sources.md", "generated/reference/parameters-and-mappings.md", "assumptions.md"]
+data_requirements = [{ root = "download", edition = "2024", path = "2024-isp-inputs-and-assumptions-workbook.xlsx", type = "file" }]
+related_reference_pages = ["generated/isp2024/reference/data-sources.md", "generated/isp2024/reference/parameters-and-mappings.md", "assumptions.md"]

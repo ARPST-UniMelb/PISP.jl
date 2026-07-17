@@ -7,6 +7,8 @@ using PISP
 
 include(joinpath(@__DIR__, "page_registry.jl"))
 using .PISPDocsPageRegistry
+include(joinpath(@__DIR__, "navigation.jl"))
+using .PISPDocsNavigation
 
 const DOCS_DIR = @__DIR__
 const SRC = joinpath(DOCS_DIR, "src")
@@ -22,39 +24,6 @@ link_target_name in ("local", "public") || error("PISP_DOCS_LINK_TARGET must be 
 link_target = Symbol(link_target_name)
 stage_documentation!(SRC, STAGED_SRC, joinpath(DOCS_DIR, "source-links.toml"), link_target;
     repo_root = dirname(DOCS_DIR))
-
-const PAGE_KIND_LABELS = [
-    "tutorial" => "Tutorials",
-    "validation" => "Data validation",
-    "analysis" => "Analyses and case studies",
-]
-
-function registry_navigation(registry_pages)
-    navigation = Any["Home" => "index.md"]
-
-    reference_pages = sort(
-        filter(page -> page.kind == "reference" && page.status != "archived", registry_pages);
-        by = page -> (page.nav_order, page.id),
-    )
-    isempty(reference_pages) && error("the page registry must contain at least one active reference page")
-
-    for page in reference_pages
-        push!(navigation, page.title => page.output)
-        page.id == "data-sources" && push!(navigation, "Domain concepts" => "concepts.md")
-    end
-    push!(navigation, "Assumptions and scope" => "assumptions.md")
-
-    for (kind, label) in PAGE_KIND_LABELS
-        pages = sort(
-            filter(page -> page.kind == kind && page.status != "archived", registry_pages);
-            by = page -> (page.nav_order, page.id),
-        )
-        isempty(pages) || push!(navigation, label => Any[page.title => page.output for page in pages])
-    end
-
-    push!(navigation, "API Reference" => "api.md")
-    return navigation
-end
 
 registry_pages = try
     load_page_registry(REGISTRY_PATH; require_published_outputs = true)

@@ -1,170 +1,166 @@
 # PISP documentation maintenance
 
-PISP documentation uses two source types:
+This guide describes the maintained documentation sources, the Literate rendering workflow, and the checks required before publishing the Documenter site.
+It is for maintainers; ordinary readers should begin with the rendered site.
 
-- stable explanatory pages under `docs/src/` for package purpose, concepts, assumptions, and API reference;
-- executable Literate.jl pages under `docs/literate/` for package-derived reference tables, tutorials, data validation, and analyses.
-
-`docs/page-registry.toml` is the authority for every executable page. It records the stable page ID, reader-facing title, page role, data lineage, Literate source, generated Markdown destination, navigation order, evidence producer, evidence directory, and direct local-data requirements.
-
-Maintained Markdown keeps repository-local links to the PDFs under `data/2024/pisp-reports/`. The schema-v2 registry in `docs/source-links.toml` maps those paths to official AEMO URLs for public builds. `docs/make.jl` stages a target-specific copy under `docs/.documenter-source/`; it never rewrites `docs/src/`.
-
-## Documentation surfaces
+## Documentation architecture
 
 | Surface | Responsibility |
-|---|---|
-| `docs/src/index.md` | Package purpose, dataset workflow, and entry points. |
-| `docs/src/concepts.md` | Stable explanation of asset relationships, scenarios, traces, and the static/schedule model. |
-| `docs/src/assumptions.md` | Modelling scope, caveats, validation responsibilities, and external checks. |
-| `docs/src/api.md` | Public API reference. |
-| `docs/literate/reference/` | Executable reference pages generated from package constants, schemas, downloader targets, and filesystem checks. |
-| `docs/literate/tutorials/` | Executable package and dataset workflows. |
-| `docs/literate/validation/` | Executable validation pages that load their own source data, compute their own evidence, and build their own figures directly on the page — the page itself is the analysis, not a consumer of a separate producer script. |
-| `docs/literate/analysis/` | Executable analysis pages following the same self-contained pattern as `docs/literate/validation/`. |
-| `docs/src/generated/` | Static Markdown and figures generated from all active Literate sources. |
-| `docs/eda_support.jl` | Shared table/figure-writer helper used by every page under `docs/literate/validation/` and `docs/literate/analysis/`. |
-| `eda/compare_tables.jl` | Regression harness comparing Julia-produced evidence tables against the archived Python baseline under `eda/archive/`, for the pages ported from an original Python analysis. |
-| `eda/tables/julia/<script-stem>/` | Current EDA evidence location. |
+| --- | --- |
+| `docs/src/index.md` | Package entry points and the ISP edition guide. |
+| `docs/src/editions/` | Edition support, source-material, output-model, trace, mapping, and comparison boundaries. |
+| `docs/src/concepts.md` | Stable explanation of the ISP 2024 asset, scenario, trace, and static/schedule model. |
+| `docs/src/assumptions.md` | ISP 2024 modelling scope, caveats, validation responsibilities, and external checks. |
+| `docs/src/api.md` | Public ISP 2024 build and source-acquisition API boundary. |
+| `docs/literate/isp2024/` | Executable ISP 2024 reference, tutorial, validation, and analysis sources. |
+| `docs/page-registry.toml` | Authority for every registry-managed Literate source and generated Markdown output. |
+| `docs/edition_profiles.jl` | Edition-specific local data roots and schedule defaults used by rendering preflight. |
+| `docs/navigation.jl` | Published-site navigation assembled from static edition pages and published registry entries. |
+| `docs/src/generated/` | Markdown and figures generated from registered Literate pages. |
+| `docs/render_literate.jl` | Literate selection, profile resolution, data preflight, execution, and generated-output installation. |
+| `docs/make.jl` | Target-specific source-link staging and Documenter site build. |
 
-The public navigation follows reader purpose: reference, tutorial, validation, or analysis. No page in `docs/page-registry.toml` currently sets a `producer`/`evidence_dir`: every executable page computes its own evidence at render time.
+The public site separates shared explanatory pages from ISP 2024, ISP 2026, and comparison tracks.
+Only the ISP 2024 track currently has registry-managed Literate pages.
+The ISP 2026 and comparison landing pages state their available support boundaries without representing source downloads as generated data.
 
-## Complete local build
+## Page registry
 
-From the repository root, run:
+Each `[[page]]` entry in `docs/page-registry.toml` describes one executable Literate page.
+The registry validates page metadata, source and output paths, navigation positions, related pages, registered sources, and generated Markdown.
 
-```sh
-julia --project=docs docs/build_all.jl
-```
+| Field | Meaning |
+| --- | --- |
+| `id` | Stable page identity, independent of filenames. |
+| `title` | Reader-facing page title. |
+| `kind` | `reference`, `tutorial`, `validation`, or `analysis`. |
+| `track` | `shared`, `isp2024`, `isp2026`, or `comparison`. |
+| `editions` | Edition scope declared by the page. `isp2024` requires `["2024"]`; `isp2026` requires `["2026"]`; `comparison` requires at least two editions. |
+| `data_layer` | `package-workflow`, `source-data`, `pisp-dataset`, or `cross-layer`. |
+| `source` | Literate source path relative to `docs/`. |
+| `output` | Generated Markdown path relative to `docs/src/`. |
+| `status` | Publication and render selection state. |
+| `nav_order` | Position within a track and kind. |
+| `snapshot` | Whether the page describes a dated source or generated-data state. |
+| `data_requirements` | Typed local files or directories required before page execution. |
+| `producer` and `evidence_dir` | Optional external evidence producer and its directory. |
+| `related_reference_pages` | Static or generated pages defining the relevant package contract. |
 
-The complete build performs these lifecycle stages in order:
+Use relative paths in registry metadata; paths that escape their declared root are rejected.
+The registry also rejects duplicate IDs, titles, outputs, and renderable `(track, kind, nav_order)` positions.
 
-1. run each unique `eda/*.jl` producer registered by an active page (no page currently registers one — every page computes its own evidence when its Literate source executes);
-2. execute every active Literate source and regenerate its static Markdown and figures;
-3. build the Documenter site from the generated files.
+### Status and selection
 
-The build stops on the first failed producer, Literate page, registry check, or Documenter build. A failed complete render does not replace an existing `docs/src/generated/` tree.
+| Status | Navigation | Default render selection | Generated-output requirement |
+| --- | --- | --- | --- |
+| `published` | Included in the published navigation. | Included by `PISP_LITERATE_SET=published`, the default. | Required before `docs/make.jl` can build the site. |
+| `draft` | Omitted from published navigation. | Included only by `PISP_LITERATE_SET=draft` or `all`. | Not required by `docs/make.jl`. |
+| `archived` | Omitted. | Never renderable, including through an explicit page-ID selection. | Not required. |
 
-Set `PISP_DATA_ROOT` when the source-data reference page should inspect a download root other than `data/2024/pisp-downloads/`.
+`PISP_LITERATE_SET` accepts `published`, `draft`, or `all`; `eda-drafts` is also accepted as a draft alias.
+`PISP_DOCS_TRACK` filters the selected status set by `shared`, `isp2024`, `isp2026`, or `comparison`.
+`PISP_LITERATE_PAGES` selects explicit comma-separated page IDs, but it cannot be combined with a non-default set or with a track filter.
 
-Open `docs/build/index.html` after the build completes.
-
-## Run stages separately
-
-### Re-render only what changed (recommended)
-
-After editing one or more Literate sources, render just the affected pages by passing their registry `id`s as a comma-separated list through `PISP_LITERATE_PAGES`. This is the default way to re-render: it is much faster than a full render because it skips every page you did not touch, and it still reruns any registered producer required by the pages you selected.
-
-One page:
-
-```sh
-PISP_LITERATE_PAGES=historical-trace-years julia --project=docs docs/render_literate.jl
-```
-
-Several pages:
-
-```sh
-PISP_LITERATE_PAGES=trace-coverage-and-schema,temperature-data-coverage,generated-output-consistency julia --project=docs docs/render_literate.jl
-```
-
-Then build Documenter from the generated files:
-
-```sh
-julia --project=docs docs/make.jl
-```
-
-The default build uses local PDF links and non-pretty HTML paths so the links resolve from the generated pages. A public-link build uses official HTTPS destinations:
+For example, render the current published ISP 2024 track with:
 
 ```sh
-PISP_DOCS_LINK_TARGET=public julia --project=docs docs/make.jl
+PISP_DOCS_TRACK=isp2024 julia --project=docs docs/render_literate.jl
 ```
 
-Local PDFs remain repository inputs and are not copied into or published from `docs/build/`. The public target does not require TraceCite or any local evidence database.
+Render one known page by its registry ID with:
 
-### Full render (slower, occasional use)
+```sh
+PISP_LITERATE_PAGES=isp2024-historical-trace-years julia --project=docs docs/render_literate.jl
+```
 
-Render every active Literate page and rerun every registered producer (none currently registers one, so this step is a no-op today). Reach for this before a release, or whenever a change could plausibly affect pages beyond the ones just edited (for example, a shared helper such as `docs/eda_support.jl`), rather than as the routine way to check one edit:
+## Edition profiles and data preflight
+
+`docs/edition_profiles.jl` centralises local roots and schedule defaults used by documentation rendering.
+Relative environment-variable values are resolved from the repository root.
+
+| Edition | Environment variable | Default |
+| --- | --- | --- |
+| ISP 2024 | `PISP_DOCS_ISP2024_DOWNLOAD_ROOT` | `data/2024/pisp-downloads` |
+| ISP 2024 | `PISP_DOCS_ISP2024_OUTPUT_ROOT` | `data/2024/pisp-datasets/out-ref4006-poe10/csv` |
+| ISP 2024 | `PISP_DOCS_ISP2024_SCHEDULE_TAG` | `schedule-2030` |
+| ISP 2026 | `PISP_DOCS_ISP2026_DOWNLOAD_ROOT` | `data/2026/pisp-downloads` |
+| ISP 2026 | `PISP_DOCS_ISP2026_OUTPUT_ROOT` | Unset unless explicitly configured. |
+| ISP 2026 | `PISP_DOCS_ISP2026_SCHEDULE_TAG` | Unset unless explicitly configured. |
+
+A `data_requirements` item is an inline TOML table with `root`, `path`, and `type`; `download` and `output` requirements also need an `edition` that the page declares.
+The allowed roots are `repo`, `download`, and `output`, while the allowed types are `file`, `directory`, and `path`.
+
+```toml
+data_requirements = [{ root = "download", edition = "2024", path = "2024-isp-inputs-and-assumptions-workbook.xlsx", type = "file" }]
+```
+
+Before any producer or Literate page runs, the renderer resolves each selected requirement through the relevant edition profile and checks its type.
+The render plan prints selected page IDs, track and edition scope, resolved profiles, and resolved requirements.
+
+## Rendering and site builds
+
+Regenerate all published Literate pages before a complete local site build:
 
 ```sh
 julia --project=docs docs/render_literate.jl
 ```
 
-Skip rerunning registered producers, reusing their existing evidence only when it is known to match the current Literate sources (has no effect on pages that compute their own evidence, since those have no producer to skip):
+When this selection is exactly the published registry set, rendering uses a staging tree and replaces `docs/src/generated/` only after every page succeeds and the registry validates the results.
+For selected-page renders, inspect the generated Markdown and figures before building the site.
 
-```sh
-PISP_RUN_PRODUCERS=false julia --project=docs docs/render_literate.jl
-```
-
-Build Documenter from the committed generated files:
+Build the site from the maintained Markdown and generated outputs with local source links:
 
 ```sh
 julia --project=docs docs/make.jl
 ```
 
-`docs/render_literate.jl` defaults to every non-archived registry entry and reruns the unique producers required by the selected pages. A complete render writes all pages to a temporary staging tree and replaces `docs/src/generated/` only after every page succeeds. This removes stale renamed pages without destroying the previous generated site when one page fails. Explicit page IDs can be supplied as a comma-separated list through `PISP_LITERATE_PAGES`, as shown above. Set `PISP_RUN_PRODUCERS=false` only to reuse an already current evidence bundle. The renderer executes each selected source, writes its registered output path, and collapses Julia source blocks behind a **Show source code** disclosure while leaving rendered tables and figures visible.
+Run rendering followed by the site build in one command sequence with:
 
-## Page registry
-
-Each `[[page]]` entry in `docs/page-registry.toml` contains:
-
-| Field | Meaning |
-|---|---|
-| `id` | Stable page identity, independent of filenames. |
-| `title` | Reader-facing navigation title. |
-| `kind` | `reference`, `tutorial`, `validation`, or `analysis`. |
-| `data_layer` | `package-workflow`, `source-data`, `pisp-dataset`, or `cross-layer`. |
-| `source` | Literate source path relative to `docs/`. |
-| `output` | Generated Markdown path relative to `docs/src/`. |
-| `status` | `published`, `draft`, or `archived`. Active pages are included in navigation; archived pages are not rendered or published. |
-| `nav_order` | Position within the page role. |
-| `snapshot` | Whether results describe a dated source or generated-data state. |
-| `evidence_dir` | Optional EDA evidence directory relative to the repository root. |
-| `producer` | Optional analytical producer relative to the repository root. |
-| `data_requirements` | Optional direct local inputs required by the Literate page. |
-| `related_reference_pages` | Reference or caveat pages that define the relevant package contract. |
-
-`docs/page_registry.jl` rejects unsupported classifications, unsafe paths, duplicate IDs or outputs, duplicate navigation positions, unregistered Literate sources, orphan generated Markdown, missing producers, and missing related pages. A Documenter build also requires every active registry output to exist.
-
-## Evidence and rendering contract
-
-Every page under `docs/literate/validation/` and `docs/literate/analysis/` is self-contained: the Literate page owns everything reader-facing about its topic, in one place — it loads its own source data, computes its own evidence, builds its own figures, and states its own interpretation:
-
-```text
-source data or PISP datasets
-    -> docs/literate/{validation,analysis}/<page>.jl   (loads data, computes evidence, builds figures, on the page)
-        -> eda/tables/julia/<script-stem>/   (the same code also writes this, for the regression harness)
-            -> docs/src/generated/<role>/<topic>.md
+```sh
+julia --project=docs docs/build_all.jl
 ```
 
-An earlier producer-consumer split existed for a few pages, where a separate `eda/<stem>.jl` script computed the evidence tables and the Literate page only read and displayed them. That split has been fully retired: no page currently registers a `producer` or `evidence_dir`, and `eda/` holds only the Python-comparison regression harness (`eda/compare_tables.jl`) plus data/figure/table storage directories; the shared table/figure-writer helper lives at `docs/eda_support.jl`. Keep new pages self-contained rather than reintroducing a separate producer script.
+`docs/make.jl` never executes Literate pages.
+It requires every published registry output to exist, stages `docs/src/` under `docs/.documenter-source/`, and builds the site under `docs/build/`.
 
-Pages under `docs/literate/validation/` and `docs/literate/analysis/` should state the data's vintage or source build directly in their own prose (which download root, output root, schedule directory, or year range the page describes) wherever that materially affects how a reader interprets the evidence. Final claims should be derived from executed evidence or written as interpretation rules rather than hard-coded observations that can become stale.
+## Source links and validation
 
-## Adding a page
+Maintained Markdown keeps repository-local links to registered source PDFs.
+`docs/source-links.toml` maps those local paths to official publisher URLs for public builds, while `docs/make.jl` stages a target-specific copy rather than rewriting `docs/src/`.
 
-1. Choose one primary reader purpose: reference, tutorial, validation, or analysis.
-2. Add the Literate source under the matching `docs/literate/` area where practical.
-3. Add one registry entry with a topic-oriented output path.
-4. Prefer making the page self-contained: load data, compute evidence, and build figures directly in the Literate source (`include`-ing `docs/eda_support.jl` for the shared table/figure-writer helpers), and skip `producer`/`evidence_dir`. State the data's vintage or source build directly in the page's own prose where that materially affects interpretation, rather than as a separate provenance line. Only register a separate `eda/*.jl` producer and `evidence_dir` when there is a specific reason the evidence must be computed outside the page itself.
-5. Keep source-derived tables executable rather than copying package constants, filenames, schemas, or repository inventories into plain Markdown.
-6. Run the page and inspect the rendered evidence.
-7. Run the full documentation build before committing generated Markdown and figures.
+Build the public-link variant with:
 
-## Removing or renaming a page
+```sh
+PISP_DOCS_LINK_TARGET=public julia --project=docs docs/make.jl
+```
 
-Remove or rename the Literate source, registry entry, generated Markdown, and generated figures together. Update internal links and decide whether the previous public URL requires a compatibility page or redirect.
+Validate source-link routing independently with:
 
-`assumptions.md` is the authority for modelling caveats. The earlier standalone `caveats.md` page and duplicate output-validation Literate source are intentionally removed.
+```sh
+julia --project=docs docs/test_source_links.jl
+```
+
+## Adding or changing a registry-managed page
+
+1. Choose the page's reader purpose, track, edition scope, and data layer.
+2. Add or update the Literate source and its registry entry together.
+3. Declare every direct local input through typed `data_requirements` instead of embedding untracked path assumptions in the renderer.
+4. Use the edition profile for source or output roots in edition-specific Literate pages.
+5. Render the affected page, inspect its Markdown and figures, then run the appropriate site and source-link checks.
+6. Update related reference pages whenever a source, output, mapping, or support boundary changes.
+
+Executable validation and analysis pages should keep reader-facing evidence and interpretation with the code that computes them.
+Use `producer` and `evidence_dir` only when a separate producer is necessary; every registered path must be valid, and `evidence_dir` requires a `producer`.
 
 ## Implementation locations
 
-The generated reference pages read current values from package objects. The main implementation locations remain:
-
 | Concern | Source location |
-|---|---|
-| Fixed workbook and archive download targets | `src/scrappers/PISP-scrapper-2024files.jl` |
-| Trace-page configuration | `src/scrappers/PISP-scrapper-2024traces.jl` |
+| --- | --- |
+| ISP 2024 source download targets | `src/scrappers/PISP-scrapper-2024files.jl` |
+| ISP 2024 trace configuration | `src/scrappers/PISP-scrapper-2024traces.jl` |
+| ISP 2026 source-asset download targets | `src/scrappers/PISP-scrapper-2026files.jl` |
+| ISP 2026 report-download targets | `src/scrappers/PISP-scrapper-2026reports.jl` |
 | Static and schedule schemas | `src/datamodel/` |
 | Exported filename mapping | `src/utils/writing/PISPutils-writing.jl` |
-| Scenario, bus, area, and weather-year mappings | `src/parameters/general2024ISP.jl` |
-| Generator, storage, hydro, build-out, and retirement mappings | `src/parameters/` |
-| Renewable-capacity construction | `src/parsers/PISP-2024parser.jl` |
+| ISP 2024 scenario, bus, area, and weather-year mappings | `src/parameters/general2024ISP.jl` |
+| ISP 2024 parser | `src/parsers/PISP-2024parser.jl` |
