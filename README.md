@@ -305,10 +305,7 @@ Below, an overview of each of the databases the parser produces is given.
 > - 2024 Integrated System Plan **Model**
 > - 2024 Integrated System Plan **Demand & Variable Renewable Energy trace data**
 
-### Which release each static table draws from
-
-The four releases above are not interchangeable across tables — each of
-PISP's six static tables draws from a different subset of them:
+Each of PISP's six static tables draws from a different subset of the raw dataset:
 
 | Table       | Source release(s)                                                                                                                                                                                                                                                                                                  |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -318,3 +315,14 @@ PISP's six static tables draws from a different subset of them:
 | `Generator` | **Inputs and Assumptions workbook** (existing-generator, capacity, mapping, and reliability sheets); hourly solar/wind schedules additionally draw on the **generation and storage outlook** and the **Demand & Variable Renewable Energy trace data**; hydro inflow schedules additionally draw on the **Model**. |
 | `ESS`       | **Inputs and Assumptions workbook** (storage-property, capacity, mapping, and reliability sheets); behind-the-meter/VPP battery schedules additionally draw on the **generation and storage outlook**.                                                                                                             |
 | `DER`       | None of the four for the static row itself (built from the `Demand`/`Bus` tables); its demand-response and EV-charging schedules draw on the **Inputs and Assumptions workbook**.                                                                                                                                  |
+
+## Documentation
+
+- [Documentation home](docs/src/index.md)
+- [Quickstart](docs/src/quickstart.md)
+- [Download ISP source material](docs/src/source-acquisition.md)
+- [Supported ISP editions](docs/src/editions/supported-editions.md)
+- [ISP 2024 output tables and field dictionary](docs/src/generated/isp2024/reference/output-tables.md)
+- [ISP 2024 source-to-output provenance](docs/src/generated/isp2024/reference/data-sources.md)
+- [Assumptions and scope](docs/src/assumptions.md)
+- [API reference](docs/src/api.md)
