@@ -12,8 +12,8 @@ The distinction matters when choosing inputs, interpreting outputs, or planning 
 | PISP.jl parser integration | Implemented in the documented ISP 2024 workflow. | Not yet integrated into the documented public PISP.jl workflow. |
 | Build a PISP dataset | Implemented by `PISP.build_ISP24_datasets`. | Not yet integrated into the documented public PISP.jl workflow. |
 | Generated-output contract | Static and schedule tables are documented for the 2024 build. | Not yet established for the documented PISP.jl workflow. |
-| Published validation evidence | Release-specific validation pages cover supported 2024 sources and outputs. | Not yet published. |
-| Published analysis or EDA evidence | Release-specific analysis pages interpret supported 2024 sources and outputs. | Not yet published. |
+| Published validation evidence | Release-specific validation pages cover supported 2024 sources and outputs. | A source-only availability page documents configured reports, archives, landmarks, and limitations; no processed-data validation is claimed. |
+| Published analysis or EDA evidence | Release-specific analysis pages interpret supported 2024 sources and outputs. | No processed-data analysis or trace-schema result is published. |
 
 These labels describe PISP support and its published evidence, not the completeness or comparability of the upstream ISP releases.
 The ISP 2024 pages describe the source inputs, package-defined mappings, output tables, validation checks, and analyses associated with that implemented workflow.
@@ -22,4 +22,5 @@ Under-review parser development is not evidence of an integrated dataset builder
 
 Use the [ISP 2024 overview](isp2024.md) to navigate the implemented data workflow.
 Use the [ISP 2026 overview](isp2026.md) to understand the source, parser-review, and integration boundary.
+Use the [ISP 2026 source-availability page](../generated/isp2026/validation/source-availability.md) for local source observations.
 The [comparison guide](comparison.md) describes the crosswalks required before drawing any cross-release conclusion.

@@ -34,3 +34,6 @@ The [ISP 2024 overview](isp2024.md) describes the implemented output workflow.
 The [ISP 2026 overview](isp2026.md) summarises the source, parser-review, and integration boundary for 2026 material.
 The [supported editions](supported-editions.md) page is the detailed capability status authority.
 The [trace coverage](trace-coverage.md) and [parameters and mappings](parameters-and-mappings.md) pages identify two areas that require release-specific treatment.
+The [source-availability comparison](../generated/comparison/validation/source-availability-by-edition.md)
+shows the observed acquisition and extraction structures without asserting
+semantic equivalence.

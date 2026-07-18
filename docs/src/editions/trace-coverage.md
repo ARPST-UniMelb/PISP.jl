@@ -14,6 +14,22 @@ The [supported editions](supported-editions.md) page is the detailed status auth
 | Values and units | The documented solar and wind samples are capacity-factor traces; the validation records their sampled value range and distinguishes them from the demand trace family. | No published PISP.jl interpretation establishes units, scale, missing-value treatment, or capacity-factor semantics for the 2026 trace material. |
 | Generated-data use | The ISP 2024 build uses its release-specific trace conventions when producing PISP schedules. | No ISP 2026 dataset build or generated trace-derived output contract is yet integrated into PISP.jl. |
 
+In this source context, a trace is a time series supplied to the detailed
+long-term model. The 2024 PLEXOS Model Instructions describe demand, hydro,
+load-subtractor, solar, timeslice, and wind trace folders (physical p. 7).
+The 2026 instructions add DNSP, gas, and rooftop-PV folders to that list
+(physical p. 7). The reports describe 14 historical reference years for 2024
+and 16 for 2026 (physical p. 5); those report-backed counts do not establish
+that every local archive contains every expected trace.
+
+The 2024 local demand filenames include `POE10` and `POE50`. The 2023 Inputs,
+Assumptions and Scenarios Report defines POE as “probability of exceedance”
+(physical p. 172), while the 2023 ISP Methodology describes 10%, 50%, and
+sometimes 90% POE simulations and uses 10% POE demand profiles for capacity-
+outlook modelling (physical p. 39). Filename labels are therefore kept
+separate from report-backed meaning. No 2026 PoE meaning or cross-edition
+equivalence is established here.
+
 The [ISP 2024 trace data availability and structure](../generated/isp2024/validation/trace-coverage-and-schema.md)
 page is the detailed evidence for the checked 2024 files, schema, identifiers,
 coverage, and sample values.

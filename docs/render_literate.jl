@@ -92,7 +92,13 @@ end
 function requirement_root(requirement, profiles)
     requirement.root == "repo" && return REPO_ROOT
     profile = profile_for(profiles, requirement.edition)
-    root = requirement.root == "download" ? profile.download_root : profile.output_root
+    root = if requirement.root == "report"
+        profile.report_root
+    elseif requirement.root == "download"
+        profile.download_root
+    else
+        profile.output_root
+    end
     root === nothing && error(
         "edition $(requirement.edition) does not define a $(requirement.root) root for requirement $(requirement.path)",
     )
@@ -115,7 +121,7 @@ function print_render_plan(pages, profiles)
             profile = profile_for(profiles, edition)
             output_root = something(profile.output_root, "not configured")
             schedule_tag = something(profile.schedule_tag, "not configured")
-            println("  - $(profile.label): download=$(profile.download_root)")
+            println("  - $(profile.label): report=$(profile.report_root); download=$(profile.download_root)")
             println("    output=$output_root; schedule=$schedule_tag")
         end
     end

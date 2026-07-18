@@ -5,6 +5,7 @@ export EditionProfile, edition_profile, edition_profiles
 Base.@kwdef struct EditionProfile
     edition::String
     label::String
+    report_root::String
     download_root::String
     output_root::Union{Nothing, String} = nothing
     schedule_tag::Union{Nothing, String} = nothing
@@ -36,6 +37,11 @@ function edition_profiles(repo_root::AbstractString)
         EditionProfile(
             edition = "2024",
             label = "ISP 2024",
+            report_root = configured_root(
+                repo_root,
+                "PISP_DOCS_ISP2024_REPORT_ROOT",
+                joinpath("data", "2024", "pisp-reports"),
+            ),
             download_root = configured_root(
                 repo_root,
                 "PISP_DOCS_ISP2024_DOWNLOAD_ROOT",
@@ -51,6 +57,11 @@ function edition_profiles(repo_root::AbstractString)
         EditionProfile(
             edition = "2026",
             label = "ISP 2026",
+            report_root = configured_root(
+                repo_root,
+                "PISP_DOCS_ISP2026_REPORT_ROOT",
+                joinpath("data", "2026", "pisp-reports"),
+            ),
             download_root = configured_root(
                 repo_root,
                 "PISP_DOCS_ISP2026_DOWNLOAD_ROOT",

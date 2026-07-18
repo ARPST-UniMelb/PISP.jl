@@ -3,7 +3,8 @@
 PISP works with AEMO Integrated System Plan material drawn from several source families.
 The relationship between a source family and a PISP workflow is edition-specific.
 PISP.jl provides ISP 2026 asset and report downloaders and an archive-extraction helper.
-ISP 2026 parser development is under review, but its source-family coverage is not established by these docs and it is not yet integrated into a PISP.jl dataset-build or generated-output workflow.
+The source-only pages report local availability separately from any parser or
+generated-output capability.
 The [supported editions](supported-editions.md) page is the detailed status authority.
 
 | Source family | ISP 2024 PISP consumer or support | ISP 2026 PISP support boundary | Cross-release relationship status |
@@ -21,6 +22,11 @@ The [supported editions](supported-editions.md) page is the detailed status auth
 
 The [ISP 2024 data sources](../generated/isp2024/reference/data-sources.md) page explains the source families consumed by the implemented 2024 workflow.
 The [ISP 2026 overview](isp2026.md) describes source download and extraction, the ParseISP.jl review state, and the current PISP.jl integration boundary.
+
+For report-backed trace-folder meanings, see the 2024 and 2026 PLEXOS Model
+Instructions, physical pp. 5 and 7. The local source pages use those reports to
+explain trace groups, not to infer that similarly named local folders are
+equivalent across editions.
 
 An unknown relationship is not a compatibility claim. Similar source names do
 not establish a shared schema, coverage, scenario definition, modelling role,

@@ -15,7 +15,7 @@ const VALID_DATA_LAYERS = Set(["package-workflow", "source-data", "pisp-dataset"
 const VALID_STATUSES = Set(["draft", "published", "archived"])
 const VALID_TRACKS = Set(["shared", "isp2024", "isp2026", "comparison"])
 const VALID_EDITIONS = Set(["2024", "2026"])
-const VALID_REQUIREMENT_ROOTS = Set(["repo", "download", "output"])
+const VALID_REQUIREMENT_ROOTS = Set(["repo", "report", "download", "output"])
 const VALID_REQUIREMENT_TYPES = Set(["file", "directory", "path"])
 
 struct DataRequirement
@@ -303,8 +303,13 @@ function resolve_requirement_path(requirement; repo_root, profile_for)
         repo_root
     else
         profile = profile_for(requirement.edition)
-        candidate = requirement.root == "download" ?
-            getproperty(profile, :download_root) : getproperty(profile, :output_root)
+        candidate = if requirement.root == "report"
+            getproperty(profile, :report_root)
+        elseif requirement.root == "download"
+            getproperty(profile, :download_root)
+        else
+            getproperty(profile, :output_root)
+        end
         candidate === nothing && error(
             "edition $(requirement.edition) does not define a $(requirement.root) root for requirement $(requirement.path)",
         )

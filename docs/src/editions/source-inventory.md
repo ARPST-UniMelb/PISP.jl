@@ -12,54 +12,18 @@ Keeping those layers separate makes it possible to distinguish an acquired file 
 | Generated dataset | Static and schedule outputs can be written by the 2024 build. | An ISP 2026 dataset-build entry point and generated-output contract are not yet integrated into PISP.jl's documented public workflow. |
 | Published validation or analysis evidence | Registry-managed pages cover selected 2024 source and output questions. | No PISP 2026 validation or analysis pages are published. |
 
-## Observed local inventory
+## Observed local availability
 
-The following counts were observed in the local default-profile roots.
-They describe non-hidden files present for this documentation build, not a claim about complete upstream coverage, source currency, extraction state, or the files available in another checkout.
+The [ISP 2026 source-availability page](../generated/isp2026/validation/source-availability.md)
+and the [edition comparison page](../generated/comparison/validation/source-availability-by-edition.md)
+report selected observations from configured roots. They deliberately avoid
+recursive file totals: dot-file filtering is a local hygiene choice, not an
+upstream completeness measure, and a file's presence does not establish parser
+integration or a generated-data contract.
 
-| Edition | Download root observation | Report root observation |
-| --- | --- | --- |
-| ISP 2024 | 8,250 non-hidden files; 68,352,904 KiB (65.19 GiB). | 10 PDFs; 50,848 KiB (49.66 MiB). |
-| ISP 2026 | 817 non-hidden files; 2,380,248 KiB (2.27 GiB). | 10 PDFs; 57,192 KiB (55.85 MiB). |
-
-### ISP 2024 download-root observation
-
-| Top-level location | Non-hidden files |
-| --- | ---: |
-| `2024 ISP Model` | 90 |
-| `Auxiliary` | 7 |
-| `Core` | 3 |
-| `Sensitivities` | 9 |
-| `Traces` | 8,074 |
-| `zip` | 64 |
-| Root workbooks | 3 |
-
-| File extension | Files |
-| --- | ---: |
-| CSV | 8,158 |
-| XLSX | 22 |
-| XML | 6 |
-| ZIP | 64 |
-
-### ISP 2026 download-root observation
-
-| Top-level location | Non-hidden files |
-| --- | ---: |
-| `2026 ISP Model` | 348 |
-| `Core scenarios` | 3 |
-| `Sensitivities` | 6 |
-| `Traces` | 454 |
-| `zip` | 4 |
-| Root workbooks | 2 |
-
-| File extension | Files |
-| --- | ---: |
-| CSV | 799 |
-| XLSM | 1 |
-| XLSX | 10 |
-| XML | 3 |
-| ZIP | 4 |
-
-The presence of a downloaded or extracted file, or parser code under review, does not establish PISP.jl parser integration, an output schema, or analytical comparability.
+The compact evidence tables report configured report targets, archive groups,
+extracted landmarks, trace groups, and demand-trace observations. A local
+observation means only that the item was present in the supplied checkout at
+render time.
 For the implemented 2024 workflow, consult [data sources](../generated/isp2024/reference/data-sources.md) and [output tables](../generated/isp2024/reference/output-tables.md).
 For 2026 source material, consult the [ISP 2026 overview](isp2026.md).

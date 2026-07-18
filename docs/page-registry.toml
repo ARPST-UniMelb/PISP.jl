@@ -111,6 +111,71 @@ snapshot = true
 related_reference_pages = ["generated/isp2024/reference/data-sources.md", "assumptions.md"]
 
 [[page]]
+id = "isp2026-source-availability"
+title = "ISP 2026: Source availability and release structure"
+kind = "validation"
+track = "isp2026"
+editions = ["2026"]
+data_layer = "source-data"
+source = "literate/isp2026/validation/source_availability.jl"
+output = "generated/isp2026/validation/source-availability.md"
+status = "published"
+nav_order = 10
+snapshot = false
+data_requirements = [
+    { root = "report", edition = "2026", path = "2026-integrated-system-plan.pdf", type = "file" },
+    { root = "report", edition = "2026", path = "2026-isp-plexos-model-instructions.pdf", type = "file" },
+    { root = "report", edition = "2026", path = "2025-inputs-assumptions-and-scenarios-report.pdf", type = "file" },
+    { root = "report", edition = "2026", path = "addendum-to-2025-inputs-assumptions-and-scenarios-report.pdf", type = "file" },
+    { root = "report", edition = "2026", path = "2025-isp-methodology.pdf", type = "file" },
+    { root = "report", edition = "2026", path = "a2-isp-development-opportunities.pdf", type = "file" },
+    { root = "report", edition = "2026", path = "a3-renewable-energy-zones.pdf", type = "file" },
+    { root = "report", edition = "2026", path = "a4-system-operability.pdf", type = "file" },
+    { root = "report", edition = "2026", path = "a6-cost-benefit-analysis.pdf", type = "file" },
+    { root = "report", edition = "2026", path = "a7-system-security.pdf", type = "file" },
+    { root = "download", edition = "2026", path = "zip/2026-isp-model.zip", type = "file" },
+    { root = "download", edition = "2026", path = "zip/2026-isp-generation-and-storage-outlook.zip", type = "file" },
+    { root = "download", edition = "2026", path = "zip/Traces/2026-isp-solar-traces.zip", type = "file" },
+    { root = "download", edition = "2026", path = "zip/Traces/2026-isp-wind-traces.zip", type = "file" },
+    { root = "download", edition = "2026", path = "2026 ISP Model", type = "directory" },
+    { root = "download", edition = "2026", path = "Core scenarios", type = "directory" },
+    { root = "download", edition = "2026", path = "Sensitivities", type = "directory" },
+    { root = "download", edition = "2026", path = "Traces", type = "directory" },
+]
+related_reference_pages = ["editions/source-material.md", "editions/trace-coverage.md"]
+
+[[page]]
+id = "comparison-source-availability-by-edition"
+title = "ISP 2024 and ISP 2026: Source availability by edition"
+kind = "validation"
+track = "comparison"
+editions = ["2024", "2026"]
+data_layer = "source-data"
+source = "literate/comparison/validation/source_availability_by_edition.jl"
+output = "generated/comparison/validation/source-availability-by-edition.md"
+status = "published"
+nav_order = 10
+snapshot = false
+data_requirements = [
+    { root = "report", edition = "2024", path = "2024-isp-plexos-model-instructions.pdf", type = "file" },
+    { root = "report", edition = "2026", path = "2026-isp-plexos-model-instructions.pdf", type = "file" },
+    { root = "download", edition = "2024", path = "zip/2024-isp-model.zip", type = "file" },
+    { root = "download", edition = "2024", path = "zip/Traces", type = "directory" },
+    { root = "download", edition = "2024", path = "2024 ISP Model", type = "directory" },
+    { root = "download", edition = "2024", path = "Core", type = "directory" },
+    { root = "download", edition = "2024", path = "Sensitivities", type = "directory" },
+    { root = "download", edition = "2024", path = "Traces", type = "directory" },
+    { root = "download", edition = "2026", path = "zip/2026-isp-model.zip", type = "file" },
+    { root = "download", edition = "2026", path = "zip/Traces/2026-isp-solar-traces.zip", type = "file" },
+    { root = "download", edition = "2026", path = "zip/Traces/2026-isp-wind-traces.zip", type = "file" },
+    { root = "download", edition = "2026", path = "2026 ISP Model", type = "directory" },
+    { root = "download", edition = "2026", path = "Core scenarios", type = "directory" },
+    { root = "download", edition = "2026", path = "Sensitivities", type = "directory" },
+    { root = "download", edition = "2026", path = "Traces", type = "directory" },
+]
+related_reference_pages = ["editions/comparison.md", "editions/trace-coverage.md"]
+
+[[page]]
 id = "isp2024-generated-output-consistency"
 title = "ISP 2024: Generated-output consistency"
 kind = "validation"

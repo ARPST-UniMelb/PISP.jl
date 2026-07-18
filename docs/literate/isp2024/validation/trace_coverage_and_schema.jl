@@ -1,6 +1,10 @@
 # # ISP 2024: Trace data availability and structure
 #
-# PISP uses historical demand, solar, and wind traces with different directory layouts and table schemas. AEMO's [2024 ISP PLEXOS Model Instructions, physical p. 7](../../../../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=7) describes the demand, hydro, load-subtracter, solar, timeslice, and wind trace families. In the local downloads inspected here, solar and wind are grouped by technology and reference year, while demand is grouped by state/scenario and node. This page loads those raw trace files directly and shows their shape, date coverage, value ranges, and one demand-trace example.
+# PISP uses historical demand, solar, and wind traces with different directory layouts and table schemas. AEMO's [2024 ISP PLEXOS Model Instructions, physical p. 5](../../../../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=5) describes traces as time series combined from 14 historical weather years in a rolling reference-year sequence. The report lists demand, hydro, load-subtracter, solar, timeslice, and wind trace groups in the model package ([physical p. 7](../../../../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=7)). In the configured local downloads, solar and wind are grouped by technology and reference year, while demand is grouped by state/scenario and node. This page loads source traces directly and shows their shape, date coverage, value ranges, and a demand-trace example.
+#
+# A trace here means a source time series supplied to the detailed long-term
+# model. The report-backed group descriptions do not imply that every local
+# archive is complete or that the 2026 groups have the same contract.
 
 ENV["GKSwstype"] = "100"
 
@@ -18,11 +22,22 @@ const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, ".
 include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
 using .PISPDocsEditionProfiles
 
+include(joinpath(REPO_ROOT, "docs", "source_availability.jl"))
+using .PISPDocsSourceAvailability: source_availability_summary
+
 include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
 using .EdaSupport
 
 const SCRIPT_STEM = "isp2024_01_data_loading"
 const ISP2024_PROFILE = edition_profile(REPO_ROOT, "2024")
+const SOURCE_PROFILE = PISPDocsSourceAvailability.EditionProfile(
+    edition = ISP2024_PROFILE.edition,
+    report_root = ISP2024_PROFILE.report_root,
+    download_root = ISP2024_PROFILE.download_root,
+    report_root_source = :profile,
+    download_root_source = :profile,
+)
+const SOURCE_SUMMARY = source_availability_summary(SOURCE_PROFILE)
 const TRACES = relpath(joinpath(ISP2024_PROFILE.download_root, "Traces"), REPO_ROOT)  # kept relative: this is the path form recorded in the tables below
 abs_path(relative_path) = joinpath(REPO_ROOT, relative_path)  # resolves a TRACES-relative path to an absolute file location for reading
 
@@ -153,6 +168,15 @@ markdown_table(solar_midday_low_days)
 demand_dir = joinpath(TRACES, "demand_VIC_Step Change")
 dem_files = isdir(abs_path(demand_dir)) ? sort(filter(name -> endswith(name, "_PV_TOT.csv"), readdir(abs_path(demand_dir)))) : String[]
 
+demand_groups = isdir(abs_path(TRACES)) ? sort(filter(name -> startswith(name, "demand_"), readdir(abs_path(TRACES)))) : String[]
+demand_trace_count = sum(
+    count(name -> endswith(name, "_PV_TOT.csv"), readdir(abs_path(joinpath(TRACES, group))))
+    for group in demand_groups
+    if isdir(abs_path(joinpath(TRACES, group)))
+)
+println("Locally observed demand groups: ", length(demand_groups), "; demand traces: ", demand_trace_count)
+println("Across the configured download root: ", length(SOURCE_SUMMARY.trace_archive_files), " trace archives, ", length(SOURCE_SUMMARY.demand_group_paths), " demand groups, ", SOURCE_SUMMARY.demand_trace_files, " demand CSV traces, and PoE labels ", join(SOURCE_SUMMARY.poe_labels, ", "))
+
 demand_sample_metadata = if !isempty(dem_files)
     df_dem = CSV.read(abs_path(joinpath(demand_dir, dem_files[1])), DataFrame)
     println("Demand file: ", dem_files[1])
@@ -244,3 +268,5 @@ nothing #hide
 # - The executed 4006 samples for solar site Bannerton_SAT and wind site ARWF1 each contain 10,227 rows and 51 columns, spanning 2024-07-01 through 2052-06-30.
 # - For the solar 4006 sample at Bannerton_SAT, 67 of 10,227 days (0.655129%) have a midday maximum below the threshold `0.1` across columns `24:35`.
 # - Solar and wind traces share one schema (three metadata columns plus half-hourly value columns); demand traces use a different, per-node file family.
+# - The direct configured `Traces/` directory contains 36 state/scenario demand groups and 2,880 demand trace files; the configured download root also contains three extracted model-scenario demand groups, for 39 groups and 2,916 demand CSV traces in total. The `zip/Traces/` directory contains 62 trace archives. These are local observations, not upstream completeness.
+# - The configured local demand filenames include `POE10` and `POE50`. The 2023 Inputs, Assumptions and Scenarios Report defines POE as “probability of exceedance” ([physical p. 172](../../../../../data/2024/pisp-reports/2023-inputs-assumptions-and-scenarios-report.pdf#page=172)); the 2023 ISP Methodology describes 10%, 50%, and sometimes 90% POE simulations and uses 10% POE demand profiles for capacity-outlook modelling ([physical p. 39](../../../../../data/2024/pisp-reports/2023-isp-methodology.pdf#page=39)). The labels remain separate from that report-backed meaning, and no 2026 PoE contract is inferred.

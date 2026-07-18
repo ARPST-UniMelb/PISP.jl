@@ -14,15 +14,15 @@ It is for maintainers; ordinary readers should begin with the rendered site.
 | `docs/src/api.md` | Public ISP 2024 build and source-acquisition API boundary. |
 | `docs/literate/isp2024/` | Executable ISP 2024 reference, tutorial, validation, and analysis sources. |
 | `docs/page-registry.toml` | Authority for every registry-managed Literate source and generated Markdown output. |
-| `docs/edition_profiles.jl` | Edition-specific local data roots and schedule defaults used by rendering preflight. |
+| `docs/edition_profiles.jl` | Edition-specific report/download roots and schedule defaults used by rendering preflight. |
 | `docs/navigation.jl` | Published-site navigation assembled from static edition pages and published registry entries. |
 | `docs/src/generated/` | Markdown and figures generated from registered Literate pages. |
 | `docs/render_literate.jl` | Literate selection, profile resolution, data preflight, execution, and generated-output installation. |
 | `docs/make.jl` | Target-specific source-link staging and Documenter site build. |
 
 The public site separates shared explanatory pages from ISP 2024, ISP 2026, and comparison tracks.
-Only the ISP 2024 track currently has registry-managed Literate pages.
-The ISP 2026 and comparison landing pages distinguish source download and archive extraction in PISP.jl, parser development under review in ParseISP.jl, PISP.jl integration, generated-output contracts, and published evidence.
+The ISP 2026 and comparison tracks publish source-data-only availability pages;
+processed-data and parser claims remain outside their scope.
 
 ## Page registry
 
@@ -80,19 +80,28 @@ Relative environment-variable values are resolved from the repository root.
 
 | Edition | Environment variable | Default |
 | --- | --- | --- |
+| ISP 2024 | `PISP_DOCS_ISP2024_REPORT_ROOT` | `data/2024/pisp-reports` |
 | ISP 2024 | `PISP_DOCS_ISP2024_DOWNLOAD_ROOT` | `data/2024/pisp-downloads` |
 | ISP 2024 | `PISP_DOCS_ISP2024_OUTPUT_ROOT` | `data/2024/pisp-datasets/out-ref4006-poe10/csv` |
 | ISP 2024 | `PISP_DOCS_ISP2024_SCHEDULE_TAG` | `schedule-2030` |
 | ISP 2026 | `PISP_DOCS_ISP2026_DOWNLOAD_ROOT` | `data/2026/pisp-downloads` |
+| ISP 2026 | `PISP_DOCS_ISP2026_REPORT_ROOT` | `data/2026/pisp-reports` |
 | ISP 2026 | `PISP_DOCS_ISP2026_OUTPUT_ROOT` | Unset unless explicitly configured. |
 | ISP 2026 | `PISP_DOCS_ISP2026_SCHEDULE_TAG` | Unset unless explicitly configured. |
 
 A `data_requirements` item is an inline TOML table with `root`, `path`, and `type`; `download` and `output` requirements also need an `edition` that the page declares.
-The allowed roots are `repo`, `download`, and `output`, while the allowed types are `file`, `directory`, and `path`.
+The allowed roots are `repo`, `report`, `download`, and `output`, while the allowed types are `file`, `directory`, and `path`.
 
 ```toml
 data_requirements = [{ root = "download", edition = "2024", path = "2024-isp-inputs-and-assumptions-workbook.xlsx", type = "file" }]
 ```
+
+The source-only ISP 2026 and comparison pages declare edition-qualified report
+and download requirements. Their preflight is mandatory for a selected
+Literate render: provide both roots, render the selected page, and inspect the
+generated Markdown and local-observation tables. An absent root is not skipped
+by selected-page rendering. The optional skip-versus-fail behavior belongs only
+to the package-root fixture checks in `test/runtests.jl`.
 
 Before any producer or Literate page runs, the renderer resolves each selected requirement through the relevant edition profile and checks its type.
 The render plan prints selected page IDs, track and edition scope, resolved profiles, and resolved requirements.
@@ -122,6 +131,8 @@ julia --project=docs docs/build_all.jl
 
 `docs/make.jl` never executes Literate pages.
 It requires every published registry output to exist, stages `docs/src/` under `docs/.documenter-source/`, and builds the site under `docs/build/`.
+It does not resolve or evaluate `data_requirements`; it builds from committed
+generated Markdown and therefore does not require local source roots.
 
 ## Source links and validation
 

@@ -2,75 +2,97 @@ using PISP
 using Test
 using Dates
 
-include(joinpath(@__DIR__, "..", "eda", "isp2026_source_trace_inventory.jl"))
-using .ISP2026SourceTraceInventory
+include(joinpath(@__DIR__, "..", "docs", "source_availability.jl"))
+using .PISPDocsSourceAvailability
 
-@testset "ISP 2026 source trace EDA" begin
-    @test classify_trace_schema(["Year", "Month", "Day", lpad.(string.(1:48), 2, '0')...]) == :daily_half_hourly_zero_padded
-    @test classify_trace_schema(["Year", "Month", "Day", string.(1:48)...]) == :daily_half_hourly_unpadded
-    @test classify_trace_schema(["Year", "Month", "Day", ["BAD$(i)" for i in 1:48]...]) == :unsupported
-    @test classify_trace_schema(["Year", "Month", "Day", "Inflows"]) == :value_file
-    @test classify_trace_schema(["Year", "Month", "Day", "01", "02"]) == :unsupported
-    @test validate_date_sequence([2024, 2024], [1, 1], [1, 2]) == (valid=true, cadence=:daily, first_date=Date(2024, 1, 1), last_date=Date(2024, 1, 2))
-    @test !validate_date_sequence([2024, 2024], [1, 1], [1, 3]).valid
-    @test validate_date_sequence([2024, 2024], [1, 1], [1, 3]).cadence == :non_contiguous
-    @test validate_date_sequence([2024], [1], [1]).cadence == :single
-    mktempdir() do dir
-        path = joinpath(dir, "synthetic.csv")
-        open(path, "w") do io
-            println(io, "Year,Month,Day,Inflows")
-            println(io, "2024,1,1,1.0")
-            println(io, "2024,1,3,2.0")
-        end
-        observed = inspect_csv(path)
-        @test observed.schema == :value_file
-        @test observed.cadence == :non_contiguous
-        @test observed.rows == 2
-        wind_path = joinpath(dir, "Traces", "load_subtractor", "LS_TAS_Wind_ACCELERATED_TRANSITION_RefYear5000.csv")
-        mkpath(dirname(wind_path))
-        cp(path, wind_path)
-        observed_wind = inspect_csv(wind_path; root=dir)
-        @test observed_wind.family == "load_subtractor"
-    end
-    mktempdir() do dir
-        path = joinpath(dir, "noncontiguous.csv")
-        open(path, "w") do io
-            println(io, "Year,Month,Day,", join(lpad.(string.(1:48), 2, '0'), ","))
-            println(io, "2024,1,1,", join(fill("1.0", 48), ","))
-            println(io, "2024,1,3,", join(fill("2.0", 48), ","))
-        end
-        observed = inspect_csv(path)
-        @test observed.schema == :daily_half_hourly_zero_padded
-        @test observed.cadence == :non_contiguous
-    end
-    @test begin
-        try
-            require_download_roots("/missing/2024", "")
-            false
-        catch error
-            sprint(showerror, error) == "missing PISP_ISP2026_DOWNLOAD_ROOT: explicit root is required"
-        end
-    end
+function local_material_state(profile)
+    inspection = inspect_edition(profile)
+    inspection.state == :absent && return :skip
+    inspection.state == :complete && return :pass
+    error("$(profile.edition) local source material is incomplete")
 end
 
-if get(ENV, "PISP_SOURCE_TRACE_INTEGRATION", "") == "1"
-    @testset "source trace real-source contracts (opt-in)" begin
-        root24 = get(ENV, "PISP_ISP2024_DOWNLOAD_ROOT", "")
-        root26 = get(ENV, "PISP_ISP2026_DOWNLOAD_ROOT", "")
-        roots = require_download_roots(root24, root26)
-        records24 = inventory_root(roots.root24, "ISP 2024")
-        records26 = inventory_root(roots.root26, "ISP 2026")
-        solar24 = first(filter(r -> r.family == "solar" && r.rows == 10227 && r.columns == 51, records24))
-        solar26 = first(filter(r -> r.family == "solar" && r.rows == 9131 && r.columns == 51, records26))
-        wind24 = first(filter(r -> r.family == "wind" && r.rows == 10227 && r.columns == 51, records24))
-        wind26 = first(filter(r -> r.family == "wind" && r.rows == 9131 && r.columns == 51, records26))
-        @test all(r -> r.schema == :daily_half_hourly_unpadded, filter(r -> r.family == "solar", records24))
-        @test all(r -> r.schema == :daily_half_hourly_zero_padded, filter(r -> r.family == "wind", records24))
-        @test all(r -> r.schema == :daily_half_hourly_zero_padded, filter(r -> r.family in ("solar", "wind"), records26))
-        @test (solar24.first_date, solar24.last_date) == (Date(2024, 7, 1), Date(2052, 6, 30))
-        @test (solar26.first_date, solar26.last_date) == (Date(2026, 7, 1), Date(2051, 6, 30))
-        @test (wind24.first_date, wind24.last_date) == (Date(2024, 7, 1), Date(2052, 6, 30))
-        @test (wind26.first_date, wind26.last_date) == (Date(2026, 7, 1), Date(2051, 6, 30))
+@testset "source availability helper fixtures" begin
+    function fixture_roots(dir, edition; report = true, download = true)
+        profiles = source_availability_profiles(dir; env = Dict{String, String}())
+        profile = only(filter(p -> p.edition == edition, profiles))
+        report && mkpath(profile.report_root)
+        download && mkpath(profile.download_root)
+        return profile
+    end
+
+    function populate_fixture(profile)
+        for requirement in edition_requirements(profile.edition)
+            root = requirement.class == :report ? profile.report_root : profile.download_root
+            path = joinpath(root, requirement.relative_path)
+            if requirement.kind == :file
+                mkpath(dirname(path))
+                write(path, "fixture")
+            elseif requirement.kind == :directory
+                mkpath(path)
+            elseif requirement.kind == :archive_group
+                mkpath(path)
+                write(joinpath(path, "fixture-traces.zip"), "fixture")
+            end
+        end
+    end
+
+    mktempdir() do dir
+        profiles = source_availability_profiles(dir; env = Dict{String, String}())
+        @test all(profile -> inspect_edition(profile).state == :absent, profiles)
+        @test all(profile -> local_material_state(profile) == :skip, profiles)
+    end
+
+    mktempdir() do dir
+        profile = fixture_roots(dir, "2024"; report = true, download = false)
+        @test inspect_edition(profile).state == :incomplete
+        @test_throws ErrorException local_material_state(profile)
+    end
+
+    mktempdir() do dir
+        profile = fixture_roots(dir, "2024")
+        populate_fixture(profile)
+        inspection = inspect_edition(profile)
+        @test inspection.state == :complete
+        @test all(observation -> observation.observed, inspection.observations)
+        @test local_material_state(profile) == :pass
+        summary = source_availability_summary(profile)
+        @test summary.trace_archive_files == ["zip/Traces/fixture-traces.zip"]
+        @test isempty(summary.demand_group_paths)
+        @test summary.demand_trace_files == 0
+    end
+
+    mktempdir() do dir
+        profile = fixture_roots(dir, "2026")
+        populate_fixture(profile)
+        requirement = first(filter(r -> r.kind == :file && r.class == :download, edition_requirements("2026")))
+        path = joinpath(profile.download_root, requirement.relative_path)
+        rm(path)
+        mkpath(path)
+        @test inspect_edition(profile).state == :incomplete
+    end
+
+    mktempdir() do dir
+        override_report = joinpath(dir, "reports-override")
+        env = Dict("PISP_ISP2024_REPORT_ROOT" => override_report)
+        profile = only(filter(p -> p.edition == "2024", source_availability_profiles(dir; env = env)))
+        @test profile.report_root == normpath(abspath(override_report))
+        @test profile.report_root_source == :environment
+        @test profile.download_root_source == :default
+    end
+
+    @test !isdefined(PISPDocsSourceAvailability, :HTTP)
+end
+
+profiles = source_availability_profiles(normpath(joinpath(@__DIR__, "..")))
+for profile in profiles
+    inspection = inspect_edition(profile)
+    @testset "$(profile.edition) local source material" begin
+        if inspection.state == :absent
+            @test_skip "$(profile.edition) report and download roots are absent"
+        else
+            @test inspection.state == :complete
+        end
     end
 end
 
