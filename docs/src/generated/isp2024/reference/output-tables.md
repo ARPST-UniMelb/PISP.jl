@@ -47,6 +47,14 @@ function container_inventory(container)
     return DataFrame(rows)
 end
 
+# `RawMarkdown` emits assembled Markdown verbatim. The PrettyTables backend
+# escapes backticks and underscores, which would strip the inline-code
+# formatting the interpretation tables on this page rely on.
+struct RawMarkdown
+    markdown::String
+end
+Base.show(io::IO, ::MIME"text/markdown", table::RawMarkdown) = print(io, table.markdown)
+
 _tc, static_container, schedule_container = PISP.initialise_time_structures()
 ````
 
@@ -142,6 +150,28 @@ markdown_table(static_tables)
 | DER | der | id\_der | id\_dem | id\_der, name, tech, id\_dem, active, investment, capacity, reduct, pred\_max, cost\_red, n |
 
 
+The `Bus` table fixes the spatial resolution of the dataset. The counts in the
+sentence below come from the package's bus and area constants; their
+interpretation reflects the sub-regional network the 2024 ISP uses for the NEM.
+
+```@raw html
+<details class="source-code"><summary>Show source code</summary>
+```
+
+````julia
+RawMarkdown(
+    "The static tables represent the NEM as $(length(PISP.NEMBUSES)) sub-regional network " *
+    "nodes spanning the $(length(unique(values(PISP.BUS2AREA)))) NEM regions - Queensland, " *
+    "New South Wales, Victoria, Tasmania, and South Australia - interconnected by the `Line` records.",
+)
+````
+
+```@raw html
+</details>
+```
+
+The static tables represent the NEM as 12 sub-regional network nodes spanning the 5 NEM regions - Queensland, New South Wales, Victoria, Tasmania, and South Australia - interconnected by the `Line` records.
+
 ## Schedule tables
 
 Schedule tables carry scenario- and time-dependent values. The output filename is taken from the same `alt_names` mapping used by the CSV and Arrow writers.
@@ -184,14 +214,6 @@ Each schedule row applies to one asset, scenario, and timestamp. The `value` col
 ```
 
 ````julia
-# `RawMarkdown` emits an assembled Markdown table verbatim. The PrettyTables
-# backend escapes backticks and underscores, which would strip the inline-code
-# formatting these interpretation tables rely on.
-struct RawMarkdown
-    markdown::String
-end
-Base.show(io::IO, ::MIME"text/markdown", table::RawMarkdown) = print(io, table.markdown)
-
 # Curated interpretation for each schedule. Coverage - which schedules appear -
 # is driven by the live container above; only the value meaning, unit, and
 # overlay relationship are authored here.

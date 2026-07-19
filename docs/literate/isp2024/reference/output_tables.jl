@@ -38,6 +38,14 @@ function container_inventory(container)
     return DataFrame(rows)
 end
 
+## `RawMarkdown` emits assembled Markdown verbatim. The PrettyTables backend
+## escapes backticks and underscores, which would strip the inline-code
+## formatting the interpretation tables on this page rely on.
+struct RawMarkdown
+    markdown::String
+end
+Base.show(io::IO, ::MIME"text/markdown", table::RawMarkdown) = print(io, table.markdown)
+
 _tc, static_container, schedule_container = PISP.initialise_time_structures()
 
 # ## Static asset tables
@@ -46,6 +54,16 @@ _tc, static_container, schedule_container = PISP.initialise_time_structures()
 
 static_tables = container_inventory(static_container)
 markdown_table(static_tables)
+
+# The `Bus` table fixes the spatial resolution of the dataset. The counts in the
+# sentence below come from the package's bus and area constants; their
+# interpretation reflects the sub-regional network the 2024 ISP uses for the NEM.
+
+RawMarkdown(
+    "The static tables represent the NEM as $(length(PISP.NEMBUSES)) sub-regional network " *
+    "nodes spanning the $(length(unique(values(PISP.BUS2AREA)))) NEM regions - Queensland, " *
+    "New South Wales, Victoria, Tasmania, and South Australia - interconnected by the `Line` records.",
+)
 
 # ## Schedule tables
 #
@@ -57,14 +75,6 @@ markdown_table(schedule_tables)
 # ## Schedule value semantics
 #
 # Each schedule row applies to one asset, scenario, and timestamp. The `value` column overlays the corresponding static quantity when reconstructing the system state for that scenario and time. The schedules covered here are read from the live schedule container, so the table always lists exactly the schedules a build writes.
-
-## `RawMarkdown` emits an assembled Markdown table verbatim. The PrettyTables
-## backend escapes backticks and underscores, which would strip the inline-code
-## formatting these interpretation tables rely on.
-struct RawMarkdown
-    markdown::String
-end
-Base.show(io::IO, ::MIME"text/markdown", table::RawMarkdown) = print(io, table.markdown)
 
 ## Curated interpretation for each schedule. Coverage - which schedules appear -
 ## is driven by the live container above; only the value meaning, unit, and
