@@ -248,7 +248,48 @@ Inflow schedules are approximate energy allocations for one unit of the relevant
 
 ## Derived quantities
 
-The expressions below use the applicable static or scheduled value for the selected scenario and timestamp. When a corresponding schedule exists, its `value` replaces the static field before the quantity is derived.
+These quantities are not written as separate columns; they are reconstructed from the static columns when building a system state. Each uses the applicable static or scheduled value for the selected scenario and timestamp: when a corresponding schedule exists, its `value` replaces the static field before the quantity is derived.
+
+```@raw html
+<details class="source-code"><summary>Show source code</summary>
+```
+
+````julia
+# Reconstruction conventions applied by downstream use of the per-unit columns.
+# Each factor is validated against the live static schema, so a renamed column
+# fails the render rather than leaving a stale formula.
+const DERIVED_QUANTITIES = [
+    ("Generator", "Maximum generation output", ["pmax", "n"], "MW"),
+    ("Generator", "Minimum generation output", ["pmin", "n"], "MW"),
+    ("ESS", "Maximum discharging output", ["pmax", "n"], "MW"),
+    ("ESS", "Maximum charging input", ["lmax", "n"], "MW"),
+    ("ESS", "Minimum discharging output", ["pmin", "n"], "MW"),
+    ("ESS", "Minimum charging input", ["lmin", "n"], "MW"),
+    ("ESS", "Minimum stored energy", ["emin", "emax"], "MWh"),
+    ("ESS", "Initial stored energy at the first time step", ["eini", "emax"], "MWh"),
+    ("Line", "Maximum forward transfer capacity", ["fwcap", "n"], "MW"),
+    ("Line", "Maximum reverse transfer capacity", ["rvcap", "n"], "MW"),
+]
+
+let asset_columns = Dict(row.output_table => Set(split(row.columns, ", ")) for row in eachrow(static_tables))
+    rows = ["| Asset | Quantity | Expression | Unit |", "|---|---|---|---|"]
+    for (asset, quantity, factors, unit) in DERIVED_QUANTITIES
+        haskey(asset_columns, asset) ||
+            error("derived quantity references unknown static table `$asset`")
+        for factor in factors
+            factor in asset_columns[asset] ||
+                error("derived quantity `$quantity` references `$asset.$factor`, which is not a current column")
+        end
+        expression = "`" * join(factors, " × ") * "`"
+        push!(rows, "| $asset | $quantity | $expression | $unit |")
+    end
+    RawMarkdown(join(rows, "\n"))
+end
+````
+
+```@raw html
+</details>
+```
 
 | Asset | Quantity | Expression | Unit |
 |---|---|---|---|
