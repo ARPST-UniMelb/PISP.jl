@@ -66,7 +66,7 @@ markdown_table(expected_input_status)
 
 # ## Source contribution by output table
 #
-# PISP combines AEMO source files with package-defined mappings and records derived during dataset construction. The table summarises how each static output table is created and identifies additional source families used for its time-varying schedules. The static output tables covered here are read from the package's static-table schema, so the table cannot omit a table the schema defines.
+# PISP combines AEMO source files with package-defined mappings and records derived during dataset construction. The table summarises how each static output table is created and identifies additional source families used for its time-varying schedules.
 
 ## `RawMarkdown` emits assembled Markdown verbatim; the PrettyTables backend
 ## would escape the backticks and underscores this table relies on.

@@ -50,14 +50,12 @@ _tc, static_container, schedule_container = PISP.initialise_time_structures();
 
 # ## Static asset tables
 #
-# Static tables define asset identity and time-invariant attributes. Schedule rows should be joined back to these tables through the relationship identifier shown in the generated schema.
+# Static tables define asset identity and time-invariant attributes. Schedule rows should be joined back to these tables through the relationship identifier shown above.
 
 static_tables = container_inventory(static_container)
 markdown_table(static_tables)
 
-# The `Bus` table fixes the spatial resolution of the dataset. The counts in the
-# sentence below come from the package's bus and area constants; their
-# interpretation reflects the sub-regional network the 2024 ISP uses for the NEM.
+# The `Bus` table fixes the spatial resolution of the dataset.
 
 RawMarkdown(
     "The static tables represent the NEM as $(length(PISP.NEMBUSES)) sub-regional network " *
@@ -74,7 +72,7 @@ markdown_table(schedule_tables)
 
 # ## Schedule value semantics
 #
-# Each schedule row applies to one asset, scenario, and timestamp. The `value` column overlays the corresponding static quantity when reconstructing the system state for that scenario and time. The schedules covered here are read from the package's schedule schema, so the table always lists exactly the schedules the schema defines.
+# Each schedule row applies to one asset, scenario, and timestamp. The `value` column overlays the corresponding static quantity when reconstructing the system state for that scenario and time.
 
 ## Curated interpretation for each schedule. Coverage - which schedules appear -
 ## is driven by the live container above; only the value meaning, unit, and
@@ -149,7 +147,7 @@ end
 
 # ## Core static field meanings
 #
-# The generated schema above is the complete current column inventory. The tables below define the core fields used to interpret the six static asset tables.
+# The table above lists every column of the six static asset tables. The tables below define the core fields used to interpret them.
 
 ## Curated meanings for the documented core fields of each static table.
 ## Coverage and order follow this curated list; a documented field that is no

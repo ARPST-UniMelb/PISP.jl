@@ -64,7 +64,7 @@ _tc, static_container, schedule_container = PISP.initialise_time_structures();
 
 ## Static asset tables
 
-Static tables define asset identity and time-invariant attributes. Schedule rows should be joined back to these tables through the relationship identifier shown in the generated schema.
+Static tables define asset identity and time-invariant attributes. Schedule rows should be joined back to these tables through the relationship identifier shown above.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -89,9 +89,7 @@ markdown_table(static_tables)
 | DER | der | id\_der | id\_dem | id\_der, name, tech, id\_dem, active, investment, capacity, reduct, pred\_max, cost\_red, n |
 
 
-The `Bus` table fixes the spatial resolution of the dataset. The counts in the
-sentence below come from the package's bus and area constants; their
-interpretation reflects the sub-regional network the 2024 ISP uses for the NEM.
+The `Bus` table fixes the spatial resolution of the dataset.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -146,7 +144,7 @@ markdown_table(schedule_tables)
 
 ## Schedule value semantics
 
-Each schedule row applies to one asset, scenario, and timestamp. The `value` column overlays the corresponding static quantity when reconstructing the system state for that scenario and time. The schedules covered here are read from the package's schedule schema, so the table always lists exactly the schedules the schema defines.
+Each schedule row applies to one asset, scenario, and timestamp. The `value` column overlays the corresponding static quantity when reconstructing the system state for that scenario and time.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -269,7 +267,7 @@ end
 
 ## Core static field meanings
 
-The generated schema above is the complete current column inventory. The tables below define the core fields used to interpret the six static asset tables.
+The table above lists every column of the six static asset tables. The tables below define the core fields used to interpret them.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
