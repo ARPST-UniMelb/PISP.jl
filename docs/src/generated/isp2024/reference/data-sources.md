@@ -141,7 +141,62 @@ Source-derived values, code-derived values, and package assumptions have differe
 
 ## Source contribution by output table
 
-PISP combines AEMO source files with package-defined mappings and records derived during dataset construction. The table summarises how each static output table is created and identifies additional source families used for its time-varying schedules.
+PISP combines AEMO source files with package-defined mappings and records derived during dataset construction. The table summarises how each static output table is created and identifies additional source families used for its time-varying schedules. The static output tables covered here are read from the live build structures, so the table cannot omit a table the build produces.
+
+```@raw html
+<details class="source-code"><summary>Show source code</summary>
+```
+
+````julia
+# `RawMarkdown` emits assembled Markdown verbatim; the PrettyTables backend
+# would escape the backticks and underscores this table relies on.
+struct RawMarkdown
+    markdown::String
+end
+Base.show(io::IO, ::MIME"text/markdown", table::RawMarkdown) = print(io, table.markdown)
+
+_, static_container, _ = PISP.initialise_time_structures()
+static_output_tables = [
+    get(PISP.alt_names, field, string(field))
+    for field in fieldnames(typeof(static_container))
+    if getfield(static_container, field) isa DataFrame
+]
+
+# Curated provenance for each static output table. Coverage is validated against
+# the live build structures above; only the construction and schedule-input
+# descriptions are authored here.
+const SOURCE_CONTRIBUTION = Dict(
+    "Bus" => ("Bus names, representative coordinates, and NEM area mappings are package-defined constants.", "No time-varying bus schedule is produced."),
+    "Demand" => ("PISP creates one demand record for each bus.", "Hourly demand profiles come from the **Demand & Variable Renewable Energy trace data**."),
+    "Line" => ("Network capability, transmission reliability, and augmentation-option data come from the **Inputs and Assumptions workbook**.", "Line capacity schedules use the same workbook source family."),
+    "Generator" => ("Generator characteristics, capacities, mappings, and reliability parameters come from the **Inputs and Assumptions workbook**.", "Solar and wind schedules also use the **generation and storage outlook** and the **Demand & Variable Renewable Energy trace data**. Hydro inflow schedules additionally use the **Model** dataset."),
+    "ESS" => ("Storage characteristics, capacities, mappings, and reliability parameters come from the **Inputs and Assumptions workbook**.", "Behind-the-meter and virtual power plant battery schedules also use the **generation and storage outlook**."),
+    "DER" => ("DER records are constructed from the `Demand` and `Bus` tables.", "Demand-response and electric-vehicle charging schedules use the **Inputs and Assumptions workbook**."),
+)
+const SOURCE_CONTRIBUTION_ORDER = ["Bus", "Demand", "Line", "Generator", "ESS", "DER"]
+
+let
+    live = Set(static_output_tables)
+    documented = Set(keys(SOURCE_CONTRIBUTION))
+    live == documented || error(
+        "source-contribution coverage differs from the live static tables: " *
+        "only-live=$(sort(collect(setdiff(live, documented)))), " *
+        "only-documented=$(sort(collect(setdiff(documented, live))))",
+    )
+    Set(SOURCE_CONTRIBUTION_ORDER) == documented ||
+        error("SOURCE_CONTRIBUTION_ORDER must list exactly the documented tables")
+    rows = ["| Table | Static-table construction | Additional schedule inputs |", "|---|---|---|"]
+    for table in SOURCE_CONTRIBUTION_ORDER
+        construction, schedule_inputs = SOURCE_CONTRIBUTION[table]
+        push!(rows, "| `$table` | $construction | $schedule_inputs |")
+    end
+    RawMarkdown(join(rows, "\n"))
+end
+````
+
+```@raw html
+</details>
+```
 
 | Table | Static-table construction | Additional schedule inputs |
 |---|---|---|
