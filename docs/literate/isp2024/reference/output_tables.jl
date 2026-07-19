@@ -140,122 +140,148 @@ end
 # ## Core static field meanings
 #
 # The generated schema above is the complete current column inventory. The tables below define the core fields used to interpret the six static asset tables.
-#
+
+## Curated meanings for the documented core fields of each static table.
+## Coverage and order follow this curated list; a documented field that is no
+## longer a current column fails the render. Columns outside this core set appear
+## in the generated inventory above and are intentionally omitted here.
+static_columns = Dict(row.output_table => split(row.columns, ", ") for row in eachrow(static_tables))
+
+const FIELD_MEANINGS = Dict(
+    "Bus" => [
+        "id_bus" => "Unique bus identifier.",
+        "active" => "Inclusion flag: `1` for active and `0` for inactive.",
+        "id_area" => "NEM market-area identifier: `1` QLD, `2` NSW, `3` VIC, `4` TAS, and `5` SA.",
+    ],
+    "Demand" => [
+        "id_dem" => "Unique demand identifier.",
+        "load_" => "Static load value in MW; `Demand_load_sched` supplies the time-varying load.",
+        "id_bus" => "Bus to which the demand is connected.",
+        "active" => "Inclusion flag: `1` for active and `0` for inactive.",
+        "controllable" => "Controllability flag: `1` for controllable and `0` for non-controllable demand.",
+        "voll" => "Value of lost load in `\$/MWh`.",
+    ],
+    "DER" => [
+        "id_der" => "Unique DER identifier.",
+        "name" => "DER name.",
+        "tech" => "DER technology or service category, including `DSP` for demand-side participation.",
+        "id_dem" => "Demand record to which the DER is attached.",
+        "active" => "Inclusion flag: `1` for active and `0` for inactive.",
+        "capacity" => "DER service capacity in MW.",
+        "reduct" => "Reduction flag: `1` when the service represents load reduction and `0` otherwise.",
+        "pred_max" => "Maximum predicted load-reduction capacity in MW.",
+        "cost_red" => "Cost associated with load reduction in `\$/MWh`.",
+    ],
+    "ESS" => [
+        "id_ess" => "Unique energy-storage identifier.",
+        "tech" => "Storage technology, including `BESS` for battery energy storage and `PS` for pumped storage.",
+        "type" => "Storage-duration category, such as shallow, medium, or deep.",
+        "investment" => "Investment flag: `1` for an investment record and `0` for a non-investment record.",
+        "active" => "Inclusion flag: `1` for active and `0` for inactive.",
+        "id_bus" => "Bus to which the storage asset is connected.",
+        "ch_eff" => "Charging efficiency under the package's stored fraction convention.",
+        "dch_eff" => "Discharging efficiency under the package's stored fraction convention.",
+        "eini" => "Initial stored-energy fraction relative to `emax`.",
+        "emin" => "Minimum stored-energy fraction relative to `emax`.",
+        "emax" => "Maximum stored-energy capacity in MWh.",
+        "pmin" => "Minimum discharging power per unit in MW.",
+        "pmax" => "Maximum discharging power per unit in MW.",
+        "lmin" => "Minimum charging input per unit in MW.",
+        "lmax" => "Maximum charging input per unit in MW.",
+        "fullout" => "Full forced-outage rate, represented as a fraction of time.",
+        "partialout" => "Partial forced-outage rate, represented as a fraction of time.",
+        "mttrfull" => "Mean time to repair after a full outage, in hours.",
+        "mttrpart" => "Mean time to repair after a partial outage, in hours.",
+        "n" => "Maximum number of storage units available or online.",
+    ],
+    "Generator" => [
+        "id_gen" => "Unique generator identifier.",
+        "fuel" => "Generator fuel category.",
+        "tech" => "Generator technology.",
+        "type" => "Generator type or planning classification.",
+        "forate" => "Aggregate forced-outage parameter supplied by the package.",
+        "fullout" => "Full forced-outage rate, represented as a fraction of time.",
+        "partialout" => "Partial forced-outage rate, represented as a fraction of time.",
+        "derate" => "Capacity derating applied during a partial outage.",
+        "mttrfull" => "Mean time to repair after a full outage, in hours.",
+        "mttrpart" => "Mean time to repair after a partial outage, in hours.",
+        "id_bus" => "Bus to which the generator is connected.",
+        "pmin" => "Minimum power output per unit in MW.",
+        "pmax" => "Maximum power output per unit in MW.",
+        "rup" => "Ramp-up capability in MW/min.",
+        "rdw" => "Ramp-down capability in MW/min.",
+        "investment" => "Investment flag: `1` for an investment record and `0` for a non-investment record.",
+        "active" => "Inclusion flag: `1` for active and `0` for inactive.",
+        "cvar" => "Variable generation cost in `\$/MWh`.",
+        "cfuel" => "Fuel cost in `\$/GJ`.",
+        "cvom" => "Variable operation and maintenance cost in `\$/MWh`.",
+        "cfom" => "Fixed operation and maintenance cost parameter.",
+        "co2" => "Carbon-dioxide emissions intensity in kgCO2/MWh.",
+        "hrate" => "Generator heat-rate parameter used with fuel-cost information.",
+        "pfrmax" => "Maximum headroom available for frequency response in MW.",
+        "ffr" => "Fast-frequency-response provision flag.",
+        "pfr" => "Primary-frequency-response provision flag.",
+        "res2" => "Secondary-reserve provision flag.",
+        "res3" => "Tertiary or regulation-reserve provision flag.",
+        "n" => "Maximum number of generator units available or online.",
+        "down_time" => "Minimum down time after shutdown, in hours.",
+        "up_time" => "Minimum up time after startup, in hours.",
+        "start_up_cost" => "Startup cost in dollars.",
+        "shut_down_cost" => "Shutdown cost in dollars.",
+        "start_up_time" => "Time required to start a unit, in hours.",
+        "shut_down_time" => "Time required to shut down a unit, in hours.",
+    ],
+    "Line" => [
+        "id_lin" => "Unique line or transfer-corridor identifier.",
+        "tech" => "Line or transfer technology.",
+        "capacity" => "Maximum line capacity in MW.",
+        "id_bus_from" => "Bus at the forward-direction origin.",
+        "id_bus_to" => "Bus at the forward-direction destination.",
+        "investment" => "Investment flag: `1` for an investment record and `0` for a non-investment record.",
+        "active" => "Inclusion flag: `1` for active and `0` for inactive.",
+        "fwcap" => "Maximum forward transfer capacity per unit in MW.",
+        "rvcap" => "Maximum reverse transfer capacity per unit in MW.",
+        "fullout" => "Unplanned full-outage rate for a single credible contingency, represented as a fraction of time.",
+        "mttrfull" => "Mean time to repair after the contingency, in hours.",
+        "n" => "Maximum number of line units or parallel elements available.",
+    ],
+)
+
+function field_glossary(table)
+    haskey(static_columns, table) || error("unknown static table `$table`")
+    live = Set(static_columns[table])
+    rows = ["| Field | Meaning |", "|---|---|"]
+    for (field, meaning) in FIELD_MEANINGS[table]
+        field in live || error("`$table.$field` is documented but is not a current column")
+        push!(rows, "| `$field` | $meaning |")
+    end
+    RawMarkdown(join(rows, "\n"))
+end
+
 # ### `Bus`
-#
-# | Field | Meaning |
-# |---|---|
-# | `id_bus` | Unique bus identifier. |
-# | `active` | Inclusion flag: `1` for active and `0` for inactive. |
-# | `id_area` | NEM market-area identifier: `1` QLD, `2` NSW, `3` VIC, `4` TAS, and `5` SA. |
-#
+
+field_glossary("Bus")
+
 # ### `Demand`
-#
-# | Field | Meaning |
-# |---|---|
-# | `id_dem` | Unique demand identifier. |
-# | `load_` | Static load value in MW; `Demand_load_sched` supplies the time-varying load. |
-# | `id_bus` | Bus to which the demand is connected. |
-# | `active` | Inclusion flag: `1` for active and `0` for inactive. |
-# | `controllable` | Controllability flag: `1` for controllable and `0` for non-controllable demand. |
-# | `voll` | Value of lost load in `$/MWh`. |
-#
+
+field_glossary("Demand")
+
 # ### `DER`
-#
-# | Field | Meaning |
-# |---|---|
-# | `id_der` | Unique DER identifier. |
-# | `name` | DER name. |
-# | `tech` | DER technology or service category, including `DSP` for demand-side participation. |
-# | `id_dem` | Demand record to which the DER is attached. |
-# | `active` | Inclusion flag: `1` for active and `0` for inactive. |
-# | `capacity` | DER service capacity in MW. |
-# | `reduct` | Reduction flag: `1` when the service represents load reduction and `0` otherwise. |
-# | `pred_max` | Maximum predicted load-reduction capacity in MW. |
-# | `cost_red` | Cost associated with load reduction in `$/MWh`. |
-#
+
+field_glossary("DER")
+
 # ### `ESS`
-#
-# | Field | Meaning |
-# |---|---|
-# | `id_ess` | Unique energy-storage identifier. |
-# | `tech` | Storage technology, including `BESS` for battery energy storage and `PS` for pumped storage. |
-# | `type` | Storage-duration category, such as shallow, medium, or deep. |
-# | `investment` | Investment flag: `1` for an investment record and `0` for a non-investment record. |
-# | `active` | Inclusion flag: `1` for active and `0` for inactive. |
-# | `id_bus` | Bus to which the storage asset is connected. |
-# | `ch_eff` | Charging efficiency under the package's stored fraction convention. |
-# | `dch_eff` | Discharging efficiency under the package's stored fraction convention. |
-# | `eini` | Initial stored-energy fraction relative to `emax`. |
-# | `emin` | Minimum stored-energy fraction relative to `emax`. |
-# | `emax` | Maximum stored-energy capacity in MWh. |
-# | `pmin` | Minimum discharging power per unit in MW. |
-# | `pmax` | Maximum discharging power per unit in MW. |
-# | `lmin` | Minimum charging input per unit in MW. |
-# | `lmax` | Maximum charging input per unit in MW. |
-# | `fullout` | Full forced-outage rate, represented as a fraction of time. |
-# | `partialout` | Partial forced-outage rate, represented as a fraction of time. |
-# | `mttrfull` | Mean time to repair after a full outage, in hours. |
-# | `mttrpart` | Mean time to repair after a partial outage, in hours. |
-# | `n` | Maximum number of storage units available or online. |
-#
+
+field_glossary("ESS")
+
 # ### `Generator`
-#
-# | Field | Meaning |
-# |---|---|
-# | `id_gen` | Unique generator identifier. |
-# | `fuel` | Generator fuel category. |
-# | `tech` | Generator technology. |
-# | `type` | Generator type or planning classification. |
-# | `forate` | Aggregate forced-outage parameter supplied by the package. |
-# | `fullout` | Full forced-outage rate, represented as a fraction of time. |
-# | `partialout` | Partial forced-outage rate, represented as a fraction of time. |
-# | `derate` | Capacity derating applied during a partial outage. |
-# | `mttrfull` | Mean time to repair after a full outage, in hours. |
-# | `mttrpart` | Mean time to repair after a partial outage, in hours. |
-# | `id_bus` | Bus to which the generator is connected. |
-# | `pmin` | Minimum power output per unit in MW. |
-# | `pmax` | Maximum power output per unit in MW. |
-# | `rup` | Ramp-up capability in MW/min. |
-# | `rdw` | Ramp-down capability in MW/min. |
-# | `investment` | Investment flag: `1` for an investment record and `0` for a non-investment record. |
-# | `active` | Inclusion flag: `1` for active and `0` for inactive. |
-# | `cvar` | Variable generation cost in `$/MWh`. |
-# | `cfuel` | Fuel cost in `$/GJ`. |
-# | `cvom` | Variable operation and maintenance cost in `$/MWh`. |
-# | `cfom` | Fixed operation and maintenance cost parameter. |
-# | `co2` | Carbon-dioxide emissions intensity in kgCO2/MWh. |
-# | `hrate` | Generator heat-rate parameter used with fuel-cost information. |
-# | `pfrmax` | Maximum headroom available for frequency response in MW. |
-# | `ffr` | Fast-frequency-response provision flag. |
-# | `pfr` | Primary-frequency-response provision flag. |
-# | `res2` | Secondary-reserve provision flag. |
-# | `res3` | Tertiary or regulation-reserve provision flag. |
-# | `n` | Maximum number of generator units available or online. |
-# | `down_time` | Minimum down time after shutdown, in hours. |
-# | `up_time` | Minimum up time after startup, in hours. |
-# | `start_up_cost` | Startup cost in dollars. |
-# | `shut_down_cost` | Shutdown cost in dollars. |
-# | `start_up_time` | Time required to start a unit, in hours. |
-# | `shut_down_time` | Time required to shut down a unit, in hours. |
-#
+
+field_glossary("Generator")
+
 # ### `Line`
-#
-# | Field | Meaning |
-# |---|---|
-# | `id_lin` | Unique line or transfer-corridor identifier. |
-# | `tech` | Line or transfer technology. |
-# | `capacity` | Maximum line capacity in MW. |
-# | `id_bus_from` | Bus at the forward-direction origin. |
-# | `id_bus_to` | Bus at the forward-direction destination. |
-# | `investment` | Investment flag: `1` for an investment record and `0` for a non-investment record. |
-# | `active` | Inclusion flag: `1` for active and `0` for inactive. |
-# | `fwcap` | Maximum forward transfer capacity per unit in MW. |
-# | `rvcap` | Maximum reverse transfer capacity per unit in MW. |
-# | `fullout` | Unplanned full-outage rate for a single credible contingency, represented as a fraction of time. |
-# | `mttrfull` | Mean time to repair after the contingency, in hours. |
-# | `n` | Maximum number of line units or parallel elements available. |
-#
+
+field_glossary("Line")
+
 # A full outage removes the affected unit from service. A partial outage leaves the unit available at a reduced capability determined by the partial-outage and derating parameters. Mean time to repair is the average restoration duration after the corresponding outage state.
 
 # ## Output directory pattern
