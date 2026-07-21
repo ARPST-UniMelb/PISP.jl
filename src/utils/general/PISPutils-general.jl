@@ -68,6 +68,23 @@ function fill_problem_table_year(tc::PISPtimeConfig, year::Int; sce=keys(PISP.ID
     end
 end
 
+"""
+    _to_datetime(d, bound::Symbol) -> DateTime
+
+Normalise a date-like value `d` to a `DateTime` clamped to the start or end of its
+calendar day. `d` may be a `DateTime`, a `Date`, or a `"dd-mm-yyyy"` string.
+`bound = :end` returns the final hour of the day (`23:00:00`); any other value
+(for example `:start`) returns midnight (`00:00:00`).
+
+# Examples
+```jldoctest
+julia> PISP._to_datetime("15-03-2024", :start)
+2024-03-15T00:00:00
+
+julia> PISP._to_datetime("15-03-2024", :end)
+2024-03-15T23:00:00
+```
+"""
 function _to_datetime(d, bound::Symbol)
     dt = d isa DateTime ? d :
          d isa Date     ? DateTime(d) :

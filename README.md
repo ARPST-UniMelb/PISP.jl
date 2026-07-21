@@ -316,6 +316,45 @@ PISP combines AEMO source files with package-defined mappings and records derive
 | `ESS`       | Storage characteristics, capacities, mappings, and reliability parameters are obtained from the **Inputs and Assumptions workbook**.   | Behind-the-meter and virtual power plant battery schedules also use the **generation and storage outlook**.                                                                                        |
 | `DER`       | DER records are constructed from the `Demand` and `Bus` tables.                                                                        | Demand-response and electric-vehicle charging schedules are obtained from the **Inputs and Assumptions workbook**.                                                                                 |
 
+## Running the tests
+
+The test suite uses Julia's standard `Test` framework. From a Julia session started in the package environment (`julia --project=.`):
+
+```julia
+using Pkg
+Pkg.test()
+```
+
+Equivalently, press `]` to enter the Pkg REPL and run `test`.
+
+### Tests that need local data skip automatically
+
+Some test sets exercise the ISP report and source downloaders against the on-disk data layout. When the matching local data is absent, those tests report as *skipped* instead of failing, so a fresh checkout without the large AEMO assets still runs green. The suite looks for data under `data/<edition>/pisp-reports` and `data/<edition>/pisp-downloads` (for editions `2024` and `2026`). To point it at data kept elsewhere, set any of these environment variables before running the tests:
+
+| Environment variable         | Selects                            |
+| ---------------------------- | ---------------------------------- |
+| `PISP_ISP2024_REPORT_ROOT`   | ISP 2024 report PDFs               |
+| `PISP_ISP2024_DOWNLOAD_ROOT` | ISP 2024 model and trace downloads |
+| `PISP_ISP2026_REPORT_ROOT`   | ISP 2026 report PDFs               |
+| `PISP_ISP2026_DOWNLOAD_ROOT` | ISP 2026 model and trace downloads |
+
+A few tests also skip themselves when the `zip` / `unzip` command-line tools are not available.
+
+### Coverage
+
+Continuous integration measures line coverage on every run and uploads it to Codecov (see the build badge at the top of this README). To produce a coverage report locally, run the tests with coverage collection enabled:
+
+```julia
+using Pkg
+Pkg.test(; coverage=true)
+```
+
+This writes `*.cov` files alongside the sources; process them into a summary or `lcov` report with [Coverage.jl](https://github.com/JuliaCI/Coverage.jl), which you add to your own environment (it is not a dependency of PISP).
+
+### Doctests
+
+The `jldoctest` examples embedded in the package's docstrings are verified with [Documenter](https://documenter.juliadocs.org/)'s doctesting, independently of the ISP datasets and the full documentation build. Run them with `julia --project=docs docs/doctests.jl`.
+
 ## Documentation
 
 - [Documentation home](docs/src/index.md)
