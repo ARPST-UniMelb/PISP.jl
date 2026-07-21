@@ -30,6 +30,7 @@ test-*/
 *.xls*
 *.xml
 *.zip
+*.info
 data/
 *.DS_Store
 tmp/
