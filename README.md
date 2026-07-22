@@ -352,7 +352,7 @@ Pkg.test(; coverage=true)
 This writes `*.cov` files alongside the sources. Process them into a summary or `lcov` report with [Coverage.jl](https://github.com/JuliaCI/Coverage.jl), which you add to your own environment (it is not a dependency of PISP).
 
 ```sh
-./scripts/coverage.sh
+./scripts/test_coverage.sh
 ```
 
 ### Doctests
