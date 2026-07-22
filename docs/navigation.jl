@@ -47,7 +47,6 @@ function registry_navigation(registry_pages)
     navigation = Any[
         "Home" => "index.md",
         "Quickstart" => "quickstart.md",
-        "Contributing" => "contributing.md",
     ]
 
     push!(
@@ -70,6 +69,7 @@ function registry_navigation(registry_pages)
         "Compare ISP 2024 and ISP 2026" =>
             track_navigation(registry_pages, "comparison", "Overview and comparison rules", "editions/comparison.md"),
     )
+    push!(navigation, "Contributing" => "contributing.md")
     push!(navigation, "API Reference" => "api.md")
     return navigation
 end
