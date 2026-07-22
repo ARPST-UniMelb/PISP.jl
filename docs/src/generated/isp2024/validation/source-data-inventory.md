@@ -232,7 +232,7 @@ println("Total files discovered under ", DOWNLOAD_ROOT, ": ", length(files))
 ```
 
 ````
-Total files discovered under data/2024/pisp-downloads: 8250
+Total files discovered under data/2024/pisp-downloads: 8322
 
 ````
 
@@ -294,7 +294,7 @@ markdown_table(top_level_summary)
 | Auxiliary | directory | 7 | 6282064 | xlsx |
 | Core | directory | 3 | 27871688 | xlsx |
 | Sensitivities | directory | 9 | 31047416 | xlsx |
-| Traces | directory | 8074 | 50348183696 | csv |
+| Traces | directory | 8146 | 50838932474 | csv |
 | zip | directory | 64 | 19034494645 | zip |
 
 
@@ -314,7 +314,7 @@ markdown_table(extension_summary)
 
 | **extension** | **file\_count** | **total\_bytes** |
 |:--|--:|--:|
-| csv | 8158 | 50752303703 |
+| csv | 8230 | 51243052481 |
 | xlsx | 22 | 102972933 |
 | xml | 6 | 91464073 |
 | zip | 64 | 19034494645 |
@@ -389,182 +389,182 @@ pisp-downloads/
       - CNSW_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING.csv
       - CNSW_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING_PVLITE.csv
       - CNSW_RefYear_2011_HYDROGEN_EXPORT_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_CNSW_Progressive Change/
       - CNSW_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING.csv
       - CNSW_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
       - CNSW_RefYear_2011_PROGRESSIVE_CHANGE_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_CNSW_Step Change/
       - CNSW_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING.csv
       - CNSW_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
       - CNSW_RefYear_2011_STEP_CHANGE_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_CQ_Green Energy Exports/
       - CQ_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING.csv
       - CQ_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING_PVLITE.csv
       - CQ_RefYear_2011_HYDROGEN_EXPORT_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_CQ_Progressive Change/
       - CQ_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING.csv
       - CQ_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
       - CQ_RefYear_2011_PROGRESSIVE_CHANGE_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_CQ_Step Change/
       - CQ_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING.csv
       - CQ_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
       - CQ_RefYear_2011_STEP_CHANGE_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_CSA_Green Energy Exports/
       - CSA_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING.csv
       - CSA_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING_PVLITE.csv
       - CSA_RefYear_2011_HYDROGEN_EXPORT_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_CSA_Progressive Change/
       - CSA_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING.csv
       - CSA_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
       - CSA_RefYear_2011_PROGRESSIVE_CHANGE_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_CSA_Step Change/
       - CSA_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING.csv
       - CSA_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
       - CSA_RefYear_2011_STEP_CHANGE_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_GG_Green Energy Exports/
       - GG_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING.csv
       - GG_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING_PVLITE.csv
       - GG_RefYear_2011_HYDROGEN_EXPORT_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_GG_Progressive Change/
       - GG_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING.csv
       - GG_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
       - GG_RefYear_2011_PROGRESSIVE_CHANGE_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_GG_Step Change/
       - GG_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING.csv
       - GG_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
       - GG_RefYear_2011_STEP_CHANGE_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_NNSW_Green Energy Exports/
       - NNSW_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING.csv
       - NNSW_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING_PVLITE.csv
       - NNSW_RefYear_2011_HYDROGEN_EXPORT_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_NNSW_Progressive Change/
       - NNSW_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING.csv
       - NNSW_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
       - NNSW_RefYear_2011_PROGRESSIVE_CHANGE_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_NNSW_Step Change/
       - NNSW_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING.csv
       - NNSW_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
       - NNSW_RefYear_2011_STEP_CHANGE_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_NQ_Green Energy Exports/
       - NQ_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING.csv
       - NQ_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING_PVLITE.csv
       - NQ_RefYear_2011_HYDROGEN_EXPORT_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_NQ_Progressive Change/
       - NQ_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING.csv
       - NQ_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
       - NQ_RefYear_2011_PROGRESSIVE_CHANGE_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_NQ_Step Change/
       - NQ_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING.csv
       - NQ_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
       - NQ_RefYear_2011_STEP_CHANGE_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_SESA_Green Energy Exports/
       - SESA_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING.csv
       - SESA_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING_PVLITE.csv
       - SESA_RefYear_2011_HYDROGEN_EXPORT_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_SESA_Progressive Change/
       - SESA_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING.csv
       - SESA_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
       - SESA_RefYear_2011_PROGRESSIVE_CHANGE_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_SESA_Step Change/
       - SESA_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING.csv
       - SESA_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
       - SESA_RefYear_2011_STEP_CHANGE_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_SNSW_Green Energy Exports/
       - SNSW_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING.csv
       - SNSW_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING_PVLITE.csv
       - SNSW_RefYear_2011_HYDROGEN_EXPORT_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_SNSW_Progressive Change/
       - SNSW_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING.csv
       - SNSW_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
       - SNSW_RefYear_2011_PROGRESSIVE_CHANGE_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_SNSW_Step Change/
       - SNSW_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING.csv
       - SNSW_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
       - SNSW_RefYear_2011_STEP_CHANGE_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_SNW_Green Energy Exports/
       - SNW_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING.csv
       - SNW_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING_PVLITE.csv
       - SNW_RefYear_2011_HYDROGEN_EXPORT_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_SNW_Progressive Change/
       - SNW_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING.csv
       - SNW_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
       - SNW_RefYear_2011_PROGRESSIVE_CHANGE_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_SNW_Step Change/
       - SNW_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING.csv
       - SNW_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
       - SNW_RefYear_2011_STEP_CHANGE_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_SQ_Green Energy Exports/
       - SQ_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING.csv
       - SQ_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING_PVLITE.csv
       - SQ_RefYear_2011_HYDROGEN_EXPORT_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_SQ_Progressive Change/
       - SQ_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING.csv
       - SQ_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
       - SQ_RefYear_2011_PROGRESSIVE_CHANGE_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_SQ_Step Change/
       - SQ_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING.csv
       - SQ_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
       - SQ_RefYear_2011_STEP_CHANGE_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_TAS_Green Energy Exports/
       - TAS_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING.csv
       - TAS_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING_PVLITE.csv
       - TAS_RefYear_2011_HYDROGEN_EXPORT_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_TAS_Progressive Change/
       - TAS_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING.csv
       - TAS_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
       - TAS_RefYear_2011_PROGRESSIVE_CHANGE_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_TAS_Step Change/
       - TAS_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING.csv
       - TAS_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
       - TAS_RefYear_2011_STEP_CHANGE_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_VIC_Green Energy Exports/
       - VIC_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING.csv
       - VIC_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING_PVLITE.csv
       - VIC_RefYear_2011_HYDROGEN_EXPORT_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_VIC_Progressive Change/
       - VIC_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING.csv
       - VIC_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
       - VIC_RefYear_2011_PROGRESSIVE_CHANGE_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - demand_VIC_Step Change/
       - VIC_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING.csv
       - VIC_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
       - VIC_RefYear_2011_STEP_CHANGE_POE10_PV_TOT.csv
-      - ... (77 more files omitted)
+      - ... (79 more files omitted)
     - solar_2011/
       - Adelaide_Desal_FFP_RefYear2011.csv
       - Aramara_SAT_RefYear2011.csv
@@ -759,13 +759,13 @@ metric_value_table([
 | **Metric** | **Value** |
 |:--|:--|
 | Download root | data/2024/pisp-downloads |
-| Total files | 8250 |
-| Total bytes | 69981235354 |
+| Total files | 8322 |
+| Total bytes | 70471984132 |
 | Tree depth | 3 |
 | Maximum files in one directory | 3 |
 | Top-level entries | 9 |
 | Largest entry | Traces |
-| Largest entry (bytes) | 50348183696 |
+| Largest entry (bytes) | 50838932474 |
 
 
 ```@raw html
@@ -781,7 +781,7 @@ metric_value_table([
 ```
 
 ````
-Total: 8250 files, 66739.31 MB under data/2024/pisp-downloads
+Total: 8322 files, 67207.32 MB under data/2024/pisp-downloads
 
 ````
 

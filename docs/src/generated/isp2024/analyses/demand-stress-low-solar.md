@@ -185,11 +185,11 @@ markdown_table(area_demand_summary)
 
 | **area** | **mean\_demand\_mw** | **min\_demand\_mw** | **max\_demand\_mw** | **n\_days** |
 |--:|--:|--:|--:|--:|
-| 1 | 1971.82 | 1720.08 | 2601.81 | 365 |
-| 2 | 2439.4 | 2044.34 | 3528.19 | 365 |
-| 3 | 6295.69 | 4727.52 | 9789.05 | 365 |
-| 4 | 1335.16 | 1115.71 | 1625.82 | 365 |
-| 5 | 1038.86 | 822.857 | 1659.72 | 365 |
+| 1 | 1866.12 | 1626.77 | 2507.94 | 365 |
+| 2 | 2350.35 | 1965.23 | 3448.83 | 365 |
+| 3 | 6486.5 | 4943.57 | 10002.6 | 365 |
+| 4 | 1290.81 | 1083.71 | 1586.97 | 365 |
+| 5 | 1055.96 | 835.589 | 1670.46 | 365 |
 
 
 ## Representative Victorian solar input
@@ -289,9 +289,9 @@ metric_value_table([
 | Matched days | 365 |
 | First date | 2030-01-01 |
 | Last date | 2030-12-31 |
-| Mean demand (MW) | 6295.69 |
-| Minimum demand (MW) | 4727.52 |
-| Maximum demand (MW) | 9789.05 |
+| Mean demand (MW) | 6486.5 |
+| Minimum demand (MW) | 4943.57 |
+| Maximum demand (MW) | 10002.6 |
 | Mean solar capacity factor | 0.26346 |
 | Minimum solar capacity factor | 0.0095789 |
 | Maximum solar capacity factor | 0.499403 |
@@ -341,7 +341,7 @@ end
 |:--|:--|
 | Demand quantile | 0.9 |
 | Solar quantile | 0.1 |
-| Demand threshold (MW) | 7139.93 |
+| Demand threshold (MW) | 7313.93 |
 | Solar threshold (capacity factor) | 0.0912422 |
 | Coincident days | 3.0 |
 | Days checked | 365.0 |
@@ -374,7 +374,7 @@ println("Normal days (<P90): ", length(normal_days))
 
 ````
 
-Demand thresholds: P90=7140 MW, P95=7277 MW
+Demand thresholds: P90=7314 MW, P95=7443 MW
 Demand-stress days (>P95): 19
 Normal days (<P90): 328
 
@@ -412,30 +412,30 @@ markdown_table(stress_normal_hourly_profile)
 
 | **hour** | **demand\_stress\_mean\_demand\_mw** | **normal\_mean\_demand\_mw** |
 |--:|--:|--:|
-| 0 | 6422.62 | 5424.77 |
-| 1 | 6301.45 | 5226.55 |
-| 2 | 5921.9 | 4870.9 |
-| 3 | 5684.41 | 4683.32 |
-| 4 | 5686.27 | 4705.25 |
-| 5 | 6059.81 | 5041.43 |
-| 6 | 7054.82 | 5721.08 |
-| 7 | 8047.01 | 6217.16 |
-| 8 | 8703.03 | 6635.65 |
-| 9 | 9027.88 | 6867.61 |
-| 10 | 9138.19 | 6982.72 |
-| 11 | 9198.58 | 7023.56 |
-| 12 | 9233.39 | 6997.17 |
-| 13 | 9248.78 | 6933.84 |
-| 14 | 9094.69 | 6796.92 |
-| 15 | 8991.5 | 6717.16 |
-| 16 | 9076.8 | 6708.16 |
-| 17 | 9251.63 | 6750.31 |
-| 18 | 9136.51 | 6747.13 |
-| 19 | 8749.59 | 6628.25 |
-| 20 | 8389.32 | 6422.13 |
-| 21 | 7834.15 | 6030.69 |
-| 22 | 7209.96 | 5690.17 |
-| 23 | 6945.96 | 5797.04 |
+| 0 | 6621.06 | 5633.84 |
+| 1 | 6510.36 | 5442.19 |
+| 2 | 6143.05 | 5094.39 |
+| 3 | 5909.05 | 4909.51 |
+| 4 | 5907.5 | 4931.7 |
+| 5 | 6282.61 | 5264.24 |
+| 6 | 7259.85 | 5930.72 |
+| 7 | 8231.84 | 6415.63 |
+| 8 | 8876.57 | 6825.24 |
+| 9 | 9197.01 | 7053.38 |
+| 10 | 9308.45 | 7163.66 |
+| 11 | 9368.55 | 7197.25 |
+| 12 | 9397.89 | 7167.64 |
+| 13 | 9412.28 | 7107.42 |
+| 14 | 9264.0 | 6976.0 |
+| 15 | 9160.84 | 6897.39 |
+| 16 | 9241.6 | 6885.78 |
+| 17 | 9407.82 | 6923.68 |
+| 18 | 9288.72 | 6916.95 |
+| 19 | 8905.59 | 6798.69 |
+| 20 | 8550.83 | 6597.54 |
+| 21 | 8006.59 | 6217.22 |
+| 22 | 7394.43 | 5886.7 |
+| 23 | 7132.91 | 5994.54 |
 
 
 ## Demand duration evidence
@@ -472,13 +472,13 @@ markdown_table(duration_curve_quantile_marks)
 
 | **quantile\_label** | **demand\_mw** |
 |:--|--:|
-| max | 9789.05 |
-| p95 | 7277.23 |
-| p90 | 7139.93 |
-| p75 | 6752.21 |
-| median | 6191.03 |
-| p25 | 5908.9 |
-| min | 4727.52 |
+| max | 10002.6 |
+| p95 | 7443.21 |
+| p90 | 7313.93 |
+| p75 | 6939.36 |
+| median | 6391.19 |
+| p25 | 6100.47 |
+| min | 4943.57 |
 
 
 ## Normalised demand and solar comparison
@@ -513,7 +513,7 @@ end
 
 | **day\_count** | **demand\_solar\_correlation** |
 |--:|--:|
-| 365 | -0.257949 |
+| 365 | -0.254149 |
 
 
 ## Key demand statistics
@@ -543,8 +543,8 @@ println("Total days: ", total_days)
 === DEMAND-STRESS ANALYSIS ===
 Total days: 365
 Demand-stress days (>P95): 19 (5.2%)
-Peak demand: 9789 MW on 2030-01-09
-Mean demand: 6296 MW
+Peak demand: 10003 MW on 2030-01-09
+Mean demand: 6486 MW
 
 ````
 
@@ -639,14 +639,14 @@ metric_value_table([
 | **Metric** | **Value** |
 |:--|:--|
 | Total days | 365 |
-| Demand P90 (MW) | 7139.93 |
-| Demand P95 (MW) | 7277.23 |
+| Demand P90 (MW) | 7313.93 |
+| Demand P95 (MW) | 7443.21 |
 | Demand-stress days | 19 |
 | Normal days | 328 |
 | Demand-stress share (%) | 5.20548 |
-| Peak demand (MW) | 9789.05 |
+| Peak demand (MW) | 10002.6 |
 | Peak date | 2030-01-09 |
-| Mean demand (MW) | 6295.69 |
+| Mean demand (MW) | 6486.5 |
 
 
 ## Time-series evidence

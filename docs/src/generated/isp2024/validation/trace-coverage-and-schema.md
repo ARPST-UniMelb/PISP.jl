@@ -348,7 +348,7 @@ metric_value_table([
 | **Metric** | **Value** |
 |:--|:--|
 | Demand directory | data/2024/pisp-downloads/Traces/demand\_VIC\_Step Change |
-| Files | 27 |
+| Files | 28 |
 | Sample file | VIC\_RefYear\_2011\_STEP\_CHANGE\_POE10\_PV\_TOT.csv |
 | Sample rows | 11323 |
 | Sample columns | 51 |

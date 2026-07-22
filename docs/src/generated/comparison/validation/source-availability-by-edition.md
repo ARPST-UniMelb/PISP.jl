@@ -77,7 +77,7 @@ end
 ISP 2024 source state: complete
   reports observed: 10/10
   download requirements observed: 7/7
-  trace archives: 62; demand groups: 39; demand traces: 2916
+  trace archives: 62; demand groups: 39; demand traces: 2988
   local PoE labels: POE10, POE50
 ISP 2026 source state: complete
   reports observed: 10/10
