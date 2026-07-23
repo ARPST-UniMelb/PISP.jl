@@ -176,11 +176,11 @@ Below, an overview of each of the databases the parser produces is given.
 
 ### Bus
 
-| Parameter | Description                                                             |
-| --------- | ----------------------------------------------------------------------- |
-| `id_bus`  | id of the bus                                                           |
-| `active`  | Active flag (1: active; 0: inactive)                                    |
-| `id_area` | Area of the 5-bus NEM  market model (1: QLD; 2:NSW; 3:VIC; 4:TAS; 5:SA) |
+| Parameter | Description                                         |
+| --------- | --------------------------------------------------- |
+| `id_bus`  | id of the bus                                       |
+| `active`  | Active flag (1: active; 0: inactive)                |
+| `id_area` | NEM market area (1: QLD; 2:NSW; 3:VIC; 4:TAS; 5:SA) |
 
 ### Demand
 
@@ -304,3 +304,70 @@ Below, an overview of each of the databases the parser produces is given.
 > - 2024 Integrated System Plan **generation and storage outlook**
 > - 2024 Integrated System Plan **Model**
 > - 2024 Integrated System Plan **Demand & Variable Renewable Energy trace data**
+
+PISP combines AEMO source files with package-defined mappings and records derived during dataset construction. The table below summarises how each static output table is created and identifies the additional source data used for its time-varying schedules.
+
+| Table       | Static table construction                                                                                                              | Time-varying schedule sources                                                                                                                                                                      |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Bus`       | Bus names, locations, and NEM area mappings are defined as package constants.                                                          | No time-varying bus schedules are produced.                                                                                                                                                        |
+| `Demand`    | PISP creates one demand record for each bus.                                                                                           | Hourly demand profiles are obtained from the **Demand & Variable Renewable Energy trace data**.                                                                                                    |
+| `Line`      | Network capability, transmission reliability, and augmentation-option data are obtained from the **Inputs and Assumptions workbook**.  | Line schedules use the same source family; no additional AEMO dataset is required.                                                                                                                 |
+| `Generator` | Generator characteristics, capacities, mappings, and reliability parameters are obtained from the **Inputs and Assumptions workbook**. | Solar and wind schedules also use the **generation and storage outlook** and the **Demand & Variable Renewable Energy trace data**. Hydro inflow schedules additionally use the **Model** dataset. |
+| `ESS`       | Storage characteristics, capacities, mappings, and reliability parameters are obtained from the **Inputs and Assumptions workbook**.   | Behind-the-meter and virtual power plant battery schedules also use the **generation and storage outlook**.                                                                                        |
+| `DER`       | DER records are constructed from the `Demand` and `Bus` tables.                                                                        | Demand-response and electric-vehicle charging schedules are obtained from the **Inputs and Assumptions workbook**.                                                                                 |
+
+## Running the tests
+
+The test suite uses Julia's standard `Test` framework. From a Julia session started in the package environment (`julia --project=.`):
+
+```julia
+using Pkg
+Pkg.test()
+```
+
+Equivalently, press `]` to enter the Pkg REPL and run `test`.
+
+### Tests that need local data skip automatically
+
+Some test sets exercise the ISP report and source downloaders against the on-disk data layout. When the matching local data is absent, those tests report as *skipped* instead of failing, so a fresh checkout without the large AEMO assets still runs green. The suite looks for data under `data/<edition>/pisp-reports` and `data/<edition>/pisp-downloads` (for editions `2024` and `2026`). To point it at data kept elsewhere, set any of these environment variables before running the tests:
+
+| Environment variable         | Selects                            |
+| ---------------------------- | ---------------------------------- |
+| `PISP_ISP2024_REPORT_ROOT`   | ISP 2024 report PDFs               |
+| `PISP_ISP2024_DOWNLOAD_ROOT` | ISP 2024 model and trace downloads |
+| `PISP_ISP2026_REPORT_ROOT`   | ISP 2026 report PDFs               |
+| `PISP_ISP2026_DOWNLOAD_ROOT` | ISP 2026 model and trace downloads |
+
+A few tests also skip themselves when the `zip` / `unzip` command-line tools are not available.
+
+### Coverage
+
+Continuous integration measures line coverage on every run and uploads it to Codecov (see the build badge at the top of this README). To produce a coverage report locally, run the tests with coverage collection enabled:
+
+```julia
+using Pkg
+Pkg.test(; coverage=true)
+```
+
+This writes `*.cov` files alongside the sources. Process them into a summary or `lcov` report with [Coverage.jl](https://github.com/JuliaCI/Coverage.jl), which you add to your own environment (it is not a dependency of PISP).
+
+```sh
+./scripts/test_coverage.sh
+```
+
+### Doctests
+
+The `jldoctest` examples embedded in the package's docstrings are verified with [Documenter](https://documenter.juliadocs.org/)'s doctesting, independently of the ISP datasets and the full documentation build. Run them with `julia --project=docs docs/doctests.jl`.
+
+## Documentation
+
+- [Documentation home](docs/src/index.md)
+- [Quickstart](docs/src/quickstart.md)
+- [Contributor setup and tests](docs/src/contributing.md)
+- [Documentation maintenance and complete regeneration](docs/README.md)
+- [Download ISP source material](docs/src/editions/source-material.md)
+- [Supported ISP editions](docs/src/editions/supported-editions.md)
+- [ISP 2024 output tables and field dictionary](docs/src/generated/isp2024/reference/output-tables.md)
+- [ISP 2024 source-to-output provenance](docs/src/generated/isp2024/reference/data-sources.md)
+- [Assumptions and scope](docs/src/assumptions.md)
+- [API reference](docs/src/api.md)

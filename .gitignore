@@ -1,6 +1,8 @@
 *.jl.*.cov
 *.jl.cov
 *.jl.mem
+*.pyc
+__pycache__/
 config/
 usr/usr-params.jl
 Manifest.toml
@@ -13,8 +15,13 @@ data/*
 *.arrow
 out/
 out-*/
-test/
+# Test sources (test/*.jl) are tracked; test-generated data/outputs stay ignored.
+/test/**/*.csv
+/test/**/*.arrow
+/test/out*/
 test-*/
+!docs/test/
+!docs/test/**
 !data-updated/
 !data-updated/**
 *.zip
@@ -23,12 +30,15 @@ test-*/
 *.xls*
 *.xml
 *.zip
+*.info
 data/
 *.DS_Store
 tmp/
 build/
-__pycache__/
 
 CLAUDE*
 AGENTS*
 .claude/
+
+eda/figures/
+eda/tables/

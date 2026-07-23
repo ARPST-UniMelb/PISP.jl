@@ -1,0 +1,8 @@
+# Regenerable Documenter.jl site build; rebuild with:
+#   julia --project=docs docs/make.jl
+#
+# Keep docs/src/generated/ committed. Those files are rendered registry-managed executable pages, not throwaway build output.
+build/
+.documenter-source/
+.literate-staging-*/
+src/.generated-backup-*/

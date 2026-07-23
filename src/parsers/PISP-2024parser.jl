@@ -16,7 +16,22 @@ function bus_table(ts::PISPtimeStatic)
     end
 end
 
-# Select daily trace rows whose Year/Month/Day fall inside the requested window.
+"""
+    select_trace_date_window(df, dstart::DateTime, dend::DateTime) -> DataFrame
+
+Return the rows of a daily trace `df` whose `Year`/`Month`/`Day` columns fall within
+the inclusive date window `[dstart, dend]`, compared at day resolution.
+
+# Examples
+```jldoctest
+julia> df = DataFrame(Year = [2024, 2024, 2025], Month = [6, 12, 1], Day = [15, 31, 1]);
+
+julia> window = PISP.select_trace_date_window(df, DateTime(2024, 1, 1), DateTime(2024, 12, 31));
+
+julia> nrow(window)
+2
+```
+"""
 function select_trace_date_window(df::DataFrame, dstart::DateTime, dend::DateTime)
     trace_dates = Date.(df.Year, df.Month, df.Day)
     mask = (trace_dates .>= Date(dstart)) .& (trace_dates .<= Date(dend))

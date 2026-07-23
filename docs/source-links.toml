@@ -1,0 +1,29 @@
+schema_version = 2
+
+[[source]]
+title = "2024 Integrated System Plan"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2024/pisp-reports/2024-integrated-system-plan.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2024/2024-integrated-system-plan-isp.pdf?la=en"
+public_origin = "official"
+
+[[source]]
+title = "2024 ISP PLEXOS Model Instructions"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2024/supporting-materials/2024-isp-plexos-model-instructions.pdf?la=en"
+public_origin = "official"
+
+[[source]]
+title = "2023 Inputs, Assumptions and Scenarios Report"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2024/pisp-reports/2023-inputs-assumptions-and-scenarios-report.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2023/2023-inputs-assumptions-and-scenarios-report.pdf?la=en"
+public_origin = "official"
+
+[[source]]
+title = "ISP Methodology (30 June 2023)"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2024/pisp-reports/2023-isp-methodology.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/stakeholder_consultation/consultations/nem-consultations/2023/isp-methodology-2023/isp-methodology_june-2023.pdf?la=en"
+public_origin = "official"

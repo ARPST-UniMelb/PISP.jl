@@ -1,0 +1,305 @@
+[[page]]
+id = "isp2024-data-sources"
+title = "ISP 2024: Data sources"
+kind = "reference"
+track = "isp2024"
+editions = ["2024"]
+data_layer = "source-data"
+source = "literate/isp2024/reference/data_sources.jl"
+output = "generated/isp2024/reference/data-sources.md"
+status = "published"
+nav_order = 10
+snapshot = false
+related_reference_pages = ["concepts.md", "assumptions.md"]
+
+[[page]]
+id = "isp2024-output-tables"
+title = "ISP 2024: Output tables"
+kind = "reference"
+track = "isp2024"
+editions = ["2024"]
+data_layer = "pisp-dataset"
+source = "literate/isp2024/reference/output_tables.jl"
+output = "generated/isp2024/reference/output-tables.md"
+status = "published"
+nav_order = 20
+snapshot = false
+related_reference_pages = ["concepts.md", "assumptions.md"]
+
+[[page]]
+id = "isp2024-parameters-and-mappings"
+title = "ISP 2024: Parameters and mappings"
+kind = "reference"
+track = "isp2024"
+editions = ["2024"]
+data_layer = "package-workflow"
+source = "literate/isp2024/reference/parameters_and_mappings.jl"
+output = "generated/isp2024/reference/parameters-and-mappings.md"
+status = "published"
+nav_order = 30
+snapshot = false
+related_reference_pages = ["concepts.md", "assumptions.md"]
+
+[[page]]
+id = "isp2024-problem-table"
+title = "ISP 2024: Building a problem table"
+kind = "tutorial"
+track = "isp2024"
+editions = ["2024"]
+data_layer = "package-workflow"
+source = "literate/isp2024/tutorials/problem_table.jl"
+output = "generated/isp2024/tutorials/building-problem-table.md"
+status = "published"
+nav_order = 10
+snapshot = false
+related_reference_pages = ["concepts.md", "generated/isp2024/reference/output-tables.md"]
+
+[[page]]
+id = "isp2024-working-with-pisp-outputs"
+title = "ISP 2024: Working with PISP-generated outputs"
+kind = "tutorial"
+track = "isp2024"
+editions = ["2024"]
+data_layer = "pisp-dataset"
+source = "literate/isp2024/tutorials/working_with_pisp_outputs.jl"
+output = "generated/isp2024/tutorials/working-with-pisp-outputs.md"
+status = "published"
+nav_order = 20
+snapshot = true
+related_reference_pages = ["concepts.md", "generated/isp2024/reference/output-tables.md", "assumptions.md"]
+
+[[page]]
+id = "isp2024-source-data-inventory"
+title = "ISP 2024: Source-data inventory"
+kind = "validation"
+track = "isp2024"
+editions = ["2024"]
+data_layer = "source-data"
+source = "literate/isp2024/validation/source_data_inventory.jl"
+output = "generated/isp2024/validation/source-data-inventory.md"
+status = "published"
+nav_order = 10
+snapshot = true
+related_reference_pages = ["generated/isp2024/reference/data-sources.md"]
+
+[[page]]
+id = "isp2024-trace-coverage-and-schema"
+title = "ISP 2024: Trace data availability and structure"
+kind = "validation"
+track = "isp2024"
+editions = ["2024"]
+data_layer = "source-data"
+source = "literate/isp2024/validation/trace_coverage_and_schema.jl"
+output = "generated/isp2024/validation/trace-coverage-and-schema.md"
+status = "published"
+nav_order = 20
+snapshot = true
+related_reference_pages = ["generated/isp2024/reference/data-sources.md", "concepts.md"]
+
+[[page]]
+id = "isp2024-temperature-data-coverage"
+title = "ISP 2024: Temperature-data coverage and climate-zone solar comparison"
+kind = "validation"
+track = "isp2024"
+editions = ["2024"]
+data_layer = "cross-layer"
+source = "literate/isp2024/validation/temperature_data_coverage.jl"
+output = "generated/isp2024/validation/temperature-data-coverage.md"
+status = "published"
+nav_order = 30
+snapshot = true
+related_reference_pages = ["generated/isp2024/reference/data-sources.md", "assumptions.md"]
+
+[[page]]
+id = "isp2026-source-availability"
+title = "ISP 2026: Source availability and release structure"
+kind = "validation"
+track = "isp2026"
+editions = ["2026"]
+data_layer = "source-data"
+source = "literate/isp2026/validation/source_availability.jl"
+output = "generated/isp2026/validation/source-availability.md"
+status = "published"
+nav_order = 10
+snapshot = false
+data_requirements = [
+    { root = "report", edition = "2026", path = "2026-integrated-system-plan.pdf", type = "file" },
+    { root = "report", edition = "2026", path = "2026-isp-plexos-model-instructions.pdf", type = "file" },
+    { root = "report", edition = "2026", path = "2025-inputs-assumptions-and-scenarios-report.pdf", type = "file" },
+    { root = "report", edition = "2026", path = "addendum-to-2025-inputs-assumptions-and-scenarios-report.pdf", type = "file" },
+    { root = "report", edition = "2026", path = "2025-isp-methodology.pdf", type = "file" },
+    { root = "report", edition = "2026", path = "a2-isp-development-opportunities.pdf", type = "file" },
+    { root = "report", edition = "2026", path = "a3-renewable-energy-zones.pdf", type = "file" },
+    { root = "report", edition = "2026", path = "a4-system-operability.pdf", type = "file" },
+    { root = "report", edition = "2026", path = "a6-cost-benefit-analysis.pdf", type = "file" },
+    { root = "report", edition = "2026", path = "a7-system-security.pdf", type = "file" },
+    { root = "download", edition = "2026", path = "zip/2026-isp-model.zip", type = "file" },
+    { root = "download", edition = "2026", path = "zip/2026-isp-generation-and-storage-outlook.zip", type = "file" },
+    { root = "download", edition = "2026", path = "zip/Traces/2026-isp-solar-traces.zip", type = "file" },
+    { root = "download", edition = "2026", path = "zip/Traces/2026-isp-wind-traces.zip", type = "file" },
+    { root = "download", edition = "2026", path = "2026 ISP Model", type = "directory" },
+    { root = "download", edition = "2026", path = "Core scenarios", type = "directory" },
+    { root = "download", edition = "2026", path = "Sensitivities", type = "directory" },
+    { root = "download", edition = "2026", path = "Traces", type = "directory" },
+]
+related_reference_pages = ["editions/source-material.md", "editions/trace-coverage.md"]
+
+[[page]]
+id = "comparison-source-availability-by-edition"
+title = "ISP 2024 and ISP 2026: Source availability by edition"
+kind = "validation"
+track = "comparison"
+editions = ["2024", "2026"]
+data_layer = "source-data"
+source = "literate/comparison/validation/source_availability_by_edition.jl"
+output = "generated/comparison/validation/source-availability-by-edition.md"
+status = "published"
+nav_order = 10
+snapshot = false
+data_requirements = [
+    { root = "report", edition = "2024", path = "2024-isp-plexos-model-instructions.pdf", type = "file" },
+    { root = "report", edition = "2026", path = "2026-isp-plexos-model-instructions.pdf", type = "file" },
+    { root = "download", edition = "2024", path = "zip/2024-isp-model.zip", type = "file" },
+    { root = "download", edition = "2024", path = "zip/Traces", type = "directory" },
+    { root = "download", edition = "2024", path = "2024 ISP Model", type = "directory" },
+    { root = "download", edition = "2024", path = "Core", type = "directory" },
+    { root = "download", edition = "2024", path = "Sensitivities", type = "directory" },
+    { root = "download", edition = "2024", path = "Traces", type = "directory" },
+    { root = "download", edition = "2026", path = "zip/2026-isp-model.zip", type = "file" },
+    { root = "download", edition = "2026", path = "zip/Traces/2026-isp-solar-traces.zip", type = "file" },
+    { root = "download", edition = "2026", path = "zip/Traces/2026-isp-wind-traces.zip", type = "file" },
+    { root = "download", edition = "2026", path = "2026 ISP Model", type = "directory" },
+    { root = "download", edition = "2026", path = "Core scenarios", type = "directory" },
+    { root = "download", edition = "2026", path = "Sensitivities", type = "directory" },
+    { root = "download", edition = "2026", path = "Traces", type = "directory" },
+]
+related_reference_pages = ["editions/comparison.md", "editions/trace-coverage.md"]
+
+[[page]]
+id = "isp2024-generated-output-consistency"
+title = "ISP 2024: Generated-output consistency"
+kind = "validation"
+track = "isp2024"
+editions = ["2024"]
+data_layer = "pisp-dataset"
+source = "literate/isp2024/validation/generated_output_consistency.jl"
+output = "generated/isp2024/validation/generated-output-consistency.md"
+status = "published"
+nav_order = 40
+snapshot = true
+related_reference_pages = ["generated/isp2024/reference/output-tables.md", "assumptions.md"]
+
+[[page]]
+id = "isp2024-reference-trace-profile"
+title = "ISP 2024: Reference trace 4006 profiles"
+kind = "analysis"
+track = "isp2024"
+editions = ["2024"]
+data_layer = "source-data"
+source = "literate/isp2024/analysis/reference_trace_profile.jl"
+output = "generated/isp2024/analyses/reference-trace-4006-profiles.md"
+status = "published"
+nav_order = 10
+snapshot = true
+related_reference_pages = ["generated/isp2024/reference/data-sources.md", "concepts.md", "generated/isp2024/reference/parameters-and-mappings.md"]
+
+[[page]]
+id = "isp2024-historical-trace-years"
+title = "ISP 2024: Historical trace-year comparison"
+kind = "analysis"
+track = "isp2024"
+editions = ["2024"]
+data_layer = "source-data"
+source = "literate/isp2024/analysis/historical_trace_years.jl"
+output = "generated/isp2024/analyses/historical-trace-year-comparison.md"
+status = "published"
+nav_order = 20
+snapshot = true
+related_reference_pages = ["generated/isp2024/reference/data-sources.md", "concepts.md"]
+
+[[page]]
+id = "isp2024-seasonal-renewable-extremes"
+title = "ISP 2024: Seasonal renewable extremes"
+kind = "analysis"
+track = "isp2024"
+editions = ["2024"]
+data_layer = "source-data"
+source = "literate/isp2024/analysis/seasonal_renewable_extremes.jl"
+output = "generated/isp2024/analyses/seasonal-renewable-extremes.md"
+status = "published"
+nav_order = 30
+snapshot = true
+related_reference_pages = ["generated/isp2024/reference/data-sources.md", "assumptions.md"]
+
+[[page]]
+id = "isp2024-demand-stress-low-solar"
+title = "ISP 2024: Demand stress and low-solar coincidence"
+kind = "analysis"
+track = "isp2024"
+editions = ["2024"]
+data_layer = "cross-layer"
+source = "literate/isp2024/analysis/demand_stress_low_solar.jl"
+output = "generated/isp2024/analyses/demand-stress-low-solar.md"
+status = "published"
+nav_order = 40
+snapshot = true
+related_reference_pages = ["generated/isp2024/reference/output-tables.md", "assumptions.md"]
+
+[[page]]
+id = "isp2024-reference-trace-4006-mapping"
+title = "ISP 2024: Reference trace 4006 composite mapping"
+kind = "analysis"
+track = "isp2024"
+editions = ["2024"]
+data_layer = "cross-layer"
+source = "literate/isp2024/analysis/reference_trace_4006_mapping.jl"
+output = "generated/isp2024/analyses/reference-trace-4006-composite-mapping.md"
+status = "published"
+nav_order = 50
+snapshot = true
+related_reference_pages = ["generated/isp2024/reference/parameters-and-mappings.md", "assumptions.md"]
+
+[[page]]
+id = "isp2024-iasr-build-cost-trajectories"
+title = "ISP 2024: IASR build-cost trajectories by technology"
+kind = "analysis"
+track = "isp2024"
+editions = ["2024"]
+data_layer = "source-data"
+source = "literate/isp2024/analysis/iasr_build_cost_trajectories.jl"
+output = "generated/isp2024/analyses/iasr-build-cost-trajectories.md"
+status = "published"
+nav_order = 60
+snapshot = true
+data_requirements = [{ root = "download", edition = "2024", path = "2024-isp-inputs-and-assumptions-workbook.xlsx", type = "file" }]
+related_reference_pages = ["generated/isp2024/reference/data-sources.md", "generated/isp2024/reference/parameters-and-mappings.md", "assumptions.md"]
+
+[[page]]
+id = "isp2024-rez-resource-versus-connection-cost"
+title = "ISP 2024: REZ resource potential versus connection cost"
+kind = "analysis"
+track = "isp2024"
+editions = ["2024"]
+data_layer = "source-data"
+source = "literate/isp2024/analysis/rez_resource_versus_connection_cost.jl"
+output = "generated/isp2024/analyses/rez-resource-versus-connection-cost.md"
+status = "published"
+nav_order = 70
+snapshot = true
+data_requirements = [{ root = "download", edition = "2024", path = "2024-isp-inputs-and-assumptions-workbook.xlsx", type = "file" }]
+related_reference_pages = ["generated/isp2024/reference/data-sources.md", "generated/isp2024/reference/parameters-and-mappings.md", "assumptions.md"]
+
+[[page]]
+id = "isp2024-storage-characteristics"
+title = "ISP 2024: PHES and battery storage characteristics"
+kind = "analysis"
+track = "isp2024"
+editions = ["2024"]
+data_layer = "source-data"
+source = "literate/isp2024/analysis/storage_characteristics.jl"
+output = "generated/isp2024/analyses/storage-characteristics.md"
+status = "published"
+nav_order = 80
+snapshot = true
+data_requirements = [{ root = "download", edition = "2024", path = "2024-isp-inputs-and-assumptions-workbook.xlsx", type = "file" }]
+related_reference_pages = ["generated/isp2024/reference/data-sources.md", "generated/isp2024/reference/parameters-and-mappings.md", "assumptions.md"]
