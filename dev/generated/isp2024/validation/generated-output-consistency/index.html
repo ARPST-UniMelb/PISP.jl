@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>ISP 2024: Generated-output consistency · PISP.jl</title><meta name="title" content="ISP 2024: Generated-output consistency · PISP.jl"/><meta property="og:title" content="ISP 2024: Generated-output consistency · PISP.jl"/><meta property="twitter:title" content="ISP 2024: Generated-output consistency · PISP.jl"/><meta name="description" content="Documentation for PISP.jl."/><meta property="og:description" content="Documentation for PISP.jl."/><meta property="twitter:description" content="Documentation for PISP.jl."/><script data-outdated-warner src="../../../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../../../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../../../assets/documenter.js"></script><script src="../../../../search_index.js"></script><script src="../../../../siteinfo.js"></script><script src="../../../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../../../">PISP.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../../../">Home</a></li><li><a class="tocitem" href="../../../../quickstart/">Quickstart</a></li><li><span class="tocitem">Understand PISP and ISP data</span><ul><li><a class="tocitem" href="../../../../editions/supported-editions/">Supported ISP editions</a></li><li><a class="tocitem" href="../../../../concepts/">Domain concepts</a></li><li><a class="tocitem" href="../../../../editions/output-data-model/">Output data model</a></li><li><a class="tocitem" href="../../../../assumptions/">Assumptions and scope</a></li><li><a class="tocitem" href="../../../../editions/source-material/">What each ISP edition publishes</a></li><li><a class="tocitem" href="../../../../editions/source-inventory/">Downloaded source inventory by edition</a></li><li><a class="tocitem" href="../../../../editions/trace-coverage/">Trace families, schemas, and coverage</a></li><li><a class="tocitem" href="../../../../editions/parameters-and-mappings/">Parameters and mappings across editions</a></li></ul></li><li><span class="tocitem">ISP 2024</span><ul><li><a class="tocitem" href="../../../../editions/isp2024/">Overview</a></li><li><input class="collapse-toggle" id="menuitem-4-2" type="checkbox"/><label class="tocitem" for="menuitem-4-2"><span class="docs-label">Reference and inputs</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../reference/data-sources/">ISP 2024: Data sources</a></li><li><a class="tocitem" href="../../reference/output-tables/">ISP 2024: Output tables</a></li><li><a class="tocitem" href="../../reference/parameters-and-mappings/">ISP 2024: Parameters and mappings</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-3" type="checkbox"/><label class="tocitem" for="menuitem-4-3"><span class="docs-label">Tutorials</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../tutorials/building-problem-table/">ISP 2024: Building a problem table</a></li><li><a class="tocitem" href="../../tutorials/working-with-pisp-outputs/">ISP 2024: Working with PISP-generated outputs</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-4" type="checkbox" checked/><label class="tocitem" for="menuitem-4-4"><span class="docs-label">Data validation</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../source-data-inventory/">ISP 2024: Source-data inventory</a></li><li><a class="tocitem" href="../trace-coverage-and-schema/">ISP 2024: Trace data availability and structure</a></li><li><a class="tocitem" href="../temperature-data-coverage/">ISP 2024: Temperature-data coverage and climate-zone solar comparison</a></li><li class="is-active"><a class="tocitem" href>ISP 2024: Generated-output consistency</a><ul class="internal"><li><a class="tocitem" href="#Selected-build-and-inputs"><span>Selected build and inputs</span></a></li><li><a class="tocitem" href="#Build-identity"><span>Build identity</span></a></li><li><a class="tocitem" href="#Generator-coverage"><span>Generator coverage</span></a></li><li><a class="tocitem" href="#Schedule-coverage"><span>Schedule coverage</span></a></li><li><a class="tocitem" href="#Static-to-schedule-join-coverage"><span>Static-to-schedule join coverage</span></a></li><li><a class="tocitem" href="#Renewable-classification"><span>Renewable classification</span></a></li><li><a class="tocitem" href="#Annual-mean-available-output"><span>Annual mean available output</span></a></li><li><a class="tocitem" href="#Capacity-factor-duration"><span>Capacity-factor duration</span></a></li><li><a class="tocitem" href="#Demand-by-area"><span>Demand by area</span></a></li><li><a class="tocitem" href="#Daily-aggregate-profiles"><span>Daily aggregate profiles</span></a></li><li><a class="tocitem" href="#Hourly-available-output-profile"><span>Hourly available-output profile</span></a></li><li><a class="tocitem" href="#Renewable-availability-and-demand-summaries"><span>Renewable availability and demand summaries</span></a></li><li><a class="tocitem" href="#Output-overview"><span>Output overview</span></a></li><li><a class="tocitem" href="#Renewable-availability-and-demand-over-time"><span>Renewable availability and demand over time</span></a></li><li><a class="tocitem" href="#Detailed-output-diagnostics"><span>Detailed output diagnostics</span></a></li><li><a class="tocitem" href="#Summary"><span>Summary</span></a></li></ul></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-5" type="checkbox"/><label class="tocitem" for="menuitem-4-5"><span class="docs-label">Analyses and case studies</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../analyses/reference-trace-4006-profiles/">ISP 2024: Reference trace 4006 profiles</a></li><li><a class="tocitem" href="../../analyses/historical-trace-year-comparison/">ISP 2024: Historical trace-year comparison</a></li><li><a class="tocitem" href="../../analyses/seasonal-renewable-extremes/">ISP 2024: Seasonal renewable extremes</a></li><li><a class="tocitem" href="../../analyses/demand-stress-low-solar/">ISP 2024: Demand stress and low-solar coincidence</a></li><li><a class="tocitem" href="../../analyses/reference-trace-4006-composite-mapping/">ISP 2024: Reference trace 4006 composite mapping</a></li><li><a class="tocitem" href="../../analyses/iasr-build-cost-trajectories/">ISP 2024: IASR build-cost trajectories by technology</a></li><li><a class="tocitem" href="../../analyses/rez-resource-versus-connection-cost/">ISP 2024: REZ resource potential versus connection cost</a></li><li><a class="tocitem" href="../../analyses/storage-characteristics/">ISP 2024: PHES and battery storage characteristics</a></li></ul></li></ul></li><li><span class="tocitem">ISP 2026</span><ul><li><a class="tocitem" href="../../../../editions/isp2026/">Overview</a></li><li><input class="collapse-toggle" id="menuitem-5-2" type="checkbox"/><label class="tocitem" for="menuitem-5-2"><span class="docs-label">Data validation</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../../isp2026/validation/source-availability/">ISP 2026: Source availability and release structure</a></li></ul></li></ul></li><li><span class="tocitem">Compare ISP 2024 and ISP 2026</span><ul><li><a class="tocitem" href="../../../../editions/comparison/">Overview and comparison rules</a></li><li><input class="collapse-toggle" id="menuitem-6-2" type="checkbox"/><label class="tocitem" for="menuitem-6-2"><span class="docs-label">Validation pages</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../../comparison/validation/source-availability-by-edition/">ISP 2024 and ISP 2026: Source availability by edition</a></li></ul></li></ul></li><li><a class="tocitem" href="../../../../contributing/">Contributing</a></li><li><a class="tocitem" href="../../../../api/">API Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">ISP 2024</a></li><li><a class="is-disabled">Data validation</a></li><li class="is-active"><a href>ISP 2024: Generated-output consistency</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>ISP 2024: Generated-output consistency</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/ARPST-UniMelb/PISP.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/ARPST-UniMelb/PISP.jl/blob/main/docs/literate/isp2024/validation/generated_output_consistency.jl" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="ISP-2024:-Generated-output-consistency"><a class="docs-heading-anchor" href="#ISP-2024:-Generated-output-consistency">ISP 2024: Generated-output consistency</a><a id="ISP-2024:-Generated-output-consistency-1"></a><a class="docs-heading-anchor-permalink" href="#ISP-2024:-Generated-output-consistency" title="Permalink"></a></h1><p>This validation checks identifier coverage, schedule coverage, generator classification, and daily solar, wind, and demand alignment for one generated ISP 2024 build. Supporting tables are saved under <code>eda/tables/julia/06_pisp_outputs/</code>, and the selected figures summarise the same computed evidence.</p><p>By default it reads <code>data/2024/pisp-datasets/out-ref4006-poe10/csv/</code> and <code>schedule-2030/</code>; set <code>PISP_DOCS_ISP2024_OUTPUT_ROOT</code> or <code>PISP_DOCS_ISP2024_SCHEDULE_TAG</code> to select another local generated build.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">ENV[&quot;GKSwstype&quot;] = &quot;100&quot;
+
+using CSV
+using DataFrames
+using Dates
+using Printf
+using Statistics
+using Plots
+
+gr();
+
+const REPO_ROOT = normpath(get(ENV, &quot;PISP_DOCS_REPO_ROOT&quot;, joinpath(@__DIR__, &quot;..&quot;, &quot;..&quot;, &quot;..&quot;, &quot;..&quot;)))
+
+include(joinpath(REPO_ROOT, &quot;docs&quot;, &quot;edition_profiles.jl&quot;))
+using .PISPDocsEditionProfiles
+
+include(joinpath(REPO_ROOT, &quot;docs&quot;, &quot;eda_support.jl&quot;))
+using .EdaSupport
+
+const SCRIPT_STEM = &quot;isp2024_06_pisp_outputs&quot;
+const ISP2024_PROFILE = edition_profile(REPO_ROOT, &quot;2024&quot;)
+const OUTPUT_ROOT = ISP2024_PROFILE.output_root
+OUTPUT_ROOT === nothing &amp;&amp; error(
+    &quot;ISP 2024 profile does not define output_root; set PISP_DOCS_ISP2024_OUTPUT_ROOT to select a local output build.&quot;,
+)
+const OUT = normpath(OUTPUT_ROOT)
+const SCHEDULE_TAG = ISP2024_PROFILE.schedule_tag
+SCHEDULE_TAG === nothing &amp;&amp; error(
+    &quot;ISP 2024 profile does not define schedule_tag; set PISP_DOCS_ISP2024_SCHEDULE_TAG to select a local schedule.&quot;,
+)
+const SCHEDULE_DIR = joinpath(OUT, SCHEDULE_TAG)
+
+abs_path(relative_path) = joinpath(REPO_ROOT, relative_path)  # no-op here since OUT/SCHEDULE_DIR are already absolute; kept for consistency with the other EDA pages
+
+const AREA_NAMES = Dict(1 =&gt; &quot;QLD&quot;, 2 =&gt; &quot;NSW&quot;, 3 =&gt; &quot;VIC&quot;, 4 =&gt; &quot;TAS&quot;, 5 =&gt; &quot;SA&quot;)</code></pre></details><p>Schedule dates look like &quot;2030-01-01T00:00:00.0&quot;; this fallback handles the case where the column is read back as text rather than the DateTime CSV.jl already infers.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">parse_schedule_datetime(s::AbstractString) = DateTime(replace(s, r&quot;\.\d+$&quot; =&gt; &quot;&quot;))
+parse_schedule_datetime(d::DateTime) = d
+
+is_solar_tech(tech) = occursin(r&quot;PV|SOLAR&quot;i, tech)
+is_wind_tech(tech) = occursin(r&quot;WIND&quot;i, tech)
+
+function append_relationship_diagnostics!(summary_rows, detail_rows, relationship, left_label, right_label, left_ids, right_ids)
+    left_set = Set(skipmissing(left_ids))
+    right_set = Set(skipmissing(right_ids))
+    left_unmatched = sort(collect(setdiff(left_set, right_set)))
+    right_unmatched = sort(collect(setdiff(right_set, left_set)))
+
+    push!(
+        summary_rows,
+        (
+            relationship = relationship,
+            left_label = left_label,
+            right_label = right_label,
+            checked_unique_ids = length(left_set) + length(right_set),
+            matched_unique_ids = length(intersect(left_set, right_set)),
+            unmatched_unique_ids = length(left_unmatched) + length(right_unmatched),
+            unmatched_pct = isempty(left_set) &amp;&amp; isempty(right_set) ? 0.0 :
+                100 * (length(left_unmatched) + length(right_unmatched)) /
+                (length(left_set) + length(right_set)),
+            left_unique_ids = length(left_set),
+            right_unique_ids = length(right_set),
+            left_unmatched_ids = length(left_unmatched),
+            right_unmatched_ids = length(right_unmatched),
+        ),
+    )
+
+    for id in left_unmatched
+        push!(detail_rows, (relationship = relationship, unmatched_side = left_label, id = string(id)))
+    end
+    for id in right_unmatched
+        push!(detail_rows, (relationship = relationship, unmatched_side = right_label, id = string(id)))
+    end
+end</code></pre></details><p>Capacity factor for solar and wind divides each generator&#39;s scheduled mean output by that generator&#39;s own scheduled maximum, not by the static <code>pmax</code> recorded in <code>Generator.csv</code>. The static field is not a reliable capacity reference for these generators: rooftop PV rows carry a fixed placeholder pmax (<a href="https://github.com/ARPST-UniMelb/PISP.jl/blob/main/src/parsers/PISP-2024parser.jl"><code>src/parsers/PISP-2024parser.jl</code></a>:1070, <code>gen_pmax_distpv</code>), and utility-scale solar/wind rows record only currently operating capacity, which a future-year schedule can exceed once ISP-outlook build-out is reflected in the trace (<code>gen_pmax_wind</code>, ~1386 vs. ~1477 in the same file). <a href="https://github.com/ARPST-UniMelb/SiennaNEM.jl">SiennaNEM.jl</a>, which builds unit-commitment models from this same PISP output, applies the same convention (<a href="https://github.com/ARPST-UniMelb/SiennaNEM.jl/blob/main/src/read_data.jl"><code>src/read_data.jl</code></a>:214-229, <code>update_system_data_bound!</code>) and calls the static pmax &quot;dummy&quot; for these generators (<a href="https://github.com/ARPST-UniMelb/SiennaNEM.jl/blob/main/src/create_system.jl"><code>src/create_system.jl</code></a>:342,368). See the generated Parameters and mappings page and <code>docs/src/assumptions.md</code> for the full caveat.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">function capacity_factor_duration_frame(gen_pmax::DataFrame, gens::DataFrame, tech::AbstractString)
+    ids = Set(gens.id_gen)
+
+    sched = gen_pmax[in.(gen_pmax.id_gen, Ref(ids)), :]
+    grouped = combine(groupby(sched, :id_gen), :value =&gt; mean =&gt; :mean_value, :value =&gt; maximum =&gt; :max_value)
+
+    cf_values = Float64[]
+    for row in eachrow(grouped)
+        cf = row.mean_value / row.max_value
+        isnan(cf) &amp;&amp; continue
+        push!(cf_values, cf)
+    end
+    sorted_desc = sort(cf_values; rev = true)
+    return DataFrame(tech = tech, rank = 1:length(sorted_desc), capacity_factor = sorted_desc)
+end
+
+function build_dem_load_full(dem_load::DataFrame, dem_df::DataFrame, bus_df::DataFrame)
+    area_map = Dict(row.id_bus =&gt; row.id_area for row in eachrow(bus_df))
+    dem_load_full = innerjoin(dem_load, dem_df[:, [:id_dem, :id_bus]], on = :id_dem)
+    dem_load_full.datetime = parse_schedule_datetime.(dem_load_full.date)
+    dem_load_full.area = [area_map[b] for b in dem_load_full.id_bus]
+    dem_load_full.area_name = [AREA_NAMES[a] for a in dem_load_full.area]
+    return dem_load_full
+end
+
+function build_gen_pmax_ts(gen_pmax::DataFrame, gen_df::DataFrame)
+    gen_pmax_ts = innerjoin(gen_pmax, gen_df[:, [:id_gen, :tech]], on = :id_gen)
+    gen_pmax_ts.datetime = parse_schedule_datetime.(gen_pmax_ts.date)
+    return gen_pmax_ts
+end
+
+function daily_tech_sum(gen_pmax_ts::DataFrame, tech_predicate)
+    subset = gen_pmax_ts[tech_predicate.(gen_pmax_ts.tech), :]
+    subset = transform(subset, :datetime =&gt; ByRow(Date) =&gt; :date_only)
+    return combine(groupby(subset, :date_only), :value =&gt; sum =&gt; :total)
+end</code></pre></details><h2 id="Selected-build-and-inputs"><a class="docs-heading-anchor" href="#Selected-build-and-inputs">Selected build and inputs</a><a id="Selected-build-and-inputs-1"></a><a class="docs-heading-anchor-permalink" href="#Selected-build-and-inputs" title="Permalink"></a></h2><p><code>Generator.csv</code>, <code>Demand.csv</code>, and <code>Bus.csv</code> describe the static network; <code>Generator_pmax_sched.csv</code> and <code>Demand_load_sched.csv</code> under the <code>schedule-2030</code> tag describe the time-varying build for this generated dataset.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">gen_df = CSV.read(abs_path(joinpath(OUT, &quot;Generator.csv&quot;)), DataFrame)
+dem_df = CSV.read(abs_path(joinpath(OUT, &quot;Demand.csv&quot;)), DataFrame)
+bus_df = CSV.read(abs_path(joinpath(OUT, &quot;Bus.csv&quot;)), DataFrame)
+
+gen_pmax = CSV.read(abs_path(joinpath(SCHEDULE_DIR, &quot;Generator_pmax_sched.csv&quot;)), DataFrame)
+dem_load = CSV.read(abs_path(joinpath(SCHEDULE_DIR, &quot;Demand_load_sched.csv&quot;)), DataFrame)</code></pre></details><h2 id="Build-identity"><a class="docs-heading-anchor" href="#Build-identity">Build identity</a><a id="Build-identity-1"></a><a class="docs-heading-anchor-permalink" href="#Build-identity" title="Permalink"></a></h2><p>The recorded paths are relative to the repository root so this evidence table stays comparable across machines and reproducible from any checkout.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">build_metadata = DataFrame([
+    (
+        pisp_output_root = replace(relpath(OUT, REPO_ROOT), &#39;\\&#39; =&gt; &#39;/&#39;),
+        schedule_tag = SCHEDULE_TAG,
+        schedule_directory = replace(relpath(SCHEDULE_DIR, REPO_ROOT), &#39;\\&#39; =&gt; &#39;/&#39;),
+    ),
+])
+write_table(build_metadata, SCRIPT_STEM, &quot;build_metadata&quot;)
+markdown_table(build_metadata)</code></pre></details><table><tr><th style="text-align: left"><strong>pisp_output_root</strong></th><th style="text-align: left"><strong>schedule_tag</strong></th><th style="text-align: left"><strong>schedule_directory</strong></th></tr><tr><td style="text-align: left">data/2024/pisp-datasets/out-ref4006-poe10/csv</td><td style="text-align: left">schedule-2030</td><td style="text-align: left">data/2024/pisp-datasets/out-ref4006-poe10/csv/schedule-2030</td></tr></table><h2 id="Generator-coverage"><a class="docs-heading-anchor" href="#Generator-coverage">Generator coverage</a><a id="Generator-coverage-1"></a><a class="docs-heading-anchor-permalink" href="#Generator-coverage" title="Permalink"></a></h2><p><code>Generator.csv</code> classifies each generator by <code>fuel</code> and by <code>tech</code>; these counts show which classifications are available for later technology-specific filtering.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">println(&quot;=== Generator Table ===&quot;)
+println(&quot;Shape: &quot;, (nrow(gen_df), ncol(gen_df)))
+
+generator_fuel_counts = combine(groupby(gen_df, :fuel), nrow =&gt; :count)
+write_table(generator_fuel_counts, SCRIPT_STEM, &quot;generator_fuel_counts&quot;)
+markdown_table(generator_fuel_counts)</code></pre></details><table><tr><th style="text-align: left"><strong>fuel</strong></th><th style="text-align: right"><strong>count</strong></th></tr><tr><td style="text-align: left">Coal</td><td style="text-align: right">15</td></tr><tr><td style="text-align: left">Diesel</td><td style="text-align: right">7</td></tr><tr><td style="text-align: left">Hydro</td><td style="text-align: right">30</td></tr><tr><td style="text-align: left">Hydrogen</td><td style="text-align: right">2</td></tr><tr><td style="text-align: left">Natural Gas</td><td style="text-align: right">37</td></tr><tr><td style="text-align: left">Solar</td><td style="text-align: right">22</td></tr><tr><td style="text-align: left">Wind</td><td style="text-align: right">11</td></tr></table><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">generator_tech_counts = combine(groupby(gen_df, :tech), nrow =&gt; :count)
+write_table(generator_tech_counts, SCRIPT_STEM, &quot;generator_tech_counts&quot;)
+markdown_table(generator_tech_counts)</code></pre></details><table><tr><th style="text-align: left"><strong>tech</strong></th><th style="text-align: right"><strong>count</strong></th></tr><tr><td style="text-align: left">Black Coal NSW</td><td style="text-align: right">4</td></tr><tr><td style="text-align: left">Black Coal QLD</td><td style="text-align: right">8</td></tr><tr><td style="text-align: left">Brown Coal VIC</td><td style="text-align: right">2</td></tr><tr><td style="text-align: left">Brown Coal</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">Diesel</td><td style="text-align: right">7</td></tr><tr><td style="text-align: left">Run-of-River</td><td style="text-align: right">2</td></tr><tr><td style="text-align: left">Reservoir</td><td style="text-align: right">28</td></tr><tr><td style="text-align: left">Hydrogen-based gas turbines</td><td style="text-align: right">2</td></tr><tr><td style="text-align: left">OCGT</td><td style="text-align: right">28</td></tr><tr><td style="text-align: left">CCGT</td><td style="text-align: right">9</td></tr><tr><td style="text-align: left">RoofPV</td><td style="text-align: right">12</td></tr><tr><td style="text-align: left">LargePV</td><td style="text-align: right">10</td></tr><tr><td style="text-align: left">Wind</td><td style="text-align: right">11</td></tr></table><h2 id="Schedule-coverage"><a class="docs-heading-anchor" href="#Schedule-coverage">Schedule coverage</a><a id="Schedule-coverage-1"></a><a class="docs-heading-anchor-permalink" href="#Schedule-coverage" title="Permalink"></a></h2><p>The two schedule tables share the same long-format layout (one row per identifier per timestamp); their row/column shapes and represented time interval describe the extent of this generated build.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">println(&quot;\n=== Generator_pmax_sched ===&quot;)
+println(&quot;Shape: &quot;, (nrow(gen_pmax), ncol(gen_pmax)))
+println(&quot;\n=== Demand_load_sched ===&quot;)
+println(&quot;Shape: &quot;, (nrow(dem_load), ncol(dem_load)))
+
+schedule_shapes = DataFrame([
+    (schedule = &quot;Generator_pmax_sched&quot;, n_rows = nrow(gen_pmax), n_cols = ncol(gen_pmax)),
+    (schedule = &quot;Demand_load_sched&quot;, n_rows = nrow(dem_load), n_cols = ncol(dem_load)),
+])
+write_table(schedule_shapes, SCRIPT_STEM, &quot;schedule_shapes&quot;)
+markdown_table(schedule_shapes)</code></pre></details><table><tr><th style="text-align: left"><strong>schedule</strong></th><th style="text-align: right"><strong>n_rows</strong></th><th style="text-align: right"><strong>n_cols</strong></th></tr><tr><td style="text-align: left">Generator_pmax_sched</td><td style="text-align: right">867243</td><td style="text-align: right">5</td></tr><tr><td style="text-align: left">Demand_load_sched</td><td style="text-align: right">315360</td><td style="text-align: right">5</td></tr></table><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">schedule_time_coverage_rows = NamedTuple[]
+for (schedule_name, schedule) in [
+    (&quot;Generator_pmax_sched&quot;, gen_pmax),
+    (&quot;Demand_load_sched&quot;, dem_load),
+]
+    timestamps = parse_schedule_datetime.(schedule.date)
+    push!(
+        schedule_time_coverage_rows,
+        (
+            schedule = schedule_name,
+            first_timestamp = minimum(timestamps),
+            last_timestamp = maximum(timestamps),
+            unique_timestamps = length(unique(timestamps)),
+            unique_days = length(unique(Date.(timestamps))),
+        ),
+    )
+end
+schedule_time_coverage = DataFrame(schedule_time_coverage_rows)
+write_table(schedule_time_coverage, SCRIPT_STEM, &quot;schedule_time_coverage&quot;)
+markdown_table(schedule_time_coverage)</code></pre></details><table><tr><th style="text-align: left"><strong>schedule</strong></th><th style="text-align: left"><strong>first_timestamp</strong></th><th style="text-align: left"><strong>last_timestamp</strong></th><th style="text-align: right"><strong>unique_timestamps</strong></th><th style="text-align: right"><strong>unique_days</strong></th></tr><tr><td style="text-align: left">Generator_pmax_sched</td><td style="text-align: left">2030-01-01T00:00:00</td><td style="text-align: left">2044-07-01T00:00:00</td><td style="text-align: right">8761</td><td style="text-align: right">366</td></tr><tr><td style="text-align: left">Demand_load_sched</td><td style="text-align: left">2030-01-01T00:00:00</td><td style="text-align: left">2030-12-31T23:00:00</td><td style="text-align: right">8760</td><td style="text-align: right">365</td></tr></table><h2 id="Static-to-schedule-join-coverage"><a class="docs-heading-anchor" href="#Static-to-schedule-join-coverage">Static-to-schedule join coverage</a><a id="Static-to-schedule-join-coverage-1"></a><a class="docs-heading-anchor-permalink" href="#Static-to-schedule-join-coverage" title="Permalink"></a></h2><p>Each relationship below compares one schedule or static identifier column against the identifier column it should join against, recording how many identifiers are unmatched on either side.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">join_summary_rows = NamedTuple[]
+join_detail_rows = NamedTuple[]
+
+append_relationship_diagnostics!(
+    join_summary_rows,
+    join_detail_rows,
+    &quot;generator schedule to static generator&quot;,
+    &quot;Generator_pmax_sched.id_gen&quot;,
+    &quot;Generator.id_gen&quot;,
+    gen_pmax.id_gen,
+    gen_df.id_gen,
+)
+append_relationship_diagnostics!(
+    join_summary_rows,
+    join_detail_rows,
+    &quot;demand schedule to static demand&quot;,
+    &quot;Demand_load_sched.id_dem&quot;,
+    &quot;Demand.id_dem&quot;,
+    dem_load.id_dem,
+    dem_df.id_dem,
+)
+append_relationship_diagnostics!(
+    join_summary_rows,
+    join_detail_rows,
+    &quot;generator bus to bus table&quot;,
+    &quot;Generator.id_bus&quot;,
+    &quot;Bus.id_bus&quot;,
+    gen_df.id_bus,
+    bus_df.id_bus,
+)
+append_relationship_diagnostics!(
+    join_summary_rows,
+    join_detail_rows,
+    &quot;demand bus to bus table&quot;,
+    &quot;Demand.id_bus&quot;,
+    &quot;Bus.id_bus&quot;,
+    dem_df.id_bus,
+    bus_df.id_bus,
+)
+
+join_coverage = DataFrame(join_summary_rows)
+write_table(join_coverage, SCRIPT_STEM, &quot;join_coverage&quot;)
+join_coverage_display = select(
+    join_coverage,
+    :relationship =&gt; Symbol(&quot;Relationship&quot;),
+    :checked_unique_ids =&gt; Symbol(&quot;Unique IDs checked&quot;),
+    :matched_unique_ids =&gt; Symbol(&quot;Matched IDs&quot;),
+    :unmatched_unique_ids =&gt; Symbol(&quot;Unmatched IDs&quot;),
+    :unmatched_pct =&gt; Symbol(&quot;Unmatched (%)&quot;),
+)
+markdown_table(join_coverage_display)</code></pre></details><table><tr><th style="text-align: left"><strong>Relationship</strong></th><th style="text-align: right"><strong>Unique IDs checked</strong></th><th style="text-align: right"><strong>Matched IDs</strong></th><th style="text-align: right"><strong>Unmatched IDs</strong></th><th style="text-align: right"><strong>Unmatched (%)</strong></th></tr><tr><td style="text-align: left">generator schedule to static generator</td><td style="text-align: right">158</td><td style="text-align: right">34</td><td style="text-align: right">90</td><td style="text-align: right">56.962</td></tr><tr><td style="text-align: left">demand schedule to static demand</td><td style="text-align: right">24</td><td style="text-align: right">12</td><td style="text-align: right">0</td><td style="text-align: right">0.0</td></tr><tr><td style="text-align: left">generator bus to bus table</td><td style="text-align: right">24</td><td style="text-align: right">12</td><td style="text-align: right">0</td><td style="text-align: right">0.0</td></tr><tr><td style="text-align: left">demand bus to bus table</td><td style="text-align: right">24</td><td style="text-align: right">12</td><td style="text-align: right">0</td><td style="text-align: right">0.0</td></tr></table><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">unmatched_ids = isempty(join_detail_rows) ? DataFrame(relationship = String[], unmatched_side = String[], id = String[]) : DataFrame(join_detail_rows)
+write_table(unmatched_ids, SCRIPT_STEM, &quot;unmatched_ids&quot;)
+if isempty(unmatched_ids)
+    metric_value_table([&quot;Unmatched identifiers&quot; =&gt; 0])
+else
+    unmatched_summary = combine(
+        groupby(unmatched_ids, [:relationship, :unmatched_side]),
+        nrow =&gt; :unmatched_count,
+    )
+    markdown_table(unmatched_summary; column_labels = [&quot;Relationship&quot;, &quot;Unmatched side&quot;, &quot;Count&quot;])
+
+    unmatched_examples = vcat(
+        [first(group, min(5, nrow(group))) for group in groupby(unmatched_ids, :relationship)]...;
+        cols = :union,
+    )
+    # At most five identifiers per relationship are shown; the complete list remains in `unmatched_ids.csv`.
+    markdown_table(unmatched_examples; column_labels = [&quot;Relationship&quot;, &quot;Unmatched side&quot;, &quot;Identifier&quot;])
+end</code></pre></details><table><tr><th style="text-align: left"><strong>Relationship</strong></th><th style="text-align: left"><strong>Unmatched side</strong></th><th style="text-align: left"><strong>Identifier</strong></th></tr><tr><td style="text-align: left">generator schedule to static generator</td><td style="text-align: left">Generator.id_gen</td><td style="text-align: left">1</td></tr><tr><td style="text-align: left">generator schedule to static generator</td><td style="text-align: left">Generator.id_gen</td><td style="text-align: left">2</td></tr><tr><td style="text-align: left">generator schedule to static generator</td><td style="text-align: left">Generator.id_gen</td><td style="text-align: left">3</td></tr><tr><td style="text-align: left">generator schedule to static generator</td><td style="text-align: left">Generator.id_gen</td><td style="text-align: left">4</td></tr><tr><td style="text-align: left">generator schedule to static generator</td><td style="text-align: left">Generator.id_gen</td><td style="text-align: left">5</td></tr></table><h2 id="Renewable-classification"><a class="docs-heading-anchor" href="#Renewable-classification">Renewable classification</a><a id="Renewable-classification-1"></a><a class="docs-heading-anchor-permalink" href="#Renewable-classification" title="Permalink"></a></h2><p>Solar and wind generators are identified from <code>Generator.tech</code> with one case-insensitive pattern match used consistently throughout the validation.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">solar_gens = gen_df[is_solar_tech.(gen_df.tech), :]
+wind_gens = gen_df[is_wind_tech.(gen_df.tech), :]
+println(&quot;\nSolar generators: &quot;, nrow(solar_gens))
+println(&quot;Wind generators: &quot;, nrow(wind_gens))
+
+solar_wind_generator_counts = DataFrame([
+    (category = &quot;solar&quot;, n_generators = nrow(solar_gens)),
+    (category = &quot;wind&quot;, n_generators = nrow(wind_gens)),
+])
+write_table(solar_wind_generator_counts, SCRIPT_STEM, &quot;solar_wind_generator_counts&quot;)
+markdown_table(solar_wind_generator_counts)</code></pre></details><table><tr><th style="text-align: left"><strong>category</strong></th><th style="text-align: right"><strong>n_generators</strong></th></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">22</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">11</td></tr></table><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">solar_wind_tech_counts_solar = combine(groupby(solar_gens, :tech), nrow =&gt; :count)
+solar_wind_tech_counts_solar.category .= &quot;solar&quot;
+solar_wind_tech_counts_wind = combine(groupby(wind_gens, :tech), nrow =&gt; :count)
+solar_wind_tech_counts_wind.category .= &quot;wind&quot;
+solar_wind_tech_counts = vcat(solar_wind_tech_counts_solar, solar_wind_tech_counts_wind)[:, [:category, :tech, :count]]
+write_table(solar_wind_tech_counts, SCRIPT_STEM, &quot;solar_wind_tech_counts&quot;)
+markdown_table(solar_wind_tech_counts)</code></pre></details><table><tr><th style="text-align: left"><strong>category</strong></th><th style="text-align: left"><strong>tech</strong></th><th style="text-align: right"><strong>count</strong></th></tr><tr><td style="text-align: left">solar</td><td style="text-align: left">RoofPV</td><td style="text-align: right">12</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: left">LargePV</td><td style="text-align: right">10</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: left">Wind</td><td style="text-align: right">11</td></tr></table><h2 id="Annual-mean-available-output"><a class="docs-heading-anchor" href="#Annual-mean-available-output">Annual mean available output</a><a id="Annual-mean-available-output-1"></a><a class="docs-heading-anchor-permalink" href="#Annual-mean-available-output" title="Permalink"></a></h2><p>This is a plain per-generator annual mean of the scheduled pmax series, unrelated to the capacity-factor denominator question addressed next.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">solar_ids = Set(solar_gens.id_gen)
+wind_ids = Set(wind_gens.id_gen)
+
+sol_sched = gen_pmax[in.(gen_pmax.id_gen, Ref(solar_ids)), :]
+wind_sched = gen_pmax[in.(gen_pmax.id_gen, Ref(wind_ids)), :]
+
+sol_annual = combine(groupby(sol_sched, :id_gen), :value =&gt; mean =&gt; :mean_pmax)
+sol_annual.tech .= &quot;solar&quot;
+wind_annual = combine(groupby(wind_sched, :id_gen), :value =&gt; mean =&gt; :mean_pmax)
+wind_annual.tech .= &quot;wind&quot;
+
+annual_mean_pmax = vcat(sol_annual, wind_annual)[:, [:tech, :id_gen, :mean_pmax]]
+write_table(annual_mean_pmax, SCRIPT_STEM, &quot;annual_mean_pmax&quot;)
+markdown_table(annual_mean_pmax)</code></pre></details><table><tr><th style="text-align: left"><strong>tech</strong></th><th style="text-align: right"><strong>id_gen</strong></th><th style="text-align: right"><strong>mean_pmax</strong></th></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">92</td><td style="text-align: right">155.907</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">93</td><td style="text-align: right">165.396</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">94</td><td style="text-align: right">15.489</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">95</td><td style="text-align: right">1075.06</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">96</td><td style="text-align: right">220.029</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">97</td><td style="text-align: right">138.072</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">98</td><td style="text-align: right">1035.13</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">99</td><td style="text-align: right">239.17</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">100</td><td style="text-align: right">1176.94</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">101</td><td style="text-align: right">69.4871</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">102</td><td style="text-align: right">528.324</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">103</td><td style="text-align: right">21.952</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">104</td><td style="text-align: right">928.051</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">105</td><td style="text-align: right">927.829</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">106</td><td style="text-align: right">661.881</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">107</td><td style="text-align: right">907.72</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">108</td><td style="text-align: right">517.949</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">109</td><td style="text-align: right">777.506</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">110</td><td style="text-align: right">938.221</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">111</td><td style="text-align: right">1370.82</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">112</td><td style="text-align: right">21.184</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">113</td><td style="text-align: right">9.7209</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">114</td><td style="text-align: right">1857.69</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">115</td><td style="text-align: right">4846.46</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">116</td><td style="text-align: right">1725.65</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">117</td><td style="text-align: right">2240.35</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">118</td><td style="text-align: right">1609.93</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">119</td><td style="text-align: right">1944.25</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">120</td><td style="text-align: right">1444.67</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">121</td><td style="text-align: right">2704.88</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">122</td><td style="text-align: right">1768.3</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">123</td><td style="text-align: right">267.823</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">124</td><td style="text-align: right">0.0</td></tr></table><h2 id="Capacity-factor-duration"><a class="docs-heading-anchor" href="#Capacity-factor-duration">Capacity-factor duration</a><a id="Capacity-factor-duration-1"></a><a class="docs-heading-anchor-permalink" href="#Capacity-factor-duration" title="Permalink"></a></h2><p>Each generator&#39;s capacity factor is its scheduled mean output divided by its own scheduled maximum (see the caveat documented on <code>capacity_factor_duration_frame</code> above); generators are then ranked in descending capacity-factor order within each technology.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">capacity_factor_duration = vcat(
+    capacity_factor_duration_frame(gen_pmax, solar_gens, &quot;solar&quot;),
+    capacity_factor_duration_frame(gen_pmax, wind_gens, &quot;wind&quot;),
+)
+write_table(capacity_factor_duration, SCRIPT_STEM, &quot;capacity_factor_duration&quot;)
+markdown_table(capacity_factor_duration)</code></pre></details><table><tr><th style="text-align: left"><strong>tech</strong></th><th style="text-align: right"><strong>rank</strong></th><th style="text-align: right"><strong>capacity_factor</strong></th></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">1</td><td style="text-align: right">0.236929</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">2</td><td style="text-align: right">0.226594</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">3</td><td style="text-align: right">0.181941</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">4</td><td style="text-align: right">0.166754</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">5</td><td style="text-align: right">0.163866</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">6</td><td style="text-align: right">0.162742</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">7</td><td style="text-align: right">0.159858</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">8</td><td style="text-align: right">0.159474</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">9</td><td style="text-align: right">0.159196</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">10</td><td style="text-align: right">0.158282</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">11</td><td style="text-align: right">0.157504</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">12</td><td style="text-align: right">0.156229</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">13</td><td style="text-align: right">0.154617</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">14</td><td style="text-align: right">0.149317</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">15</td><td style="text-align: right">0.147794</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">16</td><td style="text-align: right">0.140268</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">17</td><td style="text-align: right">0.136418</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">18</td><td style="text-align: right">0.113766</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">19</td><td style="text-align: right">0.112869</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">20</td><td style="text-align: right">0.109473</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">21</td><td style="text-align: right">0.104435</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">22</td><td style="text-align: right">0.0655664</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">1</td><td style="text-align: right">0.344141</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">2</td><td style="text-align: right">0.306527</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">3</td><td style="text-align: right">0.294099</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">4</td><td style="text-align: right">0.292721</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">5</td><td style="text-align: right">0.27232</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">6</td><td style="text-align: right">0.268375</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">7</td><td style="text-align: right">0.242306</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">8</td><td style="text-align: right">0.240554</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">9</td><td style="text-align: right">0.216236</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">10</td><td style="text-align: right">0.204271</td></tr></table><h2 id="Demand-by-area"><a class="docs-heading-anchor" href="#Demand-by-area">Demand by area</a><a id="Demand-by-area-1"></a><a class="docs-heading-anchor-permalink" href="#Demand-by-area" title="Permalink"></a></h2><p>The demand schedule is joined to the static <code>Demand</code> table to obtain each demand node&#39;s bus, then to <code>Bus</code> to obtain its NEM area, before summing to a daily total per area. The full daily series (1825 rows: 5 NEM areas x 365 days) is written to <code>demand_by_area_daily.csv</code>; the table below summarises it per area.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">dem_load_full = build_dem_load_full(dem_load, dem_df, bus_df)
+
+dem_load_full.date_only = Date.(dem_load_full.datetime)
+demand_by_area_daily = combine(groupby(dem_load_full, [:date_only, :area_name]), :value =&gt; sum =&gt; :total_demand_mw)
+rename!(demand_by_area_daily, :date_only =&gt; :date)
+write_table(demand_by_area_daily, SCRIPT_STEM, &quot;demand_by_area_daily&quot;)
+
+demand_by_area_summary = combine(
+    groupby(demand_by_area_daily, :area_name),
+    :total_demand_mw =&gt; mean =&gt; :mean_daily_mw,
+    :total_demand_mw =&gt; minimum =&gt; :min_daily_mw,
+    :total_demand_mw =&gt; maximum =&gt; :max_daily_mw,
+)
+markdown_table(demand_by_area_summary)</code></pre></details><table><tr><th style="text-align: left"><strong>area_name</strong></th><th style="text-align: right"><strong>mean_daily_mw</strong></th><th style="text-align: right"><strong>min_daily_mw</strong></th><th style="text-align: right"><strong>max_daily_mw</strong></th></tr><tr><td style="text-align: left">QLD</td><td style="text-align: right">5.37443e5</td><td style="text-align: right">468511.0</td><td style="text-align: right">7.22287e5</td></tr><tr><td style="text-align: left">NSW</td><td style="text-align: right">6.76902e5</td><td style="text-align: right">565987.0</td><td style="text-align: right">9.93262e5</td></tr><tr><td style="text-align: left">VIC</td><td style="text-align: right">4.67028e5</td><td style="text-align: right">3.55937e5</td><td style="text-align: right">7.20187e5</td></tr><tr><td style="text-align: left">TAS</td><td style="text-align: right">92938.2</td><td style="text-align: right">78027.4</td><td style="text-align: right">1.14262e5</td></tr><tr><td style="text-align: left">SA</td><td style="text-align: right">1.52058e5</td><td style="text-align: right">1.20325e5</td><td style="text-align: right">240546.0</td></tr></table><h2 id="Daily-aggregate-profiles"><a class="docs-heading-anchor" href="#Daily-aggregate-profiles">Daily aggregate profiles</a><a id="Daily-aggregate-profiles-1"></a><a class="docs-heading-anchor-permalink" href="#Daily-aggregate-profiles" title="Permalink"></a></h2><p>Generator schedules are joined to generator technology before summing solar and wind pmax separately by day; the demand schedule&#39;s daily total is combined alongside them and converted from MW to GW. The complete daily series is written to <code>daily_solar_wind_demand_gw.csv</code>; the table below shows the first 10 dates.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">gen_pmax_ts = build_gen_pmax_ts(gen_pmax, gen_df)
+
+sol_daily = daily_tech_sum(gen_pmax_ts, is_solar_tech)
+wind_daily = daily_tech_sum(gen_pmax_ts, is_wind_tech)
+dem_daily_ts = combine(groupby(dem_load_full, :date_only), :value =&gt; sum =&gt; :total_demand)
+
+daily_joined = innerjoin(
+    innerjoin(sol_daily, wind_daily, on = :date_only, makeunique = true, renamecols = &quot;_solar&quot; =&gt; &quot;_wind&quot;),
+    dem_daily_ts,
+    on = :date_only,
+)
+sort!(daily_joined, :date_only)
+daily_gw = DataFrame(
+    date = daily_joined.date_only,
+    solar_gw = daily_joined.total_solar ./ 1000,
+    wind_gw = daily_joined.total_wind ./ 1000,
+    demand_gw = daily_joined.total_demand ./ 1000,
+)
+write_table(daily_gw, SCRIPT_STEM, &quot;daily_solar_wind_demand_gw&quot;)
+markdown_table(first(daily_gw, 10))</code></pre></details><table><tr><th style="text-align: left"><strong>date</strong></th><th style="text-align: right"><strong>solar_gw</strong></th><th style="text-align: right"><strong>wind_gw</strong></th><th style="text-align: right"><strong>demand_gw</strong></th></tr><tr><td style="text-align: left">2030-01-01</td><td style="text-align: right">1246.71</td><td style="text-align: right">949.769</td><td style="text-align: right">1798.78</td></tr><tr><td style="text-align: left">2030-01-02</td><td style="text-align: right">1145.46</td><td style="text-align: right">1557.08</td><td style="text-align: right">2284.5</td></tr><tr><td style="text-align: left">2030-01-03</td><td style="text-align: right">989.282</td><td style="text-align: right">1244.29</td><td style="text-align: right">1997.75</td></tr><tr><td style="text-align: left">2030-01-04</td><td style="text-align: right">1152.08</td><td style="text-align: right">1298.23</td><td style="text-align: right">2007.67</td></tr><tr><td style="text-align: left">2030-01-05</td><td style="text-align: right">1087.16</td><td style="text-align: right">1690.19</td><td style="text-align: right">1961.72</td></tr><tr><td style="text-align: left">2030-01-06</td><td style="text-align: right">1022.48</td><td style="text-align: right">1219.31</td><td style="text-align: right">1804.34</td></tr><tr><td style="text-align: left">2030-01-07</td><td style="text-align: right">868.513</td><td style="text-align: right">1129.14</td><td style="text-align: right">1887.91</td></tr><tr><td style="text-align: left">2030-01-08</td><td style="text-align: right">1126.54</td><td style="text-align: right">1512.55</td><td style="text-align: right">1988.29</td></tr><tr><td style="text-align: left">2030-01-09</td><td style="text-align: right">1145.92</td><td style="text-align: right">1568.4</td><td style="text-align: right">2285.53</td></tr><tr><td style="text-align: left">2030-01-10</td><td style="text-align: right">989.648</td><td style="text-align: right">1242.56</td><td style="text-align: right">2001.33</td></tr></table><h2 id="Hourly-available-output-profile"><a class="docs-heading-anchor" href="#Hourly-available-output-profile">Hourly available-output profile</a><a id="Hourly-available-output-profile-1"></a><a class="docs-heading-anchor-permalink" href="#Hourly-available-output-profile" title="Permalink"></a></h2><p>Restricting to the first 30 scheduled days and grouping scheduled pmax by hour of day gives a representative diurnal shape for solar and wind generators. The full per-generator profile (792 rows) is written to <code>hourly_pmax_profile.csv</code>; the table below averages across generators within each technology to show the fleet-level diurnal shape, and Step 15 plots the per-generator profile for up to 5 generators of each technology.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">cutoff30 = minimum(Date.(gen_pmax_ts.datetime)) + Day(29)
+subset30 = gen_pmax_ts[Date.(gen_pmax_ts.datetime) .&lt;= cutoff30, :]
+
+sol_subset = subset30[is_solar_tech.(subset30.tech), :]
+sol_subset = transform(sol_subset, :datetime =&gt; ByRow(hour) =&gt; :hour)
+sol_profile = combine(groupby(sol_subset, [:id_gen, :hour]), :value =&gt; mean =&gt; :mean_pmax)
+sol_profile.tech .= &quot;solar&quot;
+
+wind_subset = subset30[is_wind_tech.(subset30.tech), :]
+wind_subset = transform(wind_subset, :datetime =&gt; ByRow(hour) =&gt; :hour)
+wind_profile = combine(groupby(wind_subset, [:id_gen, :hour]), :value =&gt; mean =&gt; :mean_pmax)
+wind_profile.tech .= &quot;wind&quot;
+
+hourly_pmax_profile = vcat(sol_profile, wind_profile)[:, [:tech, :id_gen, :hour, :mean_pmax]]
+write_table(hourly_pmax_profile, SCRIPT_STEM, &quot;hourly_pmax_profile&quot;)
+
+hourly_pmax_profile_fleet_mean = combine(
+    groupby(hourly_pmax_profile, [:tech, :hour]),
+    :mean_pmax =&gt; mean =&gt; :fleet_mean_pmax,
+)
+markdown_table(hourly_pmax_profile_fleet_mean)</code></pre></details><table><tr><th style="text-align: left"><strong>tech</strong></th><th style="text-align: right"><strong>hour</strong></th><th style="text-align: right"><strong>fleet_mean_pmax</strong></th></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">0</td><td style="text-align: right">0.0</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">1</td><td style="text-align: right">0.0</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">2</td><td style="text-align: right">0.0</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">3</td><td style="text-align: right">0.0</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">4</td><td style="text-align: right">0.204708</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">5</td><td style="text-align: right">49.8679</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">6</td><td style="text-align: right">419.354</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">7</td><td style="text-align: right">984.439</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">8</td><td style="text-align: right">1296.43</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">9</td><td style="text-align: right">1504.42</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">10</td><td style="text-align: right">1618.38</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">11</td><td style="text-align: right">1663.9</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">12</td><td style="text-align: right">1659.36</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">13</td><td style="text-align: right">1600.8</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">14</td><td style="text-align: right">1460.96</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">15</td><td style="text-align: right">1285.84</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">16</td><td style="text-align: right">1051.72</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">17</td><td style="text-align: right">679.452</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">18</td><td style="text-align: right">220.837</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">19</td><td style="text-align: right">18.3051</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">20</td><td style="text-align: right">0.0</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">21</td><td style="text-align: right">0.0</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">22</td><td style="text-align: right">0.0</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">23</td><td style="text-align: right">0.0</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">0</td><td style="text-align: right">1956.45</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">1</td><td style="text-align: right">1908.84</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">2</td><td style="text-align: right">1849.24</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">3</td><td style="text-align: right">1776.48</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">4</td><td style="text-align: right">1722.91</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">5</td><td style="text-align: right">1701.01</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">6</td><td style="text-align: right">1641.53</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">7</td><td style="text-align: right">1558.17</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">8</td><td style="text-align: right">1534.13</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">9</td><td style="text-align: right">1500.53</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">10</td><td style="text-align: right">1464.37</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">11</td><td style="text-align: right">1448.04</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">12</td><td style="text-align: right">1466.72</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">13</td><td style="text-align: right">1523.24</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">14</td><td style="text-align: right">1591.95</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">15</td><td style="text-align: right">1692.36</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">16</td><td style="text-align: right">1799.88</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">17</td><td style="text-align: right">1884.56</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">18</td><td style="text-align: right">1968.9</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">19</td><td style="text-align: right">2035.49</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">20</td><td style="text-align: right">2088.87</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">21</td><td style="text-align: right">2089.55</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">22</td><td style="text-align: right">2071.23</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">23</td><td style="text-align: right">2035.35</td></tr></table><h2 id="Renewable-availability-and-demand-summaries"><a class="docs-heading-anchor" href="#Renewable-availability-and-demand-summaries">Renewable availability and demand summaries</a><a id="Renewable-availability-and-demand-summaries-1"></a><a class="docs-heading-anchor-permalink" href="#Renewable-availability-and-demand-summaries" title="Permalink"></a></h2><p>The first summary describes the scale and correlation of daily VRE (solar + wind) generation against daily demand; the second describes the distribution of daily demand alone.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">vre_daily = daily_gw.solar_gw .+ daily_gw.wind_gw
+demand_daily = daily_gw.demand_gw
+vre_vs_demand_summary = DataFrame([(
+    n_days = nrow(daily_gw),
+    mean_demand_gw = mean(demand_daily),
+    mean_vre_gw = mean(vre_daily),
+    min_demand_gw = minimum(demand_daily),
+    max_demand_gw = maximum(demand_daily),
+    min_vre_gw = minimum(vre_daily),
+    max_vre_gw = maximum(vre_daily),
+    corr_demand_vre = cor(demand_daily, vre_daily),
+)])
+write_table(vre_vs_demand_summary, SCRIPT_STEM, &quot;vre_vs_demand_summary&quot;)
+metric_value_table([
+    &quot;Days&quot; =&gt; vre_vs_demand_summary.n_days[1],
+    &quot;Mean demand (GW)&quot; =&gt; vre_vs_demand_summary.mean_demand_gw[1],
+    &quot;Mean VRE (GW)&quot; =&gt; vre_vs_demand_summary.mean_vre_gw[1],
+    &quot;Minimum demand (GW)&quot; =&gt; vre_vs_demand_summary.min_demand_gw[1],
+    &quot;Maximum demand (GW)&quot; =&gt; vre_vs_demand_summary.max_demand_gw[1],
+    &quot;Minimum VRE (GW)&quot; =&gt; vre_vs_demand_summary.min_vre_gw[1],
+    &quot;Maximum VRE (GW)&quot; =&gt; vre_vs_demand_summary.max_vre_gw[1],
+    &quot;Demand-VRE correlation&quot; =&gt; vre_vs_demand_summary.corr_demand_vre[1],
+])</code></pre></details><table><tr><th style="text-align: left"><strong>Metric</strong></th><th style="text-align: left"><strong>Value</strong></th></tr><tr><td style="text-align: left">Days</td><td style="text-align: left">365.0</td></tr><tr><td style="text-align: left">Mean demand (GW)</td><td style="text-align: left">1926.37</td></tr><tr><td style="text-align: left">Mean VRE (GW)</td><td style="text-align: left">2326.45</td></tr><tr><td style="text-align: left">Minimum demand (GW)</td><td style="text-align: left">1608.96</td></tr><tr><td style="text-align: left">Maximum demand (GW)</td><td style="text-align: left">2285.53</td></tr><tr><td style="text-align: left">Minimum VRE (GW)</td><td style="text-align: left">780.444</td></tr><tr><td style="text-align: left">Maximum VRE (GW)</td><td style="text-align: left">4103.23</td></tr><tr><td style="text-align: left">Demand-VRE correlation</td><td style="text-align: left">-0.0554535</td></tr></table><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">demand_distribution_summary = DataFrame([(
+    n = length(dem_daily_ts.total_demand),
+    mean_mw = mean(dem_daily_ts.total_demand),
+    std_mw = std(dem_daily_ts.total_demand),
+    min_mw = minimum(dem_daily_ts.total_demand),
+    max_mw = maximum(dem_daily_ts.total_demand),
+    median_mw = median(dem_daily_ts.total_demand),
+)])
+write_table(demand_distribution_summary, SCRIPT_STEM, &quot;demand_distribution_summary&quot;)
+metric_value_table([
+    &quot;Days&quot; =&gt; demand_distribution_summary.n[1],
+    &quot;Mean demand (MW)&quot; =&gt; demand_distribution_summary.mean_mw[1],
+    &quot;Demand standard deviation (MW)&quot; =&gt; demand_distribution_summary.std_mw[1],
+    &quot;Minimum demand (MW)&quot; =&gt; demand_distribution_summary.min_mw[1],
+    &quot;Maximum demand (MW)&quot; =&gt; demand_distribution_summary.max_mw[1],
+    &quot;Median demand (MW)&quot; =&gt; demand_distribution_summary.median_mw[1],
+])</code></pre></details><table><tr><th style="text-align: left"><strong>Metric</strong></th><th style="text-align: left"><strong>Value</strong></th></tr><tr><td style="text-align: left">Days</td><td style="text-align: left">365.0</td></tr><tr><td style="text-align: left">Mean demand (MW)</td><td style="text-align: left">1.92637e6</td></tr><tr><td style="text-align: left">Demand standard deviation (MW)</td><td style="text-align: left">1.20642e5</td></tr><tr><td style="text-align: left">Minimum demand (MW)</td><td style="text-align: left">1.60896e6</td></tr><tr><td style="text-align: left">Maximum demand (MW)</td><td style="text-align: left">2.28553e6</td></tr><tr><td style="text-align: left">Median demand (MW)</td><td style="text-align: left">1.92103e6</td></tr></table><h2 id="Output-overview"><a class="docs-heading-anchor" href="#Output-overview">Output overview</a><a id="Output-overview-1"></a><a class="docs-heading-anchor-permalink" href="#Output-overview" title="Permalink"></a></h2><p>A 2x2 overview: annual mean pmax per solar generator, annual mean pmax per wind generator, daily total demand by NEM area, and the capacity-factor duration curve for solar and wind. The per-generator pmax panels use horizontal-line scatter plots rather than <code>Plots.jl</code> bar charts, a plotting-library workaround with no effect on the underlying values.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">sol_annual_sorted = sort(combine(groupby(sol_sched, :id_gen), :value =&gt; mean =&gt; :mean_pmax), :mean_pmax)
+wind_annual_sorted = sort(combine(groupby(wind_sched, :id_gen), :value =&gt; mean =&gt; :mean_pmax), :mean_pmax)
+
+p_sol_bar = scatter(sol_annual_sorted.mean_pmax, 1:nrow(sol_annual_sorted),
+                    title=&quot;Solar Generators — Annual Mean pmax (MW)&quot;, xlabel=&quot;PMax (MW)&quot;, ylabel=&quot;&quot;,
+                    legend=false, grid=true, gridalpha=0.3, markersize=0,
+                    yticks=(1:nrow(sol_annual_sorted), string.(sol_annual_sorted.id_gen)))
+for i in 1:nrow(sol_annual_sorted)
+    plot!(p_sol_bar, [0, sol_annual_sorted.mean_pmax[i]], [i, i], color=:orange, alpha=0.7, label=&quot;&quot;)
+end
+
+p_wind_bar = scatter(wind_annual_sorted.mean_pmax, 1:nrow(wind_annual_sorted),
+                     title=&quot;Wind Generators — Annual Mean pmax (MW)&quot;, xlabel=&quot;PMax (MW)&quot;, ylabel=&quot;&quot;,
+                     legend=false, grid=true, gridalpha=0.3, markersize=0,
+                     yticks=(1:nrow(wind_annual_sorted), string.(wind_annual_sorted.id_gen)))
+for i in 1:nrow(wind_annual_sorted)
+    plot!(p_wind_bar, [0, wind_annual_sorted.mean_pmax[i]], [i, i], color=:steelblue, alpha=0.7, label=&quot;&quot;)
+end
+
+area_map_plot = Dict(row.id_bus =&gt; row.id_area for row in eachrow(bus_df))
+dem_load_full_plot = innerjoin(dem_load, dem_df[:, [:id_dem, :id_bus]], on = :id_dem)
+dem_load_full_plot.datetime = parse_schedule_datetime.(dem_load_full_plot.date)
+dem_load_full_plot.area = [area_map_plot[b] for b in dem_load_full_plot.id_bus]
+dem_load_full_plot.area_name = [AREA_NAMES[a] for a in dem_load_full_plot.area]
+dem_load_full_plot.date_only = Date.(dem_load_full_plot.datetime)
+dem_daily_area = combine(groupby(dem_load_full_plot, [:date_only, :area_name]), :value =&gt; sum =&gt; :total_demand_mw)
+
+p_demand = plot(title=&quot;Daily Total Demand (MW) by NEM Area&quot;, xlabel=&quot;Date&quot;, ylabel=&quot;Demand (MW)&quot;,
+                legend=:topright, grid=true, gridalpha=0.3)
+for area in sort(unique(dem_daily_area.area_name))
+    area_data = filter(row -&gt; row.area_name == area, dem_daily_area)
+    plot!(p_demand, area_data.date_only, area_data.total_demand_mw, label=area, linewidth=1, alpha=0.7)
+end
+
+sol_cf_grouped = combine(groupby(sol_sched, :id_gen), :value =&gt; mean =&gt; :mean_val, :value =&gt; maximum =&gt; :max_val)
+wind_cf_grouped = combine(groupby(wind_sched, :id_gen), :value =&gt; mean =&gt; :mean_val, :value =&gt; maximum =&gt; :max_val)
+
+sol_cf_vals = Float64[]
+for row in eachrow(sol_cf_grouped)
+    cf = row.mean_val / row.max_val
+    isnan(cf) || push!(sol_cf_vals, cf)
+end
+sol_cf_sorted = sort(sol_cf_vals; rev=true)
+
+wind_cf_vals = Float64[]
+for row in eachrow(wind_cf_grouped)
+    cf = row.mean_val / row.max_val
+    isnan(cf) || push!(wind_cf_vals, cf)
+end
+wind_cf_sorted = sort(wind_cf_vals; rev=true)
+
+p_cf = plot(sol_cf_sorted, label=&quot;Solar CF&quot;, color=:orange, linewidth=1.5, alpha=0.7,
+            title=&quot;Capacity Factor Duration Curve (2030)&quot;, xlabel=&quot;Generator Rank&quot;, ylabel=&quot;Capacity Factor&quot;,
+            legend=:topright, grid=true, gridalpha=0.3)
+plot!(p_cf, wind_cf_sorted, label=&quot;Wind CF&quot;, color=:steelblue, linewidth=1.5, alpha=0.7)
+
+p_overview = plot(p_sol_bar, p_wind_bar, p_demand, p_cf, layout=(2,2), size=(1200, 1000), left_margin=8Plots.mm, top_margin=8Plots.mm)
+
+savefig(p_overview, figure_path(SCRIPT_STEM, &quot;06_pisp_outputs_overview.png&quot;))
+EdaSupport.embed_figure(figure_path(SCRIPT_STEM, &quot;06_pisp_outputs_overview.png&quot;), &quot;06_pisp_outputs_overview.png&quot;)</code></pre></details><p><img src="../06_pisp_outputs_overview.png" alt="PISP outputs overview: annual mean pmax by generator for solar and wind, daily demand by NEM area, and the solar/wind capacity-factor duration curve"/></p><h2 id="Renewable-availability-and-demand-over-time"><a class="docs-heading-anchor" href="#Renewable-availability-and-demand-over-time">Renewable availability and demand over time</a><a id="Renewable-availability-and-demand-over-time-1"></a><a class="docs-heading-anchor-permalink" href="#Renewable-availability-and-demand-over-time" title="Permalink"></a></h2><p>Daily solar PMax, wind PMax, and total demand, each summed across generators/nodes and expressed in GW, plotted over the full scheduled horizon.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">gen_pmax_ts_plot = innerjoin(gen_pmax, gen_df[:, [:id_gen, :tech]], on = :id_gen)
+gen_pmax_ts_plot.datetime = parse_schedule_datetime.(gen_pmax_ts_plot.date)
+gen_pmax_ts_plot.date_only = Date.(gen_pmax_ts_plot.datetime)
+
+sol_daily_ts = combine(groupby(gen_pmax_ts_plot[is_solar_tech.(gen_pmax_ts_plot.tech), :], :date_only), :value =&gt; sum =&gt; :total)
+wind_daily_ts = combine(groupby(gen_pmax_ts_plot[is_wind_tech.(gen_pmax_ts_plot.tech), :], :date_only), :value =&gt; sum =&gt; :total)
+dem_daily_ts_plot = combine(groupby(dem_load_full_plot, :date_only), :value =&gt; sum =&gt; :total_demand)
+
+p_ts = plot(size=(1200, 600), title=&quot;2030 — Daily Aggregate: Solar PMax, Wind PMax, Total Demand&quot;,
+           xlabel=&quot;Date&quot;, ylabel=&quot;GW&quot;, legend=:topright, grid=true, gridalpha=0.3, left_margin=8Plots.mm)
+plot!(p_ts, sol_daily_ts.date_only, sol_daily_ts.total ./ 1000, label=&quot;Solar PMax (GW)&quot;, color=:orange, linewidth=1, alpha=0.7)
+plot!(p_ts, wind_daily_ts.date_only, wind_daily_ts.total ./ 1000, label=&quot;Wind PMax (GW)&quot;, color=:steelblue, linewidth=1, alpha=0.7)
+plot!(p_ts, dem_daily_ts_plot.date_only, dem_daily_ts_plot.total_demand ./ 1000, label=&quot;Total Demand (GW)&quot;, color=:grey, linewidth=1, alpha=0.7)
+
+savefig(p_ts, figure_path(SCRIPT_STEM, &quot;06_solar_wind_vs_demand_ts.png&quot;))
+EdaSupport.embed_figure(figure_path(SCRIPT_STEM, &quot;06_solar_wind_vs_demand_ts.png&quot;), &quot;06_solar_wind_vs_demand_ts.png&quot;)</code></pre></details><p><img src="../06_solar_wind_vs_demand_ts.png" alt="Daily solar PMax, wind PMax, and total demand over the scheduled horizon, each in GW"/></p><h2 id="Detailed-output-diagnostics"><a class="docs-heading-anchor" href="#Detailed-output-diagnostics">Detailed output diagnostics</a><a id="Detailed-output-diagnostics-1"></a><a class="docs-heading-anchor-permalink" href="#Detailed-output-diagnostics" title="Permalink"></a></h2><p>A second 2x2 detail view: hourly pmax profile (first 30 days) for up to 5 solar generators, the same for up to 5 wind generators, a VRE-vs-demand scatter with a 1:1 reference line, and the daily demand distribution histogram.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">cutoff = minimum(Date.(gen_pmax_ts_plot.datetime)) + Day(29)
+subset30_plot = filter(row -&gt; Date(row.datetime) &lt;= cutoff, gen_pmax_ts_plot)
+
+sol_subset_plot = subset30_plot[is_solar_tech.(subset30_plot.tech), :]
+sol_subset_plot = transform(sol_subset_plot, :datetime =&gt; ByRow(hour) =&gt; :hour)
+sol_profile_plot = combine(groupby(sol_subset_plot, [:id_gen, :hour]), :value =&gt; mean =&gt; :mean_pmax)
+sort!(sol_profile_plot, :id_gen)
+
+wind_subset_plot = subset30_plot[is_wind_tech.(subset30_plot.tech), :]
+wind_subset_plot = transform(wind_subset_plot, :datetime =&gt; ByRow(hour) =&gt; :hour)
+wind_profile_plot = combine(groupby(wind_subset_plot, [:id_gen, :hour]), :value =&gt; mean =&gt; :mean_pmax)
+sort!(wind_profile_plot, :id_gen)
+
+p_detailed = plot(layout=(2,2), size=(1200, 1000), left_margin=8Plots.mm, top_margin=8Plots.mm)
+
+top_sol_gens = unique(sol_profile_plot.id_gen)[1:min(5, length(unique(sol_profile_plot.id_gen)))]
+for gid in top_sol_gens
+    gdata = filter(row -&gt; row.id_gen == gid, sol_profile_plot)
+    plot!(p_detailed[1], gdata.hour, gdata.mean_pmax, label=&quot;Solar Gen $gid&quot;, linewidth=1.5)
+end
+plot!(p_detailed[1], title=&quot;Solar PMax: Hourly Profile (mean of first 30 days)&quot;, xlabel=&quot;Hour&quot;, ylabel=&quot;PMax (MW)&quot;,
+      legend=:topright, grid=true, gridalpha=0.3)
+
+top_wind_gens = unique(wind_profile_plot.id_gen)[1:min(5, length(unique(wind_profile_plot.id_gen)))]
+for gid in top_wind_gens
+    gdata = filter(row -&gt; row.id_gen == gid, wind_profile_plot)
+    plot!(p_detailed[2], gdata.hour, gdata.mean_pmax, label=&quot;Wind Gen $gid&quot;, linewidth=1.5)
+end
+plot!(p_detailed[2], title=&quot;Wind PMax: Hourly Profile (mean of first 30 days)&quot;, xlabel=&quot;Hour&quot;, ylabel=&quot;PMax (MW)&quot;,
+      legend=:topright, grid=true, gridalpha=0.3)
+
+vre_scatter = daily_gw.solar_gw .+ daily_gw.wind_gw
+scatter!(p_detailed[3], daily_gw.demand_gw, vre_scatter, markersize=2, alpha=0.3, color=:purple, label=&quot;&quot;, legend=false)
+plot!(p_detailed[3], [0, maximum(daily_gw.demand_gw)], [0, maximum(daily_gw.demand_gw)],
+      label=&quot;1:1&quot;, color=:black, linestyle=:dash, alpha=0.3, linewidth=1)
+plot!(p_detailed[3], title=&quot;VRE Generation vs Total Demand (2030)&quot;, xlabel=&quot;Demand (GW)&quot;, ylabel=&quot;VRE Solar+Wind (GW)&quot;,
+      grid=true, gridalpha=0.3, legend=false)
+
+histogram!(p_detailed[4], dem_daily_ts_plot.total_demand, bins=50, alpha=0.6, color=:grey, legend=false)
+plot!(p_detailed[4], title=&quot;Daily Total Demand Distribution (2030)&quot;, xlabel=&quot;Demand (MW)&quot;, ylabel=&quot;&quot;,
+      grid=true, gridalpha=0.3, legend=false)
+
+savefig(p_detailed, figure_path(SCRIPT_STEM, &quot;06_pisp_detailed.png&quot;))
+EdaSupport.embed_figure(figure_path(SCRIPT_STEM, &quot;06_pisp_detailed.png&quot;), &quot;06_pisp_detailed.png&quot;)</code></pre></details><p><img src="../06_pisp_detailed.png" alt="PISP detailed view: hourly pmax profiles for solar and wind generators, VRE-vs-demand scatter, and daily demand distribution"/></p><h2 id="Summary"><a class="docs-heading-anchor" href="#Summary">Summary</a><a id="Summary-1"></a><a class="docs-heading-anchor-permalink" href="#Summary" title="Permalink"></a></h2><ul><li>Static asset tables and 2030 schedule outputs join cleanly for this generated build, with identifier coverage and schedule time coverage recorded above and any unmatched identifiers listed in <code>unmatched_ids</code>.</li><li>Solar and wind classification, annual mean available output, and capacity-factor duration follow the denominator convention documented on <code>capacity_factor_duration_frame</code>.</li><li>The figures and tables use the same joined static and schedule inputs.</li><li>Complete diagnostics are saved under <code>eda/tables/julia/06_pisp_outputs/</code>; no historical thresholds are applied.</li></ul></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../temperature-data-coverage/">« ISP 2024: Temperature-data coverage and climate-zone solar comparison</a><a class="docs-footer-nextpage" href="../../analyses/reference-trace-4006-profiles/">ISP 2024: Reference trace 4006 profiles »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Thursday 23 July 2026 09:57">Thursday 23 July 2026</span>. Using Julia version 1.12.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

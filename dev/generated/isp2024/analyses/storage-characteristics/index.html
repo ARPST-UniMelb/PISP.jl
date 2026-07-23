@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>ISP 2024: PHES and battery storage characteristics · PISP.jl</title><meta name="title" content="ISP 2024: PHES and battery storage characteristics · PISP.jl"/><meta property="og:title" content="ISP 2024: PHES and battery storage characteristics · PISP.jl"/><meta property="twitter:title" content="ISP 2024: PHES and battery storage characteristics · PISP.jl"/><meta name="description" content="Documentation for PISP.jl."/><meta property="og:description" content="Documentation for PISP.jl."/><meta property="twitter:description" content="Documentation for PISP.jl."/><script data-outdated-warner src="../../../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../../../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../../../assets/documenter.js"></script><script src="../../../../search_index.js"></script><script src="../../../../siteinfo.js"></script><script src="../../../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../../../">PISP.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../../../">Home</a></li><li><a class="tocitem" href="../../../../quickstart/">Quickstart</a></li><li><span class="tocitem">Understand PISP and ISP data</span><ul><li><a class="tocitem" href="../../../../editions/supported-editions/">Supported ISP editions</a></li><li><a class="tocitem" href="../../../../concepts/">Domain concepts</a></li><li><a class="tocitem" href="../../../../editions/output-data-model/">Output data model</a></li><li><a class="tocitem" href="../../../../assumptions/">Assumptions and scope</a></li><li><a class="tocitem" href="../../../../editions/source-material/">What each ISP edition publishes</a></li><li><a class="tocitem" href="../../../../editions/source-inventory/">Downloaded source inventory by edition</a></li><li><a class="tocitem" href="../../../../editions/trace-coverage/">Trace families, schemas, and coverage</a></li><li><a class="tocitem" href="../../../../editions/parameters-and-mappings/">Parameters and mappings across editions</a></li></ul></li><li><span class="tocitem">ISP 2024</span><ul><li><a class="tocitem" href="../../../../editions/isp2024/">Overview</a></li><li><input class="collapse-toggle" id="menuitem-4-2" type="checkbox"/><label class="tocitem" for="menuitem-4-2"><span class="docs-label">Reference and inputs</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../reference/data-sources/">ISP 2024: Data sources</a></li><li><a class="tocitem" href="../../reference/output-tables/">ISP 2024: Output tables</a></li><li><a class="tocitem" href="../../reference/parameters-and-mappings/">ISP 2024: Parameters and mappings</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-3" type="checkbox"/><label class="tocitem" for="menuitem-4-3"><span class="docs-label">Tutorials</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../tutorials/building-problem-table/">ISP 2024: Building a problem table</a></li><li><a class="tocitem" href="../../tutorials/working-with-pisp-outputs/">ISP 2024: Working with PISP-generated outputs</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-4" type="checkbox"/><label class="tocitem" for="menuitem-4-4"><span class="docs-label">Data validation</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../validation/source-data-inventory/">ISP 2024: Source-data inventory</a></li><li><a class="tocitem" href="../../validation/trace-coverage-and-schema/">ISP 2024: Trace data availability and structure</a></li><li><a class="tocitem" href="../../validation/temperature-data-coverage/">ISP 2024: Temperature-data coverage and climate-zone solar comparison</a></li><li><a class="tocitem" href="../../validation/generated-output-consistency/">ISP 2024: Generated-output consistency</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-5" type="checkbox" checked/><label class="tocitem" for="menuitem-4-5"><span class="docs-label">Analyses and case studies</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../reference-trace-4006-profiles/">ISP 2024: Reference trace 4006 profiles</a></li><li><a class="tocitem" href="../historical-trace-year-comparison/">ISP 2024: Historical trace-year comparison</a></li><li><a class="tocitem" href="../seasonal-renewable-extremes/">ISP 2024: Seasonal renewable extremes</a></li><li><a class="tocitem" href="../demand-stress-low-solar/">ISP 2024: Demand stress and low-solar coincidence</a></li><li><a class="tocitem" href="../reference-trace-4006-composite-mapping/">ISP 2024: Reference trace 4006 composite mapping</a></li><li><a class="tocitem" href="../iasr-build-cost-trajectories/">ISP 2024: IASR build-cost trajectories by technology</a></li><li><a class="tocitem" href="../rez-resource-versus-connection-cost/">ISP 2024: REZ resource potential versus connection cost</a></li><li class="is-active"><a class="tocitem" href>ISP 2024: PHES and battery storage characteristics</a><ul class="internal"><li><a class="tocitem" href="#Source-fields"><span>Source fields</span></a></li><li><a class="tocitem" href="#Storage-source-tables"><span>Storage source tables</span></a></li><li><a class="tocitem" href="#Battery-and-PHES-characteristics"><span>Battery and PHES characteristics</span></a></li><li><a class="tocitem" href="#PHES-build-limits"><span>PHES build limits</span></a></li><li><a class="tocitem" href="#Storage-class-comparison"><span>Storage-class comparison</span></a></li><li><a class="tocitem" href="#PHES-concentration"><span>PHES concentration</span></a></li><li><a class="tocitem" href="#Summary-metrics"><span>Summary metrics</span></a></li><li><a class="tocitem" href="#Comparison-findings"><span>Comparison findings</span></a></li><li><a class="tocitem" href="#Interpretation"><span>Interpretation</span></a></li><li><a class="tocitem" href="#Limitations"><span>Limitations</span></a></li><li><a class="tocitem" href="#Model-input-treatment"><span>Model-input treatment</span></a></li></ul></li></ul></li></ul></li><li><span class="tocitem">ISP 2026</span><ul><li><a class="tocitem" href="../../../../editions/isp2026/">Overview</a></li><li><input class="collapse-toggle" id="menuitem-5-2" type="checkbox"/><label class="tocitem" for="menuitem-5-2"><span class="docs-label">Data validation</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../../isp2026/validation/source-availability/">ISP 2026: Source availability and release structure</a></li></ul></li></ul></li><li><span class="tocitem">Compare ISP 2024 and ISP 2026</span><ul><li><a class="tocitem" href="../../../../editions/comparison/">Overview and comparison rules</a></li><li><input class="collapse-toggle" id="menuitem-6-2" type="checkbox"/><label class="tocitem" for="menuitem-6-2"><span class="docs-label">Validation pages</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../../comparison/validation/source-availability-by-edition/">ISP 2024 and ISP 2026: Source availability by edition</a></li></ul></li></ul></li><li><a class="tocitem" href="../../../../contributing/">Contributing</a></li><li><a class="tocitem" href="../../../../api/">API Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">ISP 2024</a></li><li><a class="is-disabled">Analyses and case studies</a></li><li class="is-active"><a href>ISP 2024: PHES and battery storage characteristics</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>ISP 2024: PHES and battery storage characteristics</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/ARPST-UniMelb/PISP.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/ARPST-UniMelb/PISP.jl/blob/main/docs/literate/isp2024/analysis/storage_characteristics.jl" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="ISP-2024:-PHES-and-battery-storage-characteristics"><a class="docs-heading-anchor" href="#ISP-2024:-PHES-and-battery-storage-characteristics">ISP 2024: PHES and battery storage characteristics</a><a id="ISP-2024:-PHES-and-battery-storage-characteristics-1"></a><a class="docs-heading-anchor-permalink" href="#ISP-2024:-PHES-and-battery-storage-characteristics" title="Permalink"></a></h1><p>The source tables identify which storage-duration, efficiency, and build-limit fields are available for battery storage and pumped hydro energy storage (PHES), and which fields are not comparable across the two classes.</p><h2 id="Source-fields"><a class="docs-heading-anchor" href="#Source-fields">Source fields</a><a id="Source-fields-1"></a><a class="docs-heading-anchor-permalink" href="#Source-fields" title="Permalink"></a></h2><table><tr><th style="text-align: right">Item</th><th style="text-align: right">Definition</th></tr><tr><td style="text-align: right">Source</td><td style="text-align: right">2024 ISP Inputs and Assumptions workbook</td></tr><tr><td style="text-align: right">Property sheet</td><td style="text-align: right"><code>Storage properties</code></td></tr><tr><td style="text-align: right">Build-limit sheet</td><td style="text-align: right"><code>Build limits - PHES</code></td></tr><tr><td style="text-align: right">Battery duration</td><td style="text-align: right">Energy capacity divided by maximum power where both fields are available</td></tr><tr><td style="text-align: right">Battery efficiency</td><td style="text-align: right">Workbook round-trip efficiency fields</td></tr><tr><td style="text-align: right">PHES efficiency</td><td style="text-align: right">Pumping efficiency only; not treated as round-trip efficiency</td></tr><tr><td style="text-align: right">PHES build limits</td><td style="text-align: right">8-hour, 24-hour, 48-hour, and named <code>BOTN - Cethana</code> columns</td></tr></table><p><code>BOTN - Cethana</code> is a named scheme-specific build-limit column rather than a duration class. Source basis: the 2024 ISP Inputs and Assumptions workbook and the named sheets listed above.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">using CSV
+using DataFrames
+using Printf
+using XLSX
+
+const REPO_ROOT = normpath(get(ENV, &quot;PISP_DOCS_REPO_ROOT&quot;, joinpath(@__DIR__, &quot;..&quot;, &quot;..&quot;, &quot;..&quot;, &quot;..&quot;)))
+
+include(joinpath(REPO_ROOT, &quot;docs&quot;, &quot;edition_profiles.jl&quot;))
+using .PISPDocsEditionProfiles
+
+include(joinpath(REPO_ROOT, &quot;docs&quot;, &quot;eda_support.jl&quot;))
+using .EdaSupport
+
+const SCRIPT_STEM = &quot;isp2024_12_storage_characteristics&quot;
+const ISP2024_PROFILE = edition_profile(REPO_ROOT, &quot;2024&quot;)
+const DOWNLOADS = relpath(ISP2024_PROFILE.download_root, REPO_ROOT)  # kept relative: this is the path form recorded below
+const IASR_WORKBOOK = joinpath(DOWNLOADS, &quot;2024-isp-inputs-and-assumptions-workbook.xlsx&quot;)
+abs_path(relative_path) = joinpath(REPO_ROOT, relative_path)  # resolves a DOWNLOADS-relative path to an absolute location for reading
+
+function trim_sheet(matrix)
+    nrows, ncols = size(matrix)
+    last_row = 0
+    for r in 1:nrows
+        if any(x -&gt; x !== missing, view(matrix, r, :))
+            last_row = r
+        end
+    end
+    last_col = 0
+    for c in 1:ncols
+        if any(x -&gt; x !== missing, view(matrix, :, c))
+            last_col = c
+        end
+    end
+    (last_row == 0 || last_col == 0) &amp;&amp; return Matrix{Any}(undef, 0, 0)
+    return matrix[1:last_row, 1:last_col]
+end
+
+source_string(x::Missing) = &quot;&quot;
+source_string(x) = string(x)
+
+function numeric_or_missing(x)
+    x === missing &amp;&amp; return missing
+    x isa Real &amp;&amp; return Float64(x)
+    s = strip(string(x))
+    isempty(s) &amp;&amp; return missing
+    lowercase(s) == &quot;not applicable&quot; &amp;&amp; return missing
+    m = match(r&quot;^-?[\d,]+\.?\d*&quot;, s)
+    m === nothing &amp;&amp; return missing
+    return parse(Float64, replace(m.match, &quot;,&quot; =&gt; &quot;&quot;))
+end
+
+function property_row_lookup(matrix, row_range, property_label)
+    for r in row_range
+        matrix[r, 2] === property_label &amp;&amp; return r
+    end
+    error(&quot;Could not locate property row \&quot;$property_label\&quot;&quot;)
+end
+
+function battery_properties(storage_matrix)
+    tech_cols = 3:7
+    unit_col = 8
+    property_rows = Dict(
+        &quot;Maximum power1&quot; =&gt; property_row_lookup(storage_matrix, 5:13, &quot;Maximum power1&quot;),
+        &quot;Energy capacity2&quot; =&gt; property_row_lookup(storage_matrix, 5:13, &quot;Energy capacity2&quot;),
+        &quot;Round trip efficiency (aggregated)3&quot; =&gt; property_row_lookup(storage_matrix, 5:13, &quot;Round trip efficiency (aggregated)3&quot;),
+        &quot;Charge efficiency (utility)&quot; =&gt; property_row_lookup(storage_matrix, 5:13, &quot;Charge efficiency (utility)&quot;),
+        &quot;Discharge efficiency (utility)&quot; =&gt; property_row_lookup(storage_matrix, 5:13, &quot;Discharge efficiency (utility)&quot;),
+        &quot;Round trip efficiency (utility)&quot; =&gt; property_row_lookup(storage_matrix, 5:13, &quot;Round trip efficiency (utility)&quot;),
+        &quot;Annual degradation (utility)&quot; =&gt; property_row_lookup(storage_matrix, 5:13, &quot;Annual degradation (utility)&quot;),
+        &quot;Allowable max state of charge&quot; =&gt; property_row_lookup(storage_matrix, 5:13, &quot;Allowable max state of charge&quot;),
+        &quot;Allowable min state of charge&quot; =&gt; property_row_lookup(storage_matrix, 5:13, &quot;Allowable min state of charge&quot;),
+    )
+
+    rows = NamedTuple[]
+    for c in tech_cols
+        technology = String(storage_matrix[4, c])
+        max_power = numeric_or_missing(storage_matrix[property_rows[&quot;Maximum power1&quot;], c])
+        energy_capacity = numeric_or_missing(storage_matrix[property_rows[&quot;Energy capacity2&quot;], c])
+        duration = (max_power === missing || energy_capacity === missing || max_power == 0) ? missing : energy_capacity / max_power
+        push!(
+            rows,
+            (
+                technology_label = technology,
+                maximum_power_source_value = source_string(storage_matrix[property_rows[&quot;Maximum power1&quot;], c]),
+                maximum_power_units = source_string(storage_matrix[property_rows[&quot;Maximum power1&quot;], unit_col]),
+                energy_capacity_source_value = source_string(storage_matrix[property_rows[&quot;Energy capacity2&quot;], c]),
+                energy_capacity_units = source_string(storage_matrix[property_rows[&quot;Energy capacity2&quot;], unit_col]),
+                duration_hours_from_energy_to_power = duration,
+                round_trip_efficiency_aggregated_source_value = source_string(storage_matrix[property_rows[&quot;Round trip efficiency (aggregated)3&quot;], c]),
+                round_trip_efficiency_aggregated_pct = numeric_or_missing(storage_matrix[property_rows[&quot;Round trip efficiency (aggregated)3&quot;], c]),
+                charge_efficiency_utility_source_value = source_string(storage_matrix[property_rows[&quot;Charge efficiency (utility)&quot;], c]),
+                charge_efficiency_utility_pct = numeric_or_missing(storage_matrix[property_rows[&quot;Charge efficiency (utility)&quot;], c]),
+                discharge_efficiency_utility_source_value = source_string(storage_matrix[property_rows[&quot;Discharge efficiency (utility)&quot;], c]),
+                discharge_efficiency_utility_pct = numeric_or_missing(storage_matrix[property_rows[&quot;Discharge efficiency (utility)&quot;], c]),
+                round_trip_efficiency_utility_source_value = source_string(storage_matrix[property_rows[&quot;Round trip efficiency (utility)&quot;], c]),
+                round_trip_efficiency_utility_pct = numeric_or_missing(storage_matrix[property_rows[&quot;Round trip efficiency (utility)&quot;], c]),
+                annual_degradation_utility_pct = numeric_or_missing(storage_matrix[property_rows[&quot;Annual degradation (utility)&quot;], c]),
+                allowable_max_state_of_charge_pct = numeric_or_missing(storage_matrix[property_rows[&quot;Allowable max state of charge&quot;], c]),
+                allowable_min_state_of_charge_pct = numeric_or_missing(storage_matrix[property_rows[&quot;Allowable min state of charge&quot;], c]),
+                buildable_capacity_status = &quot;unavailable in general Build limits sheet&quot;,
+            ),
+        )
+    end
+    return DataFrame(rows)
+end
+
+function generation_and_pump_capacity(value)
+    value === missing &amp;&amp; return (missing, missing)
+    value isa Real &amp;&amp; return (Float64(value), missing)
+    s = string(value)
+    gen_match = match(r&quot;([\d,]+\.?\d*)\s*\(generation\)&quot;, s)
+    pump_match = match(r&quot;([\d,]+\.?\d*)\s*\(pump\)&quot;, s)
+    if gen_match !== nothing || pump_match !== nothing
+        gen = gen_match === nothing ? missing : parse(Float64, replace(gen_match.captures[1], &quot;,&quot; =&gt; &quot;&quot;))
+        pump = pump_match === nothing ? missing : parse(Float64, replace(pump_match.captures[1], &quot;,&quot; =&gt; &quot;&quot;))
+        return (gen, pump)
+    end
+    return (numeric_or_missing(value), missing)
+end
+
+function phes_scheme_properties(storage_matrix)
+    scheme_cols = 3:10
+    installed_row = property_row_lookup(storage_matrix, 24:26, &quot;Installed capacity3&quot;)
+    storage_row = property_row_lookup(storage_matrix, 24:26, &quot;Storage capacity&quot;)
+    pumping_row = property_row_lookup(storage_matrix, 24:26, &quot;Pumping efficiency&quot;)
+    unit_col = 11
+
+    rows = NamedTuple[]
+    for c in scheme_cols
+        scheme = storage_matrix[23, c]
+        scheme === missing &amp;&amp; continue
+        generation_mw, pump_mw = generation_and_pump_capacity(storage_matrix[installed_row, c])
+        storage_value = numeric_or_missing(storage_matrix[storage_row, c])
+        storage_units = source_string(storage_matrix[storage_row, unit_col])
+        duration = lowercase(storage_units) == &quot;hours&quot; ? storage_value : missing
+        derivation = lowercase(storage_units) == &quot;hours&quot; ?
+            &quot;source storage-capacity row is already in hours; no MWh/MW conversion applied&quot; :
+            &quot;duration not derived because storage-capacity units are not hours and no compatible energy/power pair is available&quot;
+        push!(
+            rows,
+            (
+                scheme_label = String(scheme),
+                installed_capacity_source_value = source_string(storage_matrix[installed_row, c]),
+                installed_generation_capacity_mw = generation_mw,
+                installed_pump_capacity_mw = pump_mw,
+                storage_capacity_source_value = source_string(storage_matrix[storage_row, c]),
+                storage_capacity_units = storage_units,
+                duration_hours = duration,
+                duration_derivation_method = derivation,
+                pumping_efficiency_source_value = source_string(storage_matrix[pumping_row, c]),
+                pumping_efficiency_pct = numeric_or_missing(storage_matrix[pumping_row, c]),
+                round_trip_efficiency_status = &quot;unavailable in inspected Storage properties source; Pumping efficiency is not round-trip efficiency&quot;,
+            ),
+        )
+    end
+    return DataFrame(rows)
+end
+
+function phes_build_limits(build_matrix)
+    rows = NamedTuple[]
+    for r in 10:size(build_matrix, 1)
+        name = build_matrix[r, 2]
+        name === missing &amp;&amp; break
+        name == &quot;Notes:&quot; &amp;&amp; break
+        push!(
+            rows,
+            (
+                name = String(name),
+                isp_subregion = source_string(build_matrix[r, 3]),
+                region = source_string(build_matrix[r, 4]),
+                phes_8hrs_storage_mw = numeric_or_missing(build_matrix[r, 5]),
+                phes_24hrs_storage_mw = numeric_or_missing(build_matrix[r, 6]),
+                phes_48hrs_storage_mw = numeric_or_missing(build_matrix[r, 7]),
+                botn_cethana_mw = numeric_or_missing(build_matrix[r, 8]),
+                botn_cethana_category_kind = &quot;named/scheme-specific column, not a duration class&quot;,
+            ),
+        )
+    end
+    return DataFrame(rows)
+end
+
+function comparison_summary(battery_df, phes_df, build_limits_df)
+    utility_rte = collect(skipmissing(battery_df.round_trip_efficiency_utility_pct))
+    agg_rte = collect(skipmissing(battery_df.round_trip_efficiency_aggregated_pct))
+    battery_durations = collect(skipmissing(battery_df.duration_hours_from_energy_to_power))
+    phes_durations = collect(skipmissing(phes_df.duration_hours))
+    phes_buildable_total = sum(coalesce.(build_limits_df.phes_8hrs_storage_mw, 0.0)) +
+        sum(coalesce.(build_limits_df.phes_24hrs_storage_mw, 0.0)) +
+        sum(coalesce.(build_limits_df.phes_48hrs_storage_mw, 0.0)) +
+        sum(coalesce.(build_limits_df.botn_cethana_mw, 0.0))
+
+    rows = [
+        (
+            storage_class = &quot;Battery storage (utility)&quot;,
+            source_basis = &quot;Storage properties: Battery properties&quot;,
+            duration_basis = &quot;Energy capacity divided by Maximum power; technology labels already encode 1hr/2hrs/4hrs/8hrs storage&quot;,
+            duration_range_hours = @sprintf(&quot;%.1f-%.1f&quot;, minimum(battery_durations[1:4]), maximum(battery_durations[1:4])),
+            round_trip_efficiency_status = @sprintf(&quot;available as Round trip efficiency (utility): %.0f-%.0f%%&quot;, minimum(utility_rte), maximum(utility_rte)),
+            pumping_efficiency_status = &quot;not applicable to battery rows&quot;,
+            buildable_capacity_status = &quot;unavailable: general Build limits has no battery buildable-capacity field&quot;,
+            headline_note = &quot;Battery characteristics are technology-property assumptions, not regional build limits.&quot;,
+        ),
+        (
+            storage_class = &quot;Virtual Power Plants (aggregated ESS)&quot;,
+            source_basis = &quot;Storage properties: Battery properties&quot;,
+            duration_basis = &quot;Energy capacity divided by Maximum power for the aggregated ESS row&quot;,
+            duration_range_hours = @sprintf(&quot;%.1f&quot;, battery_durations[end]),
+            round_trip_efficiency_status = isempty(agg_rte) ? &quot;unavailable&quot; : @sprintf(&quot;available as Round trip efficiency (aggregated): %.0f%%&quot;, first(agg_rte)),
+            pumping_efficiency_status = &quot;not applicable to battery rows&quot;,
+            buildable_capacity_status = &quot;unavailable: general Build limits has no battery buildable-capacity field&quot;,
+            headline_note = &quot;The aggregated ESS row has aggregated RTE while utility battery rows have utility RTE.&quot;,
+        ),
+        (
+            storage_class = &quot;Pumped Hydro Energy Storage schemes&quot;,
+            source_basis = &quot;Storage properties: Pumped hydro properties&quot;,
+            duration_basis = &quot;Storage capacity row is in hours in the inspected source; no MWh/MW conversion applied&quot;,
+            duration_range_hours = @sprintf(&quot;%.1f-%.1f&quot;, minimum(phes_durations), maximum(phes_durations)),
+            round_trip_efficiency_status = &quot;unavailable: inspected source gives Pumping efficiency only, not round-trip efficiency&quot;,
+            pumping_efficiency_status = @sprintf(&quot;available as Pumping efficiency: %.0f-%.0f%%&quot;, minimum(skipmissing(phes_df.pumping_efficiency_pct)), maximum(skipmissing(phes_df.pumping_efficiency_pct))),
+            buildable_capacity_status = @sprintf(&quot;available for PHES only in Build limits - PHES: %.0f MW total across 8hr/24hr/48hr plus BOTN - Cethana&quot;, phes_buildable_total),
+            headline_note = &quot;PHES scheme properties and PHES subregional build limits are separate keyed tables and are not force-joined.&quot;,
+        ),
+        (
+            storage_class = &quot;BOTN - Cethana&quot;,
+            source_basis = &quot;Build limits - PHES&quot;,
+            duration_basis = &quot;Named/scheme-specific build-limit column; not treated as a duration class&quot;,
+            duration_range_hours = &quot;not a duration-class column&quot;,
+            round_trip_efficiency_status = &quot;unavailable in inspected source&quot;,
+            pumping_efficiency_status = &quot;Cethana has Pumping efficiency in Storage properties, but that is not round-trip efficiency&quot;,
+            buildable_capacity_status = @sprintf(&quot;available as named column: %.0f MW&quot;, sum(coalesce.(build_limits_df.botn_cethana_mw, 0.0))),
+            headline_note = &quot;BOTN - Cethana is retained separately from 8hrs/24hrs/48hrs PHES categories.&quot;,
+        ),
+    ]
+    return DataFrame(rows)
+end
+
+function phes_concentration(build_limits_df)
+    total_8 = sum(coalesce.(build_limits_df.phes_8hrs_storage_mw, 0.0))
+    total_24 = sum(coalesce.(build_limits_df.phes_24hrs_storage_mw, 0.0))
+    total_48 = sum(coalesce.(build_limits_df.phes_48hrs_storage_mw, 0.0))
+    total_botn = sum(coalesce.(build_limits_df.botn_cethana_mw, 0.0))
+    grand_total = total_8 + total_24 + total_48 + total_botn
+
+    rows = NamedTuple[]
+    for (category, kind, total) in [
+        (&quot;8hrs storage&quot;, &quot;duration class&quot;, total_8),
+        (&quot;24hrs storage&quot;, &quot;duration class&quot;, total_24),
+        (&quot;48hrs storage&quot;, &quot;duration class&quot;, total_48),
+        (&quot;BOTN - Cethana&quot;, &quot;named/scheme-specific column&quot;, total_botn),
+    ]
+        push!(
+            rows,
+            (
+                concentration_axis = &quot;category&quot;,
+                label = category,
+                region = &quot;&quot;,
+                isp_subregion = &quot;&quot;,
+                category_kind = kind,
+                phes_8hrs_storage_mw = category == &quot;8hrs storage&quot; ? total : 0.0,
+                phes_24hrs_storage_mw = category == &quot;24hrs storage&quot; ? total : 0.0,
+                phes_48hrs_storage_mw = category == &quot;48hrs storage&quot; ? total : 0.0,
+                botn_cethana_mw = category == &quot;BOTN - Cethana&quot; ? total : 0.0,
+                total_phes_build_limit_mw = total,
+                share_of_total_phes_build_limit_pct = grand_total == 0 ? missing : total / grand_total * 100,
+            ),
+        )
+    end
+
+    for row in eachrow(build_limits_df)
+        subtotal = coalesce(row.phes_8hrs_storage_mw, 0.0) + coalesce(row.phes_24hrs_storage_mw, 0.0) + coalesce(row.phes_48hrs_storage_mw, 0.0) + coalesce(row.botn_cethana_mw, 0.0)
+        push!(
+            rows,
+            (
+                concentration_axis = &quot;isp_subregion&quot;,
+                label = row.name,
+                region = row.region,
+                isp_subregion = row.isp_subregion,
+                category_kind = &quot;subregional total across duration classes plus named BOTN - Cethana column&quot;,
+                phes_8hrs_storage_mw = coalesce(row.phes_8hrs_storage_mw, 0.0),
+                phes_24hrs_storage_mw = coalesce(row.phes_24hrs_storage_mw, 0.0),
+                phes_48hrs_storage_mw = coalesce(row.phes_48hrs_storage_mw, 0.0),
+                botn_cethana_mw = coalesce(row.botn_cethana_mw, 0.0),
+                total_phes_build_limit_mw = subtotal,
+                share_of_total_phes_build_limit_pct = grand_total == 0 ? missing : subtotal / grand_total * 100,
+            ),
+        )
+    end
+    return sort(DataFrame(rows), [:concentration_axis, order(:total_phes_build_limit_mw, rev = true), :label])
+end</code></pre></details><h2 id="Storage-source-tables"><a class="docs-heading-anchor" href="#Storage-source-tables">Storage source tables</a><a id="Storage-source-tables-1"></a><a class="docs-heading-anchor-permalink" href="#Storage-source-tables" title="Permalink"></a></h2><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">println(&quot;Workbook exists: &quot;, isfile(abs_path(IASR_WORKBOOK)))
+isfile(abs_path(IASR_WORKBOOK)) || error(&quot;IASR workbook not found at $IASR_WORKBOOK&quot;)
+
+storage_matrix, phes_limit_matrix = XLSX.openxlsx(abs_path(IASR_WORKBOOK)) do xf
+    trim_sheet(xf[&quot;Storage properties&quot;][:]), trim_sheet(xf[&quot;Build limits - PHES&quot;][:])
+end
+println(&quot;Trimmed \&quot;Storage properties\&quot; sheet shape: &quot;, size(storage_matrix))
+println(&quot;Trimmed \&quot;Build limits - PHES\&quot; sheet shape: &quot;, size(phes_limit_matrix))</code></pre></details><pre><code class="nohighlight hljs">Workbook exists: true
+Trimmed &quot;Storage properties&quot; sheet shape: (31, 11)
+Trimmed &quot;Build limits - PHES&quot; sheet shape: (30, 23)
+</code></pre><h2 id="Battery-and-PHES-characteristics"><a class="docs-heading-anchor" href="#Battery-and-PHES-characteristics">Battery and PHES characteristics</a><a id="Battery-and-PHES-characteristics-1"></a><a class="docs-heading-anchor-permalink" href="#Battery-and-PHES-characteristics" title="Permalink"></a></h2><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">battery_df = battery_properties(storage_matrix)
+write_table(battery_df, SCRIPT_STEM, &quot;battery_properties&quot;)
+battery_display = DataFrame(
+    :Technology =&gt; battery_df.technology_label,
+    Symbol(&quot;Duration (h)&quot;) =&gt; battery_df.duration_hours_from_energy_to_power,
+    Symbol(&quot;Round-trip efficiency (%)&quot;) =&gt; [
+        coalesce(utility, aggregated)
+        for (utility, aggregated) in zip(
+            battery_df.round_trip_efficiency_utility_pct,
+            battery_df.round_trip_efficiency_aggregated_pct,
+        )
+    ],
+    Symbol(&quot;Energy capacity (MWh)&quot;) =&gt; battery_df.energy_capacity_source_value,
+    Symbol(&quot;Source sheet / field&quot;) =&gt; fill(
+        &quot;Storage properties / Battery properties&quot;,
+        nrow(battery_df),
+    ),
+)
+markdown_table(battery_display)</code></pre></details><table><tr><th style="text-align: left"><strong>Technology</strong></th><th style="text-align: right"><strong>Duration (h)</strong></th><th style="text-align: right"><strong>Round-trip efficiency (%)</strong></th><th style="text-align: left"><strong>Energy capacity (MWh)</strong></th><th style="text-align: left"><strong>Source sheet / field</strong></th></tr><tr><td style="text-align: left">Battery storage (1hr storage)</td><td style="text-align: right">1.0</td><td style="text-align: right">84.0</td><td style="text-align: left">1</td><td style="text-align: left">Storage properties / Battery properties</td></tr><tr><td style="text-align: left">Battery storage (2hrs storage)</td><td style="text-align: right">2.0</td><td style="text-align: right">84.0</td><td style="text-align: left">2</td><td style="text-align: left">Storage properties / Battery properties</td></tr><tr><td style="text-align: left">Battery storage (4hrs storage)</td><td style="text-align: right">4.0</td><td style="text-align: right">85.0</td><td style="text-align: left">4</td><td style="text-align: left">Storage properties / Battery properties</td></tr><tr><td style="text-align: left">Battery storage (8hrs storage)</td><td style="text-align: right">8.0</td><td style="text-align: right">83.0</td><td style="text-align: left">8</td><td style="text-align: left">Storage properties / Battery properties</td></tr><tr><td style="text-align: left">Virtual Power Plants (aggregated ESS)4</td><td style="text-align: right">2.2</td><td style="text-align: right">85.0</td><td style="text-align: left">2.2</td><td style="text-align: left">Storage properties / Battery properties</td></tr></table><p>Energy capacity is reported directly by the workbook. Duration is the ratio of that source value to the corresponding maximum-power value.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">phes_scheme_df = phes_scheme_properties(storage_matrix)
+write_table(phes_scheme_df, SCRIPT_STEM, &quot;phes_scheme_properties&quot;)
+phes_scheme_display = DataFrame(
+    Symbol(&quot;Project / technology&quot;) =&gt; phes_scheme_df.scheme_label,
+    Symbol(&quot;Generation capacity (MW)&quot;) =&gt; phes_scheme_df.installed_generation_capacity_mw,
+    Symbol(&quot;Pump capacity (MW)&quot;) =&gt; phes_scheme_df.installed_pump_capacity_mw,
+    Symbol(&quot;Storage duration (h)&quot;) =&gt; phes_scheme_df.duration_hours,
+    Symbol(&quot;Round-trip efficiency&quot;) =&gt; [
+        value === missing ? &quot;Unavailable&quot; : &quot;Unavailable; pumping efficiency $(value)%&quot;
+        for value in phes_scheme_df.pumping_efficiency_pct
+    ],
+    Symbol(&quot;Source sheet / field&quot;) =&gt; fill(
+        &quot;Storage properties / Pumped hydro properties&quot;,
+        nrow(phes_scheme_df),
+    ),
+)
+markdown_table(phes_scheme_display)</code></pre></details><table><tr><th style="text-align: left"><strong>Project / technology</strong></th><th style="text-align: right"><strong>Generation capacity (MW)</strong></th><th style="text-align: right"><strong>Pump capacity (MW)</strong></th><th style="text-align: right"><strong>Storage duration (h)</strong></th><th style="text-align: left"><strong>Round-trip efficiency</strong></th><th style="text-align: left"><strong>Source sheet / field</strong></th></tr><tr><td style="text-align: left">Snowy 2.01</td><td style="text-align: right">2040.0</td><td style="text-align: right">missing</td><td style="text-align: right">168.0</td><td style="text-align: left">Unavailable; pumping efficiency 76.0%</td><td style="text-align: left">Storage properties / Pumped hydro properties</td></tr><tr><td style="text-align: left">Lower Tumut2</td><td style="text-align: right">missing</td><td style="text-align: right">missing</td><td style="text-align: right">missing</td><td style="text-align: left">Unavailable; pumping efficiency 78.0%</td><td style="text-align: left">Storage properties / Pumped hydro properties</td></tr><tr><td style="text-align: left">Wivenhoe</td><td style="text-align: right">570.0</td><td style="text-align: right">missing</td><td style="text-align: right">10.0</td><td style="text-align: left">Unavailable; pumping efficiency 70.0%</td><td style="text-align: left">Storage properties / Pumped hydro properties</td></tr><tr><td style="text-align: left">Shoalhaven</td><td style="text-align: right">240.0</td><td style="text-align: right">missing</td><td style="text-align: right">63.5</td><td style="text-align: left">Unavailable; pumping efficiency 70.0%</td><td style="text-align: left">Storage properties / Pumped hydro properties</td></tr><tr><td style="text-align: left">Kidston3</td><td style="text-align: right">250.0</td><td style="text-align: right">325.0</td><td style="text-align: right">6.0</td><td style="text-align: left">Unavailable; pumping efficiency 80.0%</td><td style="text-align: left">Storage properties / Pumped hydro properties</td></tr><tr><td style="text-align: left">Cethana4</td><td style="text-align: right">750.0</td><td style="text-align: right">missing</td><td style="text-align: right">20.0</td><td style="text-align: left">Unavailable; pumping efficiency 76.0%</td><td style="text-align: left">Storage properties / Pumped hydro properties</td></tr><tr><td style="text-align: left">Borumba4</td><td style="text-align: right">1998.0</td><td style="text-align: right">missing</td><td style="text-align: right">24.0</td><td style="text-align: left">Unavailable; pumping efficiency 76.0%</td><td style="text-align: left">Storage properties / Pumped hydro properties</td></tr><tr><td style="text-align: left">New Entrant PHES4</td><td style="text-align: right">missing</td><td style="text-align: right">missing</td><td style="text-align: right">missing</td><td style="text-align: left">Unavailable; pumping efficiency 76.0%</td><td style="text-align: left">Storage properties / Pumped hydro properties</td></tr></table><p>The inspected source supplies pumping efficiency, not round-trip efficiency. The table keeps that distinction explicit rather than converting between them.</p><h2 id="PHES-build-limits"><a class="docs-heading-anchor" href="#PHES-build-limits">PHES build limits</a><a id="PHES-build-limits-1"></a><a class="docs-heading-anchor-permalink" href="#PHES-build-limits" title="Permalink"></a></h2><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">phes_limits_df = phes_build_limits(phes_limit_matrix)
+write_table(phes_limits_df, SCRIPT_STEM, &quot;phes_build_limits&quot;)
+phes_limits_display = select(
+    phes_limits_df,
+    :name =&gt; Symbol(&quot;Location&quot;),
+    :region =&gt; Symbol(&quot;Region&quot;),
+    :isp_subregion =&gt; Symbol(&quot;ISP sub-region&quot;),
+    :phes_8hrs_storage_mw =&gt; Symbol(&quot;8-hour limit (MW)&quot;),
+    :phes_24hrs_storage_mw =&gt; Symbol(&quot;24-hour limit (MW)&quot;),
+    :phes_48hrs_storage_mw =&gt; Symbol(&quot;48-hour limit (MW)&quot;),
+    :botn_cethana_mw =&gt; Symbol(&quot;BOTN - Cethana (MW)&quot;),
+)
+markdown_table(phes_limits_display)</code></pre></details><table><tr><th style="text-align: left"><strong>Location</strong></th><th style="text-align: left"><strong>Region</strong></th><th style="text-align: left"><strong>ISP sub-region</strong></th><th style="text-align: right"><strong>8-hour limit (MW)</strong></th><th style="text-align: right"><strong>24-hour limit (MW)</strong></th><th style="text-align: right"><strong>48-hour limit (MW)</strong></th><th style="text-align: right"><strong>BOTN - Cethana (MW)</strong></th></tr><tr><td style="text-align: left">Northern New South Wales</td><td style="text-align: left">NSW</td><td style="text-align: left">NNSW</td><td style="text-align: right">1275.0</td><td style="text-align: right">500.0</td><td style="text-align: right">500.0</td><td style="text-align: right">0.0</td></tr><tr><td style="text-align: left">Central New South Wales</td><td style="text-align: left">NSW</td><td style="text-align: left">CNSW</td><td style="text-align: right">1750.0</td><td style="text-align: right">235.0</td><td style="text-align: right">83.0</td><td style="text-align: right">0.0</td></tr><tr><td style="text-align: left">South New South Wales</td><td style="text-align: left">NSW</td><td style="text-align: left">SNSW</td><td style="text-align: right">2500.0</td><td style="text-align: right">583.0</td><td style="text-align: right">167.0</td><td style="text-align: right">0.0</td></tr><tr><td style="text-align: left">Sydney, Newcastle, Wollongong</td><td style="text-align: left">NSW</td><td style="text-align: left">SNW</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td></tr><tr><td style="text-align: left">Northern Queensland</td><td style="text-align: left">QLD</td><td style="text-align: left">NQ</td><td style="text-align: right">1250.0</td><td style="text-align: right">5278.0</td><td style="text-align: right">111.0</td><td style="text-align: right">0.0</td></tr><tr><td style="text-align: left">Central Queensland</td><td style="text-align: left">QLD</td><td style="text-align: left">CQ</td><td style="text-align: right">1000.0</td><td style="text-align: right">0.0</td><td style="text-align: right">89.0</td><td style="text-align: right">0.0</td></tr><tr><td style="text-align: left">Gladstone Grid</td><td style="text-align: left">QLD</td><td style="text-align: left">GG</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td></tr><tr><td style="text-align: left">South Queensland</td><td style="text-align: left">QLD</td><td style="text-align: left">SQ</td><td style="text-align: right">1750.0</td><td style="text-align: right">0.0</td><td style="text-align: right">300.0</td><td style="text-align: right">0.0</td></tr><tr><td style="text-align: left">Central South Australia</td><td style="text-align: left">SA</td><td style="text-align: left">CSA</td><td style="text-align: right">698.0</td><td style="text-align: right">200.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td></tr><tr><td style="text-align: left">South East South Australia</td><td style="text-align: left">SA</td><td style="text-align: left">SESA</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td></tr><tr><td style="text-align: left">Tasmania</td><td style="text-align: left">TAS</td><td style="text-align: left">TAS</td><td style="text-align: right">1625.0</td><td style="text-align: right">1200.0</td><td style="text-align: right">371.0</td><td style="text-align: right">750.0</td></tr><tr><td style="text-align: left">Victoria</td><td style="text-align: left">VIC</td><td style="text-align: left">VIC</td><td style="text-align: right">2700.0</td><td style="text-align: right">700.0</td><td style="text-align: right">400.0</td><td style="text-align: right">0.0</td></tr></table><h2 id="Storage-class-comparison"><a class="docs-heading-anchor" href="#Storage-class-comparison">Storage-class comparison</a><a id="Storage-class-comparison-1"></a><a class="docs-heading-anchor-permalink" href="#Storage-class-comparison" title="Permalink"></a></h2><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">comparison_df = comparison_summary(battery_df, phes_scheme_df, phes_limits_df)
+write_table(comparison_df, SCRIPT_STEM, &quot;storage_class_availability_summary&quot;)
+comparison_display = select(
+    comparison_df,
+    :storage_class =&gt; Symbol(&quot;Storage class&quot;),
+    :duration_range_hours =&gt; Symbol(&quot;Duration range (h)&quot;),
+    :round_trip_efficiency_status =&gt; Symbol(&quot;Efficiency evidence&quot;),
+    :buildable_capacity_status =&gt; Symbol(&quot;Build-limit evidence&quot;),
+)
+markdown_table(comparison_display)</code></pre></details><table><tr><th style="text-align: left"><strong>Storage class</strong></th><th style="text-align: left"><strong>Duration range (h)</strong></th><th style="text-align: left"><strong>Efficiency evidence</strong></th><th style="text-align: left"><strong>Build-limit evidence</strong></th></tr><tr><td style="text-align: left">Battery storage (utility)</td><td style="text-align: left">1.0-8.0</td><td style="text-align: left">available as Round trip efficiency (utility): 83-85%</td><td style="text-align: left">unavailable: general Build limits has no battery buildable-capacity field</td></tr><tr><td style="text-align: left">Virtual Power Plants (aggregated ESS)</td><td style="text-align: left">2.2</td><td style="text-align: left">available as Round trip efficiency (aggregated): 85%</td><td style="text-align: left">unavailable: general Build limits has no battery buildable-capacity field</td></tr><tr><td style="text-align: left">Pumped Hydro Energy Storage schemes</td><td style="text-align: left">6.0-168.0</td><td style="text-align: left">unavailable: inspected source gives Pumping efficiency only, not round-trip efficiency</td><td style="text-align: left">available for PHES only in Build limits - PHES: 26015 MW total across 8hr/24hr/48hr plus BOTN - Cethana</td></tr><tr><td style="text-align: left">BOTN - Cethana</td><td style="text-align: left">not a duration-class column</td><td style="text-align: left">unavailable in inspected source</td><td style="text-align: left">available as named column: 750 MW</td></tr></table><h2 id="PHES-concentration"><a class="docs-heading-anchor" href="#PHES-concentration">PHES concentration</a><a id="PHES-concentration-1"></a><a class="docs-heading-anchor-permalink" href="#PHES-concentration" title="Permalink"></a></h2><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">concentration_df = phes_concentration(phes_limits_df)
+write_table(concentration_df, SCRIPT_STEM, &quot;phes_regional_category_concentration&quot;)
+concentration_display = select(
+    first(concentration_df, min(10, nrow(concentration_df))),
+    :concentration_axis =&gt; Symbol(&quot;Grouping&quot;),
+    :label =&gt; Symbol(&quot;Category or sub-region&quot;),
+    :total_phes_build_limit_mw =&gt; Symbol(&quot;PHES build limit (MW)&quot;),
+    :share_of_total_phes_build_limit_pct =&gt; Symbol(&quot;Share of total (%)&quot;),
+)
+markdown_table(concentration_display)</code></pre></details><table><tr><th style="text-align: left"><strong>Grouping</strong></th><th style="text-align: left"><strong>Category or sub-region</strong></th><th style="text-align: right"><strong>PHES build limit (MW)</strong></th><th style="text-align: right"><strong>Share of total (%)</strong></th></tr><tr><td style="text-align: left">category</td><td style="text-align: left">8hrs storage</td><td style="text-align: right">14548.0</td><td style="text-align: right">55.9216</td></tr><tr><td style="text-align: left">category</td><td style="text-align: left">24hrs storage</td><td style="text-align: right">8696.0</td><td style="text-align: right">33.4269</td></tr><tr><td style="text-align: left">category</td><td style="text-align: left">48hrs storage</td><td style="text-align: right">2021.0</td><td style="text-align: right">7.7686</td></tr><tr><td style="text-align: left">category</td><td style="text-align: left">BOTN - Cethana</td><td style="text-align: right">750.0</td><td style="text-align: right">2.88295</td></tr><tr><td style="text-align: left">isp_subregion</td><td style="text-align: left">Northern Queensland</td><td style="text-align: right">6639.0</td><td style="text-align: right">25.5199</td></tr><tr><td style="text-align: left">isp_subregion</td><td style="text-align: left">Tasmania</td><td style="text-align: right">3946.0</td><td style="text-align: right">15.1682</td></tr><tr><td style="text-align: left">isp_subregion</td><td style="text-align: left">Victoria</td><td style="text-align: right">3800.0</td><td style="text-align: right">14.607</td></tr><tr><td style="text-align: left">isp_subregion</td><td style="text-align: left">South New South Wales</td><td style="text-align: right">3250.0</td><td style="text-align: right">12.4928</td></tr><tr><td style="text-align: left">isp_subregion</td><td style="text-align: left">Northern New South Wales</td><td style="text-align: right">2275.0</td><td style="text-align: right">8.74495</td></tr><tr><td style="text-align: left">isp_subregion</td><td style="text-align: left">Central New South Wales</td><td style="text-align: right">2068.0</td><td style="text-align: right">7.94926</td></tr></table><h2 id="Summary-metrics"><a class="docs-heading-anchor" href="#Summary-metrics">Summary metrics</a><a id="Summary-metrics-1"></a><a class="docs-heading-anchor-permalink" href="#Summary-metrics" title="Permalink"></a></h2><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">total_phes_build_limit = sum(coalesce.(phes_limits_df.phes_8hrs_storage_mw, 0.0)) +
+    sum(coalesce.(phes_limits_df.phes_24hrs_storage_mw, 0.0)) +
+    sum(coalesce.(phes_limits_df.phes_48hrs_storage_mw, 0.0)) +
+    sum(coalesce.(phes_limits_df.botn_cethana_mw, 0.0))
+category_rows = filter(:concentration_axis =&gt; ==(&quot;category&quot;), concentration_df)
+subregion_rows = filter(:concentration_axis =&gt; ==(&quot;isp_subregion&quot;), concentration_df)
+top_category = first(category_rows)
+top_subregion = first(subregion_rows)
+
+@printf(&quot;Battery rows: %d; PHES scheme rows: %d; PHES build-limit rows: %d\n&quot;, nrow(battery_df), nrow(phes_scheme_df), nrow(phes_limits_df))
+@printf(&quot;Total PHES build limit: %.0f MW\n&quot;, total_phes_build_limit)
+@printf(&quot;Largest PHES category: %s (%.0f MW, %.1f%% of total)\n&quot;, top_category.label, top_category.total_phes_build_limit_mw, top_category.share_of_total_phes_build_limit_pct)
+@printf(&quot;Largest PHES ISP sub-region: %s/%s (%.0f MW, %.1f%% of total)\n&quot;, top_subregion.region, top_subregion.isp_subregion, top_subregion.total_phes_build_limit_mw, top_subregion.share_of_total_phes_build_limit_pct)
+println(&quot;PHES round-trip efficiency: unavailable in inspected source; pumping efficiency is reported separately.&quot;)
+println(&quot;Battery buildable capacity: unavailable in general Build limits; not fabricated.&quot;)
+
+metric_value_table([
+    &quot;Battery rows&quot; =&gt; nrow(battery_df),
+    &quot;PHES scheme rows&quot; =&gt; nrow(phes_scheme_df),
+    &quot;PHES build-limit rows&quot; =&gt; nrow(phes_limits_df),
+    &quot;Total PHES build limit (MW)&quot; =&gt; total_phes_build_limit,
+    &quot;Largest category&quot; =&gt; top_category.label,
+    &quot;Largest ISP sub-region&quot; =&gt; &quot;$(top_subregion.region)/$(top_subregion.isp_subregion)&quot;,
+])</code></pre></details><table><tr><th style="text-align: left"><strong>Metric</strong></th><th style="text-align: left"><strong>Value</strong></th></tr><tr><td style="text-align: left">Battery rows</td><td style="text-align: left">5</td></tr><tr><td style="text-align: left">PHES scheme rows</td><td style="text-align: left">8</td></tr><tr><td style="text-align: left">PHES build-limit rows</td><td style="text-align: left">12</td></tr><tr><td style="text-align: left">Total PHES build limit (MW)</td><td style="text-align: left">26015.0</td></tr><tr><td style="text-align: left">Largest category</td><td style="text-align: left">8hrs storage</td></tr><tr><td style="text-align: left">Largest ISP sub-region</td><td style="text-align: left">QLD/NQ</td></tr></table><h2 id="Comparison-findings"><a class="docs-heading-anchor" href="#Comparison-findings">Comparison findings</a><a id="Comparison-findings-1"></a><a class="docs-heading-anchor-permalink" href="#Comparison-findings" title="Permalink"></a></h2><ul><li>Utility-battery duration classes span <code>1-8</code> hours and the reported utility round-trip efficiencies span <code>83-85%</code>.</li><li>PHES scheme durations span <code>6-168</code> hours in the inspected property table, while the available efficiency field is pumping efficiency rather than round-trip efficiency.</li><li>The PHES build-limit table totals <code>26,015 MW</code>; the 8-hour category contributes <code>14,548 MW</code> or <code>55.9%</code>.</li><li>Northern Queensland is the largest reported subregional total at <code>6,639 MW</code> or <code>25.5%</code>.</li></ul><h2 id="Interpretation"><a class="docs-heading-anchor" href="#Interpretation">Interpretation</a><a id="Interpretation-1"></a><a class="docs-heading-anchor-permalink" href="#Interpretation" title="Permalink"></a></h2><p>Battery properties, PHES scheme properties, and PHES regional build limits are different evidence layers. They should not be force-joined or compared through fields that the workbook does not supply on a common basis.</p><h2 id="Limitations"><a class="docs-heading-anchor" href="#Limitations">Limitations</a><a id="Limitations-1"></a><a class="docs-heading-anchor-permalink" href="#Limitations" title="Permalink"></a></h2><ul><li>PHES pumping efficiency is not converted into round-trip efficiency.</li><li>The general build-limit evidence does not provide battery buildable capacity, so none is inferred.</li><li>A duration-class build limit is not the same as an individual scheme&#39;s energy capacity or feasible project pipeline.</li><li><code>BOTN - Cethana</code> remains separate because it is a named column, not an 8/24/48-hour category.</li></ul><h2 id="Model-input-treatment"><a class="docs-heading-anchor" href="#Model-input-treatment">Model-input treatment</a><a id="Model-input-treatment-1"></a><a class="docs-heading-anchor-permalink" href="#Model-input-treatment" title="Permalink"></a></h2><p>Preserve the source-specific meaning of each storage field. Comparative models should introduce any missing common assumptions explicitly and label them as project assumptions rather than workbook-derived values.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../rez-resource-versus-connection-cost/">« ISP 2024: REZ resource potential versus connection cost</a><a class="docs-footer-nextpage" href="../../../../editions/isp2026/">Overview »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Thursday 23 July 2026 09:57">Thursday 23 July 2026</span>. Using Julia version 1.12.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

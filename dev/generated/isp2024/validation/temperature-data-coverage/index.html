@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>ISP 2024: Temperature-data coverage and climate-zone solar comparison · PISP.jl</title><meta name="title" content="ISP 2024: Temperature-data coverage and climate-zone solar comparison · PISP.jl"/><meta property="og:title" content="ISP 2024: Temperature-data coverage and climate-zone solar comparison · PISP.jl"/><meta property="twitter:title" content="ISP 2024: Temperature-data coverage and climate-zone solar comparison · PISP.jl"/><meta name="description" content="Documentation for PISP.jl."/><meta property="og:description" content="Documentation for PISP.jl."/><meta property="twitter:description" content="Documentation for PISP.jl."/><script data-outdated-warner src="../../../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../../../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../../../assets/documenter.js"></script><script src="../../../../search_index.js"></script><script src="../../../../siteinfo.js"></script><script src="../../../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../../../">PISP.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../../../">Home</a></li><li><a class="tocitem" href="../../../../quickstart/">Quickstart</a></li><li><span class="tocitem">Understand PISP and ISP data</span><ul><li><a class="tocitem" href="../../../../editions/supported-editions/">Supported ISP editions</a></li><li><a class="tocitem" href="../../../../concepts/">Domain concepts</a></li><li><a class="tocitem" href="../../../../editions/output-data-model/">Output data model</a></li><li><a class="tocitem" href="../../../../assumptions/">Assumptions and scope</a></li><li><a class="tocitem" href="../../../../editions/source-material/">What each ISP edition publishes</a></li><li><a class="tocitem" href="../../../../editions/source-inventory/">Downloaded source inventory by edition</a></li><li><a class="tocitem" href="../../../../editions/trace-coverage/">Trace families, schemas, and coverage</a></li><li><a class="tocitem" href="../../../../editions/parameters-and-mappings/">Parameters and mappings across editions</a></li></ul></li><li><span class="tocitem">ISP 2024</span><ul><li><a class="tocitem" href="../../../../editions/isp2024/">Overview</a></li><li><input class="collapse-toggle" id="menuitem-4-2" type="checkbox"/><label class="tocitem" for="menuitem-4-2"><span class="docs-label">Reference and inputs</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../reference/data-sources/">ISP 2024: Data sources</a></li><li><a class="tocitem" href="../../reference/output-tables/">ISP 2024: Output tables</a></li><li><a class="tocitem" href="../../reference/parameters-and-mappings/">ISP 2024: Parameters and mappings</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-3" type="checkbox"/><label class="tocitem" for="menuitem-4-3"><span class="docs-label">Tutorials</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../tutorials/building-problem-table/">ISP 2024: Building a problem table</a></li><li><a class="tocitem" href="../../tutorials/working-with-pisp-outputs/">ISP 2024: Working with PISP-generated outputs</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-4" type="checkbox" checked/><label class="tocitem" for="menuitem-4-4"><span class="docs-label">Data validation</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../source-data-inventory/">ISP 2024: Source-data inventory</a></li><li><a class="tocitem" href="../trace-coverage-and-schema/">ISP 2024: Trace data availability and structure</a></li><li class="is-active"><a class="tocitem" href>ISP 2024: Temperature-data coverage and climate-zone solar comparison</a><ul class="internal"><li><a class="tocitem" href="#Temperature-related-source-fields"><span>Temperature-related source fields</span></a></li><li><a class="tocitem" href="#Exported-fields"><span>Exported fields</span></a></li><li><a class="tocitem" href="#Solar-proxy-comparison"><span>Solar proxy comparison</span></a></li><li><a class="tocitem" href="#Summer-capacity-factor-distribution"><span>Summer capacity-factor distribution</span></a></li><li><a class="tocitem" href="#Midday-and-daily-mean-relationship"><span>Midday and daily-mean relationship</span></a></li><li><a class="tocitem" href="#Interpretation"><span>Interpretation</span></a></li><li><a class="tocitem" href="#Limitations"><span>Limitations</span></a></li></ul></li><li><a class="tocitem" href="../generated-output-consistency/">ISP 2024: Generated-output consistency</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-5" type="checkbox"/><label class="tocitem" for="menuitem-4-5"><span class="docs-label">Analyses and case studies</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../analyses/reference-trace-4006-profiles/">ISP 2024: Reference trace 4006 profiles</a></li><li><a class="tocitem" href="../../analyses/historical-trace-year-comparison/">ISP 2024: Historical trace-year comparison</a></li><li><a class="tocitem" href="../../analyses/seasonal-renewable-extremes/">ISP 2024: Seasonal renewable extremes</a></li><li><a class="tocitem" href="../../analyses/demand-stress-low-solar/">ISP 2024: Demand stress and low-solar coincidence</a></li><li><a class="tocitem" href="../../analyses/reference-trace-4006-composite-mapping/">ISP 2024: Reference trace 4006 composite mapping</a></li><li><a class="tocitem" href="../../analyses/iasr-build-cost-trajectories/">ISP 2024: IASR build-cost trajectories by technology</a></li><li><a class="tocitem" href="../../analyses/rez-resource-versus-connection-cost/">ISP 2024: REZ resource potential versus connection cost</a></li><li><a class="tocitem" href="../../analyses/storage-characteristics/">ISP 2024: PHES and battery storage characteristics</a></li></ul></li></ul></li><li><span class="tocitem">ISP 2026</span><ul><li><a class="tocitem" href="../../../../editions/isp2026/">Overview</a></li><li><input class="collapse-toggle" id="menuitem-5-2" type="checkbox"/><label class="tocitem" for="menuitem-5-2"><span class="docs-label">Data validation</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../../isp2026/validation/source-availability/">ISP 2026: Source availability and release structure</a></li></ul></li></ul></li><li><span class="tocitem">Compare ISP 2024 and ISP 2026</span><ul><li><a class="tocitem" href="../../../../editions/comparison/">Overview and comparison rules</a></li><li><input class="collapse-toggle" id="menuitem-6-2" type="checkbox"/><label class="tocitem" for="menuitem-6-2"><span class="docs-label">Validation pages</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../../comparison/validation/source-availability-by-edition/">ISP 2024 and ISP 2026: Source availability by edition</a></li></ul></li></ul></li><li><a class="tocitem" href="../../../../contributing/">Contributing</a></li><li><a class="tocitem" href="../../../../api/">API Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">ISP 2024</a></li><li><a class="is-disabled">Data validation</a></li><li class="is-active"><a href>ISP 2024: Temperature-data coverage and climate-zone solar comparison</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>ISP 2024: Temperature-data coverage and climate-zone solar comparison</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/ARPST-UniMelb/PISP.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/ARPST-UniMelb/PISP.jl/blob/main/docs/literate/isp2024/validation/temperature_data_coverage.jl" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="ISP-2024:-Temperature-related-fields-and-climate-zone-solar-proxies"><a class="docs-heading-anchor" href="#ISP-2024:-Temperature-related-fields-and-climate-zone-solar-proxies">ISP 2024: Temperature-related fields and climate-zone solar proxies</a><a id="ISP-2024:-Temperature-related-fields-and-climate-zone-solar-proxies-1"></a><a class="docs-heading-anchor-permalink" href="#ISP-2024:-Temperature-related-fields-and-climate-zone-solar-proxies" title="Permalink"></a></h1><p>Temperature-related workbook fields and PISP outputs are inventoried alongside descriptive summer solar comparisons for selected climate-zone proxy sites.</p><p>No observed temperature time series is loaded, and no causal temperature-response model is estimated. Climate-zone comparisons are descriptive solar-trace comparisons, not direct measurements of thermal derating.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">ENV[&quot;GKSwstype&quot;] = &quot;100&quot;
+
+using CSV
+using DataFrames
+using XLSX
+using Printf
+using Statistics
+using Plots
+
+gr();
+
+const REPO_ROOT = normpath(get(ENV, &quot;PISP_DOCS_REPO_ROOT&quot;, joinpath(@__DIR__, &quot;..&quot;, &quot;..&quot;, &quot;..&quot;, &quot;..&quot;)))
+
+include(joinpath(REPO_ROOT, &quot;docs&quot;, &quot;edition_profiles.jl&quot;))
+using .PISPDocsEditionProfiles
+
+include(joinpath(REPO_ROOT, &quot;docs&quot;, &quot;eda_support.jl&quot;))
+using .EdaSupport
+
+const SCRIPT_STEM = &quot;isp2024_05_temperature_analysis&quot;
+const ISP2024_PROFILE = edition_profile(REPO_ROOT, &quot;2024&quot;)
+const TRACES = relpath(joinpath(ISP2024_PROFILE.download_root, &quot;Traces&quot;), REPO_ROOT)  # kept relative: this is the path form recorded in the tables below
+const DOWNLOADS = relpath(ISP2024_PROFILE.download_root, REPO_ROOT)  # kept relative, same reason as TRACES
+const OUTPUT_ROOT = ISP2024_PROFILE.output_root
+OUTPUT_ROOT === nothing &amp;&amp; error(
+    &quot;ISP 2024 profile does not define output_root; set PISP_DOCS_ISP2024_OUTPUT_ROOT to select a local output build.&quot;,
+)
+const SCHEDULE_TAG = ISP2024_PROFILE.schedule_tag
+SCHEDULE_TAG === nothing &amp;&amp; error(
+    &quot;ISP 2024 profile does not define schedule_tag; set PISP_DOCS_ISP2024_SCHEDULE_TAG to select a local schedule.&quot;,
+)
+
+abs_path(relative_path) = joinpath(REPO_ROOT, relative_path)  # resolves a relative path above to an absolute file location for reading
+
+const TEMP_KEYWORDS = [&quot;temp&quot;, &quot;heat&quot;, &quot;thermal&quot;, &quot;derate&quot;, &quot;pv&quot;, &quot;solar&quot;, &quot;wind&quot;, &quot;rooftop&quot;, &quot;inverter&quot;]
+const HH_COLS_SOL = string.(1:48)
+const CLIMATE_ZONES = [
+    (&quot;Hot_Inland&quot;, &quot;Bomen_SAT&quot;),
+    (&quot;Hot_SA&quot;, &quot;Cultana_SAT&quot;),
+    (&quot;Moderate_VIC&quot;, &quot;Bannerton_SAT&quot;),
+    (&quot;Cool_TAS&quot;, &quot;Derby_SAT&quot;),
+]
+
+is_keyword_match(name) = any(kw -&gt; occursin(kw, lowercase(name)), TEMP_KEYWORDS)
+is_rooftop_match(name) = occursin(&quot;rooftop&quot;, lowercase(name)) || occursin(&quot;rtpv&quot;, lowercase(name))
+function is_reliability_match(name)
+    lname = lowercase(name)
+    return occursin(&quot;reliability&quot;, lname) || occursin(&quot;outage&quot;, lname) || occursin(&quot;generator&quot;, lname)
+end</code></pre></details><p>Trim a raw XLSX matrix down to the bounding box of non-missing cells. A worksheet&#39;s declared dimension (and hence XLSX.jl&#39;s <code>sheet[:]</code>) can report extra trailing all-empty rows/columns beyond the sheet&#39;s real content, so this drops trailing rows/columns that hold no value before reporting a sheet&#39;s shape. Verified against this workbook: e.g. &quot;Rooftop PV&quot; has a raw shape of (64, 35) but a trimmed shape of (62, 33) — rows 63-64 and columns 34-35 are entirely <code>missing</code>.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">function trim_sheet(matrix)
+    nrows, ncols = size(matrix)
+    last_row = 0
+    for r in 1:nrows
+        if any(x -&gt; x !== missing, view(matrix, r, :))
+            last_row = r
+        end
+    end
+    last_col = 0
+    for c in 1:ncols
+        if any(x -&gt; x !== missing, view(matrix, :, c))
+            last_col = c
+        end
+    end
+    (last_row == 0 || last_col == 0) &amp;&amp; return Matrix{Any}(undef, 0, 0)
+    return matrix[1:last_row, 1:last_col]
+end</code></pre></details><p>A blank header cell gets a placeholder name using its 0-based column index.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">function header_names(row)
+    return [ismissing(v) ? &quot;Unnamed: $(j - 1)&quot; : string(v) for (j, v) in enumerate(row)]
+end
+
+function empty_df(schema::Vector{Pair{Symbol, DataType}})
+    return DataFrame([name =&gt; Type[] for (name, Type) in schema]...)
+end</code></pre></details><h2 id="Temperature-related-source-fields"><a class="docs-heading-anchor" href="#Temperature-related-source-fields">Temperature-related source fields</a><a id="Temperature-related-source-fields-1"></a><a class="docs-heading-anchor-permalink" href="#Temperature-related-source-fields" title="Permalink"></a></h2><p>The workbook lists all its worksheets; a keyword match identifies material for review, it does not by itself prove that a sheet contains a usable temperature dependency.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">workbook_path = joinpath(DOWNLOADS, &quot;2024-isp-inputs-and-assumptions-workbook.xlsx&quot;)
+println(&quot;Workbook exists: &quot;, isfile(abs_path(workbook_path)))
+
+sheet_inventory_rows = NamedTuple[]
+relevant_shape_rows = NamedTuple[]
+rooftop_rows = NamedTuple[]
+reliability_shape_rows = NamedTuple[]
+
+if isfile(abs_path(workbook_path))
+    XLSX.openxlsx(abs_path(workbook_path)) do xf
+        sheet_names = XLSX.sheetnames(xf)
+        println(&quot;\n=== ISP Assumptions Workbook Sheets ($(length(sheet_names))) ===&quot;)
+        for (i, name) in enumerate(sheet_names)
+            println(@sprintf(&quot;  %2d. %s&quot;, i, name))
+        end
+
+        println(&quot;\n=== Potentially Relevant Sheets ===&quot;)
+        for name in sheet_names
+            is_keyword_match(name) &amp;&amp; println(&quot;  - &quot;, name)
+        end
+
+        for (i, name) in enumerate(sheet_names)
+            push!(
+                sheet_inventory_rows,
+                (
+                    sheet_index = i,
+                    sheet_name = name,
+                    is_keyword_match = is_keyword_match(name) ? 1 : 0,
+                    is_rooftop_match = is_rooftop_match(name) ? 1 : 0,
+                    is_reliability_match = is_reliability_match(name) ? 1 : 0,
+                ),
+            )
+        end
+
+        relevant_sheets = [name for name in sheet_names if is_keyword_match(name)]
+
+        for sheet in first(relevant_sheets, min(10, length(relevant_sheets)))
+            m = trim_sheet(xf[sheet][:])
+            n_rows, n_cols = size(m)
+            println(&quot;\n--- Sheet: $sheet (shape: ($n_rows, $n_cols)) ---&quot;)
+            push!(relevant_shape_rows, (sheet_name = sheet, n_rows = n_rows, n_cols = n_cols, read_ok = 1))
+        end
+
+        for sheet in sheet_names
+            if is_rooftop_match(sheet)
+                m = trim_sheet(xf[sheet][:])
+                total_rows, n_cols = size(m)
+                n_rows = max(total_rows - 1, 0)
+                cols = total_rows &gt; 0 ? header_names(m[1, :]) : String[]
+                println(&quot;\n=== Rooftop PV Sheet ($sheet) ===&quot;)
+                println(&quot;Columns: &quot;, cols)
+                push!(
+                    rooftop_rows,
+                    (
+                        sheet_name = sheet,
+                        n_rows = n_rows,
+                        n_cols = n_cols,
+                        columns_preview = join(cols[1:min(5, length(cols))], &quot;|&quot;),
+                    ),
+                )
+            end
+        end
+
+        for sheet in sheet_names
+            if is_reliability_match(sheet)
+                m = trim_sheet(xf[sheet][:])
+                n_rows, n_cols = size(m)
+                println(&quot;\n=== Reliability Sheet: $sheet (shape: ($n_rows, $n_cols)) ===&quot;)
+                push!(reliability_shape_rows, (sheet_name = sheet, n_rows = n_rows, n_cols = n_cols))
+            end
+        end
+    end
+end
+
+workbook_sheet_inventory = isempty(sheet_inventory_rows) ?
+    empty_df([:sheet_index =&gt; Int, :sheet_name =&gt; String, :is_keyword_match =&gt; Int, :is_rooftop_match =&gt; Int, :is_reliability_match =&gt; Int]) :
+    DataFrame(sheet_inventory_rows)
+write_table(workbook_sheet_inventory, SCRIPT_STEM, &quot;workbook_sheet_inventory&quot;)
+workbook_inventory_summary = DataFrame(
+    Metric = [&quot;Workbook sheets&quot;, &quot;Keyword matches&quot;, &quot;Rooftop-PV matches&quot;, &quot;Reliability matches&quot;],
+    Value = [
+        nrow(workbook_sheet_inventory),
+        sum(workbook_sheet_inventory.is_keyword_match),
+        sum(workbook_sheet_inventory.is_rooftop_match),
+        sum(workbook_sheet_inventory.is_reliability_match),
+    ],
+)
+markdown_table(workbook_inventory_summary)</code></pre></details><table><tr><th style="text-align: left"><strong>Metric</strong></th><th style="text-align: right"><strong>Value</strong></th></tr><tr><td style="text-align: left">Workbook sheets</td><td style="text-align: right">76</td></tr><tr><td style="text-align: left">Keyword matches</td><td style="text-align: right">4</td></tr><tr><td style="text-align: left">Rooftop-PV matches</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">Reliability matches</td><td style="text-align: right">2</td></tr></table><p>The complete sheet inventory is retained in <code>workbook_sheet_inventory.csv</code>.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">workbook_relevant_sheet_shapes = isempty(relevant_shape_rows) ?
+    empty_df([:sheet_name =&gt; String, :n_rows =&gt; Int, :n_cols =&gt; Int, :read_ok =&gt; Int]) :
+    DataFrame(relevant_shape_rows)
+write_table(workbook_relevant_sheet_shapes, SCRIPT_STEM, &quot;workbook_relevant_sheet_shapes&quot;)
+markdown_table(workbook_relevant_sheet_shapes)</code></pre></details><table><tr><th style="text-align: left"><strong>sheet_name</strong></th><th style="text-align: right"><strong>n_rows</strong></th><th style="text-align: right"><strong>n_cols</strong></th><th style="text-align: right"><strong>read_ok</strong></th></tr><tr><td style="text-align: left">Rooftop PV</td><td style="text-align: right">62</td><td style="text-align: right">33</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">PVNSG</td><td style="text-align: right">62</td><td style="text-align: right">33</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">Heat rates</td><td style="text-align: right">70</td><td style="text-align: right">7</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">Affine Heat rates</td><td style="text-align: right">194</td><td style="text-align: right">11</td><td style="text-align: right">1</td></tr></table><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">workbook_rooftop_sheet_summary = isempty(rooftop_rows) ?
+    empty_df([:sheet_name =&gt; String, :n_rows =&gt; Int, :n_cols =&gt; Int, :columns_preview =&gt; String]) :
+    DataFrame(rooftop_rows)
+write_table(workbook_rooftop_sheet_summary, SCRIPT_STEM, &quot;workbook_rooftop_sheet_summary&quot;)
+markdown_table(workbook_rooftop_sheet_summary)</code></pre></details><table><tr><th style="text-align: left"><strong>sheet_name</strong></th><th style="text-align: right"><strong>n_rows</strong></th><th style="text-align: right"><strong>n_cols</strong></th><th style="text-align: left"><strong>columns_preview</strong></th></tr><tr><td style="text-align: left">Rooftop PV</td><td style="text-align: right">61</td><td style="text-align: right">33</td><td style="text-align: left">Unnamed: 0|Go to Assumptions Summary|Unnamed: 2|Unnamed: 3|Unnamed: 4</td></tr></table><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">workbook_reliability_sheet_shapes = isempty(reliability_shape_rows) ?
+    empty_df([:sheet_name =&gt; String, :n_rows =&gt; Int, :n_cols =&gt; Int]) :
+    DataFrame(reliability_shape_rows)
+write_table(workbook_reliability_sheet_shapes, SCRIPT_STEM, &quot;workbook_reliability_sheet_shapes&quot;)
+markdown_table(workbook_reliability_sheet_shapes)</code></pre></details><table><tr><th style="text-align: left"><strong>sheet_name</strong></th><th style="text-align: right"><strong>n_rows</strong></th><th style="text-align: right"><strong>n_cols</strong></th></tr><tr><td style="text-align: left">Transmission Reliability</td><td style="text-align: right">11</td><td style="text-align: right">7</td></tr><tr><td style="text-align: left">Generator Reliability Settings</td><td style="text-align: right">64</td><td style="text-align: right">14</td></tr></table><h2 id="Exported-fields"><a class="docs-heading-anchor" href="#Exported-fields">Exported fields</a><a id="Exported-fields-1"></a><a class="docs-heading-anchor-permalink" href="#Exported-fields" title="Permalink"></a></h2><p>The output inventory and generator-column table distinguish information present in the downloaded workbook from fields actually exported by PISP.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">csv_dir = relpath(OUTPUT_ROOT, REPO_ROOT)
+sched_dir = relpath(dirname(OUTPUT_ROOT), REPO_ROOT)
+
+output_inventory_rows = NamedTuple[]
+println(&quot;\n=== PISP Output Files ===&quot;)
+if isdir(abs_path(csv_dir))
+    for name in sort(filter(n -&gt; endswith(lowercase(n), &quot;.csv&quot;), readdir(abs_path(csv_dir))))
+        println(&quot;  CSV: &quot;, name)
+        push!(output_inventory_rows, (kind = &quot;csv&quot;, name = name))
+    end
+end
+
+if isdir(abs_path(sched_dir))
+    for name in sort(filter(n -&gt; startswith(n, &quot;schedule-&quot;), readdir(abs_path(sched_dir))))
+        if isdir(abs_path(joinpath(sched_dir, name)))
+            println(&quot;  Schedule: &quot;, name)
+            push!(output_inventory_rows, (kind = &quot;schedule&quot;, name = name))
+        end
+    end
+end
+
+pisp_output_inventory = isempty(output_inventory_rows) ? empty_df([:kind =&gt; String, :name =&gt; String]) : DataFrame(output_inventory_rows)
+write_table(pisp_output_inventory, SCRIPT_STEM, &quot;pisp_output_inventory&quot;)
+markdown_table(pisp_output_inventory)</code></pre></details><table><tr><th style="text-align: left"><strong>kind</strong></th><th style="text-align: left"><strong>name</strong></th></tr><tr><td style="text-align: left">csv</td><td style="text-align: left">Bus.csv</td></tr><tr><td style="text-align: left">csv</td><td style="text-align: left">DER.csv</td></tr><tr><td style="text-align: left">csv</td><td style="text-align: left">Demand.csv</td></tr><tr><td style="text-align: left">csv</td><td style="text-align: left">ESS.csv</td></tr><tr><td style="text-align: left">csv</td><td style="text-align: left">Generator.csv</td></tr><tr><td style="text-align: left">csv</td><td style="text-align: left">Line.csv</td></tr></table><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">gen_path = joinpath(csv_dir, &quot;Generator.csv&quot;)
+generator_details_rows = NamedTuple[]
+generator_temp_row = (generator_table_exists = 0, total_columns = missing, n_temp_columns = missing, temp_columns_list = &quot;&quot;)
+
+if isfile(abs_path(gen_path))
+    gen_df = CSV.read(abs_path(gen_path), DataFrame)
+    println(&quot;\n=== Generator Table (shape: $(size(gen_df))) ===&quot;)
+    println(&quot;Columns: &quot;, names(gen_df))
+
+    is_solar(tech) = occursin(r&quot;PV|SOLAR|DISTPV&quot;i, tech)
+    is_wind(tech) = occursin(r&quot;WIND&quot;i, tech)
+    solar_gens = filter(row -&gt; is_solar(row.tech), gen_df)
+    wind_gens = filter(row -&gt; is_wind(row.tech), gen_df)
+
+    println(&quot;\nSolar generators: &quot;, nrow(solar_gens))
+    println(&quot;\nWind generators: &quot;, nrow(wind_gens))
+
+    for (category, subset) in ((&quot;solar&quot;, solar_gens), (&quot;wind&quot;, wind_gens))
+        for row in eachrow(subset)
+            push!(
+                generator_details_rows,
+                (
+                    category = category,
+                    id_gen = row.id_gen,
+                    name = row.name,
+                    tech = row.tech,
+                    forate = row.forate,
+                    derate = row.derate,
+                    pmin = row.pmin,
+                    pmax = row.pmax,
+                    n = row.n,
+                ),
+            )
+        end
+    end
+
+    temp_cols = [col for col in names(gen_df) if any(kw -&gt; occursin(kw, lowercase(col)), [&quot;temp&quot;, &quot;heat&quot;, &quot;thermal&quot;])]
+    println(&quot;\nTemperature-related columns in Generator: &quot;, temp_cols)
+    generator_temp_row = (
+        generator_table_exists = 1,
+        total_columns = ncol(gen_df),
+        n_temp_columns = length(temp_cols),
+        temp_columns_list = join(temp_cols, &quot;|&quot;),
+    )
+end
+
+generator_solar_wind_details = isempty(generator_details_rows) ?
+    empty_df([:category =&gt; String, :id_gen =&gt; Int, :name =&gt; String, :tech =&gt; String, :forate =&gt; Float64, :derate =&gt; Float64, :pmin =&gt; Float64, :pmax =&gt; Float64, :n =&gt; Int]) :
+    DataFrame(generator_details_rows)
+write_table(generator_solar_wind_details, SCRIPT_STEM, &quot;generator_solar_wind_details&quot;)
+markdown_table(generator_solar_wind_details)</code></pre></details><table><tr><th style="text-align: left"><strong>category</strong></th><th style="text-align: right"><strong>id_gen</strong></th><th style="text-align: left"><strong>name</strong></th><th style="text-align: left"><strong>tech</strong></th><th style="text-align: right"><strong>forate</strong></th><th style="text-align: right"><strong>derate</strong></th><th style="text-align: right"><strong>pmin</strong></th><th style="text-align: right"><strong>pmax</strong></th><th style="text-align: right"><strong>n</strong></th></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">92</td><td style="text-align: left">RTPV_NQ</td><td style="text-align: left">RoofPV</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">100.0</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">93</td><td style="text-align: left">RTPV_CQ</td><td style="text-align: left">RoofPV</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">100.0</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">94</td><td style="text-align: left">RTPV_GG</td><td style="text-align: left">RoofPV</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">100.0</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">95</td><td style="text-align: left">RTPV_SQ</td><td style="text-align: left">RoofPV</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">100.0</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">96</td><td style="text-align: left">RTPV_NNSW</td><td style="text-align: left">RoofPV</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">100.0</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">97</td><td style="text-align: left">RTPV_CNSW</td><td style="text-align: left">RoofPV</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">100.0</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">98</td><td style="text-align: left">RTPV_SNW</td><td style="text-align: left">RoofPV</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">100.0</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">99</td><td style="text-align: left">RTPV_SNSW</td><td style="text-align: left">RoofPV</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">100.0</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">100</td><td style="text-align: left">RTPV_VIC</td><td style="text-align: left">RoofPV</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">100.0</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">101</td><td style="text-align: left">RTPV_TAS</td><td style="text-align: left">RoofPV</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">100.0</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">102</td><td style="text-align: left">RTPV_CSA</td><td style="text-align: left">RoofPV</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">100.0</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">103</td><td style="text-align: left">RTPV_SESA</td><td style="text-align: left">RoofPV</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">100.0</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">104</td><td style="text-align: left">LSPV_CQ</td><td style="text-align: left">LargePV</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">869.9</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">105</td><td style="text-align: left">LSPV_VIC</td><td style="text-align: left">LargePV</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">1313.68</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">106</td><td style="text-align: left">LSPV_NNSW</td><td style="text-align: left">LargePV</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">721.0</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">107</td><td style="text-align: left">LSPV_SQ</td><td style="text-align: left">LargePV</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">2042.66</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">108</td><td style="text-align: left">LSPV_CSA</td><td style="text-align: left">LargePV</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">648.04</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">109</td><td style="text-align: left">LSPV_NQ</td><td style="text-align: left">LargePV</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">599.97</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">110</td><td style="text-align: left">LSPV_SNSW</td><td style="text-align: left">LargePV</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">2345.46</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">111</td><td style="text-align: left">LSPV_CNSW</td><td style="text-align: left">LargePV</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">2053.78</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">112</td><td style="text-align: left">LSPV_TAS</td><td style="text-align: left">LargePV</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">solar</td><td style="text-align: right">113</td><td style="text-align: left">LSPV_SESA</td><td style="text-align: left">LargePV</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">42.9</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">114</td><td style="text-align: left">WIND_CQ</td><td style="text-align: left">Wind</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">450.0</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">115</td><td style="text-align: left">WIND_VIC</td><td style="text-align: left">Wind</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">5362.16</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">116</td><td style="text-align: left">WIND_NNSW</td><td style="text-align: left">Wind</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">442.48</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">117</td><td style="text-align: left">WIND_SQ</td><td style="text-align: left">Wind</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">877.88</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">118</td><td style="text-align: left">WIND_CSA</td><td style="text-align: left">Wind</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">2435.99</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">119</td><td style="text-align: left">WIND_NQ</td><td style="text-align: left">Wind</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">380.52</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">120</td><td style="text-align: left">WIND_SNSW</td><td style="text-align: left">Wind</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">1873.85</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">121</td><td style="text-align: left">WIND_CNSW</td><td style="text-align: left">Wind</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">507.24</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">122</td><td style="text-align: left">WIND_TAS</td><td style="text-align: left">Wind</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">563.35</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">123</td><td style="text-align: left">WIND_SESA</td><td style="text-align: left">Wind</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">324.5</td><td style="text-align: right">1</td></tr><tr><td style="text-align: left">wind</td><td style="text-align: right">124</td><td style="text-align: left">WIND_SNW</td><td style="text-align: left">Wind</td><td style="text-align: right">1.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">0.0</td><td style="text-align: right">1</td></tr></table><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">generator_temperature_columns = DataFrame([generator_temp_row])
+write_table(generator_temperature_columns, SCRIPT_STEM, &quot;generator_temperature_columns&quot;)
+markdown_table(generator_temperature_columns)</code></pre></details><table><tr><th style="text-align: right"><strong>generator_table_exists</strong></th><th style="text-align: right"><strong>total_columns</strong></th><th style="text-align: right"><strong>n_temp_columns</strong></th><th style="text-align: left"><strong>temp_columns_list</strong></th></tr><tr><td style="text-align: right">1</td><td style="text-align: right">48</td><td style="text-align: right">0</td><td style="text-align: left"></td></tr></table><h2 id="Solar-proxy-comparison"><a class="docs-heading-anchor" href="#Solar-proxy-comparison">Solar proxy comparison</a><a id="Solar-proxy-comparison-1"></a><a class="docs-heading-anchor-permalink" href="#Solar-proxy-comparison" title="Permalink"></a></h2><p>The zone labels are analytical groupings attached to representative sites. The summary describes summer solar capacity-factor distributions and does not isolate temperature from cloud, season, geography, or trace construction.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">zone_summary_rows = NamedTuple[]
+println(&quot;\n=== Solar CF by Climate Zone (Summer 2019) ===&quot;)
+for (zone, loc) in CLIMATE_ZONES
+    f = joinpath(TRACES, &quot;solar_2019&quot;, &quot;$(loc)_RefYear2019.csv&quot;)
+    isfile(abs_path(f)) || continue
+    df = CSV.read(abs_path(f), DataFrame)
+    summer = filter(row -&gt; row.Month in (12, 1, 2), df)
+    nrow(summer) == 0 &amp;&amp; continue
+
+    daily = [mean(row[col] for col in HH_COLS_SOL) for row in eachrow(summer)]
+    midday_cols = string.(24:35)
+    midday = [mean(row[col] for col in midday_cols) for row in eachrow(summer)]
+
+    mean_daily = mean(daily)
+    mean_midday = mean(midday)
+    min_midday = minimum(midday)
+    p5_midday = quantile(midday, 0.05)
+
+    println(
+        @sprintf(
+            &quot;  %s (%s): mean_daily=%.3f, mean_midday=%.3f, min_midday=%.3f, p5_midday=%.3f&quot;,
+            zone, loc, mean_daily, mean_midday, min_midday, p5_midday,
+        ),
+    )
+
+    push!(
+        zone_summary_rows,
+        (
+            zone = zone,
+            location = loc,
+            n_summer_days = nrow(summer),
+            mean_daily_cf = mean_daily,
+            mean_midday_cf = mean_midday,
+            min_midday_cf = min_midday,
+            p5_midday_cf = p5_midday,
+        ),
+    )
+end
+
+climate_zone_summer_cf_summary = isempty(zone_summary_rows) ?
+    empty_df([:zone =&gt; String, :location =&gt; String, :n_summer_days =&gt; Int, :mean_daily_cf =&gt; Float64, :mean_midday_cf =&gt; Float64, :min_midday_cf =&gt; Float64, :p5_midday_cf =&gt; Float64]) :
+    DataFrame(zone_summary_rows)
+write_table(climate_zone_summer_cf_summary, SCRIPT_STEM, &quot;climate_zone_summer_cf_summary&quot;)
+markdown_table(climate_zone_summer_cf_summary)</code></pre></details><table><tr><th style="text-align: left"><strong>zone</strong></th><th style="text-align: left"><strong>location</strong></th><th style="text-align: right"><strong>n_summer_days</strong></th><th style="text-align: right"><strong>mean_daily_cf</strong></th><th style="text-align: right"><strong>mean_midday_cf</strong></th><th style="text-align: right"><strong>min_midday_cf</strong></th><th style="text-align: right"><strong>p5_midday_cf</strong></th></tr><tr><td style="text-align: left">Hot_Inland</td><td style="text-align: left">Bomen_SAT</td><td style="text-align: right">3068</td><td style="text-align: right">0.379055</td><td style="text-align: right">0.771988</td><td style="text-align: right">0.054019</td><td style="text-align: right">0.219576</td></tr><tr><td style="text-align: left">Hot_SA</td><td style="text-align: left">Cultana_SAT</td><td style="text-align: right">3068</td><td style="text-align: right">0.37932</td><td style="text-align: right">0.847259</td><td style="text-align: right">0.230202</td><td style="text-align: right">0.303985</td></tr><tr><td style="text-align: left">Moderate_VIC</td><td style="text-align: left">Bannerton_SAT</td><td style="text-align: right">3068</td><td style="text-align: right">0.404872</td><td style="text-align: right">0.859197</td><td style="text-align: right">0.1881</td><td style="text-align: right">0.307869</td></tr><tr><td style="text-align: left">Cool_TAS</td><td style="text-align: left">Derby_SAT</td><td style="text-align: right">3068</td><td style="text-align: right">0.387393</td><td style="text-align: right">0.810406</td><td style="text-align: right">0.0913513</td><td style="text-align: right">0.321397</td></tr></table><h2 id="Summer-capacity-factor-distribution"><a class="docs-heading-anchor" href="#Summer-capacity-factor-distribution">Summer capacity-factor distribution</a><a id="Summer-capacity-factor-distribution-1"></a><a class="docs-heading-anchor-permalink" href="#Summer-capacity-factor-distribution" title="Permalink"></a></h2><p>Each climate zone&#39;s summer daily-mean capacity factor is drawn as an overlaid density histogram, showing how much the four representative sites overlap or diverge.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">p1 = plot(legend=:topright, title=&quot;Summer 2019 — Daily Solar CF Distribution by Climate Zone&quot;,
+          xlabel=&quot;Daily Mean Capacity Factor&quot;, ylabel=&quot;Density&quot;, size=(800, 600))
+for (zone, loc) in CLIMATE_ZONES
+    f = joinpath(TRACES, &quot;solar_2019&quot;, &quot;$(loc)_RefYear2019.csv&quot;)
+    isfile(abs_path(f)) || continue
+    df = CSV.read(abs_path(f), DataFrame)
+    summer = filter(row -&gt; row.Month in (12, 1, 2), df)
+    nrow(summer) == 0 &amp;&amp; continue
+    daily = [mean(row[col] for col in HH_COLS_SOL) for row in eachrow(summer)]
+    histogram!(p1, daily, bins=50, alpha=0.5, label=&quot;$(zone) ($(loc))&quot;, normalize=:pdf)
+end
+savefig(p1, figure_path(SCRIPT_STEM, &quot;05_cf_by_climate_zone.png&quot;))
+EdaSupport.embed_figure(figure_path(SCRIPT_STEM, &quot;05_cf_by_climate_zone.png&quot;), &quot;05_cf_by_climate_zone.png&quot;)</code></pre></details><p><img src="../05_cf_by_climate_zone.png" alt="Summer daily solar capacity-factor distribution by climate zone"/></p><h2 id="Midday-and-daily-mean-relationship"><a class="docs-heading-anchor" href="#Midday-and-daily-mean-relationship">Midday and daily-mean relationship</a><a id="Midday-and-daily-mean-relationship-1"></a><a class="docs-heading-anchor-permalink" href="#Midday-and-daily-mean-relationship" title="Permalink"></a></h2><p>For each climate zone, midday-mean capacity factor is plotted against daily-mean capacity factor for every summer day, with a 1:1 reference line showing how far midday output sits above the daily average.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">p2 = plot(layout=(2,2), figsize=(14,10), size=(1000, 800))
+for (idx, (zone, loc)) in enumerate(CLIMATE_ZONES)
+    f = joinpath(TRACES, &quot;solar_2019&quot;, &quot;$(loc)_RefYear2019.csv&quot;)
+    isfile(abs_path(f)) || continue
+    df = CSV.read(abs_path(f), DataFrame)
+    summer = filter(row -&gt; row.Month in (12, 1, 2), df)
+    nrow(summer) == 0 &amp;&amp; continue
+    daily = [mean(row[col] for col in HH_COLS_SOL) for row in eachrow(summer)]
+    midday = [mean(row[col] for col in string.(24:35)) for row in eachrow(summer)]
+    scatter!(p2[idx], daily, midday, markersize=2, alpha=0.3, color=:orange, label=&quot;&quot;, legend=false)
+    plot!(p2[idx], [0, 0.5], [0, 0.5], label=&quot;1:1&quot;, color=:black, linestyle=:dash, alpha=0.3, linewidth=1)
+    plot!(p2[idx], title=&quot;$(zone) ($(loc))&quot;, xlabel=&quot;Daily Mean CF&quot;, ylabel=&quot;Midday Mean CF&quot;,
+          xlim=(0, 0.5), ylim=(0, 0.8), grid=true, gridstyle=:dash, gridalpha=0.3)
+end
+savefig(p2, figure_path(SCRIPT_STEM, &quot;05_midday_vs_daily_scatter.png&quot;))
+EdaSupport.embed_figure(figure_path(SCRIPT_STEM, &quot;05_midday_vs_daily_scatter.png&quot;), &quot;05_midday_vs_daily_scatter.png&quot;)</code></pre></details><p><img src="../05_midday_vs_daily_scatter.png" alt="Midday capacity factor against daily mean capacity factor by climate zone"/></p><h2 id="Interpretation"><a class="docs-heading-anchor" href="#Interpretation">Interpretation</a><a id="Interpretation-1"></a><a class="docs-heading-anchor-permalink" href="#Interpretation" title="Permalink"></a></h2><ul><li>The ISP assumptions workbook and PISP&#39;s own output files contain some temperature-, derating-, and reliability-adjacent fields, but a keyword match only flags material for review, it does not establish a usable temperature dependency.</li><li>No observed temperature series is loaded here; the climate-zone comparison is a descriptive summer solar-trace comparison across four representative sites, not a measurement of thermal derating.</li></ul><h2 id="Limitations"><a class="docs-heading-anchor" href="#Limitations">Limitations</a><a id="Limitations-1"></a><a class="docs-heading-anchor-permalink" href="#Limitations" title="Permalink"></a></h2><ul><li>The source inventory does not contain an observed temperature time series for this analysis.</li><li>Climate-zone labels are analytical proxies and do not isolate temperature from cloud, season, geography, or trace construction.</li><li>No thermal-derating response is estimated from the solar comparisons.</li></ul></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../trace-coverage-and-schema/">« ISP 2024: Trace data availability and structure</a><a class="docs-footer-nextpage" href="../generated-output-consistency/">ISP 2024: Generated-output consistency »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Thursday 23 July 2026 09:57">Thursday 23 July 2026</span>. Using Julia version 1.12.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

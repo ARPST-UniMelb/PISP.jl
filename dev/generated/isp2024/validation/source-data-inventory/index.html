@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>ISP 2024: Source-data inventory · PISP.jl</title><meta name="title" content="ISP 2024: Source-data inventory · PISP.jl"/><meta property="og:title" content="ISP 2024: Source-data inventory · PISP.jl"/><meta property="twitter:title" content="ISP 2024: Source-data inventory · PISP.jl"/><meta name="description" content="Documentation for PISP.jl."/><meta property="og:description" content="Documentation for PISP.jl."/><meta property="twitter:description" content="Documentation for PISP.jl."/><script data-outdated-warner src="../../../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../../../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../../../assets/documenter.js"></script><script src="../../../../search_index.js"></script><script src="../../../../siteinfo.js"></script><script src="../../../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../../../">PISP.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../../../">Home</a></li><li><a class="tocitem" href="../../../../quickstart/">Quickstart</a></li><li><span class="tocitem">Understand PISP and ISP data</span><ul><li><a class="tocitem" href="../../../../editions/supported-editions/">Supported ISP editions</a></li><li><a class="tocitem" href="../../../../concepts/">Domain concepts</a></li><li><a class="tocitem" href="../../../../editions/output-data-model/">Output data model</a></li><li><a class="tocitem" href="../../../../assumptions/">Assumptions and scope</a></li><li><a class="tocitem" href="../../../../editions/source-material/">What each ISP edition publishes</a></li><li><a class="tocitem" href="../../../../editions/source-inventory/">Downloaded source inventory by edition</a></li><li><a class="tocitem" href="../../../../editions/trace-coverage/">Trace families, schemas, and coverage</a></li><li><a class="tocitem" href="../../../../editions/parameters-and-mappings/">Parameters and mappings across editions</a></li></ul></li><li><span class="tocitem">ISP 2024</span><ul><li><a class="tocitem" href="../../../../editions/isp2024/">Overview</a></li><li><input class="collapse-toggle" id="menuitem-4-2" type="checkbox"/><label class="tocitem" for="menuitem-4-2"><span class="docs-label">Reference and inputs</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../reference/data-sources/">ISP 2024: Data sources</a></li><li><a class="tocitem" href="../../reference/output-tables/">ISP 2024: Output tables</a></li><li><a class="tocitem" href="../../reference/parameters-and-mappings/">ISP 2024: Parameters and mappings</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-3" type="checkbox"/><label class="tocitem" for="menuitem-4-3"><span class="docs-label">Tutorials</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../tutorials/building-problem-table/">ISP 2024: Building a problem table</a></li><li><a class="tocitem" href="../../tutorials/working-with-pisp-outputs/">ISP 2024: Working with PISP-generated outputs</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-4" type="checkbox" checked/><label class="tocitem" for="menuitem-4-4"><span class="docs-label">Data validation</span><i class="docs-chevron"></i></label><ul class="collapsed"><li class="is-active"><a class="tocitem" href>ISP 2024: Source-data inventory</a><ul class="internal"><li><a class="tocitem" href="#Source-tree-coverage"><span>Source-tree coverage</span></a></li><li><a class="tocitem" href="#File-and-extension-summary"><span>File and extension summary</span></a></li><li><a class="tocitem" href="#Directory-structure"><span>Directory structure</span></a></li><li><a class="tocitem" href="#Inventory-totals"><span>Inventory totals</span></a></li><li><a class="tocitem" href="#Summary"><span>Summary</span></a></li></ul></li><li><a class="tocitem" href="../trace-coverage-and-schema/">ISP 2024: Trace data availability and structure</a></li><li><a class="tocitem" href="../temperature-data-coverage/">ISP 2024: Temperature-data coverage and climate-zone solar comparison</a></li><li><a class="tocitem" href="../generated-output-consistency/">ISP 2024: Generated-output consistency</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-5" type="checkbox"/><label class="tocitem" for="menuitem-4-5"><span class="docs-label">Analyses and case studies</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../analyses/reference-trace-4006-profiles/">ISP 2024: Reference trace 4006 profiles</a></li><li><a class="tocitem" href="../../analyses/historical-trace-year-comparison/">ISP 2024: Historical trace-year comparison</a></li><li><a class="tocitem" href="../../analyses/seasonal-renewable-extremes/">ISP 2024: Seasonal renewable extremes</a></li><li><a class="tocitem" href="../../analyses/demand-stress-low-solar/">ISP 2024: Demand stress and low-solar coincidence</a></li><li><a class="tocitem" href="../../analyses/reference-trace-4006-composite-mapping/">ISP 2024: Reference trace 4006 composite mapping</a></li><li><a class="tocitem" href="../../analyses/iasr-build-cost-trajectories/">ISP 2024: IASR build-cost trajectories by technology</a></li><li><a class="tocitem" href="../../analyses/rez-resource-versus-connection-cost/">ISP 2024: REZ resource potential versus connection cost</a></li><li><a class="tocitem" href="../../analyses/storage-characteristics/">ISP 2024: PHES and battery storage characteristics</a></li></ul></li></ul></li><li><span class="tocitem">ISP 2026</span><ul><li><a class="tocitem" href="../../../../editions/isp2026/">Overview</a></li><li><input class="collapse-toggle" id="menuitem-5-2" type="checkbox"/><label class="tocitem" for="menuitem-5-2"><span class="docs-label">Data validation</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../../isp2026/validation/source-availability/">ISP 2026: Source availability and release structure</a></li></ul></li></ul></li><li><span class="tocitem">Compare ISP 2024 and ISP 2026</span><ul><li><a class="tocitem" href="../../../../editions/comparison/">Overview and comparison rules</a></li><li><input class="collapse-toggle" id="menuitem-6-2" type="checkbox"/><label class="tocitem" for="menuitem-6-2"><span class="docs-label">Validation pages</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../../comparison/validation/source-availability-by-edition/">ISP 2024 and ISP 2026: Source availability by edition</a></li></ul></li></ul></li><li><a class="tocitem" href="../../../../contributing/">Contributing</a></li><li><a class="tocitem" href="../../../../api/">API Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">ISP 2024</a></li><li><a class="is-disabled">Data validation</a></li><li class="is-active"><a href>ISP 2024: Source-data inventory</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>ISP 2024: Source-data inventory</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/ARPST-UniMelb/PISP.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/ARPST-UniMelb/PISP.jl/blob/main/docs/literate/isp2024/validation/source_data_inventory.jl" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="ISP-2024:-Source-data-inventory"><a class="docs-heading-anchor" href="#ISP-2024:-Source-data-inventory">ISP 2024: Source-data inventory</a><a id="ISP-2024:-Source-data-inventory-1"></a><a class="docs-heading-anchor-permalink" href="#ISP-2024:-Source-data-inventory" title="Permalink"></a></h1><p>The inventory summarises files, extensions, top-level directories, and a three-level directory view for the configured ISP 2024 download root.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">using CSV
+using DataFrames
+using Printf
+
+const REPO_ROOT = normpath(get(ENV, &quot;PISP_DOCS_REPO_ROOT&quot;, joinpath(@__DIR__, &quot;..&quot;, &quot;..&quot;, &quot;..&quot;, &quot;..&quot;)))
+
+include(joinpath(REPO_ROOT, &quot;docs&quot;, &quot;edition_profiles.jl&quot;))
+using .PISPDocsEditionProfiles
+
+include(joinpath(REPO_ROOT, &quot;docs&quot;, &quot;eda_support.jl&quot;))
+using .EdaSupport
+
+const SCRIPT_STEM = &quot;isp2024_09_download_inventory&quot;
+const ISP2024_PROFILE = edition_profile(REPO_ROOT, &quot;2024&quot;)
+const DOWNLOAD_ROOT = relpath(ISP2024_PROFILE.download_root, REPO_ROOT)  # kept relative: this is the path form recorded in the tables below
+const MAX_TREE_DEPTH = 3
+const MAX_TREE_CHILDREN_PER_DIR = 3
+abs_path(relative_path) = joinpath(REPO_ROOT, relative_path)  # resolves a DOWNLOAD_ROOT-relative path to an absolute location for reading
+
+to_forward_slashes(path) = replace(path, &quot;\\&quot; =&gt; &quot;/&quot;)
+
+function lowercase_extension(name)
+    ext = lowercase(splitext(name)[2])
+    return isempty(ext) ? &quot;&quot; : ext[2:end]
+end</code></pre></details><p>The inventory covers the complete download tree and records a compact three-level directory view.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">function walk_download_root(root; max_tree_depth = MAX_TREE_DEPTH, max_children_per_dir = MAX_TREE_CHILDREN_PER_DIR)
+    files = NamedTuple[]
+    tree_rows = NamedTuple[]
+
+    for (dirpath, dirnames, filenames) in walkdir(root)
+        filter!(name -&gt; !startswith(name, &quot;.&quot;), dirnames)
+        filter!(name -&gt; !startswith(name, &quot;.&quot;), filenames)
+        rel_dir = dirpath == root ? &quot;&quot; : to_forward_slashes(relpath(dirpath, root))
+        dir_depth = isempty(rel_dir) ? 0 : length(splitpath(rel_dir))
+        child_depth = dir_depth + 1
+
+        if child_depth &lt;= max_tree_depth
+            for name in sort(dirnames)
+                push!(
+                    tree_rows,
+                    (depth = child_depth, parent_relative_path = rel_dir, name = name, kind = &quot;directory&quot;),
+                )
+            end
+            # Depth alone does not bound how many files sit in one directory (e.g. a single Traces/&lt;tech&gt;_&lt;year&gt;/ folder holds hundreds of per-location trace CSVs); cap the listed files per directory so the rendered tree stays readable, and record how many were omitted rather than silently truncating.
+            sorted_filenames = sort(filenames)
+            shown_filenames = first(sorted_filenames, min(length(sorted_filenames), max_children_per_dir))
+            for name in shown_filenames
+                push!(
+                    tree_rows,
+                    (depth = child_depth, parent_relative_path = rel_dir, name = name, kind = &quot;file&quot;),
+                )
+            end
+            omitted = length(sorted_filenames) - length(shown_filenames)
+            if omitted &gt; 0
+                push!(
+                    tree_rows,
+                    (
+                        depth = child_depth,
+                        parent_relative_path = rel_dir,
+                        name = &quot;... ($(omitted) more file$(omitted == 1 ? &quot;&quot; : &quot;s&quot;) omitted)&quot;,
+                        kind = &quot;note&quot;,
+                    ),
+                )
+            end
+        end
+
+        for filename in sort(filenames)
+            full_path = joinpath(dirpath, filename)
+            rel_path = isempty(rel_dir) ? filename : rel_dir * &quot;/&quot; * filename
+            push!(
+                files,
+                (
+                    relative_path = rel_path,
+                    size_bytes = filesize(full_path),
+                    extension = lowercase_extension(filename),
+                    depth = length(splitpath(rel_path)),
+                ),
+            )
+        end
+    end
+
+    return files, tree_rows
+end
+
+function summarize_extensions(files)
+    counts = Dict{String, Int}()
+    bytes = Dict{String, Int}()
+    for f in files
+        counts[f.extension] = get(counts, f.extension, 0) + 1
+        bytes[f.extension] = get(bytes, f.extension, 0) + f.size_bytes
+    end
+    exts = sort(collect(keys(counts)))
+    rows = [(extension = ext, file_count = counts[ext], total_bytes = bytes[ext]) for ext in exts]
+    return DataFrame(rows)
+end</code></pre></details><p>One row per immediate child of the download root, whether a file or a directory. Directory rows aggregate recursively over <code>files</code>; a plain file&#39;s own extension is not repeated in <code>extensions</code> since that column describes what is found <em>under</em> an entry, not the entry itself.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">function summarize_top_level(root, files)
+    rows = NamedTuple[]
+    for name in sort(filter(n -&gt; !startswith(n, &quot;.&quot;), readdir(root)))
+        full_path = joinpath(root, name)
+        if isdir(full_path)
+            prefix = name * &quot;/&quot;
+            matching = filter(f -&gt; startswith(f.relative_path, prefix), files)
+            total_bytes = isempty(matching) ? 0 : sum(f.size_bytes for f in matching)
+            exts = sort(unique(f.extension for f in matching if !isempty(f.extension)))
+            push!(
+                rows,
+                (
+                    name = name,
+                    kind = &quot;directory&quot;,
+                    file_count = length(matching),
+                    total_bytes = total_bytes,
+                    extensions = join(exts, &quot;,&quot;),
+                ),
+            )
+        else
+            push!(
+                rows,
+                (
+                    name = name,
+                    kind = &quot;file&quot;,
+                    file_count = 1,
+                    total_bytes = filesize(full_path),
+                    extensions = &quot;&quot;,
+                ),
+            )
+        end
+    end
+    return DataFrame(rows)
+end</code></pre></details><p>Renders the depth-limited directory-tree rows as an indented plain-text tree, root-first.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">function render_tree(tree::DataFrame; root_label = &quot;pisp-downloads&quot;)
+    children_by_parent = Dict{String, Vector{Int}}()
+    for (i, row) in enumerate(eachrow(tree))
+        push!(get!(children_by_parent, row.parent_relative_path, Int[]), i)
+    end
+
+    io = IOBuffer()
+    println(io, root_label, &quot;/&quot;)
+
+    function emit(parent_path, indent)
+        for i in get(children_by_parent, parent_path, Int[])
+            row = tree[i, :]
+            label = row.kind == &quot;directory&quot; ? &quot;$(row.name)/&quot; : row.name
+            println(io, indent, &quot;- &quot;, label)
+            if row.kind == &quot;directory&quot;
+                child_path = isempty(parent_path) ? row.name : &quot;$(parent_path)/$(row.name)&quot;
+                emit(child_path, indent * &quot;  &quot;)
+            end
+        end
+    end
+
+    emit(&quot;&quot;, &quot;  &quot;)
+    return String(take!(io))
+end</code></pre></details><h2 id="Source-tree-coverage"><a class="docs-heading-anchor" href="#Source-tree-coverage">Source-tree coverage</a><a id="Source-tree-coverage-1"></a><a class="docs-heading-anchor-permalink" href="#Source-tree-coverage" title="Permalink"></a></h2><p>A recursive inventory over the download root produces a flat file inventory (every file, at every depth) and a depth-limited directory-tree listing in the same pass.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">isdir(abs_path(DOWNLOAD_ROOT)) || error(
+    &quot;expected local download tree at \&quot;$DOWNLOAD_ROOT\&quot;; &quot; *
+    &quot;run the PISP downloader to populate $(DOWNLOAD_ROOT)/ before rendering the source inventory&quot;,
+)
+
+files, tree_rows = walk_download_root(abs_path(DOWNLOAD_ROOT))
+println(&quot;Total files discovered under &quot;, DOWNLOAD_ROOT, &quot;: &quot;, length(files))</code></pre></details><pre><code class="nohighlight hljs">Total files discovered under data/2024/pisp-downloads: 8322
+</code></pre><h2 id="File-and-extension-summary"><a class="docs-heading-anchor" href="#File-and-extension-summary">File and extension summary</a><a id="File-and-extension-summary-1"></a><a class="docs-heading-anchor-permalink" href="#File-and-extension-summary" title="Permalink"></a></h2><p><code>file_inventory</code> lists every discovered file. The table below shows the ten largest files, while <code>top_level_summary</code> and <code>extension_summary</code> aggregate the complete inventory.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">file_inventory = DataFrame(files)
+write_table(file_inventory, SCRIPT_STEM, &quot;file_inventory&quot;)
+println(&quot;Full file inventory written: &quot;, nrow(file_inventory), &quot; rows (previewing the ten largest files below)&quot;)
+
+largest_files = first(sort(file_inventory, :size_bytes; rev = true), 10)
+markdown_table(largest_files)</code></pre></details><table><tr><th style="text-align: left"><strong>relative_path</strong></th><th style="text-align: right"><strong>size_bytes</strong></th><th style="text-align: left"><strong>extension</strong></th><th style="text-align: right"><strong>depth</strong></th></tr><tr><td style="text-align: left">zip/Traces/57_ISP_Wind_Traces_r2018.zip</td><td style="text-align: right">361191687</td><td style="text-align: left">zip</td><td style="text-align: right">3</td></tr><tr><td style="text-align: left">zip/Traces/53_ISP_Wind_Traces_r2014.zip</td><td style="text-align: right">361112039</td><td style="text-align: left">zip</td><td style="text-align: right">3</td></tr><tr><td style="text-align: left">zip/Traces/51_ISP_Wind_Traces_r2012.zip</td><td style="text-align: right">361090963</td><td style="text-align: left">zip</td><td style="text-align: right">3</td></tr><tr><td style="text-align: left">zip/Traces/52_ISP_Wind_Traces_r2013.zip</td><td style="text-align: right">360736109</td><td style="text-align: left">zip</td><td style="text-align: right">3</td></tr><tr><td style="text-align: left">zip/Traces/58_ISP_Wind_Traces_r2019.zip</td><td style="text-align: right">360572827</td><td style="text-align: left">zip</td><td style="text-align: right">3</td></tr><tr><td style="text-align: left">zip/Traces/50_ISP_Wind_Traces_r2011.zip</td><td style="text-align: right">359615789</td><td style="text-align: left">zip</td><td style="text-align: right">3</td></tr><tr><td style="text-align: left">zip/Traces/55_ISP_Wind_Traces_r2016.zip</td><td style="text-align: right">359156768</td><td style="text-align: left">zip</td><td style="text-align: right">3</td></tr><tr><td style="text-align: left">zip/Traces/56_ISP_Wind_Traces_r2017.zip</td><td style="text-align: right">358943761</td><td style="text-align: left">zip</td><td style="text-align: right">3</td></tr><tr><td style="text-align: left">zip/Traces/54_ISP_Wind_Traces_r2015.zip</td><td style="text-align: right">358554638</td><td style="text-align: left">zip</td><td style="text-align: right">3</td></tr><tr><td style="text-align: left">zip/Traces/60_ISP_Wind_Traces_r2021.zip</td><td style="text-align: right">342367162</td><td style="text-align: left">zip</td><td style="text-align: right">3</td></tr></table><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">top_level_summary = summarize_top_level(abs_path(DOWNLOAD_ROOT), files)
+write_table(top_level_summary, SCRIPT_STEM, &quot;top_level_summary&quot;)
+markdown_table(top_level_summary)</code></pre></details><table><tr><th style="text-align: left"><strong>name</strong></th><th style="text-align: left"><strong>kind</strong></th><th style="text-align: right"><strong>file_count</strong></th><th style="text-align: right"><strong>total_bytes</strong></th><th style="text-align: left"><strong>extensions</strong></th></tr><tr><td style="text-align: left">2019-input-and-assumptions-workbook-v1-3-dec-19.xlsx</td><td style="text-align: left">file</td><td style="text-align: right">1</td><td style="text-align: right">25926656</td><td style="text-align: left"></td></tr><tr><td style="text-align: left">2023-iasr-ev-workbook.xlsx</td><td style="text-align: left">file</td><td style="text-align: right">1</td><td style="text-align: right">505291</td><td style="text-align: left"></td></tr><tr><td style="text-align: left">2024 ISP Model</td><td style="text-align: left">directory</td><td style="text-align: right">90</td><td style="text-align: right">495584080</td><td style="text-align: left">csv,xml</td></tr><tr><td style="text-align: left">2024-isp-inputs-and-assumptions-workbook.xlsx</td><td style="text-align: left">file</td><td style="text-align: right">1</td><td style="text-align: right">11339818</td><td style="text-align: left"></td></tr><tr><td style="text-align: left">Auxiliary</td><td style="text-align: left">directory</td><td style="text-align: right">7</td><td style="text-align: right">6282064</td><td style="text-align: left">xlsx</td></tr><tr><td style="text-align: left">Core</td><td style="text-align: left">directory</td><td style="text-align: right">3</td><td style="text-align: right">27871688</td><td style="text-align: left">xlsx</td></tr><tr><td style="text-align: left">Sensitivities</td><td style="text-align: left">directory</td><td style="text-align: right">9</td><td style="text-align: right">31047416</td><td style="text-align: left">xlsx</td></tr><tr><td style="text-align: left">Traces</td><td style="text-align: left">directory</td><td style="text-align: right">8146</td><td style="text-align: right">50838932474</td><td style="text-align: left">csv</td></tr><tr><td style="text-align: left">zip</td><td style="text-align: left">directory</td><td style="text-align: right">64</td><td style="text-align: right">19034494645</td><td style="text-align: left">zip</td></tr></table><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">extension_summary = summarize_extensions(files)
+write_table(extension_summary, SCRIPT_STEM, &quot;extension_summary&quot;)
+markdown_table(extension_summary)</code></pre></details><table><tr><th style="text-align: left"><strong>extension</strong></th><th style="text-align: right"><strong>file_count</strong></th><th style="text-align: right"><strong>total_bytes</strong></th></tr><tr><td style="text-align: left">csv</td><td style="text-align: right">8230</td><td style="text-align: right">51243052481</td></tr><tr><td style="text-align: left">xlsx</td><td style="text-align: right">22</td><td style="text-align: right">102972933</td></tr><tr><td style="text-align: left">xml</td><td style="text-align: right">6</td><td style="text-align: right">91464073</td></tr><tr><td style="text-align: left">zip</td><td style="text-align: right">64</td><td style="text-align: right">19034494645</td></tr></table><h2 id="Directory-structure"><a class="docs-heading-anchor" href="#Directory-structure">Directory structure</a><a id="Directory-structure-1"></a><a class="docs-heading-anchor-permalink" href="#Directory-structure" title="Permalink"></a></h2><p>The tree below mirrors the on-disk folder layout down to three levels deep. Some folders hold far more files than are useful to list one by one — a single <code>Traces/&lt;tech&gt;_&lt;year&gt;/</code> folder holds hundreds of near-identical per-location trace CSVs — so a folder with many files shows only its first several, followed by a line stating how many more were left out.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">directory_tree = DataFrame(tree_rows)
+write_table(directory_tree, SCRIPT_STEM, &quot;directory_tree&quot;)
+nrow(directory_tree)</code></pre></details><pre><code class="nohighlight hljs">359</code></pre><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">tree_text = render_tree(directory_tree);
+</code></pre></details><pre><code class="nohighlight hljs">pisp-downloads/
+  - 2024 ISP Model/
+    - 2024 ISP Green Energy Exports/
+      - Traces/
+      - 2024 ISP Green Energy Exports Model.xml
+      - PLEXOS_Solverparam.xml
+    - 2024 ISP Progressive Change/
+      - Traces/
+      - 2024 ISP Progressive Change Model.xml
+      - PLEXOS_Solverparam.xml
+    - 2024 ISP Step Change/
+      - Traces/
+      - 2024 ISP Step Change Model.xml
+      - PLEXOS_Solverparam.xml
+  - Auxiliary/
+    - 2024 ISP - Green Energy Exports - Core_REZCAP.xlsx
+    - 2024 ISP - Progressive Change - Core_REZCAP.xlsx
+    - 2024 ISP - Step Change - Core_REZCAP.xlsx
+    - ... (4 more files omitted)
+  - Core/
+    - 2024 ISP - Green Energy Exports - Core.xlsx
+    - 2024 ISP - Progressive Change - Core.xlsx
+    - 2024 ISP - Step Change - Core.xlsx
+  - Sensitivities/
+    - 2024 ISP - Green Energy Exports - Extended Eraring.xlsx
+    - 2024 ISP - Progressive Change - Extended Eraring.xlsx
+    - 2024 ISP - Step Change - Additional Load.xlsx
+    - ... (6 more files omitted)
+  - Traces/
+    - demand_CNSW_Green Energy Exports/
+      - CNSW_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING.csv
+      - CNSW_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING_PVLITE.csv
+      - CNSW_RefYear_2011_HYDROGEN_EXPORT_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_CNSW_Progressive Change/
+      - CNSW_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING.csv
+      - CNSW_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
+      - CNSW_RefYear_2011_PROGRESSIVE_CHANGE_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_CNSW_Step Change/
+      - CNSW_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING.csv
+      - CNSW_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
+      - CNSW_RefYear_2011_STEP_CHANGE_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_CQ_Green Energy Exports/
+      - CQ_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING.csv
+      - CQ_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING_PVLITE.csv
+      - CQ_RefYear_2011_HYDROGEN_EXPORT_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_CQ_Progressive Change/
+      - CQ_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING.csv
+      - CQ_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
+      - CQ_RefYear_2011_PROGRESSIVE_CHANGE_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_CQ_Step Change/
+      - CQ_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING.csv
+      - CQ_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
+      - CQ_RefYear_2011_STEP_CHANGE_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_CSA_Green Energy Exports/
+      - CSA_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING.csv
+      - CSA_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING_PVLITE.csv
+      - CSA_RefYear_2011_HYDROGEN_EXPORT_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_CSA_Progressive Change/
+      - CSA_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING.csv
+      - CSA_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
+      - CSA_RefYear_2011_PROGRESSIVE_CHANGE_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_CSA_Step Change/
+      - CSA_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING.csv
+      - CSA_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
+      - CSA_RefYear_2011_STEP_CHANGE_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_GG_Green Energy Exports/
+      - GG_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING.csv
+      - GG_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING_PVLITE.csv
+      - GG_RefYear_2011_HYDROGEN_EXPORT_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_GG_Progressive Change/
+      - GG_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING.csv
+      - GG_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
+      - GG_RefYear_2011_PROGRESSIVE_CHANGE_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_GG_Step Change/
+      - GG_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING.csv
+      - GG_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
+      - GG_RefYear_2011_STEP_CHANGE_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_NNSW_Green Energy Exports/
+      - NNSW_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING.csv
+      - NNSW_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING_PVLITE.csv
+      - NNSW_RefYear_2011_HYDROGEN_EXPORT_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_NNSW_Progressive Change/
+      - NNSW_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING.csv
+      - NNSW_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
+      - NNSW_RefYear_2011_PROGRESSIVE_CHANGE_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_NNSW_Step Change/
+      - NNSW_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING.csv
+      - NNSW_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
+      - NNSW_RefYear_2011_STEP_CHANGE_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_NQ_Green Energy Exports/
+      - NQ_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING.csv
+      - NQ_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING_PVLITE.csv
+      - NQ_RefYear_2011_HYDROGEN_EXPORT_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_NQ_Progressive Change/
+      - NQ_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING.csv
+      - NQ_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
+      - NQ_RefYear_2011_PROGRESSIVE_CHANGE_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_NQ_Step Change/
+      - NQ_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING.csv
+      - NQ_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
+      - NQ_RefYear_2011_STEP_CHANGE_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_SESA_Green Energy Exports/
+      - SESA_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING.csv
+      - SESA_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING_PVLITE.csv
+      - SESA_RefYear_2011_HYDROGEN_EXPORT_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_SESA_Progressive Change/
+      - SESA_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING.csv
+      - SESA_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
+      - SESA_RefYear_2011_PROGRESSIVE_CHANGE_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_SESA_Step Change/
+      - SESA_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING.csv
+      - SESA_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
+      - SESA_RefYear_2011_STEP_CHANGE_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_SNSW_Green Energy Exports/
+      - SNSW_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING.csv
+      - SNSW_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING_PVLITE.csv
+      - SNSW_RefYear_2011_HYDROGEN_EXPORT_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_SNSW_Progressive Change/
+      - SNSW_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING.csv
+      - SNSW_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
+      - SNSW_RefYear_2011_PROGRESSIVE_CHANGE_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_SNSW_Step Change/
+      - SNSW_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING.csv
+      - SNSW_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
+      - SNSW_RefYear_2011_STEP_CHANGE_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_SNW_Green Energy Exports/
+      - SNW_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING.csv
+      - SNW_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING_PVLITE.csv
+      - SNW_RefYear_2011_HYDROGEN_EXPORT_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_SNW_Progressive Change/
+      - SNW_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING.csv
+      - SNW_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
+      - SNW_RefYear_2011_PROGRESSIVE_CHANGE_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_SNW_Step Change/
+      - SNW_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING.csv
+      - SNW_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
+      - SNW_RefYear_2011_STEP_CHANGE_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_SQ_Green Energy Exports/
+      - SQ_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING.csv
+      - SQ_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING_PVLITE.csv
+      - SQ_RefYear_2011_HYDROGEN_EXPORT_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_SQ_Progressive Change/
+      - SQ_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING.csv
+      - SQ_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
+      - SQ_RefYear_2011_PROGRESSIVE_CHANGE_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_SQ_Step Change/
+      - SQ_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING.csv
+      - SQ_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
+      - SQ_RefYear_2011_STEP_CHANGE_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_TAS_Green Energy Exports/
+      - TAS_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING.csv
+      - TAS_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING_PVLITE.csv
+      - TAS_RefYear_2011_HYDROGEN_EXPORT_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_TAS_Progressive Change/
+      - TAS_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING.csv
+      - TAS_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
+      - TAS_RefYear_2011_PROGRESSIVE_CHANGE_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_TAS_Step Change/
+      - TAS_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING.csv
+      - TAS_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
+      - TAS_RefYear_2011_STEP_CHANGE_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_VIC_Green Energy Exports/
+      - VIC_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING.csv
+      - VIC_RefYear_2011_HYDROGEN_EXPORT_POE10_OPSO_MODELLING_PVLITE.csv
+      - VIC_RefYear_2011_HYDROGEN_EXPORT_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_VIC_Progressive Change/
+      - VIC_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING.csv
+      - VIC_RefYear_2011_PROGRESSIVE_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
+      - VIC_RefYear_2011_PROGRESSIVE_CHANGE_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - demand_VIC_Step Change/
+      - VIC_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING.csv
+      - VIC_RefYear_2011_STEP_CHANGE_POE10_OPSO_MODELLING_PVLITE.csv
+      - VIC_RefYear_2011_STEP_CHANGE_POE10_PV_TOT.csv
+      - ... (79 more files omitted)
+    - solar_2011/
+      - Adelaide_Desal_FFP_RefYear2011.csv
+      - Aramara_SAT_RefYear2011.csv
+      - Avonlie_SAT_RefYear2011.csv
+      - ... (186 more files omitted)
+    - solar_2012/
+      - Adelaide_Desal_FFP_RefYear2012.csv
+      - Aramara_SAT_RefYear2012.csv
+      - Avonlie_SAT_RefYear2012.csv
+      - ... (186 more files omitted)
+    - solar_2013/
+      - Adelaide_Desal_FFP_RefYear2013.csv
+      - Aramara_SAT_RefYear2013.csv
+      - Avonlie_SAT_RefYear2013.csv
+      - ... (186 more files omitted)
+    - solar_2014/
+      - Adelaide_Desal_FFP_RefYear2014.csv
+      - Aramara_SAT_RefYear2014.csv
+      - Avonlie_SAT_RefYear2014.csv
+      - ... (186 more files omitted)
+    - solar_2015/
+      - Adelaide_Desal_FFP_RefYear2015.csv
+      - Aramara_SAT_RefYear2015.csv
+      - Avonlie_SAT_RefYear2015.csv
+      - ... (186 more files omitted)
+    - solar_2016/
+      - Adelaide_Desal_FFP_RefYear2016.csv
+      - Aramara_SAT_RefYear2016.csv
+      - Avonlie_SAT_RefYear2016.csv
+      - ... (186 more files omitted)
+    - solar_2017/
+      - Adelaide_Desal_FFP_RefYear2017.csv
+      - Aramara_SAT_RefYear2017.csv
+      - Avonlie_SAT_RefYear2017.csv
+      - ... (186 more files omitted)
+    - solar_2018/
+      - Adelaide_Desal_FFP_RefYear2018.csv
+      - Aramara_SAT_RefYear2018.csv
+      - Avonlie_SAT_RefYear2018.csv
+      - ... (186 more files omitted)
+    - solar_2019/
+      - Adelaide_Desal_FFP_RefYear2019.csv
+      - Aramara_SAT_RefYear2019.csv
+      - Avonlie_SAT_RefYear2019.csv
+      - ... (186 more files omitted)
+    - solar_2020/
+      - Adelaide_Desal_FFP_RefYear2020.csv
+      - Aramara_SAT_RefYear2020.csv
+      - Avonlie_SAT_RefYear2020.csv
+      - ... (186 more files omitted)
+    - solar_2021/
+      - Adelaide_Desal_FFP_RefYear2021.csv
+      - Aramara_SAT_RefYear2021.csv
+      - Avonlie_SAT_RefYear2021.csv
+      - ... (186 more files omitted)
+    - solar_2022/
+      - Adelaide_Desal_FFP_RefYear2022.csv
+      - Aramara_SAT_RefYear2022.csv
+      - Avonlie_SAT_RefYear2022.csv
+      - ... (186 more files omitted)
+    - solar_2023/
+      - Adelaide_Desal_FFP_RefYear2023.csv
+      - Aramara_SAT_RefYear2023.csv
+      - Avonlie_SAT_RefYear2023.csv
+      - ... (186 more files omitted)
+    - solar_4006/
+      - Adelaide_Desal_FFP_RefYear4006.csv
+      - Aramara_SAT_RefYear4006.csv
+      - Avonlie_SAT_RefYear4006.csv
+      - ... (186 more files omitted)
+    - wind_2011/
+      - ARWF1_RefYear2011.csv
+      - BALDHWF1_RefYear2011.csv
+      - BANGOWF1_RefYear2011.csv
+      - ... (179 more files omitted)
+    - wind_2012/
+      - ARWF1_RefYear2012.csv
+      - BALDHWF1_RefYear2012.csv
+      - BANGOWF1_RefYear2012.csv
+      - ... (179 more files omitted)
+    - wind_2013/
+      - ARWF1_RefYear2013.csv
+      - BALDHWF1_RefYear2013.csv
+      - BANGOWF1_RefYear2013.csv
+      - ... (179 more files omitted)
+    - wind_2014/
+      - ARWF1_RefYear2014.csv
+      - BALDHWF1_RefYear2014.csv
+      - BANGOWF1_RefYear2014.csv
+      - ... (179 more files omitted)
+    - wind_2015/
+      - ARWF1_RefYear2015.csv
+      - BALDHWF1_RefYear2015.csv
+      - BANGOWF1_RefYear2015.csv
+      - ... (179 more files omitted)
+    - wind_2016/
+      - ARWF1_RefYear2016.csv
+      - BALDHWF1_RefYear2016.csv
+      - BANGOWF1_RefYear2016.csv
+      - ... (179 more files omitted)
+    - wind_2017/
+      - ARWF1_RefYear2017.csv
+      - BALDHWF1_RefYear2017.csv
+      - BANGOWF1_RefYear2017.csv
+      - ... (179 more files omitted)
+    - wind_2018/
+      - ARWF1_RefYear2018.csv
+      - BALDHWF1_RefYear2018.csv
+      - BANGOWF1_RefYear2018.csv
+      - ... (179 more files omitted)
+    - wind_2019/
+      - ARWF1_RefYear2019.csv
+      - BALDHWF1_RefYear2019.csv
+      - BANGOWF1_RefYear2019.csv
+      - ... (179 more files omitted)
+    - wind_2020/
+      - ARWF1_RefYear2020.csv
+      - BALDHWF1_RefYear2020.csv
+      - BANGOWF1_RefYear2020.csv
+      - ... (179 more files omitted)
+    - wind_2021/
+      - ARWF1_RefYear2021.csv
+      - BALDHWF1_RefYear2021.csv
+      - BANGOWF1_RefYear2021.csv
+      - ... (179 more files omitted)
+    - wind_2022/
+      - ARWF1_RefYear2022.csv
+      - BALDHWF1_RefYear2022.csv
+      - BANGOWF1_RefYear2022.csv
+      - ... (179 more files omitted)
+    - wind_2023/
+      - ARWF1_RefYear2023.csv
+      - BALDHWF1_RefYear2023.csv
+      - BANGOWF1_RefYear2023.csv
+      - ... (179 more files omitted)
+    - wind_4006/
+      - ARWF1_RefYear4006.csv
+      - BALDHWF1_RefYear4006.csv
+      - BANGOWF1_RefYear4006.csv
+      - ... (179 more files omitted)
+  - zip/
+    - Traces/
+      - 01_ISP_Demand_Traces_CNSW_Green_Energy_Exports.zip
+      - 02_ISP_Demand_Traces_CNSW_Progressive_Change.zip
+      - 03_ISP_Demand_Traces_CNSW_Step_Change.zip
+      - ... (59 more files omitted)
+    - 2024-isp-generation-and-storage-outlook.zip
+    - 2024-isp-model.zip
+  - 2019-input-and-assumptions-workbook-v1-3-dec-19.xlsx
+  - 2023-iasr-ev-workbook.xlsx
+  - 2024-isp-inputs-and-assumptions-workbook.xlsx
+</code></pre><h2 id="Inventory-totals"><a class="docs-heading-anchor" href="#Inventory-totals">Inventory totals</a><a id="Inventory-totals-1"></a><a class="docs-heading-anchor-permalink" href="#Inventory-totals" title="Permalink"></a></h2><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">total_bytes = isempty(files) ? 0 : sum(f.size_bytes for f in files)
+inventory_summary = DataFrame([
+    (
+        download_root = DOWNLOAD_ROOT,
+        total_files = length(files),
+        total_bytes = total_bytes,
+        tree_depth = MAX_TREE_DEPTH,
+        max_files_per_directory = MAX_TREE_CHILDREN_PER_DIR,
+        top_level_entries = nrow(top_level_summary),
+        largest_entry = top_level_summary.name[argmax(top_level_summary.total_bytes)],
+        largest_entry_bytes = maximum(top_level_summary.total_bytes),
+    ),
+])
+write_table(inventory_summary, SCRIPT_STEM, &quot;inventory_summary&quot;)
+metric_value_table([
+    &quot;Download root&quot; =&gt; inventory_summary.download_root[1],
+    &quot;Total files&quot; =&gt; inventory_summary.total_files[1],
+    &quot;Total bytes&quot; =&gt; inventory_summary.total_bytes[1],
+    &quot;Tree depth&quot; =&gt; inventory_summary.tree_depth[1],
+    &quot;Maximum files in one directory&quot; =&gt; inventory_summary.max_files_per_directory[1],
+    &quot;Top-level entries&quot; =&gt; inventory_summary.top_level_entries[1],
+    &quot;Largest entry&quot; =&gt; inventory_summary.largest_entry[1],
+    &quot;Largest entry (bytes)&quot; =&gt; inventory_summary.largest_entry_bytes[1],
+])</code></pre></details><table><tr><th style="text-align: left"><strong>Metric</strong></th><th style="text-align: left"><strong>Value</strong></th></tr><tr><td style="text-align: left">Download root</td><td style="text-align: left">data/2024/pisp-downloads</td></tr><tr><td style="text-align: left">Total files</td><td style="text-align: left">8322</td></tr><tr><td style="text-align: left">Total bytes</td><td style="text-align: left">70471984132</td></tr><tr><td style="text-align: left">Tree depth</td><td style="text-align: left">3</td></tr><tr><td style="text-align: left">Maximum files in one directory</td><td style="text-align: left">3</td></tr><tr><td style="text-align: left">Top-level entries</td><td style="text-align: left">9</td></tr><tr><td style="text-align: left">Largest entry</td><td style="text-align: left">Traces</td></tr><tr><td style="text-align: left">Largest entry (bytes)</td><td style="text-align: left">50838932474</td></tr></table><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">@printf(&quot;Total: %d files, %.2f MB under %s\n&quot;, length(files), total_bytes / (1024^2), DOWNLOAD_ROOT)</code></pre></details><pre><code class="nohighlight hljs">Total: 8322 files, 67207.32 MB under data/2024/pisp-downloads
+</code></pre><h2 id="Summary"><a class="docs-heading-anchor" href="#Summary">Summary</a><a id="Summary-1"></a><a class="docs-heading-anchor-permalink" href="#Summary" title="Permalink"></a></h2><ul><li>The download root currently holds the file counts and sizes shown in <code>inventory_summary</code> above, broken down by top-level entry and by file extension.</li><li>The complete per-file inventory and three-level directory tree are retained in <code>file_inventory.csv</code> and <code>directory_tree.csv</code>; the main summary presents the counts needed for interpretation.</li></ul></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../tutorials/working-with-pisp-outputs/">« ISP 2024: Working with PISP-generated outputs</a><a class="docs-footer-nextpage" href="../trace-coverage-and-schema/">ISP 2024: Trace data availability and structure »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Thursday 23 July 2026 09:57">Thursday 23 July 2026</span>. Using Julia version 1.12.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
