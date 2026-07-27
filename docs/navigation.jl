@@ -62,7 +62,9 @@ function registry_navigation(registry_pages)
             "Parameters and mappings across editions" => "editions/parameters-and-mappings.md",
         ],
     )
-    push!(navigation, "ISP 2024" => track_navigation(registry_pages, "isp2024", "Overview", "editions/isp2024.md"))
+    isp2024_navigation = track_navigation(registry_pages, "isp2024", "Overview", "editions/isp2024.md")
+    insert!(isp2024_navigation, 2, "Preprocessing workflow" => "editions/isp2024-preprocessing.md")
+    push!(navigation, "ISP 2024" => isp2024_navigation)
     push!(navigation, "ISP 2026" => track_navigation(registry_pages, "isp2026", "Overview", "editions/isp2026.md"))
     push!(
         navigation,

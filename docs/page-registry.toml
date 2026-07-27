@@ -41,6 +41,24 @@ snapshot = false
 related_reference_pages = ["concepts.md", "assumptions.md"]
 
 [[page]]
+id = "isp2024-buildout-defaults"
+title = "ISP 2024: Build-out defaults"
+kind = "reference"
+track = "isp2024"
+editions = ["2024"]
+data_layer = "package-workflow"
+source = "literate/isp2024/reference/buildout_defaults.jl"
+output = "generated/isp2024/reference/buildout-defaults.md"
+status = "published"
+nav_order = 40
+snapshot = false
+related_reference_pages = [
+    "editions/isp2024-preprocessing.md",
+    "generated/isp2024/reference/output-tables.md",
+    "assumptions.md",
+]
+
+[[page]]
 id = "isp2024-problem-table"
 title = "ISP 2024: Building a problem table"
 kind = "tutorial"

@@ -38,9 +38,6 @@ function container_inventory(container)
     return DataFrame(rows)
 end
 
-## `RawMarkdown` emits assembled Markdown verbatim. The PrettyTables backend
-## escapes backticks and underscores, which would strip the inline-code
-## formatting the interpretation tables on this page rely on.
 struct RawMarkdown
     markdown::String
 end
@@ -74,9 +71,7 @@ markdown_table(schedule_tables)
 #
 # Each schedule row applies to one asset, scenario, and timestamp. The `value` column overlays the corresponding static quantity when reconstructing the system state for that scenario and time.
 
-## Curated interpretation for each schedule. Coverage - which schedules appear -
-## is driven by the live container above; only the value meaning, unit, and
-## overlay relationship are authored here.
+## Value meaning, unit, and overlay relationship for each current schedule.
 const SCHEDULE_SEMANTICS = Dict(
     "Demand_load_sched" => ("Demand load at the timestamp.", "MW", "Overlays `Demand.load_` through `id_dem`."),
     "ESS_emax_sched" => ("Maximum stored-energy capacity at the timestamp.", "MWh", "Overlays `ESS.emax` through `id_ess`."),
@@ -112,9 +107,7 @@ end
 #
 # These quantities are not written as separate columns; they are reconstructed from the static columns when building a system state. Each uses the applicable static or scheduled value for the selected scenario and timestamp: when a corresponding schedule exists, its `value` replaces the static field before the quantity is derived.
 
-## Reconstruction conventions applied by downstream use of the per-unit columns.
-## Each factor is validated against the live static schema, so a renamed column
-## fails the render rather than leaving a stale formula.
+## Per-unit static fields used to reconstruct derived capacities.
 const DERIVED_QUANTITIES = [
     ("Generator", "Maximum generation output", ["pmax", "n"], "MW"),
     ("Generator", "Minimum generation output", ["pmin", "n"], "MW"),
@@ -149,10 +142,7 @@ end
 #
 # The table above lists every column of the six static asset tables. The tables below define the core fields used to interpret them.
 
-## Curated meanings for the documented core fields of each static table.
-## Coverage and order follow this curated list; a documented field that is no
-## longer a current column fails the render. Columns outside this core set appear
-## in the generated inventory above and are intentionally omitted here.
+## Core field meanings for each current static table.
 static_columns = Dict(row.output_table => split(row.columns, ", ") for row in eachrow(static_tables))
 
 const FIELD_MEANINGS = Dict(
