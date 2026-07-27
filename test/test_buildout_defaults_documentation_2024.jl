@@ -61,7 +61,7 @@ end
 
     reference_tables = buildout_reference_tables()
     for (table_name, table) in pairs(reference_tables)
-        expected = strip(replace(markdown_table(table).text, "\r\n" => "\n"))
+        expected = strip(replace(markdown_table(table; allow_markdown_in_cells = true).text, "\r\n" => "\n"))
         @testset "rendered $(table_name) table" begin
             @test occursin(expected, generated)
         end

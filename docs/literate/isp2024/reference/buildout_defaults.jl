@@ -26,19 +26,19 @@ validate_buildout_defaults_contract(BUILDOUT_PARSER)
 # A workbook label selects one PISP template. Storage labels also select the duration used to calculate `ESS.emax`.
 
 reference_tables = buildout_reference_tables()
-markdown_table(reference_tables.technology)
+markdown_table(reference_tables.technology; allow_markdown_in_cells = true)
 
 # ## How a build-out row is assembled
 #
 # PISP does not copy a complete static row from the workbook. Each output field has one of four origins: workbook input, generated or looked-up identity, an explicit calculation, or a package template.
 
-markdown_table(reference_tables.origins)
+markdown_table(reference_tables.origins; allow_markdown_in_cells = true)
 
 # ## Template placeholders and their applied sources
 #
 # `nothing` values in the raw template dictionaries are placeholders. The parser replaces or bypasses them using workbook values, generated identifiers, bus lookup, capacity calculations, or explicit coordinates.
 
-markdown_table(reference_tables.placeholders)
+markdown_table(reference_tables.placeholders; allow_markdown_in_cells = true)
 
 # ## Storage defaults
 #
@@ -47,12 +47,17 @@ markdown_table(reference_tables.placeholders)
 
 # ### Defaults shared by every storage template
 
-markdown_table(reference_tables.ess_common)
+markdown_table(reference_tables.ess_common; allow_markdown_in_cells = true)
 
 # ### Defaults that vary by storage technology
+#
+# Meaning and unit of each varying field:
 
-markdown_table(reference_tables.ess_varying_fields)
-markdown_table(reference_tables.ess_varying_values)
+markdown_table(reference_tables.ess_varying_fields; allow_markdown_in_cells = true)
+
+# Value of each varying field by storage technology:
+
+markdown_table(reference_tables.ess_varying_values; allow_markdown_in_cells = true)
 
 # ## Generator defaults
 #
@@ -61,11 +66,11 @@ markdown_table(reference_tables.ess_varying_values)
 
 # ### Defaults shared by every generator template
 
-markdown_table(reference_tables.gen_common)
+markdown_table(reference_tables.gen_common; allow_markdown_in_cells = true)
 
 # ### Defaults that vary by generator technology
 
-markdown_table(reference_tables.gen_varying)
+markdown_table(reference_tables.gen_varying; allow_markdown_in_cells = true)
 
 # ## Override and derivation rules
 #

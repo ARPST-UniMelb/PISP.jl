@@ -28,13 +28,15 @@ Gumbo = "0.8.3"
 HTTP = "1.10.19"
 OrderedCollections = "1.8.1"
 PlotlyJS = "0.18.17"
+PrettyTables = "3"
 Printf = "1.11.0"
 Tables = "1.12.1"
 XLSX = "0.10.4"
 julia = "1.11"
 
 [extras]
+PrettyTables = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test"]
+test = ["PrettyTables", "Test"]

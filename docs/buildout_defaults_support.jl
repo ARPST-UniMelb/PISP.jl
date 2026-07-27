@@ -132,6 +132,11 @@ const GEN_PLACEHOLDER_ORIGINS = Dict(
     "longitude" => "Set explicitly to `0.0` by the build-out parser.",
 )
 
+# Wraps an identifier in Markdown inline-code backticks. `markdown_table` is called with
+# `allow_markdown_in_cells = true` for these reference tables, so the backticks survive
+# rendering instead of being escaped like plain cell text.
+code_span(value) = "`" * string(value) * "`"
+
 function buildout_technology_rows()
     rows = NamedTuple[]
     for label in sort(collect(PISP._BUILDOUT_ESS_TECHS))
@@ -208,7 +213,7 @@ function split_common_rows(rows, labels)
     for row in rows
         values = [row.values[label] for label in labels]
         if all(==(first(values)), values)
-            push!(common, (field = row.field, value = first(values), meaning = row.meaning, unit = row.unit))
+            push!(common, (field = code_span(row.field), value = first(values), meaning = row.meaning, unit = row.unit))
         else
             push!(varying, row)
         end
@@ -218,7 +223,7 @@ end
 
 function comparison_frame(rows, labels)
     table = DataFrame(
-        field = [row.field for row in rows],
+        field = [code_span(row.field) for row in rows],
         meaning = [row.meaning for row in rows],
         unit = [row.unit for row in rows],
     )
@@ -230,14 +235,14 @@ end
 
 function field_metadata_frame(rows)
     return DataFrame(
-        field = [row.field for row in rows],
+        field = [code_span(row.field) for row in rows],
         meaning = [row.meaning for row in rows],
         unit = [row.unit for row in rows],
     )
 end
 
 function technology_value_frame(rows, labels)
-    table = DataFrame(buildout_label = labels)
+    table = DataFrame(buildout_label = [code_span(label) for label in labels])
     for row in rows
         table[!, Symbol(row.field)] = [row.values[label] for label in labels]
     end
@@ -253,10 +258,20 @@ function buildout_reference_tables()
     gen_rows = template_comparison_rows(:gen)
     gen_common, gen_varying = split_common_rows(gen_rows, gen_labels)
 
+    technology_rows = [
+        (buildout_label = code_span(row.buildout_label), output_table = row.output_table,
+         template_key = code_span(row.template_key), duration_h = row.duration_h)
+        for row in buildout_technology_rows()
+    ]
+    placeholder_rows = [
+        (output_table = row.output_table, field = code_span(row.field), applied_source = row.applied_source)
+        for row in buildout_placeholder_rows()
+    ]
+
     return (
-        technology = DataFrame(buildout_technology_rows()),
+        technology = DataFrame(technology_rows),
         origins = DataFrame(buildout_origin_rows()),
-        placeholders = DataFrame(buildout_placeholder_rows()),
+        placeholders = DataFrame(placeholder_rows),
         ess_common = DataFrame(ess_common),
         ess_varying_fields = field_metadata_frame(ess_varying),
         ess_varying_values = technology_value_frame(ess_varying, ess_labels),
