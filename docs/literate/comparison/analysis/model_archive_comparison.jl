@@ -1,8 +1,8 @@
 # # ISP 2024 and ISP 2026 model archive comparison
 #
 # AEMO publishes a scenario-specific PLEXOS model archive for each ISP edition.
-# The [2024 model instructions, physical page 6](../../../../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=6)
-# and [2026 model instructions, physical page 6](../../../../../data/2026/pisp-reports/2026-isp-plexos-model-instructions.pdf#page=6)
+# The [2024 ISP PLEXOS Model Instructions, p. 6](../../../../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=6)
+# and [2026 ISP PLEXOS Model Instructions, p. 6](../../../../../data/2026/pisp-reports/2026-isp-plexos-model-instructions.pdf#page=6)
 # identify the model ZIP alongside separate wind, solar, and timeslice ZIP files.
 # This comparison therefore describes the two model ZIPs, not the complete set
 # of published traces.
@@ -28,7 +28,7 @@ const ARCHIVES = Dict(
 
 all(isfile, values(ARCHIVES)) || error(
     "The comparison requires $(join(sort(collect(values(ARCHIVES))), ", ")).",
-)
+);
 
 # ## Method
 #
@@ -209,7 +209,7 @@ end
 
 records_for(year) = filter(record -> record.year == year, RECORDS)
 unique_sorted(values) = sort!(unique(collect(values)))
-mib(bytes) = bytes / 1024^2
+mib(bytes) = bytes / 1024^2;
 
 # ## Archive overview
 #
@@ -238,21 +238,19 @@ for year in EXPECTED_YEARS
     )
 end
 
-display(
-    markdown_table(
-        [
-            "ISP year",
-            "Archive",
-            "Root folder",
-            "Scenarios",
-            "Model XML",
-            "Solver XML",
-            "CSV files",
-            "Uncompressed MiB",
-        ],
-        archive_summary_rows;
-        alignment = [:right, :left, :left, :right, :right, :right, :right, :right],
-    ),
+markdown_table(
+    [
+        "ISP year",
+        "Archive",
+        "Root folder",
+        "Scenarios",
+        "Model XML",
+        "Solver XML",
+        "CSV files",
+        "Uncompressed MiB",
+    ],
+    archive_summary_rows;
+    alignment = [:right, :left, :left, :right, :right, :right, :right, :right],
 )
 
 # The 2026 archive packages 345 CSV files, compared with 84 in the 2024
@@ -263,28 +261,30 @@ display(
 #
 # The directory names change between editions, but AEMO provides the lineage.
 # The 2025 Inputs, Assumptions and Scenarios Report identifies Step Change as
-# continuing Step Change, Slower Growth as the successor to Progressive Change,
+# continuing Step Change ([p. 18](../../../../../data/2026/pisp-reports/2025-inputs-assumptions-and-scenarios-report.pdf#page=18)),
+# Slower Growth as the successor to Progressive Change
+# ([p. 19](../../../../../data/2026/pisp-reports/2025-inputs-assumptions-and-scenarios-report.pdf#page=19)),
 # and Accelerated Transition as a refinement of Green Energy Exports
-# ([physical pages 18–20](../../../../../data/2026/pisp-reports/2025-inputs-assumptions-and-scenarios-report.pdf#page=18)).
+# ([p. 20](../../../../../data/2026/pisp-reports/2025-inputs-assumptions-and-scenarios-report.pdf#page=20)).
 
 const SCENARIO_MAPPING = [
     (
         scenario_2024 = "Green Energy Exports",
         scenario_2026 = "Accelerated Transition",
         relationship = "Refined successor",
-        citation = "[2025 IASR, p. 20][iasr-p20]",
+        citation = "2025 IASR, p. 20",
     ),
     (
         scenario_2024 = "Progressive Change",
         scenario_2026 = "Slower Growth",
         relationship = "Renamed successor",
-        citation = "[2025 IASR, p. 19][iasr-p19]",
+        citation = "2025 IASR, p. 19",
     ),
     (
         scenario_2024 = "Step Change",
         scenario_2026 = "Step Change",
         relationship = "Same scenario name",
-        citation = "[2025 IASR, p. 18][iasr-p18]",
+        citation = "2025 IASR, p. 18",
     ),
 ]
 
@@ -293,19 +293,14 @@ scenarios_2026 = unique_sorted(record.scenario for record in records_for(2026))
 @assert sort([row.scenario_2024 for row in SCENARIO_MAPPING]) == scenarios_2024
 @assert sort([row.scenario_2026 for row in SCENARIO_MAPPING]) == scenarios_2026
 
-display(
-    markdown_table(
-        ["ISP 2024 scenario", "ISP 2026 scenario", "Relationship", "Evidence"],
-        [
-            Any[row.scenario_2024, row.scenario_2026, row.relationship, row.citation]
-            for row in SCENARIO_MAPPING
-        ],
-    ),
+markdown_table(
+    ["ISP 2024 scenario", "ISP 2026 scenario", "Relationship", "Evidence"],
+    [
+        Any[row.scenario_2024, row.scenario_2026, row.relationship, row.citation]
+        for row in SCENARIO_MAPPING
+    ],
 )
 
-# [iasr-p18]: ../../../../../data/2026/pisp-reports/2025-inputs-assumptions-and-scenarios-report.pdf#page=18
-# [iasr-p19]: ../../../../../data/2026/pisp-reports/2025-inputs-assumptions-and-scenarios-report.pdf#page=19
-# [iasr-p20]: ../../../../../data/2026/pisp-reports/2025-inputs-assumptions-and-scenarios-report.pdf#page=20
 
 # The crosswalk describes scenario lineage. It does not imply that assumptions
 # or model inputs are unchanged between editions.
@@ -328,12 +323,10 @@ for role in ["PLEXOS model", "PLEXOS solver parameters"]
     )
 end
 
-display(
-    markdown_table(
-        ["XML role", "ISP 2024 files", "ISP 2026 files"],
-        xml_role_rows;
-        alignment = [:left, :right, :right],
-    ),
+markdown_table(
+    ["XML role", "ISP 2024 files", "ISP 2026 files"],
+    xml_role_rows;
+    alignment = [:left, :right, :right],
 )
 
 # The missing standalone solver-parameter file is a packaging difference. The
@@ -403,12 +396,10 @@ push!(
     ],
 )
 
-display(
-    markdown_table(
-        ["Trace family", "ISP 2024", "ISP 2026", "Archive coverage"],
-        trace_family_rows;
-        alignment = [:left, :right, :right, :left],
-    ),
+markdown_table(
+    ["Trace family", "ISP 2024", "ISP 2026", "Archive coverage"],
+    trace_family_rows;
+    alignment = [:left, :right, :right, :left],
 )
 
 # ## Representative filenames
@@ -432,12 +423,10 @@ for category in trace_categories, year in EXPECTED_YEARS
     push!(filename_rows, Any[humanise_category(category), year, filename])
 end
 
-display(
-    markdown_table(
-        ["Trace family", "ISP year", "Example filename"],
-        filename_rows;
-        alignment = [:left, :right, :left],
-    ),
+markdown_table(
+    ["Trace family", "ISP year", "Example filename"],
+    filename_rows;
+    alignment = [:left, :right, :left],
 )
 
 # The 2026 examples show why parser logic cannot rely on one scenario token.
