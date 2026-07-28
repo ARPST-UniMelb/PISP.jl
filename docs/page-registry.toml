@@ -142,7 +142,7 @@ related_reference_pages = ["generated/isp2024/reference/data-sources.md", "conce
 
 [[page]]
 id = "isp2024-temperature-data-coverage"
-title = "ISP 2024: Temperature-data coverage and climate-zone solar comparison"
+title = "ISP 2024: Temperature information and PISP coverage"
 kind = "validation"
 track = "isp2024"
 editions = ["2024"]
@@ -152,6 +152,7 @@ output = "generated/isp2024/validation/temperature-data-coverage.md"
 status = "published"
 nav_order = 30
 snapshot = true
+data_requirements = [{ root = "download", edition = "2024", path = "2024-isp-inputs-and-assumptions-workbook.xlsx", type = "file" }]
 related_reference_pages = ["generated/isp2024/reference/data-sources.md", "assumptions.md"]
 
 [[page]]
