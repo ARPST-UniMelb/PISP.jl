@@ -232,7 +232,7 @@ println("Total files discovered under ", DOWNLOAD_ROOT, ": ", length(files))
 ```
 
 ````
-Total files discovered under data/2024/pisp-downloads: 8322
+Total files discovered under data/2024/pisp-downloads: 8324
 
 ````
 
@@ -291,10 +291,12 @@ markdown_table(top_level_summary)
 | 2023-iasr-ev-workbook.xlsx | file | 1 | 505291 |  |
 | 2024 ISP Model | directory | 90 | 495584080 | csv,xml |
 | 2024-isp-inputs-and-assumptions-workbook.xlsx | file | 1 | 11339818 |  |
+| 2024-pisp-downloads-Auxiliary.zip | file | 1 | 5028807 |  |
 | Auxiliary | directory | 7 | 6282064 | xlsx |
 | Core | directory | 3 | 27871688 | xlsx |
 | Sensitivities | directory | 9 | 31047416 | xlsx |
 | Traces | directory | 8146 | 50838932474 | csv |
+| pisp-downloads-2024-xls.zip | file | 1 | 22950734 |  |
 | zip | directory | 64 | 19034494645 | zip |
 
 
@@ -317,7 +319,7 @@ markdown_table(extension_summary)
 | csv | 8230 | 51243052481 |
 | xlsx | 22 | 102972933 |
 | xml | 6 | 91464073 |
-| zip | 64 | 19034494645 |
+| zip | 66 | 19062474186 |
 
 
 ## Directory structure
@@ -339,7 +341,7 @@ nrow(directory_tree)
 ```
 
 ````
-359
+360
 ````
 
 ```@raw html
@@ -716,6 +718,7 @@ pisp-downloads/
   - 2019-input-and-assumptions-workbook-v1-3-dec-19.xlsx
   - 2023-iasr-ev-workbook.xlsx
   - 2024-isp-inputs-and-assumptions-workbook.xlsx
+  - ... (2 more files omitted)
 
 ````
 
@@ -759,11 +762,11 @@ metric_value_table([
 | **Metric** | **Value** |
 |:--|:--|
 | Download root | data/2024/pisp-downloads |
-| Total files | 8322 |
-| Total bytes | 70471984132 |
+| Total files | 8324 |
+| Total bytes | 70499963673 |
 | Tree depth | 3 |
 | Maximum files in one directory | 3 |
-| Top-level entries | 9 |
+| Top-level entries | 11 |
 | Largest entry | Traces |
 | Largest entry (bytes) | 50838932474 |
 
@@ -781,7 +784,7 @@ metric_value_table([
 ```
 
 ````
-Total: 8322 files, 67207.32 MB under data/2024/pisp-downloads
+Total: 8324 files, 67234.00 MB under data/2024/pisp-downloads
 
 ````
 
