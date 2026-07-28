@@ -67,8 +67,8 @@ end
 Base.show(io::IO, ::MIME"text/markdown", table::MarkdownTable) = print(io, table.text)
 Base.show(io::IO, ::MIME"text/plain", table::MarkdownTable) = print(io, table.text)
 
-markdown_cell(value) = replace(replace(string(value), '\n' => "<br>"), '|' => "\\|")
-markdown_items(values) = isempty(values) ? "—" : join(("`$(markdown_cell(value))`" for value in values), "<br>")
+markdown_cell(value) = replace(replace(string(value), '\n' => " "), '|' => "\\|")
+markdown_items(values) = isempty(values) ? "—" : join(("`$(markdown_cell(value))`" for value in values), ", ")
 
 function markdown_table(headers, rows)
     lines = String[]
@@ -102,8 +102,8 @@ markdown_table(
 
 | Edition | Extracted outlook directories | Retained source archives |
 | :--- | :--- | :--- |
-| ISP 2024 | `Core`<br>`Sensitivities` | `2024-isp-generation-and-storage-outlook.zip`<br>`2024-isp-model.zip` |
-| ISP 2026 | `Core scenarios`<br>`Sensitivities` | `2026-isp-generation-and-storage-outlook.zip`<br>`2026-isp-model.zip` |
+| ISP 2024 | `Core`, `Sensitivities` | `2024-isp-generation-and-storage-outlook.zip`, `2024-isp-model.zip` |
+| ISP 2026 | `Core scenarios`, `Sensitivities` | `2026-isp-generation-and-storage-outlook.zip`, `2026-isp-model.zip` |
 
 `Core` or `Core scenarios` and `Sensitivities` contain the extracted
 generation-and-storage-outlook workbooks. The other branches have distinct

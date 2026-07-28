@@ -49,8 +49,8 @@ end
 Base.show(io::IO, ::MIME"text/markdown", table::MarkdownTable) = print(io, table.text)
 Base.show(io::IO, ::MIME"text/plain", table::MarkdownTable) = print(io, table.text)
 
-markdown_cell(value) = replace(replace(string(value), '\n' => "<br>"), '|' => "\\|")
-markdown_items(values) = isempty(values) ? "—" : join(("`$(markdown_cell(value))`" for value in values), "<br>")
+markdown_cell(value) = replace(replace(string(value), '\n' => " "), '|' => "\\|")
+markdown_items(values) = isempty(values) ? "—" : join(("`$(markdown_cell(value))`" for value in values), ", ")
 
 function markdown_table(headers, rows)
     lines = String[]

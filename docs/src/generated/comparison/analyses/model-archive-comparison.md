@@ -206,7 +206,7 @@ Base.show(io::IO, ::MIME"text/plain", table::MarkdownTable) = print(io, table.te
 
 function markdown_cell(value)
     value === nothing && return "—"
-    text = replace(string(value), '\n' => "<br>")
+    text = replace(string(value), '\n' => " ")
     return replace(text, '|' => "\\|")
 end
 
