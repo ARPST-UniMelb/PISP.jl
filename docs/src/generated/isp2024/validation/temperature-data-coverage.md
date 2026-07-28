@@ -44,43 +44,6 @@ The workbook uses temperature in three distinct ways:
 
 These are static assumptions and lookup values. They are not a local, timestamped meteorological record.
 
-```@raw html
-<details class="source-code"><summary>Show source code</summary>
-```
-
-````julia
-scenario_temperature, regional_reference_temperature, murraylink_temperature_capability, seasonal_rating_rule = XLSX.openxlsx(workbook_path) do workbook
-    carbon_budget_cells = workbook["Carbon Budgets"]["B7:E10"]
-    scenario_table = DataFrame(
-        :Scenario => string.(carbon_budget_cells[1, 2:4]),
-        Symbol("Global mean temperature increase by 2100") => string.(carbon_budget_cells[2, 2:4]),
-        Symbol("NEM carbon budget, FY2025-52 (Mt CO₂-e)") => Int.(carbon_budget_cells[4, 2:4]),
-    )
-
-    regional_cells = workbook["Network Capability"]["B77:E82"]
-    regional_table = DataFrame(
-        :Region => string.(regional_cells[2:end, 1]),
-        Symbol("Summer 10% POE reference (°C)") => Float64.(regional_cells[2:end, 2]),
-        Symbol("Summer typical (°C)") => string.(regional_cells[2:end, 3]),
-        Symbol("Winter typical (°C)") => Float64.(regional_cells[2:end, 4]),
-    )
-
-    murraylink_cells = workbook["Network Capability"]["B89:D104"]
-    murraylink_table = DataFrame(
-        Symbol("Ambient temperature (°C)") => string.(murraylink_cells[2:end, 1]),
-        Symbol("Forward capability (MW)") => Float64.(murraylink_cells[2:end, 2]),
-        Symbol("Reverse capability (MW)") => Float64.(murraylink_cells[2:end, 3]),
-    )
-
-    rule = string(workbook["Seasonal ratings"]["B8"])
-    return scenario_table, regional_table, murraylink_table, rule
-end
-````
-
-```@raw html
-</details>
-```
-
 ## Scenario-level temperature assumptions
 
 The temperature values below describe global scenario outcomes used in the ISP scenario framework.
@@ -91,6 +54,15 @@ They do not describe weather at a generator, transmission line, or demand region
 ```
 
 ````julia
+scenario_temperature = XLSX.openxlsx(workbook_path) do workbook
+    carbon_budget_cells = workbook["Carbon Budgets"]["B7:E10"]
+    DataFrame(
+        :Scenario => string.(carbon_budget_cells[1, 2:4]),
+        Symbol("Global mean temperature increase by 2100") => string.(carbon_budget_cells[2, 2:4]),
+        Symbol("NEM carbon budget, FY2025-52 (Mt CO₂-e)") => Int.(carbon_budget_cells[4, 2:4]),
+    )
+end
+
 markdown_table(scenario_temperature)
 ````
 
@@ -116,6 +88,22 @@ This is a modelling reference for peak conditions, not evidence that every South
 ```
 
 ````julia
+regional_reference_temperature = XLSX.openxlsx(workbook_path) do workbook
+    regional_cells = workbook["Network Capability"]["B77:E82"]
+    seasonal_rating_rule = string(workbook["Seasonal ratings"]["B8"])
+
+    occursin("POE10 reference temperature", seasonal_rating_rule) || error(
+        "Expected the seasonal-rating hot-day rule in Seasonal ratings!B8",
+    )
+
+    DataFrame(
+        :Region => string.(regional_cells[2:end, 1]),
+        Symbol("Summer 10% POE reference (°C)") => Float64.(regional_cells[2:end, 2]),
+        Symbol("Summer typical (°C)") => string.(regional_cells[2:end, 3]),
+        Symbol("Winter typical (°C)") => Float64.(regional_cells[2:end, 4]),
+    )
+end
+
 markdown_table(regional_reference_temperature)
 ````
 
@@ -135,20 +123,6 @@ markdown_table(regional_reference_temperature)
 The generator seasonal-rating rule uses a regional POE10 reference temperature to identify hot days.
 When fewer than five days exceed the threshold, the source workbook uses the five hottest days of that year.
 
-```@raw html
-<details class="source-code"><summary>Show source code</summary>
-```
-
-````julia
-occursin("POE10 reference temperature", seasonal_rating_rule) || error(
-    "Expected the seasonal-rating hot-day rule in Seasonal ratings!B8",
-)
-````
-
-```@raw html
-</details>
-```
-
 ## Temperature-dependent Murraylink capability
 
 The source workbook includes an explicit ambient-temperature lookup for Murraylink.
@@ -159,6 +133,15 @@ Capability is 220 MW through 38 °C, declines above that point, and reaches zero
 ```
 
 ````julia
+murraylink_temperature_capability = XLSX.openxlsx(workbook_path) do workbook
+    murraylink_cells = workbook["Network Capability"]["B89:D104"]
+    DataFrame(
+        Symbol("Ambient temperature (°C)") => string.(murraylink_cells[2:end, 1]),
+        Symbol("Forward capability (MW)") => Float64.(murraylink_cells[2:end, 2]),
+        Symbol("Reverse capability (MW)") => Float64.(murraylink_cells[2:end, 3]),
+    )
+end
+
 markdown_table(murraylink_temperature_capability)
 ````
 
