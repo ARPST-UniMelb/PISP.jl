@@ -27,3 +27,17 @@ publisher = "Australian Energy Market Operator"
 local_path = "data/2024/pisp-reports/2023-isp-methodology.pdf"
 public_url = "https://www.aemo.com.au/-/media/files/stakeholder_consultation/consultations/nem-consultations/2023/isp-methodology-2023/isp-methodology_june-2023.pdf?la=en"
 public_origin = "official"
+
+[[source]]
+title = "2026 ISP PLEXOS Model Instructions"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2026/pisp-reports/2026-isp-plexos-model-instructions.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2026/isp-model/2026-isp-plexos-model-instructions.pdf?la=en"
+public_origin = "official"
+
+[[source]]
+title = "2025 Inputs, Assumptions and Scenarios Report"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2026/pisp-reports/2025-inputs-assumptions-and-scenarios-report.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/stakeholder_consultation/consultations/nem-consultations/2024/2025-iasr-scenarios/final-docs/2025-inputs-assumptions-and-scenarios-report.pdf?rev=63268acd3f044adb9f5f3a32b6880c27&sc_lang=en"
+public_origin = "official"

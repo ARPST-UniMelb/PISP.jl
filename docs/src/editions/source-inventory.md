@@ -15,15 +15,14 @@ Keeping those layers separate makes it possible to distinguish an acquired file 
 ## Observed local availability
 
 The [ISP 2026 source-availability page](../generated/isp2026/validation/source-availability.md)
-and the [edition comparison page](../generated/comparison/validation/source-availability-by-edition.md)
-report selected observations from configured roots. They deliberately avoid
-recursive file totals: dot-file filtering is a local hygiene choice, not an
-upstream completeness measure, and a file's presence does not establish parser
-integration or a generated-data contract.
+reports selected report, archive, and extracted-path observations from the
+configured ISP 2026 roots.
 
-The compact evidence tables report configured report targets, archive groups,
-extracted landmarks, trace groups, and demand-trace observations. A local
-observation means only that the item was present in the supplied checkout at
-render time.
+The [model archive comparison](../generated/comparison/analyses/model-archive-comparison.md)
+reads the ISP 2024 and ISP 2026 model ZIPs directly. It compares scenario
+directories, XML packaging, trace families, file counts, sizes, and
+representative filenames as the first concrete input to a 2024-to-2026 parser
+crosswalk.
+
 For the implemented 2024 workflow, consult [data sources](../generated/isp2024/reference/data-sources.md) and [output tables](../generated/isp2024/reference/output-tables.md).
 For 2026 source material, consult the [ISP 2026 overview](isp2026.md).

@@ -69,7 +69,7 @@ function registry_navigation(registry_pages)
     push!(
         navigation,
         "Compare ISP 2024 and ISP 2026" =>
-            track_navigation(registry_pages, "comparison", "Overview and comparison rules", "editions/comparison.md"),
+            track_navigation(registry_pages, "comparison", "Overview", "editions/comparison.md"),
     )
     push!(navigation, "Contributing" => "contributing.md")
     push!(navigation, "API Reference" => "api.md")

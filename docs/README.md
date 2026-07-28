@@ -133,6 +133,7 @@ Local data are required for complete Literate regeneration, but not for a site b
 | `docs/src/assumptions.md` | ISP 2024 modelling scope, caveats, validation responsibilities, and external checks. |
 | `docs/src/api.md` | Public ISP 2024 build and source-acquisition API boundary. |
 | `docs/literate/isp2024/` | Executable ISP 2024 reference, tutorial, validation, and analysis sources. |
+| `docs/literate/comparison/` | Executable cross-edition source comparisons and mapping evidence. |
 | `docs/page-registry.toml` | Authority for every registry-managed Literate source and generated Markdown output. |
 | `docs/edition_profiles.jl` | Edition-specific report/download roots and schedule defaults used by rendering preflight. |
 | `docs/navigation.jl` | Published-site navigation assembled from static edition pages and published registry entries. |
@@ -141,8 +142,10 @@ Local data are required for complete Literate regeneration, but not for a site b
 | `docs/make.jl` | Target-specific source-link staging and Documenter site build. |
 
 The public site separates shared explanatory pages from ISP 2024, ISP 2026, and comparison tracks.
-The ISP 2026 and comparison tracks publish source-data-only availability pages;
-processed-data and parser claims remain outside their scope.
+The ISP 2026 track publishes source-availability evidence, while the comparison
+track analyses release-level source structures needed for explicit crosswalks.
+Processed-data compatibility still requires edition-specific parser and schema
+validation.
 
 ## Page registry
 

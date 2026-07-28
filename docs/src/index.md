@@ -13,7 +13,7 @@ PISP.jl also provides ISP 2026 report and source-asset acquisition plus archive 
 - [ISP 2024](editions/isp2024.md) leads to the implemented source, output, tutorial, validation, and analysis documentation.
 - [Supported ISP editions](editions/supported-editions.md) is the support authority for acquisition, parsing, construction, outputs, validation, and analysis.
 - [ISP 2026](editions/isp2026.md) describes report/source acquisition, archive extraction, separate parser work, and the current integration boundary.
-- [Compare ISP 2024 and ISP 2026](editions/comparison.md) shows what's available today at each pipeline stage for each release, and what to check before comparing values across them.
+- [Compare ISP 2024 and ISP 2026](editions/comparison.md) defines the reconciliation required before cross-release comparison.
 
 ## ISP 2024 source context
 

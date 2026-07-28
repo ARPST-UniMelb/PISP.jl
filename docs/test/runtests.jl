@@ -112,8 +112,34 @@ end
     end
 
     comparison = read_doc("editions", "comparison.md")
-    for required in ("price year", "real or nominal", "one-to-many", "many-to-one", "inner join")
+    for required in (
+        "model archive comparison",
+        "scenario directories",
+        "Wind, solar, and timeslice",
+        "CSV schemas",
+        "model-XML references",
+    )
         @test occursin(required, comparison)
+    end
+
+    model_archive_comparison = read_doc(
+        "generated",
+        "comparison",
+        "analyses",
+        "model-archive-comparison.md",
+    )
+    for required in (
+        "Progressive Change",
+        "Slower Growth",
+        "Green Energy Exports",
+        "Accelerated Transition",
+        "PLEXOS solver parameters",
+        "345",
+        "DNSP",
+        "Rooftop PV",
+        "2025-inputs-assumptions-and-scenarios-report.pdf#page=20",
+    )
+        @test occursin(required, model_archive_comparison)
     end
 
     trace_coverage = read_doc("editions", "trace-coverage.md")
