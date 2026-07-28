@@ -41,10 +41,10 @@ contains demand, renewable-generation, gas-availability, DNSP-level CER,
 seasonal-timeslice, and load-subtractor traces. It lists demand, DNSP, gas,
 hydro, load subtractor, rooftop PV, solar, timeslice, and wind folders under
 `Traces`; the report describes the roles of those folders in the model package
-(2026 ISP PLEXOS Model Instructions, physical p. 5 and p. 7).
+([2026 ISP PLEXOS Model Instructions, p. 5](../../../../../data/2026/pisp-reports/2026-isp-plexos-model-instructions.pdf#page=5) and [p. 7](../../../../../data/2026/pisp-reports/2026-isp-plexos-model-instructions.pdf#page=7)).
 
 The report also states that the traces combine 16 historical weather years in
-a repeating rolling-reference-year sequence (physical p. 5). That report
+a repeating rolling-reference-year sequence (p. 5). That report
 description is not a claim that every local archive or extracted folder is
 complete.
 
@@ -93,10 +93,10 @@ ISP 2024.
 ## Probability of exceedance (PoE)
 
 The 2025 Inputs, Assumptions and Scenarios Report defines POE as “probability
-of exceedance” in its abbreviations (physical p. 234). The 2025 ISP
+of exceedance” in its abbreviations ([p. 234](../../../../../data/2026/pisp-reports/2025-inputs-assumptions-and-scenarios-report.pdf#page=234)). The 2025 ISP
 Methodology describes 10%, 50%, and sometimes 90% POE simulations for
 reliability assessments, and says that 10% POE demand profiles are used in
-capacity-outlook modelling to represent high peak demand (physical p. 40).
+capacity-outlook modelling to represent high peak demand (p. 40).
 Those passages support the report's terminology and use of 10% profiles; they
 do not establish the meaning of any local 2026 filename label. The configured
 local roots contain a `POE10` filename label, but no 2026 semantic meaning is
