@@ -1,4 +1,30 @@
 [[page]]
+id = "shared-pisp-downloads-layout"
+title = "ISP 2024 and ISP 2026 downloaded source layout"
+kind = "reference"
+track = "shared"
+editions = ["2024", "2026"]
+data_layer = "source-data"
+source = "literate/shared/reference/pisp_downloads_layout.jl"
+output = "generated/shared/reference/pisp-downloads-layout.md"
+status = "published"
+nav_order = 10
+snapshot = false
+data_requirements = [
+    { root = "download", edition = "2024", path = "zip", type = "directory" },
+    { root = "download", edition = "2024", path = "Core", type = "directory" },
+    { root = "download", edition = "2024", path = "Sensitivities", type = "directory" },
+    { root = "download", edition = "2026", path = "zip", type = "directory" },
+    { root = "download", edition = "2026", path = "Core scenarios", type = "directory" },
+    { root = "download", edition = "2026", path = "Sensitivities", type = "directory" },
+]
+related_reference_pages = [
+    "editions/source-material.md",
+    "editions/source-inventory.md",
+    "editions/trace-coverage.md",
+]
+
+[[page]]
 id = "isp2024-data-sources"
 title = "ISP 2024: Data sources"
 kind = "reference"

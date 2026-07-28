@@ -57,6 +57,7 @@ function registry_navigation(registry_pages)
             "Output data model" => "editions/output-data-model.md",
             "Assumptions and scope" => "assumptions.md",
             "What each ISP edition publishes" => "editions/source-material.md",
+            "Downloaded source layout" => "generated/shared/reference/pisp-downloads-layout.md",
             "Downloaded source inventory by edition" => "editions/source-inventory.md",
             "Trace families, schemas, and coverage" => "editions/trace-coverage.md",
             "Parameters and mappings across editions" => "editions/parameters-and-mappings.md",

@@ -7,10 +7,12 @@ include(joinpath(TEST_DOCS_DIR, "page_registry.jl"))
 include(joinpath(TEST_DOCS_DIR, "render_literate.jl"))
 include(joinpath(TEST_DOCS_DIR, "navigation.jl"))
 include(joinpath(TEST_DOCS_DIR, "eda_support.jl"))
+include(joinpath(TEST_DOCS_DIR, "download_layout.jl"))
 
 using .PISPDocsPageRegistry
 using .PISPDocsNavigation
 using .EdaSupport
+using .PISPDocsDownloadLayout
 
 @testset "Markdown table rendering" begin
     rendered = markdown_table(DataFrame(Label=["alpha", "beta"], Value=[1.0, 2.0]))
@@ -145,6 +147,44 @@ end
     trace_coverage = read_doc("editions", "trace-coverage.md")
     for required in ("14 historical reference years", "16 for 2026", "DNSP", "probability of exceedance")
         @test occursin(required, trace_coverage)
+    end
+
+    download_layout = read_doc("generated", "shared", "reference", "pisp-downloads-layout.md")
+    for required in (
+        "Core/ or Core scenarios/",
+        "PISP-generated intermediates",
+        "Extracted outlook directories",
+        "2024-isp-generation-and-storage-outlook.zip",
+        "2026-isp-generation-and-storage-outlook.zip",
+    )
+        @test occursin(required, download_layout)
+    end
+end
+
+@testset "Downloaded source layout filtering" begin
+    mktempdir() do root
+        for directory in (
+            "Core",
+            "Sensitivities",
+            "Auxiliary",
+            "Traces",
+            "2024 ISP Model",
+            "manifests",
+            "zip",
+            "__MACOSX",
+        )
+            mkpath(joinpath(root, directory))
+        end
+        write(joinpath(root, "zip", "2024-isp-model.zip"), "model")
+        write(joinpath(root, "zip", "2024-isp-generation-and-storage-outlook.zip"), "outlook")
+        mkpath(joinpath(root, "zip", "Traces"))
+        write(joinpath(root, "zip", "Traces", "2024-isp-solar-traces.zip"), "trace")
+
+        @test outlook_directories(root) == ["Core", "Sensitivities"]
+        @test source_archives(root) == [
+            "2024-isp-generation-and-storage-outlook.zip",
+            "2024-isp-model.zip",
+        ]
     end
 end
 
@@ -632,6 +672,7 @@ end
             "Output data model",
             "Assumptions and scope",
             "What each ISP edition publishes",
+            "Downloaded source layout",
             "Downloaded source inventory by edition",
             "Trace families, schemas, and coverage",
             "Parameters and mappings across editions",
@@ -642,6 +683,7 @@ end
             "editions/output-data-model.md",
             "assumptions.md",
             "editions/source-material.md",
+            "generated/shared/reference/pisp-downloads-layout.md",
             "editions/source-inventory.md",
             "editions/trace-coverage.md",
             "editions/parameters-and-mappings.md",
