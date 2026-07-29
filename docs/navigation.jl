@@ -79,6 +79,7 @@ function registry_navigation(registry_pages)
             "ISP source data" => Any[
                 "Source material by edition" => "editions/source-material.md",
                 "Trace families and source meaning" => "editions/trace-coverage.md",
+                "Downloaded source layout by edition" => "generated/shared/reference/pisp-downloads-layout.md",
             ],
             "PISP transformation" => Any[
                 "Workflow support by edition" => "editions/supported-editions.md",

@@ -745,10 +745,12 @@ end
         @test first.(last(shared_material[1])) == [
             "Source material by edition",
             "Trace families and source meaning",
+            "Downloaded source layout by edition",
         ]
         @test last.(last(shared_material[1])) == [
             "editions/source-material.md",
             "editions/trace-coverage.md",
+            "generated/shared/reference/pisp-downloads-layout.md",
         ]
         @test first.(last(shared_material[2])) == [
             "Workflow support by edition",
@@ -774,23 +776,25 @@ end
         isp2024_navigation = navigation_by_title["ISP 2024"]
         @test first.(isp2024_navigation) == [
             "Overview",
+            "Preprocessing workflow",
             "Reference and inputs",
             "Tutorials",
             "Data validation",
             "Analyses and case studies",
         ]
         @test last(isp2024_navigation[1]) == "editions/isp2024.md"
-        @test first.(last(isp2024_navigation[2])) == [
+        @test last(isp2024_navigation[2]) == "editions/isp2024-preprocessing.md"
+        @test first.(last(isp2024_navigation[3])) == [
             "Renderer isp2024-reference-first",
             "Renderer isp2024-reference-later",
         ]
-        @test last.(last(isp2024_navigation[2])) == [
+        @test last.(last(isp2024_navigation[3])) == [
             "generated/fixture/isp2024-reference-first.md",
             "generated/fixture/isp2024-reference-later.md",
         ]
-        @test first.(last(isp2024_navigation[3])) == ["Renderer isp2024-tutorial"]
-        @test first.(last(isp2024_navigation[4])) == ["Renderer isp2024-validation"]
-        @test first.(last(isp2024_navigation[5])) == ["Renderer isp2024-analysis"]
+        @test first.(last(isp2024_navigation[4])) == ["Renderer isp2024-tutorial"]
+        @test first.(last(isp2024_navigation[5])) == ["Renderer isp2024-validation"]
+        @test first.(last(isp2024_navigation[6])) == ["Renderer isp2024-analysis"]
         @test !occursin("draft", repr(isp2024_navigation))
         @test !occursin("archived", repr(isp2024_navigation))
 
@@ -811,5 +815,53 @@ end
         ]
         @test !occursin("package-workflow-draft", repr(comparison_navigation))
         @test !occursin("cross-layer-archived", repr(comparison_navigation))
+    end
+
+    @testset "every published page is nav-reachable" begin
+        function flatten_nav_outputs(navigation)
+            outputs = String[]
+            for (_, value) in navigation
+                if value isa AbstractString
+                    push!(outputs, value)
+                else
+                    append!(outputs, flatten_nav_outputs(value))
+                end
+            end
+            return outputs
+        end
+
+        # Sanity-check the assertion mechanism itself: a published page whose
+        # kind has no entry in its track's KIND_LABELS is never selected by
+        # track_sections, so it must be detected as unreachable.
+        reachable_pages = [
+            renderer_page(id="covered-page", track="isp2024", editions=["2024"], status="published"),
+        ]
+        reachable_outputs = Set(flatten_nav_outputs(registry_navigation(reachable_pages)))
+        @test reachable_pages[1].output in reachable_outputs
+
+        orphan_pages = [
+            renderer_page(
+                id="orphan-page",
+                track="isp2024",
+                editions=["2024"],
+                status="published",
+                kind="unregistered-kind",
+            ),
+        ]
+        orphan_outputs = Set(flatten_nav_outputs(registry_navigation(orphan_pages)))
+        @test !(orphan_pages[1].output in orphan_outputs)
+
+        # The real registry: every published page's output must appear
+        # somewhere in the rendered navigation tree.
+        real_pages = load_page_registry(
+            joinpath(TEST_DOCS_DIR, "page-registry.toml");
+            require_published_outputs=true,
+            check_generated_outputs=true,
+        )
+        real_outputs = Set(flatten_nav_outputs(registry_navigation(real_pages)))
+        for page in real_pages
+            is_published(page) || continue
+            @test page.output in real_outputs
+        end
     end
 end
