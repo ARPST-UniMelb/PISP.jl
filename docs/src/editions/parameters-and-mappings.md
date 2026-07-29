@@ -9,6 +9,13 @@ PISP data model.
 PISP.jl can download and extract the ISP 2026 workbooks and archives, but no ISP 2026 source-sheet dependency or field interpretation is yet integrated into its documented workflow.
 The [supported editions](supported-editions.md) page records that acquisition and integration boundary.
 
+## How to read parameter provenance
+
+- **Report-defined mappings** encode a relationship stated in an AEMO report. The detailed mapping page identifies the report and shows the current PISP representation.
+- **Workbook-derived values** are read from named workbook sheets, ranges, or build-out columns by the parser.
+- **Package-defined defaults** come from PISP parameter dictionaries and are applied when the workbook does not provide a complete output row.
+- **Unverified provenance** means that the current code supplies a value, but its original external source is not established in the package documentation. Such a value remains usable as a PISP default without being attributed to an unsupported source.
+
 | Mapping or parameter layer | ISP 2024 PISP evidence |
 | --- | --- |
 | Scenario identifiers and source labels | Scenario IDs `1`, `2`, and `3` identify Progressive Change, Step Change, and Green Energy Exports. Package mappings connect those names to hydro-inflow and demand-trace source labels. |
@@ -26,6 +33,8 @@ page provides the detailed, code-derived scenario, bus, area, weather-year, and
 reliability-field tables. Its weather-year table is tied to the 2024 ISP PLEXOS
 model instructions, while the sheet dependencies identify the 2024 workbook
 fields consumed by the parser.
+
+The [ISP 2024 build-out defaults](../generated/isp2024/reference/buildout-defaults.md) page separates workbook fields, generated identities, calculations, placeholders, and package template values for optional generator and storage additions.
 
 These package-defined values are modelling inputs rather than incidental
 filenames. A change to a mapping can change generated datasets even when the

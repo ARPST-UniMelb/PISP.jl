@@ -35,9 +35,11 @@ validate_buildout_defaults_contract(BUILDOUT_PARSER)
 </details>
 ```
 
-````
-true
-````
+## Source status
+
+The build-out workbook supplies `tech`, `subregion`, `capacity`, `year`, and `n`. The parser generates or looks up identifiers and locations, calculates capacity-dependent fields, and obtains the remaining values from `PISP.params_buildout_bess` or `PISP.params_buildout_gen`.
+
+Those template dictionaries are the current code authority for the displayed defaults. PISP does not encode an original external source for every numeric template value, so this page reports them as package-defined defaults rather than assigning an unsupported report or workbook citation. Fields labelled "Not defined in PISP" retain unverified meaning or units until a source or package contract establishes them.
 
 ## Supported workbook technology labels
 

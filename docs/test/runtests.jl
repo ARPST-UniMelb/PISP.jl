@@ -109,9 +109,41 @@ end
     end
 
     mappings = read_doc("editions", "parameters-and-mappings.md")
-    for required in ("`1`, `2`, and `3`", "Twelve package bus aliases", "PISP.WEATHER_YEARS_ISP", "B11:K297", "B7:G50")
+    for required in (
+        "`1`, `2`, and `3`",
+        "Twelve package bus aliases",
+        "PISP.WEATHER_YEARS_ISP",
+        "B11:K297",
+        "B7:G50",
+        "Report-defined mappings",
+        "Workbook-derived values",
+        "Package-defined defaults",
+        "Unverified provenance",
+        "ISP 2024 build-out defaults",
+    )
         @test occursin(required, mappings)
     end
+
+    generated_mappings = read_doc(
+        "generated",
+        "isp2024",
+        "reference",
+        "parameters-and-mappings.md",
+    )
+    @test occursin("2024 ISP PLEXOS Model Instructions, p. 6", generated_mappings)
+    @test occursin("ending year", generated_mappings)
+    @test occursin("2024-isp-plexos-model-instructions.pdf#page=5", generated_mappings)
+    @test occursin("2024-isp-plexos-model-instructions.pdf#page=6", generated_mappings)
+
+    buildout_defaults = read_doc(
+        "generated",
+        "isp2024",
+        "reference",
+        "buildout-defaults.md",
+    )
+    @test occursin("Source status", buildout_defaults)
+    @test occursin("original external source", buildout_defaults)
+    @test !occursin("\n````\ntrue\n````", buildout_defaults)
 
     comparison = read_doc("editions", "comparison.md")
     for required in (

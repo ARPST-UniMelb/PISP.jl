@@ -105,9 +105,11 @@ markdown_table(bus_area_mappings)
 
 ## Reference trace 4006 weather-year mapping
 
-The composite trace maps each financial-year interval to a historical weather year. Repeated historical years are part of the mapping and should be considered when comparing planning periods.
+The composite trace maps each financial-year interval to a historical reference year. Repeated historical years are part of the mapping and should be considered when comparing planning periods.
 
-The mapping is based on AEMO's 2024 ISP PLEXOS model instructions ([2024 ISP PLEXOS Model Instructions, p. 5](../../../../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=5)), the same document cited by `PISP.WEATHER_YEARS_ISP`'s source comment in `src/parameters/general2024ISP.jl`.
+AEMO explains the rolling-reference-year method in the [2024 ISP PLEXOS Model Instructions, p. 5](../../../../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=5). The concrete sequence is in Table 1 of the [2024 ISP PLEXOS Model Instructions, p. 6](../../../../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=6). PISP stores the ending year of each report range: for example, AEMO's `2018-19` reference year is represented as `2019` for the interval from 1 July 2024 through 30 June 2025.
+
+The current implementation defines this mapping in `PISP.WEATHER_YEARS_ISP`; it does not parse the mapping from the 2024 Inputs and Assumptions workbook.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -118,7 +120,7 @@ weather_year_mapping = DataFrame([
     (
         financial_year_start = Date(window[1]),
         financial_year_end = Date(window[2]),
-        weather_year = parse(Int, weather_year),
+        reference_year_ending = parse(Int, weather_year),
     )
     for (window, weather_year) in PISP.WEATHER_YEARS_ISP
 ])
@@ -130,7 +132,7 @@ markdown_table(weather_year_mapping)
 </details>
 ```
 
-| **financial\_year\_start** | **financial\_year\_end** | **weather\_year** |
+| **financial\_year\_start** | **financial\_year\_end** | **reference\_year\_ending** |
 |:--|:--|--:|
 | 2024-07-01 | 2025-06-30 | 2019 |
 | 2025-07-01 | 2026-06-30 | 2020 |
