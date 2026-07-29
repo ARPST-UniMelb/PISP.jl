@@ -22,7 +22,7 @@
             end
             write(joinpath(src_dir, "._archive.zip"), "appledouble metadata")
 
-            extracted_paths = PISP.PISPScrapperUtils.extract_all_zips(src_dir, dest_dir; skip_existing = false)
+            extracted_paths = PISP.PISPScrapperUtils.extract_all_zips(src_dir, dest_dir; skip_existing=false)
 
             @test extracted_paths == [normpath(dest_dir)]
             @test isfile(joinpath(dest_dir, "payload.txt"))

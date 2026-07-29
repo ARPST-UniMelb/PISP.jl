@@ -13,42 +13,42 @@ using .PISPDocsNavigation
 using .EdaSupport
 
 @testset "Markdown table rendering" begin
-    rendered = markdown_table(DataFrame(Label = ["alpha", "beta"], Value = [1.0, 2.0]))
-    separator_cells = strip.(split(split(chomp(rendered.text), '\n')[2], '|'; keepempty = false))
+    rendered = markdown_table(DataFrame(Label=["alpha", "beta"], Value=[1.0, 2.0]))
+    separator_cells = strip.(split(split(chomp(rendered.text), '\n')[2], '|'; keepempty=false))
 
     @test length(separator_cells) == 2
     @test !endswith(separator_cells[1], ":")
     @test endswith(separator_cells[2], ":")
     @test occursin("alpha", rendered.text)
 
-    currency = markdown_table(DataFrame(Label = ["Cost ($/MW)"], Value = [2.0]))
+    currency = markdown_table(DataFrame(Label=["Cost (\$/MW)"], Value=[2.0]))
     @test occursin(raw"\$", currency.text)
 
     missing_numeric = markdown_table(
-        DataFrame(Label = ["alpha", "beta"], Value = Union{Missing, Float64}[1.0, missing]),
+        DataFrame(Label=["alpha", "beta"], Value=Union{Missing,Float64}[1.0, missing]),
     )
-    missing_separator = strip.(split(split(chomp(missing_numeric.text), '\n')[2], '|'; keepempty = false))
+    missing_separator = strip.(split(split(chomp(missing_numeric.text), '\n')[2], '|'; keepempty=false))
     @test endswith(missing_separator[2], ":")
 
-    empty_typed = markdown_table(DataFrame(Label = String[], Value = Float64[]))
-    empty_separator = strip.(split(split(chomp(empty_typed.text), '\n')[2], '|'; keepempty = false))
+    empty_typed = markdown_table(DataFrame(Label=String[], Value=Float64[]))
+    empty_separator = strip.(split(split(chomp(empty_typed.text), '\n')[2], '|'; keepempty=false))
     @test !endswith(empty_separator[1], ":")
     @test endswith(empty_separator[2], ":")
 
-    mixed_any = markdown_table(DataFrame(Mixed = Any[1, "two"], Value = Any[1, 2]))
-    mixed_separator = strip.(split(split(chomp(mixed_any.text), '\n')[2], '|'; keepempty = false))
+    mixed_any = markdown_table(DataFrame(Mixed=Any[1, "two"], Value=Any[1, 2]))
+    mixed_separator = strip.(split(split(chomp(mixed_any.text), '\n')[2], '|'; keepempty=false))
     @test !endswith(mixed_separator[1], ":")
     @test endswith(mixed_separator[2], ":")
 
     overridden = markdown_table(
-        DataFrame(Label = ["alpha"], Value = [1.0]);
-        alignment = [:r, :l],
+        DataFrame(Label=["alpha"], Value=[1.0]);
+        alignment=[:r, :l],
     )
-    overridden_separator = strip.(split(split(chomp(overridden.text), '\n')[2], '|'; keepempty = false))
+    overridden_separator = strip.(split(split(chomp(overridden.text), '\n')[2], '|'; keepempty=false))
     @test endswith(overridden_separator[1], ":")
     @test !endswith(overridden_separator[2], ":")
 
-    multiline = markdown_table(DataFrame(Label = ["alpha\nbeta"], Value = [1]))
+    multiline = markdown_table(DataFrame(Label=["alpha\nbeta"], Value=[1]))
     @test occursin("alpha beta", multiline.text)
     @test !occursin("alpha\nbeta", multiline.text)
 
@@ -56,7 +56,7 @@ using .EdaSupport
     @test occursin("Metric", metrics.text)
     @test occursin("Coverage (%)", metrics.text)
 
-    table_interface = markdown_table((Label = ["alpha"], Value = [1.0]))
+    table_interface = markdown_table((Label=["alpha"], Value=[1.0]))
     @test occursin("alpha", table_interface.text)
 end
 
@@ -125,17 +125,17 @@ end
 function fixture_page(
     ;
     id,
-    title = "Fixture $(id)",
-    kind = "reference",
-    track = "isp2024",
-    editions = ["2024"],
-    data_layer = "source-data",
-    source = "literate/fixture/$(id).jl",
-    output = "generated/fixture/$(id).md",
-    status = "published",
-    nav_order = 10,
-    snapshot = false,
-    data_requirements = nothing,
+    title="Fixture $(id)",
+    kind="reference",
+    track="isp2024",
+    editions=["2024"],
+    data_layer="source-data",
+    source="literate/fixture/$(id).jl",
+    output="generated/fixture/$(id).md",
+    status="published",
+    nav_order=10,
+    snapshot=false,
+    data_requirements=nothing,
 )
     edition_values = join(repr.(editions), ", ")
     requirement_line = data_requirements === nothing ? "" : "\ndata_requirements = $(data_requirements)"
@@ -156,7 +156,7 @@ function fixture_page(
     return (; id, source, output, status, block)
 end
 
-function with_registry_fixture(callback::Function, pages; generated_outputs = String[])
+function with_registry_fixture(callback::Function, pages; generated_outputs=String[])
     mktempdir() do repo_root
         docs_dir = joinpath(repo_root, "docs")
         registry_path = joinpath(docs_dir, "page-registry.toml")
@@ -181,18 +181,18 @@ end
 
 function preflight_page(requirements)
     return PageSpec(
-        id = "preflight-page",
-        title = "Preflight fixture",
-        kind = "reference",
-        track = "isp2024",
-        editions = ["2024"],
-        data_layer = "source-data",
-        source = "literate/fixture/preflight.jl",
-        output = "generated/fixture/preflight.md",
-        status = "published",
-        nav_order = 10,
-        snapshot = false,
-        data_requirements = requirements,
+        id="preflight-page",
+        title="Preflight fixture",
+        kind="reference",
+        track="isp2024",
+        editions=["2024"],
+        data_layer="source-data",
+        source="literate/fixture/preflight.jl",
+        output="generated/fixture/preflight.md",
+        status="published",
+        nav_order=10,
+        snapshot=false,
+        data_requirements=requirements,
     )
 end
 
@@ -202,21 +202,21 @@ function renderer_page(
     track,
     editions,
     status,
-    kind = "reference",
-    nav_order = 10,
+    kind="reference",
+    nav_order=10,
 )
     return PageSpec(
-        id = id,
-        title = "Renderer $(id)",
-        kind = kind,
-        track = track,
-        editions = editions,
-        data_layer = "source-data",
-        source = "literate/fixture/$(id).jl",
-        output = "generated/fixture/$(id).md",
-        status = status,
-        nav_order = nav_order,
-        snapshot = false,
+        id=id,
+        title="Renderer $(id)",
+        kind=kind,
+        track=track,
+        editions=editions,
+        data_layer="source-data",
+        source="literate/fixture/$(id).jl",
+        output="generated/fixture/$(id).md",
+        status=status,
+        nav_order=nav_order,
+        snapshot=false,
     )
 end
 
@@ -248,13 +248,13 @@ end
 
 @testset "PISP documentation page registry" begin
     @testset "status semantics and published generated outputs" begin
-        published = fixture_page(id = "published", nav_order = 10)
-        draft = fixture_page(id = "draft", status = "draft", nav_order = 20)
-        archived = fixture_page(id = "archived", status = "archived", nav_order = 10)
+        published = fixture_page(id="published", nav_order=10)
+        draft = fixture_page(id="draft", status="draft", nav_order=20)
+        archived = fixture_page(id="archived", status="archived", nav_order=10)
         pages = [published, draft, archived]
 
-        with_registry_fixture(pages; generated_outputs = [published.output]) do registry_path, _
-            loaded = load_page_registry(registry_path; require_published_outputs = true)
+        with_registry_fixture(pages; generated_outputs=[published.output]) do registry_path, _
+            loaded = load_page_registry(registry_path; require_published_outputs=true)
             by_id = Dict(page.id => page for page in loaded)
 
             @test is_published(by_id["published"])
@@ -269,42 +269,42 @@ end
         with_registry_fixture([published]) do registry_path, _
             @test_throws ErrorException load_page_registry(
                 registry_path;
-                require_published_outputs = true,
+                require_published_outputs=true,
             )
         end
 
         with_registry_fixture([draft]) do registry_path, _
-            loaded = load_page_registry(registry_path; require_published_outputs = true)
+            loaded = load_page_registry(registry_path; require_published_outputs=true)
             @test only(loaded).status == "draft"
         end
     end
 
     @testset "track and edition rules" begin
-        shared = fixture_page(id = "shared", track = "shared", editions = String[])
-        isp2024 = fixture_page(id = "isp2024", track = "isp2024", editions = ["2024"])
-        isp2026 = fixture_page(id = "isp2026", track = "isp2026", editions = ["2026"])
+        shared = fixture_page(id="shared", track="shared", editions=String[])
+        isp2024 = fixture_page(id="isp2024", track="isp2024", editions=["2024"])
+        isp2026 = fixture_page(id="isp2026", track="isp2026", editions=["2026"])
         comparison = fixture_page(
-            id = "comparison",
-            track = "comparison",
-            editions = ["2024", "2026"],
+            id="comparison",
+            track="comparison",
+            editions=["2024", "2026"],
         )
         valid_pages = [shared, isp2024, isp2026, comparison]
 
-        with_registry_fixture(valid_pages; generated_outputs = [page.output for page in valid_pages]) do registry_path, _
-            loaded = load_page_registry(registry_path; require_published_outputs = true)
+        with_registry_fixture(valid_pages; generated_outputs=[page.output for page in valid_pages]) do registry_path, _
+            loaded = load_page_registry(registry_path; require_published_outputs=true)
             @test length(loaded) == 4
         end
 
         invalid_pages = [
-            fixture_page(id = "unknown-track", track = "unsupported", editions = String[]),
-            fixture_page(id = "wrong-2024", track = "isp2024", editions = ["2026"]),
-            fixture_page(id = "wrong-2026", track = "isp2026", editions = ["2024"]),
-            fixture_page(id = "one-edition-comparison", track = "comparison", editions = ["2024"]),
-            fixture_page(id = "unknown-edition", track = "shared", editions = ["2030"]),
+            fixture_page(id="unknown-track", track="unsupported", editions=String[]),
+            fixture_page(id="wrong-2024", track="isp2024", editions=["2026"]),
+            fixture_page(id="wrong-2026", track="isp2026", editions=["2024"]),
+            fixture_page(id="one-edition-comparison", track="comparison", editions=["2024"]),
+            fixture_page(id="unknown-edition", track="shared", editions=["2030"]),
             fixture_page(
-                id = "duplicate-editions",
-                track = "comparison",
-                editions = ["2024", "2024"],
+                id="duplicate-editions",
+                track="comparison",
+                editions=["2024", "2024"],
             ),
         ]
 
@@ -316,14 +316,14 @@ end
     end
 
     @testset "navigation positions are scoped to track and kind" begin
-        first_page = fixture_page(id = "first", nav_order = 10)
-        duplicate_page = fixture_page(id = "duplicate", nav_order = 10)
+        first_page = fixture_page(id="first", nav_order=10)
+        duplicate_page = fixture_page(id="duplicate", nav_order=10)
         with_registry_fixture([first_page, duplicate_page]) do registry_path, _
             @test_throws ErrorException load_page_registry(registry_path)
         end
 
-        isp2024 = fixture_page(id = "isp2024-position", track = "isp2024", editions = ["2024"])
-        isp2026 = fixture_page(id = "isp2026-position", track = "isp2026", editions = ["2026"])
+        isp2024 = fixture_page(id="isp2024-position", track="isp2024", editions=["2024"])
+        isp2026 = fixture_page(id="isp2026-position", track="isp2026", editions=["2026"])
         with_registry_fixture([isp2024, isp2026]) do registry_path, _
             loaded = load_page_registry(registry_path)
             @test length(loaded) == 2
@@ -332,8 +332,8 @@ end
 
     @testset "typed data requirement parsing" begin
         valid_repo_requirement = fixture_page(
-            id = "valid-repo-requirement",
-            data_requirements = "[{ root = \"repo\", path = \"README.md\", type = \"file\" }]",
+            id="valid-repo-requirement",
+            data_requirements="[{ root = \"repo\", path = \"README.md\", type = \"file\" }]",
         )
         with_registry_fixture([valid_repo_requirement]) do registry_path, _
             loaded = load_page_registry(registry_path)
@@ -355,7 +355,7 @@ end
         ]
 
         for (index, requirement) in enumerate(invalid_requirements)
-            page = fixture_page(id = "invalid-requirement-$(index)", data_requirements = requirement)
+            page = fixture_page(id="invalid-requirement-$(index)", data_requirements=requirement)
             with_registry_fixture([page]) do registry_path, _
                 @test_throws ErrorException load_page_registry(registry_path)
             end
@@ -364,18 +364,18 @@ end
 
     @testset "data requirement preflight types and roots" begin
         fixture = fixture_page(
-            id = "preflight-registry-page",
-            data_requirements = """
-            [
-                { root = \"repo\", path = \"repo-file.txt\", type = \"file\" },
-                { root = \"repo\", path = \"repo-directory\", type = \"directory\" },
-                { root = \"repo\", path = \"repo-file.txt\", type = \"path\" },
-                { root = \"download\", edition = \"2024\", path = \"download-file.txt\", type = \"file\" },
-                { root = \"download\", edition = \"2024\", path = \"download-directory\", type = \"directory\" },
-                { root = \"output\", edition = \"2024\", path = \"output-file.txt\", type = \"path\" },
-                { root = \"output\", edition = \"2024\", path = \"output-directory\", type = \"path\" },
-            ]
-            """,
+            id="preflight-registry-page",
+            data_requirements="""
+          [
+              { root = \"repo\", path = \"repo-file.txt\", type = \"file\" },
+              { root = \"repo\", path = \"repo-directory\", type = \"directory\" },
+              { root = \"repo\", path = \"repo-file.txt\", type = \"path\" },
+              { root = \"download\", edition = \"2024\", path = \"download-file.txt\", type = \"file\" },
+              { root = \"download\", edition = \"2024\", path = \"download-directory\", type = \"directory\" },
+              { root = \"output\", edition = \"2024\", path = \"output-file.txt\", type = \"path\" },
+              { root = \"output\", edition = \"2024\", path = \"output-directory\", type = \"path\" },
+          ]
+          """,
         )
 
         with_registry_fixture([fixture]) do registry_path, repo_root
@@ -393,7 +393,7 @@ end
             resolved = validate_data_requirements(
                 page;
                 repo_root,
-                profile_for = edition -> profiles[edition],
+                profile_for=edition -> profiles[edition],
             )
             @test length(resolved) == 7
             @test all(ispath, resolved)
@@ -404,11 +404,11 @@ end
             @test_throws ErrorException validate_data_requirements(
                 missing_download;
                 repo_root,
-                profile_for = edition -> profiles[edition],
+                profile_for=edition -> profiles[edition],
             )
 
             missing_download_root = Dict(
-                "2024" => (; download_root = joinpath(repo_root, "missing-download"), output_root),
+                "2024" => (; download_root=joinpath(repo_root, "missing-download"), output_root),
             )
             download_requirement = preflight_page([
                 DataRequirement("download", "2024", "download-file.txt", "file"),
@@ -416,17 +416,17 @@ end
             @test_throws ErrorException validate_data_requirements(
                 download_requirement;
                 repo_root,
-                profile_for = edition -> missing_download_root[edition],
+                profile_for=edition -> missing_download_root[edition],
             )
 
-            no_output_root = Dict("2024" => (; download_root, output_root = nothing))
+            no_output_root = Dict("2024" => (; download_root, output_root=nothing))
             output_requirement = preflight_page([
                 DataRequirement("output", "2024", "output-file.txt", "file"),
             ])
             @test_throws ErrorException validate_data_requirements(
                 output_requirement;
                 repo_root,
-                profile_for = edition -> no_output_root[edition],
+                profile_for=edition -> no_output_root[edition],
             )
 
             wrong_directory_type = preflight_page([
@@ -435,7 +435,7 @@ end
             @test_throws ErrorException validate_data_requirements(
                 wrong_directory_type;
                 repo_root,
-                profile_for = edition -> profiles[edition],
+                profile_for=edition -> profiles[edition],
             )
 
             wrong_file_type = preflight_page([
@@ -444,7 +444,7 @@ end
             @test_throws ErrorException validate_data_requirements(
                 wrong_file_type;
                 repo_root,
-                profile_for = edition -> profiles[edition],
+                profile_for=edition -> profiles[edition],
             )
         end
     end
@@ -452,30 +452,30 @@ end
     @testset "renderer selection respects status and track" begin
         pages = [
             renderer_page(
-                id = "shared-published",
-                track = "shared",
-                editions = String[],
-                status = "published",
+                id="shared-published",
+                track="shared",
+                editions=String[],
+                status="published",
             ),
             renderer_page(
-                id = "isp2024-published",
-                track = "isp2024",
-                editions = ["2024"],
-                status = "published",
+                id="isp2024-published",
+                track="isp2024",
+                editions=["2024"],
+                status="published",
             ),
             renderer_page(
-                id = "isp2024-draft",
-                track = "isp2024",
-                editions = ["2024"],
-                status = "draft",
-                nav_order = 20,
+                id="isp2024-draft",
+                track="isp2024",
+                editions=["2024"],
+                status="draft",
+                nav_order=20,
             ),
             renderer_page(
-                id = "isp2024-archived",
-                track = "isp2024",
-                editions = ["2024"],
-                status = "archived",
-                nav_order = 30,
+                id="isp2024-archived",
+                track="isp2024",
+                editions=["2024"],
+                status="archived",
+                nav_order=30,
             ),
         ]
 
@@ -534,53 +534,53 @@ end
     @testset "edition navigation from published registry pages" begin
         pages = [
             renderer_page(
-                id = "isp2024-reference-later",
-                track = "isp2024",
-                editions = ["2024"],
-                status = "published",
-                nav_order = 20,
+                id="isp2024-reference-later",
+                track="isp2024",
+                editions=["2024"],
+                status="published",
+                nav_order=20,
             ),
             renderer_page(
-                id = "isp2024-reference-first",
-                track = "isp2024",
-                editions = ["2024"],
-                status = "published",
-                nav_order = 10,
+                id="isp2024-reference-first",
+                track="isp2024",
+                editions=["2024"],
+                status="published",
+                nav_order=10,
             ),
             renderer_page(
-                id = "isp2024-tutorial",
-                track = "isp2024",
-                editions = ["2024"],
-                status = "published",
-                kind = "tutorial",
+                id="isp2024-tutorial",
+                track="isp2024",
+                editions=["2024"],
+                status="published",
+                kind="tutorial",
             ),
             renderer_page(
-                id = "isp2024-validation",
-                track = "isp2024",
-                editions = ["2024"],
-                status = "published",
-                kind = "validation",
+                id="isp2024-validation",
+                track="isp2024",
+                editions=["2024"],
+                status="published",
+                kind="validation",
             ),
             renderer_page(
-                id = "isp2024-analysis",
-                track = "isp2024",
-                editions = ["2024"],
-                status = "published",
-                kind = "analysis",
+                id="isp2024-analysis",
+                track="isp2024",
+                editions=["2024"],
+                status="published",
+                kind="analysis",
             ),
             renderer_page(
-                id = "isp2024-draft",
-                track = "isp2024",
-                editions = ["2024"],
-                status = "draft",
-                nav_order = 30,
+                id="isp2024-draft",
+                track="isp2024",
+                editions=["2024"],
+                status="draft",
+                nav_order=30,
             ),
             renderer_page(
-                id = "isp2024-archived",
-                track = "isp2024",
-                editions = ["2024"],
-                status = "archived",
-                nav_order = 40,
+                id="isp2024-archived",
+                track="isp2024",
+                editions=["2024"],
+                status="archived",
+                nav_order=40,
             ),
         ]
         navigation = registry_navigation(pages)
@@ -588,11 +588,11 @@ end
         @test first.(navigation) == [
             "Home",
             "Quickstart",
-            "Contributing",
             "Understand PISP and ISP data",
             "ISP 2024",
             "ISP 2026",
             "Compare ISP 2024 and ISP 2026",
+            "Contributing",
             "API Reference",
         ]
 
@@ -645,11 +645,11 @@ end
         @test !occursin("archived", repr(isp2024_navigation))
 
         isp2026_navigation = navigation_by_title["ISP 2026"]
-        @test isp2026_navigation == Any["Overview" => "editions/isp2026.md"]
+        @test isp2026_navigation == Any["Overview"=>"editions/isp2026.md"]
 
         comparison_navigation = navigation_by_title["Compare ISP 2024 and ISP 2026"]
         @test comparison_navigation == Any[
-            "Overview and comparison rules" => "editions/comparison.md",
+            "Overview and comparison rules"=>"editions/comparison.md",
         ]
     end
 end

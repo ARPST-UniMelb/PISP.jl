@@ -26,11 +26,11 @@
         calls = Ref(0)
 
         paths = downloader.download_isp_files([target];
-                                               outdir = outdir,
-                                               download_function = function (url, path; headers)
-                                                   calls[] += 1
-                                                   error("an existing file should be skipped")
-                                               end)
+            outdir=outdir,
+            download_function=function (url, path; headers)
+                calls[] += 1
+                error("an existing file should be skipped")
+            end)
 
         @test paths == [destination]
         @test calls[] == 0
@@ -42,13 +42,13 @@
         calls = Ref(0)
 
         paths = downloader.download_isp_files([target];
-                                               outdir = outdir,
-                                               overwrite = true,
-                                               download_function = function (url, path; headers)
-                                                   calls[] += 1
-                                                   write(path, "replacement")
-                                                   return path
-                                               end)
+            outdir=outdir,
+            overwrite=true,
+            download_function=function (url, path; headers)
+                calls[] += 1
+                write(path, "replacement")
+                return path
+            end)
 
         @test paths == [destination]
         @test calls[] == 1
@@ -59,8 +59,8 @@
         target = targets[2]
 
         @test_throws ErrorException downloader.download_isp_files([target];
-                                                                     outdir = outdir,
-                                                                     download_function = (url, path; headers) -> error("request failed"))
+            outdir=outdir,
+            download_function=(url, path; headers) -> error("request failed"))
         @test isempty(readdir(outdir))
     end
 end

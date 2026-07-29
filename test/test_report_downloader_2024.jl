@@ -31,7 +31,7 @@
             write(joinpath(outdir, target.filename), "%PDF-1.7\nexisting")
         end
 
-        @test PISP.download_ISP24_reports(outdir = outdir) === nothing
+        @test PISP.download_ISP24_reports(outdir=outdir) === nothing
     end
 
     mktempdir() do outdir
@@ -42,11 +42,11 @@
         calls = Ref(0)
 
         result = core.download_report_targets([target];
-                                                            outdir = outdir,
-                                                            download_function = function (url, path; headers)
-                                                                calls[] += 1
-                                                                error("a valid existing PDF should be skipped")
-                                                            end)
+            outdir=outdir,
+            download_function=function (url, path; headers)
+                calls[] += 1
+                error("a valid existing PDF should be skipped")
+            end)
 
         @test result.paths == [destination]
         @test isempty(result.failures)
@@ -63,13 +63,13 @@
         received_headers = Ref{Any}(nothing)
 
         result = core.download_report_targets([target];
-                                                            outdir = outdir,
-                                                            download_function = function (url, path; headers)
-                                                                calls[] += 1
-                                                                received_headers[] = headers
-                                                                write(path, "%PDF-1.7\nreplacement")
-                                                                return path
-                                                            end)
+            outdir=outdir,
+            download_function=function (url, path; headers)
+                calls[] += 1
+                received_headers[] = headers
+                write(path, "%PDF-1.7\nreplacement")
+                return path
+            end)
 
         @test result.paths == [destination]
         @test isempty(result.failures)
@@ -87,9 +87,9 @@
         write(destination, existing)
 
         result = core.download_report_targets([target];
-                                                            outdir = outdir,
-                                                            overwrite = true,
-                                                            download_function = (url, path; headers) -> write(path, "not a PDF"))
+            outdir=outdir,
+            overwrite=true,
+            download_function=(url, path; headers) -> write(path, "not a PDF"))
 
         @test isempty(result.paths)
         @test length(result.failures) == 1
@@ -102,8 +102,8 @@
     mktempdir() do outdir
         target = targets[4]
         result = core.download_report_targets([target];
-                                                            outdir = outdir,
-                                                            download_function = (url, path; headers) -> error("request failed"))
+            outdir=outdir,
+            download_function=(url, path; headers) -> error("request failed"))
 
         @test isempty(result.paths)
         @test length(result.failures) == 1
@@ -120,13 +120,13 @@
         calls = Ref(0)
 
         result = core.download_report_targets([target];
-                                                            outdir = outdir,
-                                                            overwrite = true,
-                                                            download_function = function (url, path; headers)
-                                                                calls[] += 1
-                                                                write(path, "%PDF-1.7\nrefreshed")
-                                                                return path
-                                                            end)
+            outdir=outdir,
+            overwrite=true,
+            download_function=function (url, path; headers)
+                calls[] += 1
+                write(path, "%PDF-1.7\nrefreshed")
+                return path
+            end)
 
         @test result.paths == [destination]
         @test isempty(result.failures)
@@ -140,12 +140,12 @@
         successful_destination = joinpath(outdir, successful_target.filename)
 
         result = core.download_report_targets([failed_target, successful_target];
-                                                            outdir = outdir,
-                                                            download_function = function (url, path; headers)
-                                                                url == failed_target.url && error("temporary upstream failure")
-                                                                write(path, "%PDF-1.7\nlater target")
-                                                                return path
-                                                            end)
+            outdir=outdir,
+            download_function=function (url, path; headers)
+                url == failed_target.url && error("temporary upstream failure")
+                write(path, "%PDF-1.7\nlater target")
+                return path
+            end)
 
         @test result.paths == [successful_destination]
         @test length(result.failures) == 1

@@ -10,8 +10,8 @@ function local_material_state(profile)
 end
 
 @testset "source availability helper fixtures" begin
-    function fixture_roots(dir, edition; report = true, download = true)
-        profiles = source_availability_profiles(dir; env = Dict{String, String}())
+    function fixture_roots(dir, edition; report=true, download=true)
+        profiles = source_availability_profiles(dir; env=Dict{String,String}())
         profile = only(filter(p -> p.edition == edition, profiles))
         report && mkpath(profile.report_root)
         download && mkpath(profile.download_root)
@@ -35,13 +35,13 @@ end
     end
 
     mktempdir() do dir
-        profiles = source_availability_profiles(dir; env = Dict{String, String}())
+        profiles = source_availability_profiles(dir; env=Dict{String,String}())
         @test all(profile -> inspect_edition(profile).state == :absent, profiles)
         @test all(profile -> local_material_state(profile) == :skip, profiles)
     end
 
     mktempdir() do dir
-        profile = fixture_roots(dir, "2024"; report = true, download = false)
+        profile = fixture_roots(dir, "2024"; report=true, download=false)
         @test inspect_edition(profile).state == :incomplete
         @test_throws ErrorException local_material_state(profile)
     end
@@ -72,7 +72,7 @@ end
     mktempdir() do dir
         override_report = joinpath(dir, "reports-override")
         env = Dict("PISP_ISP2024_REPORT_ROOT" => override_report)
-        profile = only(filter(p -> p.edition == "2024", source_availability_profiles(dir; env = env)))
+        profile = only(filter(p -> p.edition == "2024", source_availability_profiles(dir; env=env)))
         @test profile.report_root == normpath(abspath(override_report))
         @test profile.report_root_source == :environment
         @test profile.download_root_source == :default
