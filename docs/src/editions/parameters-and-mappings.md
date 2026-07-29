@@ -18,10 +18,10 @@ The [supported editions](supported-editions.md) page records that acquisition an
 
 | Mapping or parameter layer | ISP 2024 PISP evidence |
 | --- | --- |
-| Scenario identifiers and source labels | Scenario IDs `1`, `2`, and `3` identify Progressive Change, Step Change, and Green Energy Exports. Package mappings connect those names to hydro-inflow and demand-trace source labels. |
+| Scenario identifiers and source labels | Scenario IDs `1`, `2`, and `3` identify Progressive Change, Step Change, and Green Energy Exports. The problem-table and build-out paths use those IDs, while package mappings connect the names to hydro-inflow and demand-trace source labels. |
 | Areas and bus aliases | Twelve package bus aliases (`NQ`, `CQ`, `GG`, `SQ`, `NNSW`, `CNSW`, `SNW`, `SNSW`, `VIC`, `TAS`, `CSA`, and `SESA`) map to the five model areas QLD, NSW, VIC, TAS, and SA. The reference records each display name, area ID, and representative coordinates. |
 | REZ mapping | The 2024 parser links Renewable Energy Zone IDs and names to ISP sub-regions and uses those relationships when deriving renewable capacity and schedule inputs. |
-| Weather years and trace conventions | `PISP.WEATHER_YEARS_ISP` maps each 2024 planning financial-year interval to a historical weather year for composite trace `4006`; repeated weather years are part of that release-specific convention. |
+| Weather years and trace conventions | `PISP.ISPdatabuilder.DATE_RANGES_REFYEARS` maps each 2024 planning financial-year interval to a historical weather year and is consumed when the composite solar, wind, and demand trace `4006` files are built; repeated weather years are part of that release-specific convention. |
 | Technology and asset classifications | Package parameter files classify generation, hydro, storage, and build-out inputs. Generated generator data exposes `fuel` and `tech` classifications; the mapping layer also supplies technology-specific source and trace conventions. |
 | Source-sheet dependencies | The solar and wind routines read `Existing Gen Data Summary` (`B11:K297`) for operating-capacity figures and `Renewable Energy Zones` (`B7:G50`) for REZ-to-bus assignment in the 2024 ISP Inputs and Assumptions workbook. They also use release-specific outlook material for capacity development. |
 | Aliases and hard-coded values | Scenario, hydro, demand, bus, area, generator, storage, trace-file, retirement, and build-out mappings are package-defined modelling inputs. They include aliases and constants that reconcile source names with PISP identifiers. |

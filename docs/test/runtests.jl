@@ -112,7 +112,8 @@ end
     for required in (
         "`1`, `2`, and `3`",
         "Twelve package bus aliases",
-        "PISP.WEATHER_YEARS_ISP",
+        "PISP.ISPdatabuilder.DATE_RANGES_REFYEARS",
+        "problem-table and build-out paths",
         "B11:K297",
         "B7:G50",
         "Report-defined mappings",
@@ -134,6 +135,20 @@ end
     @test occursin("ending year", generated_mappings)
     @test occursin("2024-isp-plexos-model-instructions.pdf#page=5", generated_mappings)
     @test occursin("2024-isp-plexos-model-instructions.pdf#page=6", generated_mappings)
+    @test occursin("4006 demand builder", generated_mappings)
+    @test occursin("not an inventory of every constant", generated_mappings)
+    @test occursin("Reference Year and VRE Reference Year", generated_mappings)
+    @test occursin("PISP.ISPdatabuilder.DATE_RANGES_REFYEARS", generated_mappings)
+    @test !occursin("PISP.WEATHER_YEARS_ISP", generated_mappings)
+
+    generated_4006_mapping = read_doc(
+        "generated",
+        "isp2024",
+        "analyses",
+        "reference-trace-4006-composite-mapping.md",
+    )
+    @test occursin("PISP.ISPdatabuilder.DATE_RANGES_REFYEARS", generated_4006_mapping)
+    @test !occursin("PISP.WEATHER_YEARS_ISP", generated_4006_mapping)
 
     buildout_defaults = read_doc(
         "generated",
