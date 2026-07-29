@@ -851,6 +851,24 @@ end
         orphan_outputs = Set(flatten_nav_outputs(registry_navigation(orphan_pages)))
         @test !(orphan_pages[1].output in orphan_outputs)
 
+        # Sanity-check the actual original failure mode: `registry_navigation`
+        # has no dynamic handler for the `shared` track at all (unlike
+        # `isp2024`/`isp2026`/`comparison`, which go through `track_navigation`
+        # or `comparison_navigation`). Only one `shared` page is placed, by a
+        # hand-written literal entry in the "Understand" tree; any other
+        # `shared` page is unreachable until it also gets a literal entry.
+        unhandled_track_pages = [
+            renderer_page(
+                id="future-shared-page",
+                track="shared",
+                editions=["2024", "2026"],
+                status="published",
+                kind="reference",
+            ),
+        ]
+        unhandled_track_outputs = Set(flatten_nav_outputs(registry_navigation(unhandled_track_pages)))
+        @test !(unhandled_track_pages[1].output in unhandled_track_outputs)
+
         # The real registry: every published page's output must appear
         # somewhere in the rendered navigation tree.
         real_pages = load_page_registry(
