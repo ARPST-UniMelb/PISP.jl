@@ -1,5 +1,7 @@
 # Assumptions and scope
 
+The PISP dataset layer requires explicit interpretation limits, modelling assumptions, and checks before downstream use.
+
 These assumptions apply to PISP's implemented ISP 2024 dataset-construction workflow.
 [Supported ISP editions](editions/supported-editions.md) defines the separate ISP 2026 source-acquisition and integration boundary.
 

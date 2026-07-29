@@ -36,30 +36,6 @@ include(joinpath(REPO_ROOT, "docs", "download_layout.jl"))
 using .PISPDocsEditionProfiles: edition_profiles
 using .PISPDocsDownloadLayout: inspect_download_layout
 
-const DOWNLOAD_LAYOUTS = [
-    inspect_download_layout(profile.label, profile.download_root)
-    for profile in edition_profiles(REPO_ROOT)
-]
-````
-
-```@raw html
-</details>
-```
-
-## Observed outlook directories and source archives
-
-The inventory is read from the configured edition roots. The outlook column
-contains the top-level extracted workbook directories after separating
-`Auxiliary`, `Traces`, `zip`, manifest directories, and directories ending in
-`ISP Model` into their own source families. The archive column lists direct
-ZIP files under `pisp-downloads/zip/`; trace archives stored below
-`zip/Traces/` remain part of the trace source family.
-
-```@raw html
-<details class="source-code"><summary>Show source code</summary>
-```
-
-````julia
 struct MarkdownTable
     text::String
 end
@@ -80,6 +56,30 @@ function markdown_table(headers, rows)
     end
     return MarkdownTable(join(lines, "\n"))
 end
+````
+
+```@raw html
+</details>
+```
+
+## Observed outlook directories and source archives
+
+The inventory is read from the configured edition roots. The outlook column
+contains the top-level extracted workbook directories after separating
+`Auxiliary`, `Traces`, `zip`, manifest directories, and directories ending in
+`ISP Model` into their own source families. The archive column lists direct
+ZIP files under `pisp-downloads/zip/`; trace archives stored below
+`zip/Traces/` remain part of the trace source family.
+
+```@raw html
+<details class="source-code"><summary>Show source code</summary>
+```
+
+````julia
+download_layouts = [
+    inspect_download_layout(profile.label, profile.download_root)
+    for profile in edition_profiles(REPO_ROOT)
+]
 
 layout_rows = [
     Any[
@@ -87,7 +87,7 @@ layout_rows = [
         markdown_items(layout.outlook_directories),
         markdown_items(layout.source_archives),
     ]
-    for layout in DOWNLOAD_LAYOUTS
+    for layout in download_layouts
 ]
 
 markdown_table(

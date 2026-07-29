@@ -17,7 +17,6 @@ source_profile = PISPDocsSourceAvailability.EditionProfile(
     report_root_source = :profile,
     download_root_source = :profile,
 )
-inspection = inspect_edition(source_profile)
 nothing #hide
 
 # ## What a trace means here
@@ -41,10 +40,12 @@ nothing #hide
 # expected download targets, and the local inventory records files present in
 # the roots supplied to this render.
 
+inspection = inspect_edition(source_profile)
+summary = source_availability_summary(source_profile)
+
 println("Edition: ISP 2026")
 println("Availability state in configured roots: ", inspection.state)
 println("Reports observed: ", count(o -> o.observed && o.requirement.class == :report, inspection.observations), "/10 configured report targets")
-summary = source_availability_summary(source_profile)
 println("Trace archive files observed under zip/Traces: ", join(summary.trace_archive_files, ", "))
 println("Trace directories observed: ", join(summary.trace_directories, ", "))
 println("Demand groups observed: ", join(summary.demand_group_paths, ", "))

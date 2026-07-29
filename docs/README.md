@@ -293,6 +293,15 @@ julia --project=docs docs/test_source_links.jl
 
 ## Adding or changing a registry-managed page
 
+### Literate page structure
+
+Use two complementary structures for executable documentation:
+
+1. **Setup block** — keep dependencies, edition-profile source selection, path configuration, and reusable helper definitions reader-visible near the start of the page. Add only a trailing `nothing #hide` to suppress the setup block's meaningless return value; do not hide the setup itself.
+2. **Section-local executable narrative** — keep each section's source selection, transformation, and rendered evidence together under that section's heading. Do not compute every table in one early hidden block for later headings to reference.
+
+`docs/literate/isp2024/validation/temperature_data_coverage.jl` is the local reference pattern.
+
 1. Choose the page's reader purpose, track, edition scope, and data layer.
 2. Add or update the Literate source and its registry entry together.
 3. Declare every direct local input through typed `data_requirements` instead of embedding untracked path assumptions in the renderer.

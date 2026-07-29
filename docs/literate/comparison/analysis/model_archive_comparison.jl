@@ -28,7 +28,8 @@ const ARCHIVES = Dict(
 
 all(isfile, values(ARCHIVES)) || error(
     "The comparison requires $(join(sort(collect(values(ARCHIVES))), ", ")).",
-);
+)
+nothing #hide
 
 # ## Method
 #
@@ -173,11 +174,6 @@ function inspect_archive(year, archive_path)
     return records
 end
 
-const RECORDS = reduce(
-    vcat,
-    (inspect_archive(year, ARCHIVES[year]) for year in EXPECTED_YEARS),
-)
-
 struct MarkdownTable
     text::String
 end
@@ -207,9 +203,50 @@ function markdown_table(headers, rows; alignment = fill(:left, length(headers)))
     return MarkdownTable(join(lines, "\n"))
 end
 
-records_for(year) = filter(record -> record.year == year, RECORDS)
+records_for(year) = inspect_archive(year, ARCHIVES[year])
 unique_sorted(values) = sort!(unique(collect(values)))
-mib(bytes) = bytes / 1024^2;
+mib(bytes) = bytes / 1024^2
+
+function trace_counts_by_scenario(records)
+    counts = Dict{Tuple{String, String}, Int}()
+    for record in records
+        record.family == "CSV trace" || continue
+        key = (record.scenario, something(record.category))
+        counts[key] = get(counts, key, 0) + 1
+    end
+    return counts
+end
+
+function files_per_scenario(records, category)
+    counts = trace_counts_by_scenario(records)
+    edition = only(unique(record.year for record in records))
+    observed = [
+        count
+        for ((_, observed_category), count) in counts
+        if observed_category == category
+    ]
+    isempty(observed) && return 0
+    length(unique(observed)) == 1 || error(
+        "Trace count for $category is inconsistent across ISP $edition scenarios",
+    )
+    return only(unique(observed))
+end
+
+humanise_category(category) = replace(
+    titlecase(replace(category, '_' => ' ')),
+    "Dnsp" => "DNSP",
+    "Pv" => "PV",
+    "Load Subtractor" => "Load subtractor",
+)
+
+function first_filename(records, category)
+    filenames = unique_sorted(
+        record.filename for record in records
+        if record.family == "CSV trace" && record.category == category
+    )
+    return isempty(filenames) ? "—" : "`$(first(filenames))`"
+end
+nothing #hide
 
 # ## Archive overview
 #
@@ -217,9 +254,10 @@ mib(bytes) = bytes / 1024^2;
 # file per scenario. The main structural difference is the amount and variety
 # of CSV material packaged beside those model files.
 
+archive_records = Dict(year => records_for(year) for year in EXPECTED_YEARS)
 archive_summary_rows = Vector{Any}[]
 for year in EXPECTED_YEARS
-    subset = records_for(year)
+    subset = archive_records[year]
     push!(
         archive_summary_rows,
         Any[
@@ -267,7 +305,9 @@ markdown_table(
 # and Accelerated Transition as a refinement of Green Energy Exports
 # ([p. 20](../../../../../data/2026/pisp-reports/2025-inputs-assumptions-and-scenarios-report.pdf#page=20)).
 
-const SCENARIO_MAPPING = [
+scenario_records_2024 = records_for(2024)
+scenario_records_2026 = records_for(2026)
+scenario_mapping = [
     (
         scenario_2024 = "Green Energy Exports",
         scenario_2026 = "Accelerated Transition",
@@ -288,16 +328,16 @@ const SCENARIO_MAPPING = [
     ),
 ]
 
-scenarios_2024 = unique_sorted(record.scenario for record in records_for(2024))
-scenarios_2026 = unique_sorted(record.scenario for record in records_for(2026))
-@assert sort([row.scenario_2024 for row in SCENARIO_MAPPING]) == scenarios_2024
-@assert sort([row.scenario_2026 for row in SCENARIO_MAPPING]) == scenarios_2026
+scenarios_2024 = unique_sorted(record.scenario for record in scenario_records_2024)
+scenarios_2026 = unique_sorted(record.scenario for record in scenario_records_2026)
+@assert sort([row.scenario_2024 for row in scenario_mapping]) == scenarios_2024
+@assert sort([row.scenario_2026 for row in scenario_mapping]) == scenarios_2026
 
 markdown_table(
     ["ISP 2024 scenario", "ISP 2026 scenario", "Relationship", "Evidence"],
     [
         Any[row.scenario_2024, row.scenario_2026, row.relationship, row.citation]
-        for row in SCENARIO_MAPPING
+        for row in scenario_mapping
     ],
 )
 
@@ -311,14 +351,15 @@ markdown_table(
 # separate `PLEXOS_Solverparam.xml` file in each scenario directory; the 2026
 # model ZIP has no separate XML file with that role.
 
+xml_records = vcat(records_for(2024), records_for(2026))
 xml_role_rows = Vector{Any}[]
 for role in ["PLEXOS model", "PLEXOS solver parameters"]
     push!(
         xml_role_rows,
         Any[
             role,
-            count(record -> record.family == "XML" && record.role == role && record.year == 2024, RECORDS),
-            count(record -> record.family == "XML" && record.role == role && record.year == 2026, RECORDS),
+            count(record -> record.family == "XML" && record.role == role && record.year == 2024, xml_records),
+            count(record -> record.family == "XML" && record.role == role && record.year == 2026, xml_records),
         ],
     )
 end
@@ -340,45 +381,17 @@ markdown_table(
 # and rooftop-PV families, expands hydro material, and includes three more
 # demand files per scenario. Load-subtractor counts remain unchanged.
 
-function trace_counts_by_scenario(year)
-    counts = Dict{Tuple{String, String}, Int}()
-    for record in records_for(year)
-        record.family == "CSV trace" || continue
-        key = (record.scenario, something(record.category))
-        counts[key] = get(counts, key, 0) + 1
-    end
-    return counts
-end
-
-function files_per_scenario(year, category)
-    counts = trace_counts_by_scenario(year)
-    observed = [
-        count
-        for ((_, observed_category), count) in counts
-        if observed_category == category
-    ]
-    isempty(observed) && return 0
-    length(unique(observed)) == 1 || error(
-        "Trace count for $category is inconsistent across ISP $year scenarios",
-    )
-    return only(unique(observed))
-end
-
-humanise_category(category) = replace(
-    titlecase(replace(category, '_' => ' ')),
-    "Dnsp" => "DNSP",
-    "Pv" => "PV",
-    "Load Subtractor" => "Load subtractor",
-)
-
+trace_records_2024 = records_for(2024)
+trace_records_2026 = records_for(2026)
+trace_records = vcat(trace_records_2024, trace_records_2026)
 trace_categories = unique_sorted(
-    record.category for record in RECORDS
+    record.category for record in trace_records
     if record.family == "CSV trace" && record.category !== nothing
 )
 trace_family_rows = Vector{Any}[]
 for category in trace_categories
-    count_2024 = files_per_scenario(2024, category)
-    count_2026 = files_per_scenario(2026, category)
+    count_2024 = files_per_scenario(trace_records_2024, category)
+    count_2026 = files_per_scenario(trace_records_2026, category)
     coverage = count_2024 > 0 && count_2026 > 0 ? "Both model ZIPs" :
         count_2024 > 0 ? "ISP 2024 model ZIP only" : "ISP 2026 model ZIP only"
     push!(
@@ -390,8 +403,8 @@ push!(
     trace_family_rows,
     Any[
         "Total",
-        sum(files_per_scenario(2024, category) for category in trace_categories),
-        sum(files_per_scenario(2026, category) for category in trace_categories),
+        sum(files_per_scenario(trace_records_2024, category) for category in trace_categories),
+        sum(files_per_scenario(trace_records_2026, category) for category in trace_categories),
         "—",
     ],
 )
@@ -408,17 +421,14 @@ markdown_table(
 # edition. They expose concrete parser differences without claiming that the
 # selected files contain equivalent data.
 
-function first_filename(year, category)
-    filenames = unique_sorted(
-        record.filename for record in records_for(year)
-        if record.family == "CSV trace" && record.category == category
-    )
-    return isempty(filenames) ? "—" : "`$(first(filenames))`"
-end
-
+filename_records = Dict(year => records_for(year) for year in EXPECTED_YEARS)
+filename_categories = unique_sorted(
+    record.category for records in values(filename_records) for record in records
+    if record.family == "CSV trace" && record.category !== nothing
+)
 filename_rows = Vector{Any}[]
-for category in trace_categories, year in EXPECTED_YEARS
-    filename = first_filename(year, category)
+for category in filename_categories, year in EXPECTED_YEARS
+    filename = first_filename(filename_records[year], category)
     filename == "—" && continue
     push!(filename_rows, Any[humanise_category(category), year, filename])
 end
@@ -452,14 +462,20 @@ markdown_table(
 # The next mapping stage can use this inventory to define explicit source-file,
 # scenario, trace-family, schema, and XML-reference crosswalks.
 
+# ## Verification
+#
+# These checks re-read both central directories and verify that each scenario
+# has one model XML file and that both requested editions were inspected.
+
+verification_records = vcat(records_for(2024), records_for(2026))
 model_xml_counts = Dict{Tuple{Int, String}, Int}()
-for record in RECORDS
+for record in verification_records
     record.family == "XML" && record.role == "PLEXOS model" || continue
     key = (record.year, record.scenario)
     model_xml_counts[key] = get(model_xml_counts, key, 0) + 1
 end
 @assert all(==(1), values(model_xml_counts))
-@assert Set(record.year for record in RECORDS) == Set(EXPECTED_YEARS)
+@assert Set(record.year for record in verification_records) == Set(EXPECTED_YEARS)
 @assert all(isfile, values(ARCHIVES))
 
 println("Validated archive discovery, scenario coverage, XML roles, and trace-family counts.")

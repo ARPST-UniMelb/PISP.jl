@@ -161,6 +161,42 @@ end
     end
 end
 
+@testset "Literate executable narrative structure" begin
+    read_literate(path...) = read(joinpath(TEST_DOCS_DIR, "literate", path...), String)
+    function position(needle, source)
+        match = findfirst(needle, source)
+        match === nothing && error("missing source marker: $needle")
+        return first(match)
+    end
+
+    layout = read_literate("shared", "reference", "pisp_downloads_layout.jl")
+    availability = read_literate("isp2026", "validation", "source_availability.jl")
+    archive_comparison = read_literate("comparison", "analysis", "model_archive_comparison.jl")
+
+    for source in (layout, availability, archive_comparison)
+        hidden_lines = filter(line -> occursin("#hide", line), split(source, '\n'))
+        @test !isempty(hidden_lines)
+        @test all(line -> strip(line) == "nothing #hide", hidden_lines)
+    end
+
+    @test position("download_layouts =", layout) >
+        position("# ## Observed outlook directories and source archives", layout)
+    @test position("inspection = inspect_edition", availability) >
+        position("# ## Report and archive observations", availability)
+
+    @test !occursin("const RECORDS", archive_comparison)
+    for (selection, heading) in (
+        ("archive_records =", "# ## Archive overview"),
+        ("scenario_records_2024 =", "# ## Scenario continuity"),
+        ("xml_records =", "# ## XML packaging"),
+        ("trace_records_2024 =", "# ## Trace families inside the model ZIPs"),
+        ("filename_records =", "# ## Representative filenames"),
+        ("verification_records =", "# ## Verification"),
+    )
+        @test position(selection, archive_comparison) > position(heading, archive_comparison)
+    end
+end
+
 @testset "Downloaded source layout filtering" begin
     mktempdir() do root
         for directory in (
@@ -269,6 +305,7 @@ function renderer_page(
     editions,
     status,
     kind="reference",
+    data_layer="source-data",
     nav_order=10,
 )
     return PageSpec(
@@ -277,7 +314,7 @@ function renderer_page(
         kind=kind,
         track=track,
         editions=editions,
-        data_layer="source-data",
+        data_layer=data_layer,
         source="literate/fixture/$(id).jl",
         output="generated/fixture/$(id).md",
         status=status,
@@ -648,6 +685,40 @@ end
                 status="archived",
                 nav_order=40,
             ),
+            renderer_page(
+                id="comparison-source-data",
+                track="comparison",
+                editions=["2024", "2026"],
+                status="published",
+                kind="analysis",
+                data_layer="source-data",
+                nav_order=20,
+            ),
+            renderer_page(
+                id="comparison-pisp-dataset",
+                track="comparison",
+                editions=["2024", "2026"],
+                status="published",
+                kind="reference",
+                data_layer="pisp-dataset",
+                nav_order=10,
+            ),
+            renderer_page(
+                id="comparison-package-workflow-draft",
+                track="comparison",
+                editions=["2024", "2026"],
+                status="draft",
+                data_layer="package-workflow",
+                nav_order=10,
+            ),
+            renderer_page(
+                id="comparison-cross-layer-archived",
+                track="comparison",
+                editions=["2024", "2026"],
+                status="archived",
+                data_layer="cross-layer",
+                nav_order=10,
+            ),
         ]
         navigation = registry_navigation(pages)
 
@@ -667,26 +738,37 @@ end
 
         shared_material = navigation_by_title["Understand PISP and ISP data"]
         @test first.(shared_material) == [
-            "Supported ISP editions",
-            "Domain concepts",
-            "Output data model",
-            "Assumptions and scope",
-            "What each ISP edition publishes",
-            "Downloaded source layout",
-            "Downloaded source inventory by edition",
-            "Trace families, schemas, and coverage",
-            "Parameters and mappings across editions",
+            "ISP source data",
+            "PISP transformation",
+            "PISP datasets",
         ]
-        @test last.(shared_material) == [
+        @test first.(last(shared_material[1])) == [
+            "Source material by edition",
+            "Trace families and source meaning",
+        ]
+        @test last.(last(shared_material[1])) == [
+            "editions/source-material.md",
+            "editions/trace-coverage.md",
+        ]
+        @test first.(last(shared_material[2])) == [
+            "Workflow support by edition",
+            "Source-to-dataset processing",
+            "Parameters, mappings, and constants",
+        ]
+        @test last.(last(shared_material[2])) == [
             "editions/supported-editions.md",
+            "editions/source-inventory.md",
+            "editions/parameters-and-mappings.md",
+        ]
+        @test first.(last(shared_material[3])) == [
+            "Assets, relationships, and schedules",
+            "Output tables, fields, and units",
+            "Dataset interpretation and study bounds",
+        ]
+        @test last.(last(shared_material[3])) == [
             "concepts.md",
             "editions/output-data-model.md",
             "assumptions.md",
-            "editions/source-material.md",
-            "generated/shared/reference/pisp-downloads-layout.md",
-            "editions/source-inventory.md",
-            "editions/trace-coverage.md",
-            "editions/parameters-and-mappings.md",
         ]
 
         isp2024_navigation = navigation_by_title["ISP 2024"]
@@ -718,6 +800,16 @@ end
         comparison_navigation = navigation_by_title["Compare ISP 2024 and ISP 2026"]
         @test comparison_navigation == Any[
             "Overview and comparison rules"=>"editions/comparison.md",
+            "ISP source data"=>Any[
+                "Renderer comparison-source-data"=>
+                    "generated/fixture/comparison-source-data.md",
+            ],
+            "PISP datasets"=>Any[
+                "Renderer comparison-pisp-dataset"=>
+                    "generated/fixture/comparison-pisp-dataset.md",
+            ],
         ]
+        @test !occursin("package-workflow-draft", repr(comparison_navigation))
+        @test !occursin("cross-layer-archived", repr(comparison_navigation))
     end
 end

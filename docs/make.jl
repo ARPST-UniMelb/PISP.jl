@@ -1,6 +1,7 @@
 # Documenter.jl site build for PISP.jl.
 #
-# A normal docs build publishes the Markdown already present under docs/src/. Literate regeneration is a separate maintainer step in docs/render_literate.jl so the site build does not require local AEMO or PISP output data.
+# A normal docs build publishes the Markdown already present under docs/src/.
+# Executable pages are regenerated through the separate maintainer command in docs/render_literate.jl, so the site build does not require local AEMO or PISP output data.
 
 using Documenter
 using PISP

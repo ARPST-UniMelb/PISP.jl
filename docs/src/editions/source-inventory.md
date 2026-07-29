@@ -1,16 +1,27 @@
-# Source inventory
+# Source-to-dataset processing
+
+The PISP transformation layer progresses from acquired source material through parsed and reconciled data to generated datasets.
 
 PISP keeps source material, parsed structures, and generated datasets as distinct layers.
 Keeping those layers separate makes it possible to distinguish an acquired file from a dataset that has been parsed, reconciled, and written by the package.
 
-| Workflow layer | ISP 2024 | ISP 2026 |
-| --- | --- | --- |
-| Source acquisition | The documented 2024 build has a configured download root and source workflow. | PISP.jl has download targets for selected source assets and report PDFs. |
-| Archive extraction | Integrated into the documented 2024 source workflow. | Available through `PISP.ISPdatabuilder.extract_downloads`. |
-| Parser development | The ISP 2024 parser is integrated into PISP.jl. | Under review; detailed coverage and readiness are unverified here. See [Supported ISP editions](supported-editions.md). |
-| Parsed and reconciled PISP data | Produced within the PISP 2024 workflow. | No PISP.jl parsed-data contract is yet integrated or documented. |
-| Generated dataset | Static and schedule outputs can be written by the 2024 build. | An ISP 2026 dataset-build entry point and generated-output contract are not yet integrated into PISP.jl's documented public workflow. |
-| Published validation or analysis evidence | Registry-managed pages cover selected 2024 source and output questions. | No PISP 2026 validation or analysis pages are published. |
+The workflow proceeds through separate stages:
+
+| Stage | Description |
+| --- | --- |
+| Source acquisition | Downloads or locates the published reports, workbooks, and archives. |
+| Archive extraction | Makes packaged source files available for inspection and parsing. |
+| Parser development | Defines how edition-specific source fields and structures are read. |
+| Parsed and reconciled PISP data | Aligns source names, identifiers, and fields before dataset construction. |
+| PISP.jl integration | Exposes the verified parser and mappings through the package workflow. |
+| Dataset build | Writes the static and schedule tables consumed downstream. |
+| Output contract | Defines filenames, schemas, identifiers, units, and join relationships. |
+| Published validation | Checks selected sources and outputs against explicit evidence. |
+| Published EDA | Interprets supported data without expanding the package capability boundary. |
+
+For ISP 2024, the documented PISP.jl workflow integrates these stages through dataset construction and published evidence.
+For ISP 2026, PISP.jl provides source download and archive extraction, while parser work remains under review in ParseISP.jl and the parsed-data, dataset-build, and output-contract stages are not yet integrated into the documented public workflow.
+[Supported ISP editions](supported-editions.md) is the detailed capability-status authority.
 
 ## Observed local availability
 
