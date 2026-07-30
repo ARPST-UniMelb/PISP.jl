@@ -1,11 +1,11 @@
-# Characterization tests for the hardcoded workbook/worksheet/range and CSV-pattern
-# literals scattered across the parser code (workbook path, worksheet name, and cell
-# range or file-glob passed to each reader). These lock in the real column names,
-# dimensions, and spot-check values that any future refactor of those literals must
-# preserve, using the same "one higher" readers the parser code itself calls
-# (PISP.read_xlsx_with_header, CSV.read/CSV.File) rather than the raw
-# XLSX.readdata/XLSX.openxlsx primitive. Skipped gracefully (not failed) when the real
-# AEMO workbooks are absent, since CI has no access to them.
+# Characterisation tests for the hard-coded 2024 source specifications.
+#
+# Each test reads a workbook range or CSV file used by the parser and checks its
+# columns, dimensions, and representative values. Together, these checks define
+# the source-data contracts that parser refactors must preserve.
+#
+# The tests use the same readers as the parser and skip when the required local
+# AEMO data is unavailable.
 
 using DataFrames
 using CSV
@@ -24,11 +24,9 @@ source_specs_2024_available = inspect_edition(source_specs_edition_2024).state =
 
         @testset "existing_generators — 2024-isp-inputs-and-assumptions-workbook.xlsx / Existing Gen Data Summary / B11:K297" begin
             df = PISP.read_xlsx_with_header(paths.ispdata24, "Existing Gen Data Summary", "B11:K297")
-            # The header row in this range is blank; read_xlsx_with_header's `string(missing)`
-            # conversion turns each blank cell into the literal string "missing" before the
-            # empty-header fallback runs, so makeunique numbers the duplicates instead of
-            # falling back to "Column_N". Production code (gen_pmax_solar/gen_pmax_wind)
-            # reads this table positionally, never by name, so this is real existing behaviour.
+            # This range has a blank header row. `read_xlsx_with_header` converts each blank
+            # cell to `"missing"` and numbers the duplicate names. The parser reads this
+            # table by column position rather than by name.
             @test names(df) == ["missing", "missing_1", "missing_2", "missing_3", "missing_4",
                                  "missing_5", "missing_6", "missing_7", "missing_8", "missing_9"]
             @test size(df) == (286, 10)
@@ -61,8 +59,8 @@ source_specs_2024_available = inspect_edition(source_specs_edition_2024).state =
             @test size(df) == (4997, 33)
             @test names(df)[1:8] ==
                   ["CDP", "Region", "Subregion", "Technology", "2023-24", "2024-25", "2025-26", "2026-27"]
-            # build_capacity_outlook_aux (src/scrappers/PISP-scrapper-build.jl) drops rows with
-            # no numeric value anywhere before combining scenarios; matched here for parity.
+            # Match `build_capacity_outlook_aux`, which removes rows without any numeric
+            # values before combining the scenarios.
             filtered = filter(row -> any(x -> x isa Number && !ismissing(x), row), df)
             @test size(filtered) == (4290, 33)
             @test collect(filtered[1, 1:8]) == Any["CDP1", "NSW", "NNSW", "Black coal", 0, 0, 0, 0]
