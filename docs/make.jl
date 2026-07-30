@@ -30,7 +30,7 @@ registry_pages = try
     load_page_registry(REGISTRY_PATH; require_published_outputs = true)
 catch
     println(stderr, "\nERROR: Documenter cannot start because one or more generated pages are missing or invalid.")
-    println(stderr, "Run: julia --project=docs docs/render_literate.jl")
+    println(stderr, "Run docs/render_literate.jl with the same active Julia project.")
     rethrow()
 end
 

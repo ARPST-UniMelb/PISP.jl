@@ -6,14 +6,13 @@
 #
 # Usage:
 #   julia --project=docs docs/render_changed.jl
-#   PISP_RUN_PRODUCERS=false julia --project=docs docs/render_changed.jl   # reuse existing EDA evidence
 #
 # SCOPE / CAVEAT: this tracks only changed docs/literate/**/*.jl page sources.
 # It does NOT detect changes to shared helpers (eda_support.jl, page_registry.jl),
-# EDA producer scripts, package src/, or local data -- any of which can change
-# many rendered pages. It also skips the full-set completeness/atomic-swap
-# validation that render_literate.jl performs for the whole published set.
-# Always run a full `julia --project=docs docs/render_literate.jl` before you
+# package src/, or local data -- any of which can change many rendered pages.
+# It also skips the full-set completeness/atomic-swap validation that
+# render_literate.jl performs for the whole published set.
+# Always run docs/render_literate.jl with the same active project before you
 # commit regenerated Markdown.
 
 include(joinpath(@__DIR__, "page_registry.jl"))
@@ -26,6 +25,12 @@ const RENDER_SCRIPT = joinpath(DOCS_DIR, "render_literate.jl")
 function git_lines(args)
     out = read(Cmd(`git $(args)`; dir = REPO_ROOT), String)
     return filter(!isempty, strip.(split(out, '\n')))
+end
+
+function active_project_directory()
+    project = Base.active_project()
+    project === nothing && error("render_changed.jl requires an active Julia project")
+    return dirname(project)
 end
 
 function changed_docs_jl()
@@ -60,7 +65,7 @@ function main()
 
     if !isempty(changed_other)
         println("NOTE: changed docs .jl files that are not registry page sources")
-        println("      (shared helper / producer / registry) -- these can affect many")
+        println("      (shared helper / registry) -- these can affect many")
         println("      pages, so a full render is recommended:")
         for path in changed_other
             println("  - $(path)")
@@ -70,13 +75,14 @@ function main()
 
     if isempty(changed_pages)
         println("No changed renderable Literate page sources vs HEAD; nothing to render.")
-        println("(Run `julia --project=docs docs/render_literate.jl` for a full render.)")
+        println("(Run docs/render_literate.jl with the same active project for a full render.)")
         return
     end
 
     println("Changed pages to re-render: ", join(changed_pages, ", "))
     ENV["PISP_LITERATE_PAGES"] = join(changed_pages, ",")
-    run(Cmd(`$(Base.julia_cmd()) --project=$(DOCS_DIR) $(RENDER_SCRIPT)`; dir = REPO_ROOT))
+    project_directory = active_project_directory()
+    run(Cmd(`$(Base.julia_cmd()) --project=$(project_directory) $(RENDER_SCRIPT)`; dir = REPO_ROOT))
     println("\nIncremental render complete. Run a full render before committing regenerated Markdown.")
 end
 
