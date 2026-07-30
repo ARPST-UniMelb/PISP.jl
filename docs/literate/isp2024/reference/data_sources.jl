@@ -62,14 +62,12 @@ markdown_table(expected_input_status)
 #
 # The 2024 Inputs and Assumptions workbook supplies most structured planning assumptions. The ISP model archive supplies model-side material such as hydro inflow data; the generation and storage outlook supplies future development information; the trace archives supply half-hourly demand, solar, and wind profiles; and the supplementary 2023 and 2019 workbooks provide inputs that are not available in the main 2024 workbook.
 #
-# Source-derived values, code-derived values, and package assumptions have different provenance and update requirements. A new publication may require parser changes, while a changed package mapping can alter outputs even when the downloaded files are unchanged.
+# Values taken from AEMO files, values computed by PISP, and package assumptions have different provenance and update requirements. A new publication may require parser changes, while a changed package mapping can alter outputs even when the downloaded files are unchanged.
 
 # ## Source contribution by output table
 #
 # PISP combines AEMO source files with package-defined mappings and records derived during dataset construction. The table summarises how each static output table is created and identifies additional source families used for its time-varying schedules.
 
-## `RawMarkdown` emits assembled Markdown verbatim; the PrettyTables backend
-## would escape the backticks and underscores this table relies on.
 struct RawMarkdown
     markdown::String
 end
@@ -82,9 +80,7 @@ static_output_tables = [
     if getfield(static_container, field) isa DataFrame
 ]
 
-## Curated provenance for each static output table. Coverage is validated against
-## the live build structures above; only the construction and schedule-input
-## descriptions are authored here.
+## Source contribution for each current static output table.
 const SOURCE_CONTRIBUTION = Dict(
     "Bus" => ("Bus names, representative coordinates, and NEM area mappings are package-defined constants.", "No time-varying bus schedule is produced."),
     "Demand" => ("PISP creates one demand record for each bus.", "Hourly demand profiles come from the **Demand & Variable Renewable Energy trace data**."),

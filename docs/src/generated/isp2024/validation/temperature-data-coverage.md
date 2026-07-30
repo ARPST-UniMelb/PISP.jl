@@ -2,607 +2,248 @@
 EditURL = "../../../../literate/isp2024/validation/temperature_data_coverage.jl"
 ```
 
-# ISP 2024: Temperature-related fields and climate-zone solar proxies
+# ISP 2024: Temperature information and PISP coverage
 
-Temperature-related workbook fields and PISP outputs are inventoried alongside descriptive summer solar comparisons for selected climate-zone proxy sites.
+The 2024 ISP Inputs and Assumptions workbook contains temperature-related assumptions, but it does not provide an observed ambient-temperature time series for PISP.
+The current PISP.jl parser also does not read the workbook's temperature lookup tables or export a temperature field.
 
-No observed temperature time series is loaded, and no causal temperature-response model is estimated. Climate-zone comparisons are descriptive solar-trace comparisons, not direct measurements of thermal derating.
+This distinction matters for weather-aware studies: regional reference temperatures and temperature-dependent network limits are model assumptions, while an hourly weather series is an external input that needs its own source and mapping.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
 ```
 
 ````julia
-ENV["GKSwstype"] = "100"
-
-using CSV
 using DataFrames
 using XLSX
-using Printf
-using Statistics
-using Plots
 
-gr();
+repo_root = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
-
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
+include(joinpath(repo_root, "docs", "edition_profiles.jl"))
 using .PISPDocsEditionProfiles
 
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
+include(joinpath(repo_root, "docs", "eda_support.jl"))
 using .EdaSupport
 
-const SCRIPT_STEM = "isp2024_05_temperature_analysis"
-const ISP2024_PROFILE = edition_profile(REPO_ROOT, "2024")
-const TRACES = relpath(joinpath(ISP2024_PROFILE.download_root, "Traces"), REPO_ROOT)  # kept relative: this is the path form recorded in the tables below
-const DOWNLOADS = relpath(ISP2024_PROFILE.download_root, REPO_ROOT)  # kept relative, same reason as TRACES
-const OUTPUT_ROOT = ISP2024_PROFILE.output_root
-OUTPUT_ROOT === nothing && error(
-    "ISP 2024 profile does not define output_root; set PISP_DOCS_ISP2024_OUTPUT_ROOT to select a local output build.",
-)
-const SCHEDULE_TAG = ISP2024_PROFILE.schedule_tag
-SCHEDULE_TAG === nothing && error(
-    "ISP 2024 profile does not define schedule_tag; set PISP_DOCS_ISP2024_SCHEDULE_TAG to select a local schedule.",
-)
+isp2024_profile = edition_profile(repo_root, "2024")
+workbook_path = joinpath(isp2024_profile.download_root, "2024-isp-inputs-and-assumptions-workbook.xlsx")
+isfile(workbook_path) || error("ISP 2024 inputs workbook not found: $workbook_path")
+````
 
-abs_path(relative_path) = joinpath(REPO_ROOT, relative_path)  # resolves a relative path above to an absolute file location for reading
+```@raw html
+</details>
+```
 
-const TEMP_KEYWORDS = ["temp", "heat", "thermal", "derate", "pv", "solar", "wind", "rooftop", "inverter"]
-const HH_COLS_SOL = string.(1:48)
-const CLIMATE_ZONES = [
-    ("Hot_Inland", "Bomen_SAT"),
-    ("Hot_SA", "Cultana_SAT"),
-    ("Moderate_VIC", "Bannerton_SAT"),
-    ("Cool_TAS", "Derby_SAT"),
+## What temperature information is present?
+
+The workbook uses temperature in three distinct ways:
+
+1. global warming outcomes help define the three ISP scenarios and their carbon budgets;
+2. regional reference temperatures support seasonal network and generator assumptions;
+3. a temperature-to-transfer-capability lookup describes Murraylink limits in the source model.
+
+These are static assumptions and lookup values. They are not a local, timestamped meteorological record.
+
+## Scenario-level temperature assumptions
+
+The temperature values below describe global scenario outcomes used in the ISP scenario framework.
+They do not describe weather at a generator, transmission line, or demand region.
+
+```@raw html
+<details class="source-code"><summary>Show source code</summary>
+```
+
+````julia
+scenario_temperature = XLSX.openxlsx(workbook_path) do workbook
+    carbon_budget_cells = workbook["Carbon Budgets"]["B7:E10"]
+    DataFrame(
+        :Scenario => string.(carbon_budget_cells[1, 2:4]),
+        Symbol("Global mean temperature increase by 2100") => string.(carbon_budget_cells[2, 2:4]),
+        Symbol("NEM carbon budget, FY2025-52 (Mt CO₂-e)") => Int.(carbon_budget_cells[4, 2:4]),
+    )
+end
+
+markdown_table(scenario_temperature)
+````
+
+```@raw html
+</details>
+```
+
+| **Scenario** | **Global mean temperature increase by 2100** | **NEM carbon budget, FY2025-52 (Mt CO₂-e)** |
+|:--|:--|--:|
+| Green Energy Exports | 1.5°C | 357 |
+| Step Change | 1.8°C | 681 |
+| Progressive Change | 2.6°C | 1203 |
+
+
+## Regional reference temperatures
+
+The network-capability sheet provides regional reference temperatures for summer peak, summer typical, and winter typical conditions.
+South Australia has the highest listed summer 10% POE demand reference temperature, at 43 °C.
+This is a modelling reference for peak conditions, not evidence that every South Australian location experiences the same temperature.
+
+```@raw html
+<details class="source-code"><summary>Show source code</summary>
+```
+
+````julia
+regional_reference_temperature = XLSX.openxlsx(workbook_path) do workbook
+    regional_cells = workbook["Network Capability"]["B77:E82"]
+    seasonal_rating_rule = string(workbook["Seasonal ratings"]["B8"])
+
+    occursin("POE10 reference temperature", seasonal_rating_rule) || error(
+        "Expected the seasonal-rating hot-day rule in Seasonal ratings!B8",
+    )
+
+    DataFrame(
+        :Region => string.(regional_cells[2:end, 1]),
+        Symbol("Summer 10% POE reference (°C)") => Float64.(regional_cells[2:end, 2]),
+        Symbol("Summer typical (°C)") => string.(regional_cells[2:end, 3]),
+        Symbol("Winter typical (°C)") => Float64.(regional_cells[2:end, 4]),
+    )
+end
+
+markdown_table(regional_reference_temperature)
+````
+
+```@raw html
+</details>
+```
+
+| **Region** | **Summer 10% POE reference (°C)** | **Summer typical (°C)** | **Winter typical (°C)** |
+|:--|--:|:--|--:|
+| Queensland | 37.0 | 32 | 15.0 |
+| New South Wales | 42.0 | 32 | 9.0 |
+| Victoria | 41.0 | 32 | 8.0 |
+| South Australia | 43.0 | 35 | 11.0 |
+| Tasmania | 7.7 | N/A (note 1) | 1.2 |
+
+
+The generator seasonal-rating rule uses a regional POE10 reference temperature to identify hot days.
+When fewer than five days exceed the threshold, the source workbook uses the five hottest days of that year.
+
+## Temperature-dependent Murraylink capability
+
+The source workbook includes an explicit ambient-temperature lookup for Murraylink.
+Capability is 220 MW through 38 °C, declines above that point, and reaches zero at 46 °C.
+
+```@raw html
+<details class="source-code"><summary>Show source code</summary>
+```
+
+````julia
+murraylink_temperature_capability = XLSX.openxlsx(workbook_path) do workbook
+    murraylink_cells = workbook["Network Capability"]["B89:D104"]
+    DataFrame(
+        Symbol("Ambient temperature (°C)") => string.(murraylink_cells[2:end, 1]),
+        Symbol("Forward capability (MW)") => Float64.(murraylink_cells[2:end, 2]),
+        Symbol("Reverse capability (MW)") => Float64.(murraylink_cells[2:end, 3]),
+    )
+end
+
+markdown_table(murraylink_temperature_capability)
+````
+
+```@raw html
+</details>
+```
+
+| **Ambient temperature (°C)** | **Forward capability (MW)** | **Reverse capability (MW)** |
+|:--|--:|--:|
+| <33 | 220.0 | 220.0 |
+| 34 | 220.0 | 220.0 |
+| 35 | 220.0 | 220.0 |
+| 36 | 220.0 | 220.0 |
+| 37 | 220.0 | 220.0 |
+| 38 | 220.0 | 220.0 |
+| 39 | 192.5 | 192.5 |
+| 40 | 165.0 | 165.0 |
+| 41 | 137.5 | 137.5 |
+| 42 | 110.0 | 110.0 |
+| 43 | 82.5 | 82.5 |
+| 44 | 55.0 | 55.0 |
+| 45 | 27.5 | 27.5 |
+| 46 | 0.0 | 0.0 |
+| 47> | 0.0 | 0.0 |
+
+
+## What PISP.jl currently uses
+
+PISP.jl reads the first network-capability table, which contains seasonal forward and reverse limits.
+The later regional-temperature and Murraylink lookup tables are outside the range currently read by `line_table`.
+The package source also contains no field or parser identifier named `temperature`.
+
+```@raw html
+<details class="source-code"><summary>Show source code</summary>
+```
+
+````julia
+parser_path = joinpath(repo_root, "src", "parsers", "PISP-2024parser.jl")
+parser_text = read(parser_path, String)
+network_capability_ranges = [
+    match_result.captures[1]
+    for match_result in eachmatch(r"\"Network Capability\",\s*\"([^\"]+)\"", parser_text)
 ]
 
-is_keyword_match(name) = any(kw -> occursin(kw, lowercase(name)), TEMP_KEYWORDS)
-is_rooftop_match(name) = occursin("rooftop", lowercase(name)) || occursin("rtpv", lowercase(name))
-function is_reliability_match(name)
-    lname = lowercase(name)
-    return occursin("reliability", lname) || occursin("outage", lname) || occursin("generator", lname)
-end
-````
-
-```@raw html
-</details>
-```
-
-Trim a raw XLSX matrix down to the bounding box of non-missing cells. A worksheet's declared dimension (and hence XLSX.jl's `sheet[:]`) can report extra trailing all-empty rows/columns beyond the sheet's real content, so this drops trailing rows/columns that hold no value before reporting a sheet's shape. Verified against this workbook: e.g. "Rooftop PV" has a raw shape of (64, 35) but a trimmed shape of (62, 33) — rows 63-64 and columns 34-35 are entirely `missing`.
-
-```@raw html
-<details class="source-code"><summary>Show source code</summary>
-```
-
-````julia
-function trim_sheet(matrix)
-    nrows, ncols = size(matrix)
-    last_row = 0
-    for r in 1:nrows
-        if any(x -> x !== missing, view(matrix, r, :))
-            last_row = r
-        end
-    end
-    last_col = 0
-    for c in 1:ncols
-        if any(x -> x !== missing, view(matrix, :, c))
-            last_col = c
-        end
-    end
-    (last_row == 0 || last_col == 0) && return Matrix{Any}(undef, 0, 0)
-    return matrix[1:last_row, 1:last_col]
-end
-````
-
-```@raw html
-</details>
-```
-
-A blank header cell gets a placeholder name using its 0-based column index.
-
-```@raw html
-<details class="source-code"><summary>Show source code</summary>
-```
-
-````julia
-function header_names(row)
-    return [ismissing(v) ? "Unnamed: $(j - 1)" : string(v) for (j, v) in enumerate(row)]
-end
-
-function empty_df(schema::Vector{Pair{Symbol, DataType}})
-    return DataFrame([name => Type[] for (name, Type) in schema]...)
-end
-````
-
-```@raw html
-</details>
-```
-
-## Temperature-related source fields
-
-The workbook lists all its worksheets; a keyword match identifies material for review, it does not by itself prove that a sheet contains a usable temperature dependency.
-
-```@raw html
-<details class="source-code"><summary>Show source code</summary>
-```
-
-````julia
-workbook_path = joinpath(DOWNLOADS, "2024-isp-inputs-and-assumptions-workbook.xlsx")
-println("Workbook exists: ", isfile(abs_path(workbook_path)))
-
-sheet_inventory_rows = NamedTuple[]
-relevant_shape_rows = NamedTuple[]
-rooftop_rows = NamedTuple[]
-reliability_shape_rows = NamedTuple[]
-
-if isfile(abs_path(workbook_path))
-    XLSX.openxlsx(abs_path(workbook_path)) do xf
-        sheet_names = XLSX.sheetnames(xf)
-        println("\n=== ISP Assumptions Workbook Sheets ($(length(sheet_names))) ===")
-        for (i, name) in enumerate(sheet_names)
-            println(@sprintf("  %2d. %s", i, name))
-        end
-
-        println("\n=== Potentially Relevant Sheets ===")
-        for name in sheet_names
-            is_keyword_match(name) && println("  - ", name)
-        end
-
-        for (i, name) in enumerate(sheet_names)
-            push!(
-                sheet_inventory_rows,
-                (
-                    sheet_index = i,
-                    sheet_name = name,
-                    is_keyword_match = is_keyword_match(name) ? 1 : 0,
-                    is_rooftop_match = is_rooftop_match(name) ? 1 : 0,
-                    is_reliability_match = is_reliability_match(name) ? 1 : 0,
-                ),
-            )
-        end
-
-        relevant_sheets = [name for name in sheet_names if is_keyword_match(name)]
-
-        for sheet in first(relevant_sheets, min(10, length(relevant_sheets)))
-            m = trim_sheet(xf[sheet][:])
-            n_rows, n_cols = size(m)
-            println("\n--- Sheet: $sheet (shape: ($n_rows, $n_cols)) ---")
-            push!(relevant_shape_rows, (sheet_name = sheet, n_rows = n_rows, n_cols = n_cols, read_ok = 1))
-        end
-
-        for sheet in sheet_names
-            if is_rooftop_match(sheet)
-                m = trim_sheet(xf[sheet][:])
-                total_rows, n_cols = size(m)
-                n_rows = max(total_rows - 1, 0)
-                cols = total_rows > 0 ? header_names(m[1, :]) : String[]
-                println("\n=== Rooftop PV Sheet ($sheet) ===")
-                println("Columns: ", cols)
-                push!(
-                    rooftop_rows,
-                    (
-                        sheet_name = sheet,
-                        n_rows = n_rows,
-                        n_cols = n_cols,
-                        columns_preview = join(cols[1:min(5, length(cols))], "|"),
-                    ),
-                )
-            end
-        end
-
-        for sheet in sheet_names
-            if is_reliability_match(sheet)
-                m = trim_sheet(xf[sheet][:])
-                n_rows, n_cols = size(m)
-                println("\n=== Reliability Sheet: $sheet (shape: ($n_rows, $n_cols)) ===")
-                push!(reliability_shape_rows, (sheet_name = sheet, n_rows = n_rows, n_cols = n_cols))
-            end
-        end
+source_files = String[]
+for (directory, _, files) in walkdir(joinpath(repo_root, "src"))
+    for file in files
+        endswith(file, ".jl") && push!(source_files, joinpath(directory, file))
     end
 end
 
-workbook_sheet_inventory = isempty(sheet_inventory_rows) ?
-    empty_df([:sheet_index => Int, :sheet_name => String, :is_keyword_match => Int, :is_rooftop_match => Int, :is_reliability_match => Int]) :
-    DataFrame(sheet_inventory_rows)
-write_table(workbook_sheet_inventory, SCRIPT_STEM, "workbook_sheet_inventory")
-workbook_inventory_summary = DataFrame(
-    Metric = ["Workbook sheets", "Keyword matches", "Rooftop-PV matches", "Reliability matches"],
-    Value = [
-        nrow(workbook_sheet_inventory),
-        sum(workbook_sheet_inventory.is_keyword_match),
-        sum(workbook_sheet_inventory.is_rooftop_match),
-        sum(workbook_sheet_inventory.is_reliability_match),
+temperature_source_hits = [
+    relpath(path, repo_root)
+    for path in source_files
+    if occursin(r"\btemperature\b"i, read(path, String))
+]
+
+package_coverage = DataFrame(
+    Layer = [
+        "AEMO workbook",
+        "PISP network parser",
+        "PISP source and data model",
+        "PISP renewable traces",
+    ],
+    Coverage = [
+        "Static temperature assumptions and lookup tables are present",
+        "Reads Network Capability $(join(network_capability_ranges, ", ")); does not read B77:E82 or B89:D104",
+        isempty(temperature_source_hits) ? "No exact temperature field or parser identifier" : join(temperature_source_hits, ", "),
+        "Solar and wind capacity factors, not ambient temperature",
+    ],
+    Consequence = [
+        "Useful as source assumptions",
+        "Temperature-dependent limits are not carried into current PISP line tables",
+        "No temperature series or temperature-response function is exported",
+        "Cannot be used as a substitute for meteorological temperature data",
     ],
 )
-markdown_table(workbook_inventory_summary)
+markdown_table(package_coverage; alignment = [:l, :l, :l])
 ````
 
 ```@raw html
 </details>
 ```
 
-| **Metric** | **Value** |
-|:--|--:|
-| Workbook sheets | 76 |
-| Keyword matches | 4 |
-| Rooftop-PV matches | 1 |
-| Reliability matches | 2 |
+| **Layer** | **Coverage** | **Consequence** |
+|:--|:--|:--|
+| AEMO workbook | Static temperature assumptions and lookup tables are present | Useful as source assumptions |
+| PISP network parser | Reads Network Capability B6:H21; does not read B77:E82 or B89:D104 | Temperature-dependent limits are not carried into current PISP line tables |
+| PISP source and data model | No exact temperature field or parser identifier | No temperature series or temperature-response function is exported |
+| PISP renewable traces | Solar and wind capacity factors, not ambient temperature | Cannot be used as a substitute for meteorological temperature data |
 
 
-The complete sheet inventory is retained in `workbook_sheet_inventory.csv`.
+The `derate` field in `Generator.csv` is populated from the workbook's generator-reliability settings for partial outages.
+It is not a temperature-driven derating curve.
 
-```@raw html
-<details class="source-code"><summary>Show source code</summary>
-```
+## Implication for weather-aware studies
 
-````julia
-workbook_relevant_sheet_shapes = isempty(relevant_shape_rows) ?
-    empty_df([:sheet_name => String, :n_rows => Int, :n_cols => Int, :read_ok => Int]) :
-    DataFrame(relevant_shape_rows)
-write_table(workbook_relevant_sheet_shapes, SCRIPT_STEM, "workbook_relevant_sheet_shapes")
-markdown_table(workbook_relevant_sheet_shapes)
-````
+A temperature-aware PISP study needs three additions outside the current ISP 2024 dataset contract:
 
-```@raw html
-</details>
-```
+1. an observed or climate-model temperature time series with explicit spatial and temporal coverage;
+2. a mapping from weather locations to generators, lines, demand regions, or other assets;
+3. component response models that convert temperature into capacity, availability, demand, or network-limit changes.
 
-| **sheet\_name** | **n\_rows** | **n\_cols** | **read\_ok** |
-|:--|--:|--:|--:|
-| Rooftop PV | 62 | 33 | 1 |
-| PVNSG | 62 | 33 | 1 |
-| Heat rates | 70 | 7 | 1 |
-| Affine Heat rates | 194 | 11 | 1 |
-
-
-```@raw html
-<details class="source-code"><summary>Show source code</summary>
-```
-
-````julia
-workbook_rooftop_sheet_summary = isempty(rooftop_rows) ?
-    empty_df([:sheet_name => String, :n_rows => Int, :n_cols => Int, :columns_preview => String]) :
-    DataFrame(rooftop_rows)
-write_table(workbook_rooftop_sheet_summary, SCRIPT_STEM, "workbook_rooftop_sheet_summary")
-markdown_table(workbook_rooftop_sheet_summary)
-````
-
-```@raw html
-</details>
-```
-
-| **sheet\_name** | **n\_rows** | **n\_cols** | **columns\_preview** |
-|:--|--:|--:|:--|
-| Rooftop PV | 61 | 33 | Unnamed: 0\|Go to Assumptions Summary\|Unnamed: 2\|Unnamed: 3\|Unnamed: 4 |
-
-
-```@raw html
-<details class="source-code"><summary>Show source code</summary>
-```
-
-````julia
-workbook_reliability_sheet_shapes = isempty(reliability_shape_rows) ?
-    empty_df([:sheet_name => String, :n_rows => Int, :n_cols => Int]) :
-    DataFrame(reliability_shape_rows)
-write_table(workbook_reliability_sheet_shapes, SCRIPT_STEM, "workbook_reliability_sheet_shapes")
-markdown_table(workbook_reliability_sheet_shapes)
-````
-
-```@raw html
-</details>
-```
-
-| **sheet\_name** | **n\_rows** | **n\_cols** |
-|:--|--:|--:|
-| Transmission Reliability | 11 | 7 |
-| Generator Reliability Settings | 64 | 14 |
-
-
-## Exported fields
-
-The output inventory and generator-column table distinguish information present in the downloaded workbook from fields actually exported by PISP.
-
-```@raw html
-<details class="source-code"><summary>Show source code</summary>
-```
-
-````julia
-csv_dir = relpath(OUTPUT_ROOT, REPO_ROOT)
-sched_dir = relpath(dirname(OUTPUT_ROOT), REPO_ROOT)
-
-output_inventory_rows = NamedTuple[]
-println("\n=== PISP Output Files ===")
-if isdir(abs_path(csv_dir))
-    for name in sort(filter(n -> endswith(lowercase(n), ".csv"), readdir(abs_path(csv_dir))))
-        println("  CSV: ", name)
-        push!(output_inventory_rows, (kind = "csv", name = name))
-    end
-end
-
-if isdir(abs_path(sched_dir))
-    for name in sort(filter(n -> startswith(n, "schedule-"), readdir(abs_path(sched_dir))))
-        if isdir(abs_path(joinpath(sched_dir, name)))
-            println("  Schedule: ", name)
-            push!(output_inventory_rows, (kind = "schedule", name = name))
-        end
-    end
-end
-
-pisp_output_inventory = isempty(output_inventory_rows) ? empty_df([:kind => String, :name => String]) : DataFrame(output_inventory_rows)
-write_table(pisp_output_inventory, SCRIPT_STEM, "pisp_output_inventory")
-markdown_table(pisp_output_inventory)
-````
-
-```@raw html
-</details>
-```
-
-| **kind** | **name** |
-|:--|:--|
-| csv | Bus.csv |
-| csv | DER.csv |
-| csv | Demand.csv |
-| csv | ESS.csv |
-| csv | Generator.csv |
-| csv | Line.csv |
-
-
-```@raw html
-<details class="source-code"><summary>Show source code</summary>
-```
-
-````julia
-gen_path = joinpath(csv_dir, "Generator.csv")
-generator_details_rows = NamedTuple[]
-generator_temp_row = (generator_table_exists = 0, total_columns = missing, n_temp_columns = missing, temp_columns_list = "")
-
-if isfile(abs_path(gen_path))
-    gen_df = CSV.read(abs_path(gen_path), DataFrame)
-    println("\n=== Generator Table (shape: $(size(gen_df))) ===")
-    println("Columns: ", names(gen_df))
-
-    is_solar(tech) = occursin(r"PV|SOLAR|DISTPV"i, tech)
-    is_wind(tech) = occursin(r"WIND"i, tech)
-    solar_gens = filter(row -> is_solar(row.tech), gen_df)
-    wind_gens = filter(row -> is_wind(row.tech), gen_df)
-
-    println("\nSolar generators: ", nrow(solar_gens))
-    println("\nWind generators: ", nrow(wind_gens))
-
-    for (category, subset) in (("solar", solar_gens), ("wind", wind_gens))
-        for row in eachrow(subset)
-            push!(
-                generator_details_rows,
-                (
-                    category = category,
-                    id_gen = row.id_gen,
-                    name = row.name,
-                    tech = row.tech,
-                    forate = row.forate,
-                    derate = row.derate,
-                    pmin = row.pmin,
-                    pmax = row.pmax,
-                    n = row.n,
-                ),
-            )
-        end
-    end
-
-    temp_cols = [col for col in names(gen_df) if any(kw -> occursin(kw, lowercase(col)), ["temp", "heat", "thermal"])]
-    println("\nTemperature-related columns in Generator: ", temp_cols)
-    generator_temp_row = (
-        generator_table_exists = 1,
-        total_columns = ncol(gen_df),
-        n_temp_columns = length(temp_cols),
-        temp_columns_list = join(temp_cols, "|"),
-    )
-end
-
-generator_solar_wind_details = isempty(generator_details_rows) ?
-    empty_df([:category => String, :id_gen => Int, :name => String, :tech => String, :forate => Float64, :derate => Float64, :pmin => Float64, :pmax => Float64, :n => Int]) :
-    DataFrame(generator_details_rows)
-write_table(generator_solar_wind_details, SCRIPT_STEM, "generator_solar_wind_details")
-markdown_table(generator_solar_wind_details)
-````
-
-```@raw html
-</details>
-```
-
-| **category** | **id\_gen** | **name** | **tech** | **forate** | **derate** | **pmin** | **pmax** | **n** |
-|:--|--:|:--|:--|--:|--:|--:|--:|--:|
-| solar | 92 | RTPV\_NQ | RoofPV | 1.0 | 0.0 | 0.0 | 100.0 | 1 |
-| solar | 93 | RTPV\_CQ | RoofPV | 1.0 | 0.0 | 0.0 | 100.0 | 1 |
-| solar | 94 | RTPV\_GG | RoofPV | 1.0 | 0.0 | 0.0 | 100.0 | 1 |
-| solar | 95 | RTPV\_SQ | RoofPV | 1.0 | 0.0 | 0.0 | 100.0 | 1 |
-| solar | 96 | RTPV\_NNSW | RoofPV | 1.0 | 0.0 | 0.0 | 100.0 | 1 |
-| solar | 97 | RTPV\_CNSW | RoofPV | 1.0 | 0.0 | 0.0 | 100.0 | 1 |
-| solar | 98 | RTPV\_SNW | RoofPV | 1.0 | 0.0 | 0.0 | 100.0 | 1 |
-| solar | 99 | RTPV\_SNSW | RoofPV | 1.0 | 0.0 | 0.0 | 100.0 | 1 |
-| solar | 100 | RTPV\_VIC | RoofPV | 1.0 | 0.0 | 0.0 | 100.0 | 1 |
-| solar | 101 | RTPV\_TAS | RoofPV | 1.0 | 0.0 | 0.0 | 100.0 | 1 |
-| solar | 102 | RTPV\_CSA | RoofPV | 1.0 | 0.0 | 0.0 | 100.0 | 1 |
-| solar | 103 | RTPV\_SESA | RoofPV | 1.0 | 0.0 | 0.0 | 100.0 | 1 |
-| solar | 104 | LSPV\_CQ | LargePV | 1.0 | 0.0 | 0.0 | 869.9 | 1 |
-| solar | 105 | LSPV\_VIC | LargePV | 1.0 | 0.0 | 0.0 | 1313.68 | 1 |
-| solar | 106 | LSPV\_NNSW | LargePV | 1.0 | 0.0 | 0.0 | 721.0 | 1 |
-| solar | 107 | LSPV\_SQ | LargePV | 1.0 | 0.0 | 0.0 | 2042.66 | 1 |
-| solar | 108 | LSPV\_CSA | LargePV | 1.0 | 0.0 | 0.0 | 648.04 | 1 |
-| solar | 109 | LSPV\_NQ | LargePV | 1.0 | 0.0 | 0.0 | 599.97 | 1 |
-| solar | 110 | LSPV\_SNSW | LargePV | 1.0 | 0.0 | 0.0 | 2345.46 | 1 |
-| solar | 111 | LSPV\_CNSW | LargePV | 1.0 | 0.0 | 0.0 | 2053.78 | 1 |
-| solar | 112 | LSPV\_TAS | LargePV | 1.0 | 0.0 | 0.0 | 0.0 | 1 |
-| solar | 113 | LSPV\_SESA | LargePV | 1.0 | 0.0 | 0.0 | 42.9 | 1 |
-| wind | 114 | WIND\_CQ | Wind | 1.0 | 0.0 | 0.0 | 450.0 | 1 |
-| wind | 115 | WIND\_VIC | Wind | 1.0 | 0.0 | 0.0 | 5362.16 | 1 |
-| wind | 116 | WIND\_NNSW | Wind | 1.0 | 0.0 | 0.0 | 442.48 | 1 |
-| wind | 117 | WIND\_SQ | Wind | 1.0 | 0.0 | 0.0 | 877.88 | 1 |
-| wind | 118 | WIND\_CSA | Wind | 1.0 | 0.0 | 0.0 | 2435.99 | 1 |
-| wind | 119 | WIND\_NQ | Wind | 1.0 | 0.0 | 0.0 | 380.52 | 1 |
-| wind | 120 | WIND\_SNSW | Wind | 1.0 | 0.0 | 0.0 | 1873.85 | 1 |
-| wind | 121 | WIND\_CNSW | Wind | 1.0 | 0.0 | 0.0 | 507.24 | 1 |
-| wind | 122 | WIND\_TAS | Wind | 1.0 | 0.0 | 0.0 | 563.35 | 1 |
-| wind | 123 | WIND\_SESA | Wind | 1.0 | 0.0 | 0.0 | 324.5 | 1 |
-| wind | 124 | WIND\_SNW | Wind | 1.0 | 0.0 | 0.0 | 0.0 | 1 |
-
-
-```@raw html
-<details class="source-code"><summary>Show source code</summary>
-```
-
-````julia
-generator_temperature_columns = DataFrame([generator_temp_row])
-write_table(generator_temperature_columns, SCRIPT_STEM, "generator_temperature_columns")
-markdown_table(generator_temperature_columns)
-````
-
-```@raw html
-</details>
-```
-
-| **generator\_table\_exists** | **total\_columns** | **n\_temp\_columns** | **temp\_columns\_list** |
-|--:|--:|--:|:--|
-| 1 | 48 | 0 |  |
-
-
-## Solar proxy comparison
-
-The zone labels are analytical groupings attached to representative sites. The summary describes summer solar capacity-factor distributions and does not isolate temperature from cloud, season, geography, or trace construction.
-
-```@raw html
-<details class="source-code"><summary>Show source code</summary>
-```
-
-````julia
-zone_summary_rows = NamedTuple[]
-println("\n=== Solar CF by Climate Zone (Summer 2019) ===")
-for (zone, loc) in CLIMATE_ZONES
-    f = joinpath(TRACES, "solar_2019", "$(loc)_RefYear2019.csv")
-    isfile(abs_path(f)) || continue
-    df = CSV.read(abs_path(f), DataFrame)
-    summer = filter(row -> row.Month in (12, 1, 2), df)
-    nrow(summer) == 0 && continue
-
-    daily = [mean(row[col] for col in HH_COLS_SOL) for row in eachrow(summer)]
-    midday_cols = string.(24:35)
-    midday = [mean(row[col] for col in midday_cols) for row in eachrow(summer)]
-
-    mean_daily = mean(daily)
-    mean_midday = mean(midday)
-    min_midday = minimum(midday)
-    p5_midday = quantile(midday, 0.05)
-
-    println(
-        @sprintf(
-            "  %s (%s): mean_daily=%.3f, mean_midday=%.3f, min_midday=%.3f, p5_midday=%.3f",
-            zone, loc, mean_daily, mean_midday, min_midday, p5_midday,
-        ),
-    )
-
-    push!(
-        zone_summary_rows,
-        (
-            zone = zone,
-            location = loc,
-            n_summer_days = nrow(summer),
-            mean_daily_cf = mean_daily,
-            mean_midday_cf = mean_midday,
-            min_midday_cf = min_midday,
-            p5_midday_cf = p5_midday,
-        ),
-    )
-end
-
-climate_zone_summer_cf_summary = isempty(zone_summary_rows) ?
-    empty_df([:zone => String, :location => String, :n_summer_days => Int, :mean_daily_cf => Float64, :mean_midday_cf => Float64, :min_midday_cf => Float64, :p5_midday_cf => Float64]) :
-    DataFrame(zone_summary_rows)
-write_table(climate_zone_summer_cf_summary, SCRIPT_STEM, "climate_zone_summer_cf_summary")
-markdown_table(climate_zone_summer_cf_summary)
-````
-
-```@raw html
-</details>
-```
-
-| **zone** | **location** | **n\_summer\_days** | **mean\_daily\_cf** | **mean\_midday\_cf** | **min\_midday\_cf** | **p5\_midday\_cf** |
-|:--|:--|--:|--:|--:|--:|--:|
-| Hot\_Inland | Bomen\_SAT | 3068 | 0.379055 | 0.771988 | 0.054019 | 0.219576 |
-| Hot\_SA | Cultana\_SAT | 3068 | 0.37932 | 0.847259 | 0.230202 | 0.303985 |
-| Moderate\_VIC | Bannerton\_SAT | 3068 | 0.404872 | 0.859197 | 0.1881 | 0.307869 |
-| Cool\_TAS | Derby\_SAT | 3068 | 0.387393 | 0.810406 | 0.0913513 | 0.321397 |
-
-
-## Summer capacity-factor distribution
-
-Each climate zone's summer daily-mean capacity factor is drawn as an overlaid density histogram, showing how much the four representative sites overlap or diverge.
-
-```@raw html
-<details class="source-code"><summary>Show source code</summary>
-```
-
-````julia
-p1 = plot(legend=:topright, title="Summer 2019 — Daily Solar CF Distribution by Climate Zone",
-          xlabel="Daily Mean Capacity Factor", ylabel="Density", size=(800, 600))
-for (zone, loc) in CLIMATE_ZONES
-    f = joinpath(TRACES, "solar_2019", "$(loc)_RefYear2019.csv")
-    isfile(abs_path(f)) || continue
-    df = CSV.read(abs_path(f), DataFrame)
-    summer = filter(row -> row.Month in (12, 1, 2), df)
-    nrow(summer) == 0 && continue
-    daily = [mean(row[col] for col in HH_COLS_SOL) for row in eachrow(summer)]
-    histogram!(p1, daily, bins=50, alpha=0.5, label="$(zone) ($(loc))", normalize=:pdf)
-end
-savefig(p1, figure_path(SCRIPT_STEM, "05_cf_by_climate_zone.png"))
-EdaSupport.embed_figure(figure_path(SCRIPT_STEM, "05_cf_by_climate_zone.png"), "05_cf_by_climate_zone.png")
-````
-
-```@raw html
-</details>
-```
-
-![Summer daily solar capacity-factor distribution by climate zone](05_cf_by_climate_zone.png)
-
-## Midday and daily-mean relationship
-
-For each climate zone, midday-mean capacity factor is plotted against daily-mean capacity factor for every summer day, with a 1:1 reference line showing how far midday output sits above the daily average.
-
-```@raw html
-<details class="source-code"><summary>Show source code</summary>
-```
-
-````julia
-p2 = plot(layout=(2,2), figsize=(14,10), size=(1000, 800))
-for (idx, (zone, loc)) in enumerate(CLIMATE_ZONES)
-    f = joinpath(TRACES, "solar_2019", "$(loc)_RefYear2019.csv")
-    isfile(abs_path(f)) || continue
-    df = CSV.read(abs_path(f), DataFrame)
-    summer = filter(row -> row.Month in (12, 1, 2), df)
-    nrow(summer) == 0 && continue
-    daily = [mean(row[col] for col in HH_COLS_SOL) for row in eachrow(summer)]
-    midday = [mean(row[col] for col in string.(24:35)) for row in eachrow(summer)]
-    scatter!(p2[idx], daily, midday, markersize=2, alpha=0.3, color=:orange, label="", legend=false)
-    plot!(p2[idx], [0, 0.5], [0, 0.5], label="1:1", color=:black, linestyle=:dash, alpha=0.3, linewidth=1)
-    plot!(p2[idx], title="$(zone) ($(loc))", xlabel="Daily Mean CF", ylabel="Midday Mean CF",
-          xlim=(0, 0.5), ylim=(0, 0.8), grid=true, gridstyle=:dash, gridalpha=0.3)
-end
-savefig(p2, figure_path(SCRIPT_STEM, "05_midday_vs_daily_scatter.png"))
-EdaSupport.embed_figure(figure_path(SCRIPT_STEM, "05_midday_vs_daily_scatter.png"), "05_midday_vs_daily_scatter.png")
-````
-
-```@raw html
-</details>
-```
-
-![Midday capacity factor against daily mean capacity factor by climate zone](05_midday_vs_daily_scatter.png)
-
-## Interpretation
-
-- The ISP assumptions workbook and PISP's own output files contain some temperature-, derating-, and reliability-adjacent fields, but a keyword match only flags material for review, it does not establish a usable temperature dependency.
-- No observed temperature series is loaded here; the climate-zone comparison is a descriptive summer solar-trace comparison across four representative sites, not a measurement of thermal derating.
-
-## Limitations
-
-- The source inventory does not contain an observed temperature time series for this analysis.
-- Climate-zone labels are analytical proxies and do not isolate temperature from cloud, season, geography, or trace construction.
-- No thermal-derating response is estimated from the solar comparisons.
+The ISP workbook can inform assumptions and validation, but it cannot supply the meteorological time series or the missing response models by itself.
 

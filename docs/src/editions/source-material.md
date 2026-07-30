@@ -1,7 +1,10 @@
 # Source material
 
+The ISP source-data layer comprises published artefacts, their roles, and the boundary between acquisition and integrated PISP processing.
+
 PISP uses edition-specific AEMO reports, workbooks, archives, and traces.
 The table identifies the actual source artefacts and distinguishes an acquired 2026 source from an integrated PISP.jl dataset input.
+[Supported ISP editions](supported-editions.md) records the workflow stage currently available for each edition.
 
 | Source material | ISP 2024 role in PISP | ISP 2026 acquisition and integration status |
 | --- | --- | --- |
@@ -19,10 +22,10 @@ The table identifies the actual source artefacts and distinguishes an acquired 2
 The [ISP 2024 data sources](../generated/isp2024/reference/data-sources.md) page explains the source families consumed by the implemented 2024 workflow.
 The [ISP 2026 overview](isp2026.md) describes source download and extraction, the ParseISP.jl review state, and the current PISP.jl integration boundary.
 
-For report-backed trace-folder meanings, see the 2024 and 2026 PLEXOS Model
-Instructions, physical pp. 5 and 7. The local source pages use those reports to
-explain trace groups, not to infer that similarly named local folders are
-equivalent across editions.
+A report artefact is a citable source document; a statement within that report is a claim or assumption supported by that source.
+PISP documentation keeps those roles distinct when describing source material and modelling meaning.
+
+For report-backed trace-folder meanings, see the [2024 ISP PLEXOS Model Instructions, p. 5](../../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=5) and [p. 7](../../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=7), and the [2026 ISP PLEXOS Model Instructions, p. 5](../../../data/2026/pisp-reports/2026-isp-plexos-model-instructions.pdf#page=5) and [p. 7](../../../data/2026/pisp-reports/2026-isp-plexos-model-instructions.pdf#page=7). The local source pages use those reports to explain trace groups, not to infer that similarly named local folders are equivalent across editions.
 
 Similar source names do not establish a shared schema, coverage, scenario definition, modelling role, parser compatibility, or generated-output contract.
 The [comparison guide](comparison.md) defines the release-specific evidence and crosswalks required before comparing editions.

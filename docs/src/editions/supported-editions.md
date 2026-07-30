@@ -1,5 +1,7 @@
 # Supported ISP editions
 
+The PISP transformation layer separates acquisition, extraction, parsing, dataset construction, output contracts, and published evidence.
+
 PISP distinguishes source acquisition and extraction from parser integration, dataset construction, generated outputs, validation, and analysis.
 Separate ISP 2026 parser development is available in [ParseISP.jl](https://github.com/airampg/ParseISP.jl); it is not part of PISP.jl's documented integrated dataset-construction workflow.
 

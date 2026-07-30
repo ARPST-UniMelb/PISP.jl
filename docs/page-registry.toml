@@ -1,4 +1,30 @@
 [[page]]
+id = "shared-pisp-downloads-layout"
+title = "ISP 2024 and ISP 2026 downloaded source layout"
+kind = "reference"
+track = "shared"
+editions = ["2024", "2026"]
+data_layer = "source-data"
+source = "literate/shared/reference/pisp_downloads_layout.jl"
+output = "generated/shared/reference/pisp-downloads-layout.md"
+status = "published"
+nav_order = 10
+snapshot = false
+data_requirements = [
+    { root = "download", edition = "2024", path = "zip", type = "directory" },
+    { root = "download", edition = "2024", path = "Core", type = "directory" },
+    { root = "download", edition = "2024", path = "Sensitivities", type = "directory" },
+    { root = "download", edition = "2026", path = "zip", type = "directory" },
+    { root = "download", edition = "2026", path = "Core scenarios", type = "directory" },
+    { root = "download", edition = "2026", path = "Sensitivities", type = "directory" },
+]
+related_reference_pages = [
+    "editions/source-material.md",
+    "editions/source-inventory.md",
+    "editions/trace-coverage.md",
+]
+
+[[page]]
 id = "isp2024-data-sources"
 title = "ISP 2024: Data sources"
 kind = "reference"
@@ -39,6 +65,42 @@ status = "published"
 nav_order = 30
 snapshot = false
 related_reference_pages = ["concepts.md", "assumptions.md"]
+
+[[page]]
+id = "isp2024-buildout-defaults"
+title = "ISP 2024: Build-out defaults"
+kind = "reference"
+track = "isp2024"
+editions = ["2024"]
+data_layer = "package-workflow"
+source = "literate/isp2024/reference/buildout_defaults.jl"
+output = "generated/isp2024/reference/buildout-defaults.md"
+status = "published"
+nav_order = 40
+snapshot = false
+related_reference_pages = [
+    "editions/isp2024-preprocessing.md",
+    "generated/isp2024/reference/output-tables.md",
+    "assumptions.md",
+]
+
+[[page]]
+id = "isp2024-hydro-parameters-and-constants"
+title = "ISP 2024: Hydro parameters and constants"
+kind = "reference"
+track = "isp2024"
+editions = ["2024"]
+data_layer = "package-workflow"
+source = "literate/isp2024/reference/hydro_parameters_and_constants.jl"
+output = "generated/isp2024/reference/hydro-parameters-and-constants.md"
+status = "published"
+nav_order = 50
+snapshot = false
+related_reference_pages = [
+    "editions/parameters-and-mappings.md",
+    "generated/isp2024/reference/output-tables.md",
+    "assumptions.md",
+]
 
 [[page]]
 id = "isp2024-problem-table"
@@ -98,7 +160,7 @@ related_reference_pages = ["generated/isp2024/reference/data-sources.md", "conce
 
 [[page]]
 id = "isp2024-temperature-data-coverage"
-title = "ISP 2024: Temperature-data coverage and climate-zone solar comparison"
+title = "ISP 2024: Temperature information and PISP coverage"
 kind = "validation"
 track = "isp2024"
 editions = ["2024"]
@@ -108,6 +170,7 @@ output = "generated/isp2024/validation/temperature-data-coverage.md"
 status = "published"
 nav_order = 30
 snapshot = true
+data_requirements = [{ root = "download", edition = "2024", path = "2024-isp-inputs-and-assumptions-workbook.xlsx", type = "file" }]
 related_reference_pages = ["generated/isp2024/reference/data-sources.md", "assumptions.md"]
 
 [[page]]
@@ -145,35 +208,25 @@ data_requirements = [
 related_reference_pages = ["editions/source-material.md", "editions/trace-coverage.md"]
 
 [[page]]
-id = "comparison-source-availability-by-edition"
-title = "ISP 2024 and ISP 2026: Source availability by edition"
-kind = "validation"
+id = "comparison-model-archive-structure"
+title = "ISP 2024 and ISP 2026 model archive comparison"
+kind = "analysis"
 track = "comparison"
 editions = ["2024", "2026"]
 data_layer = "source-data"
-source = "literate/comparison/validation/source_availability_by_edition.jl"
-output = "generated/comparison/validation/source-availability-by-edition.md"
+source = "literate/comparison/analysis/model_archive_comparison.jl"
+output = "generated/comparison/analyses/model-archive-comparison.md"
 status = "published"
 nav_order = 10
 snapshot = false
 data_requirements = [
     { root = "report", edition = "2024", path = "2024-isp-plexos-model-instructions.pdf", type = "file" },
     { root = "report", edition = "2026", path = "2026-isp-plexos-model-instructions.pdf", type = "file" },
+    { root = "report", edition = "2026", path = "2025-inputs-assumptions-and-scenarios-report.pdf", type = "file" },
     { root = "download", edition = "2024", path = "zip/2024-isp-model.zip", type = "file" },
-    { root = "download", edition = "2024", path = "zip/Traces", type = "directory" },
-    { root = "download", edition = "2024", path = "2024 ISP Model", type = "directory" },
-    { root = "download", edition = "2024", path = "Core", type = "directory" },
-    { root = "download", edition = "2024", path = "Sensitivities", type = "directory" },
-    { root = "download", edition = "2024", path = "Traces", type = "directory" },
     { root = "download", edition = "2026", path = "zip/2026-isp-model.zip", type = "file" },
-    { root = "download", edition = "2026", path = "zip/Traces/2026-isp-solar-traces.zip", type = "file" },
-    { root = "download", edition = "2026", path = "zip/Traces/2026-isp-wind-traces.zip", type = "file" },
-    { root = "download", edition = "2026", path = "2026 ISP Model", type = "directory" },
-    { root = "download", edition = "2026", path = "Core scenarios", type = "directory" },
-    { root = "download", edition = "2026", path = "Sensitivities", type = "directory" },
-    { root = "download", edition = "2026", path = "Traces", type = "directory" },
 ]
-related_reference_pages = ["editions/comparison.md", "editions/trace-coverage.md"]
+related_reference_pages = ["editions/comparison.md", "editions/source-material.md", "editions/trace-coverage.md"]
 
 [[page]]
 id = "isp2024-generated-output-consistency"

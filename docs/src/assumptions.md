@@ -1,5 +1,7 @@
 # Assumptions and scope
 
+The PISP dataset layer requires explicit interpretation limits, modelling assumptions, and checks before downstream use.
+
 These assumptions apply to PISP's implemented ISP 2024 dataset-construction workflow.
 [Supported ISP editions](editions/supported-editions.md) defines the separate ISP 2026 source-acquisition and integration boundary.
 
@@ -54,7 +56,8 @@ The ISP 2024 parser and downloader combine several source vintages.
 [ISP 2024 data sources](generated/isp2024/reference/data-sources.md) lists the configured download targets and expected local inputs.
 A reproducible study should still archive the exact downloaded files and record checksums.
 
-Package constants such as bus coordinates, trace-year mappings, generator trace filename exceptions, hydro mappings, and buildout templates should be reviewed as modelling assumptions. Some of these values are code-derived or source-derived; others are pragmatic mappings needed to align published files with PISP's schema.
+Package constants such as bus coordinates, trace-year mappings, generator trace filename exceptions, hydro mappings, and buildout templates should be reviewed as modelling assumptions. Some values come directly from cited source material, while others are package mappings used to align published files with PISP's schema.
+Optional build-outs use package-defined generator and storage templates rather than complete workbook rows. The [ISP 2024 build-out defaults](generated/isp2024/reference/buildout-defaults.md) page lists the values PISP injects, the fields calculated from workbook capacity, and the placeholders replaced by generated or looked-up values.
 
 ## Practical review checklist
 
@@ -75,3 +78,4 @@ Before using ISP 2024 PISP output in a downstream study, check:
 - [Data sources](generated/isp2024/reference/data-sources.md) identifies the source vintages and reproducibility boundary.
 - [Domain concepts](concepts.md) explains the aggregated network and static-versus-schedule data model.
 - [Parameters and mappings](generated/isp2024/reference/parameters-and-mappings.md) records the hard-coded values and technology-specific exceptions that require review.
+- [Build-out defaults](generated/isp2024/reference/buildout-defaults.md) records the field-level generator and storage values applied to optional new assets.

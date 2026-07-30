@@ -1,8 +1,10 @@
 # Domain concepts
 
+The PISP dataset layer connects asset identities, relationships, and schedule overlays.
+
 PISP represents its implemented ISP 2024 workflow as a connected data model rather than as a collection of independent CSV files.
 The central distinction is between **assets**, which retain stable identities and mostly static parameters, and **schedules**, which describe how selected asset quantities change with scenario and time.
-[Supported ISP editions](editions/supported-editions.md) defines the separate ISP 2026 source-acquisition and integration boundary.
+[Supported ISP editions](editions/supported-editions.md) and [Trace coverage](editions/trace-coverage.md) define the separate ISP 2026 source-acquisition, parser-review, and integration boundary.
 
 ## ISP 2024 dataset relationships
 
@@ -135,13 +137,6 @@ It does not contain intra-sub-region topology, bus voltages, detailed line imped
 When aggregating variable renewable generation from ISP 2024 PISP output, classify rows by `Generator.tech`, not by `Generator.fuel` alone.
 Technology labels preserve distinctions such as rooftop PV and utility-scale PV that can be lost in a broader fuel grouping.
 The [Working with PISP-generated outputs](generated/isp2024/tutorials/working-with-pisp-outputs.md) tutorial uses case-insensitive `pv` or `solar` matches for solar and `wind` for wind.
-
-## Edition boundary
-
-These asset, scenario, trace, and output concepts describe the implemented ISP 2024 workflow.
-Selected ISP 2026 materials can be downloaded and extracted through PISP.jl.
-No equivalent PISP.jl output contract or trace mapping is documented yet, and detailed ParseISP.jl coverage remains unverified here.
-See [Supported ISP editions](editions/supported-editions.md) and [Trace coverage](editions/trace-coverage.md) before treating a source archive as a comparable PISP dataset.
 
 ## See also
 

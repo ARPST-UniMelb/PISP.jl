@@ -11,7 +11,7 @@ A near-term or far-term renewable profile is therefore a reuse of selected histo
 
 | Item | Definition |
 |---|---|
-| Mapping authority | `PISP.WEATHER_YEARS_ISP` |
+| Runtime mapping | `PISP.ISPdatabuilder.DATE_RANGES_REFYEARS` |
 | Historical labels | 2011-2023 |
 | Representative sites | `Bannerton_SAT` solar and `DUNDWF1` wind |
 | Near-term group | Financial years ending 2025-2029 |
@@ -64,22 +64,19 @@ const FAR_YEARS = [2045, 2046, 2047, 2048, 2049]
 </details>
 ```
 
-The financial-year-to-historical-year mapping is read directly from the package configuration in `PISP.WEATHER_YEARS_ISP`. An invariant check confirms every financial-year range is contiguous.
+The financial-year-to-historical-year mapping is the same `PISP.ISPdatabuilder.DATE_RANGES_REFYEARS` object consumed by the runtime trace builder. An invariant check confirms every financial-year range is contiguous.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
 ```
 
 ````julia
-const DATE_RANGES_REFYEARS = [
-    (fy_range[1], fy_range[2], parse(Int, ref_year))
-    for (fy_range, ref_year) in sort(collect(PISP.WEATHER_YEARS_ISP); by = first)
-]
+const DATE_RANGES_REFYEARS = PISP.ISPdatabuilder.DATE_RANGES_REFYEARS
 
 for i in 1:(length(DATE_RANGES_REFYEARS) - 1)
-    this_fy_end = Date(DATE_RANGES_REFYEARS[i][2])
-    next_fy_start = Date(DATE_RANGES_REFYEARS[i + 1][1])
-    @assert next_fy_start == this_fy_end + Day(1) "PISP.WEATHER_YEARS_ISP financial-year ranges are not contiguous between row $i and $(i + 1)"
+    this_fy_end = DATE_RANGES_REFYEARS[i][2]
+    next_fy_start = DATE_RANGES_REFYEARS[i + 1][1]
+    @assert next_fy_start == this_fy_end + Day(1) "DATE_RANGES_REFYEARS financial-year ranges are not contiguous between row $i and $(i + 1)"
 end
 ````
 
@@ -101,7 +98,7 @@ trace_path(tech, yr, loc) = joinpath(TRACES, "$(tech)_$(yr)", "$(loc)_RefYear$(y
 daily_cf(df::DataFrame, hh_cols) = [mean(row[col] for col in hh_cols) for row in eachrow(df)]
 
 function ref_year_for_fy_end(yr::Int)
-    idx = findfirst(t -> startswith(t[2], string(yr)), DATE_RANGES_REFYEARS)
+    idx = findfirst(t -> year(t[2]) == yr, DATE_RANGES_REFYEARS)
     idx === nothing && return nothing
     return DATE_RANGES_REFYEARS[idx][3]
 end
@@ -137,7 +134,7 @@ Each row assigns one financial year in the planning horizon to the historical we
 fy_start = [t[1] for t in DATE_RANGES_REFYEARS]
 fy_end = [t[2] for t in DATE_RANGES_REFYEARS]
 ref_year = [t[3] for t in DATE_RANGES_REFYEARS]
-fy_label = ["FY$(e[1:4])" for e in fy_end]
+fy_label = ["FY$(year(e))" for e in fy_end]
 ref_label = string.(ref_year)
 
 mapping_table = DataFrame(
@@ -194,7 +191,7 @@ markdown_table(mapping_table)
 ````julia
 println("=== 4006 Composite Mapping ===")
 for row in eachrow(mapping_table)
-    println("  ", row.fy_start[1:4], " → ref ", row.ref_year)
+    println("  ", year(row.fy_start), " → ref ", row.ref_year)
 end
 ````
 
@@ -475,7 +472,7 @@ for (idx, row) in enumerate(eachrow(mapping_table))
     end
 end
 
-fy_labels = [row.fy_start[1:4] for row in eachrow(mapping_table)]
+fy_labels = [string(year(row.fy_start)) for row in eachrow(mapping_table)]
 plot!(p1, xticks=(1:nrow(mapping_table), fy_labels), xrotation=90)
 
 savefig(p1, figure_path(SCRIPT_STEM, "08_4006_timeline_map.png"))

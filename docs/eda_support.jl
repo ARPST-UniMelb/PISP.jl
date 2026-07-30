@@ -2,7 +2,6 @@ module EdaSupport
 
 using CSV
 using DataFrames
-using Pkg
 using PrettyTables
 
 export TABLE_ROOT,

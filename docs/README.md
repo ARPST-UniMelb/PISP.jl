@@ -133,6 +133,7 @@ Local data are required for complete Literate regeneration, but not for a site b
 | `docs/src/assumptions.md` | ISP 2024 modelling scope, caveats, validation responsibilities, and external checks. |
 | `docs/src/api.md` | Public ISP 2024 build and source-acquisition API boundary. |
 | `docs/literate/isp2024/` | Executable ISP 2024 reference, tutorial, validation, and analysis sources. |
+| `docs/literate/comparison/` | Executable cross-edition source comparisons and mapping evidence. |
 | `docs/page-registry.toml` | Authority for every registry-managed Literate source and generated Markdown output. |
 | `docs/edition_profiles.jl` | Edition-specific report/download roots and schedule defaults used by rendering preflight. |
 | `docs/navigation.jl` | Published-site navigation assembled from static edition pages and published registry entries. |
@@ -141,8 +142,10 @@ Local data are required for complete Literate regeneration, but not for a site b
 | `docs/make.jl` | Target-specific source-link staging and Documenter site build. |
 
 The public site separates shared explanatory pages from ISP 2024, ISP 2026, and comparison tracks.
-The ISP 2026 and comparison tracks publish source-data-only availability pages;
-processed-data and parser claims remain outside their scope.
+The ISP 2026 track publishes source-availability evidence, while the comparison
+track analyses release-level source structures needed for explicit crosswalks.
+Processed-data compatibility still requires edition-specific parser and schema
+validation.
 
 ## Page registry
 
@@ -192,6 +195,13 @@ Render one known page by its registry ID with:
 ```sh
 PISP_LITERATE_PAGES=isp2024-historical-trace-years julia --project=docs docs/render_literate.jl
 ```
+
+### Navigation placement by track
+
+`isp2024` and `isp2026` pages are placed automatically, grouped by `kind` under their track's section.
+`comparison` pages are placed automatically, grouped by `data_layer` under "Compare ISP 2024 and ISP 2026".
+`shared` pages have no automatic placement: add the page's entry by hand to the relevant group in `docs/navigation.jl`'s "Understand PISP and ISP data" tree.
+`docs/test/runtests.jl` fails and names any published page whose output path is not reachable from the built navigation, so a missing `shared` entry is caught rather than silently building an unreachable page.
 
 ## Edition profiles and data preflight
 
@@ -290,8 +300,17 @@ julia --project=docs docs/test_source_links.jl
 
 ## Adding or changing a registry-managed page
 
+### Literate page structure
+
+Use two complementary structures for executable documentation:
+
+1. **Setup block** — keep dependencies, edition-profile source selection, path configuration, and reusable helper definitions reader-visible near the start of the page. Add only a trailing `nothing #hide` to suppress the setup block's meaningless return value; do not hide the setup itself.
+2. **Section-local executable narrative** — keep each section's source selection, transformation, and rendered evidence together under that section's heading. Do not compute every table in one early hidden block for later headings to reference.
+
+`docs/literate/isp2024/validation/temperature_data_coverage.jl` is the local reference pattern.
+
 1. Choose the page's reader purpose, track, edition scope, and data layer.
-2. Add or update the Literate source and its registry entry together.
+2. Add or update the Literate source and its registry entry together. For a `shared`-track page, also add its entry to `docs/navigation.jl` by hand (see "Navigation placement by track" above); `isp2024`, `isp2026`, and `comparison` pages are placed automatically.
 3. Declare every direct local input through typed `data_requirements` instead of embedding untracked path assumptions in the renderer.
 4. Use the edition profile for source or output roots in edition-specific Literate pages.
 5. Render the affected page, inspect its Markdown and figures, then run the appropriate site and source-link checks.

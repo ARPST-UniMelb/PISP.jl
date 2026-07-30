@@ -5,6 +5,7 @@ EditURL = "../../../../literate/isp2024/reference/parameters_and_mappings.jl"
 # ISP 2024: Parameters and mappings
 
 PISP uses package-defined identifiers and mappings to reconcile source files that do not share one canonical naming system. The tables below list the current scenario, bus, area, weather-year, and reliability-field mappings.
+They focus on mappings with identified parser or builder roles, not an inventory of every constant in the package's parameter files.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -60,6 +61,8 @@ markdown_table(scenario_mappings)
 | 3 | Green Energy Exports | HydrogenSuperpower | HYDROGEN\_EXPORT |
 
 
+The problem-table and build-out paths iterate `PISP.ID2SCE` to create rows for the package's three scenario IDs. The hydro parser uses `PISP.HYDROSCE` to select PLEXOS hydro labels, while the 4006 demand builder uses `PISP.DEMSCE` in source and output filenames. These mappings therefore affect generated data rather than serving only as display labels.
+
 ## Bus and area constants
 
 ```@raw html
@@ -105,9 +108,11 @@ markdown_table(bus_area_mappings)
 
 ## Reference trace 4006 weather-year mapping
 
-The composite trace maps each financial-year interval to a historical weather year. Repeated historical years are part of the mapping and should be considered when comparing planning periods.
+The composite trace maps each financial-year interval to a historical reference year. Repeated historical years are part of the mapping and should be considered when comparing planning periods.
 
-The mapping is based on AEMO's 2024 ISP PLEXOS model instructions ([2024 ISP PLEXOS Model Instructions, p. 5](../../../../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=5)), the same document cited by `PISP.WEATHER_YEARS_ISP`'s source comment in `src/parameters/general2024ISP.jl`.
+AEMO explains the rolling-reference-year method in the [2024 ISP PLEXOS Model Instructions, p. 5](../../../../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=5). The Reference Year and VRE Reference Year sequence is in Table 1 of the [2024 ISP PLEXOS Model Instructions, p. 6](../../../../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=6); the table's Hydrological Reference Year is a distinct sequence. PISP stores the ending year of each report range: for example, AEMO's `2018-19` reference year is represented as `2019` for the interval from 1 July 2024 through 30 June 2025.
+
+The 4006 solar, wind, and demand builders consume `PISP.ISPdatabuilder.DATE_RANGES_REFYEARS`; the current implementation does not parse this mapping from the 2024 Inputs and Assumptions workbook.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -116,13 +121,12 @@ The mapping is based on AEMO's 2024 ISP PLEXOS model instructions ([2024 ISP PLE
 ````julia
 weather_year_mapping = DataFrame([
     (
-        financial_year_start = Date(window[1]),
-        financial_year_end = Date(window[2]),
-        weather_year = parse(Int, weather_year),
+        financial_year_start = financial_year_start,
+        financial_year_end = financial_year_end,
+        reference_year_ending = reference_year_ending,
     )
-    for (window, weather_year) in PISP.WEATHER_YEARS_ISP
+    for (financial_year_start, financial_year_end, reference_year_ending) in PISP.ISPdatabuilder.DATE_RANGES_REFYEARS
 ])
-sort!(weather_year_mapping, :financial_year_start)
 markdown_table(weather_year_mapping)
 ````
 
@@ -130,7 +134,7 @@ markdown_table(weather_year_mapping)
 </details>
 ```
 
-| **financial\_year\_start** | **financial\_year\_end** | **weather\_year** |
+| **financial\_year\_start** | **financial\_year\_end** | **reference\_year\_ending** |
 |:--|:--|--:|
 | 2024-07-01 | 2025-06-30 | 2019 |
 | 2025-07-01 | 2026-06-30 | 2020 |
@@ -200,6 +204,8 @@ markdown_table(reliability_schema)
 ## Using the mappings
 
 Scenario labels, source-specific aliases, bus assignments, weather-year mappings, technology groupings, retirement schedules, and build-out templates are modelling inputs rather than incidental filenames. Changes to these mappings can change generated datasets without any change to the downloaded source files.
+
+Optional build-out technology labels select complete PISP generator or storage templates. See [ISP 2024 build-out defaults](buildout-defaults.md) for the field-level values, calculated fields, placeholders, and override rules.
 
 Rooftop PV and utility-scale renewable capacity fields require special care. The time-varying schedule is the relevant maximum-output series for solar and wind; the static `pmax` field is not a universal capacity-factor denominator. See [Assumptions and scope](@ref).
 

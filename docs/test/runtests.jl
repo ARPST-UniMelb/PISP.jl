@@ -7,10 +7,12 @@ include(joinpath(TEST_DOCS_DIR, "page_registry.jl"))
 include(joinpath(TEST_DOCS_DIR, "render_literate.jl"))
 include(joinpath(TEST_DOCS_DIR, "navigation.jl"))
 include(joinpath(TEST_DOCS_DIR, "eda_support.jl"))
+include(joinpath(TEST_DOCS_DIR, "download_layout.jl"))
 
 using .PISPDocsPageRegistry
 using .PISPDocsNavigation
 using .EdaSupport
+using .PISPDocsDownloadLayout
 
 @testset "Markdown table rendering" begin
     rendered = markdown_table(DataFrame(Label=["alpha", "beta"], Value=[1.0, 2.0]))
@@ -107,18 +109,194 @@ end
     end
 
     mappings = read_doc("editions", "parameters-and-mappings.md")
-    for required in ("`1`, `2`, and `3`", "Twelve package bus aliases", "PISP.WEATHER_YEARS_ISP", "B11:K297", "B7:G50")
+    for required in (
+        "`1`, `2`, and `3`",
+        "Twelve package bus aliases",
+        "PISP.ISPdatabuilder.DATE_RANGES_REFYEARS",
+        "problem-table and build-out paths",
+        "B11:K297",
+        "B7:G50",
+        "Report-defined mappings",
+        "Workbook-derived values",
+        "Package-defined defaults",
+        "Unverified provenance",
+        "ISP 2024 build-out defaults",
+        "ISP 2024 hydro parameters and constants",
+    )
         @test occursin(required, mappings)
     end
 
+    generated_mappings = read_doc(
+        "generated",
+        "isp2024",
+        "reference",
+        "parameters-and-mappings.md",
+    )
+    @test occursin("2024 ISP PLEXOS Model Instructions, p. 6", generated_mappings)
+    @test occursin("ending year", generated_mappings)
+    @test occursin("2024-isp-plexos-model-instructions.pdf#page=5", generated_mappings)
+    @test occursin("2024-isp-plexos-model-instructions.pdf#page=6", generated_mappings)
+    @test occursin("4006 demand builder", generated_mappings)
+    @test occursin("not an inventory of every constant", generated_mappings)
+    @test occursin("Reference Year and VRE Reference Year", generated_mappings)
+    @test occursin("PISP.ISPdatabuilder.DATE_RANGES_REFYEARS", generated_mappings)
+    @test !occursin("PISP.WEATHER_YEARS_ISP", generated_mappings)
+
+    generated_4006_mapping = read_doc(
+        "generated",
+        "isp2024",
+        "analyses",
+        "reference-trace-4006-composite-mapping.md",
+    )
+    @test occursin("PISP.ISPdatabuilder.DATE_RANGES_REFYEARS", generated_4006_mapping)
+    @test !occursin("PISP.WEATHER_YEARS_ISP", generated_4006_mapping)
+
+    buildout_defaults = read_doc(
+        "generated",
+        "isp2024",
+        "reference",
+        "buildout-defaults.md",
+    )
+    @test occursin("Source status", buildout_defaults)
+    @test occursin("original external source", buildout_defaults)
+    @test !occursin("\n````\ntrue\n````", buildout_defaults)
+
+    hydro_parameters = read_doc(
+        "generated",
+        "isp2024",
+        "reference",
+        "hydro-parameters-and-constants.md",
+    )
+    for required in (
+        "# ISP 2024: Hydro parameters and constants",
+        "HYDRO2FILE",
+        "HYDRO2CNS",
+        "WEATHER_YEARS",
+        "DAM_SHARES",
+        "HYDRO_DAMS_GENS",
+        "SNOWY_HYDRO_GROUPS",
+        "HYDRO_DAMS_STORAGE",
+        "HYDRO_STORAGE_GEN",
+        "2023-inputs-assumptions-and-scenarios-report.pdf#page=97",
+        "2023-inputs-assumptions-and-scenarios-report.pdf#page=98",
+        "2023-inputs-assumptions-and-scenarios-report.pdf#page=99",
+        "Hydro inflow variability across reference weather years – Snowy Hydro",
+        "generator and storage inflow schedules",
+    )
+        @test occursin(required, hydro_parameters)
+    end
+    @test !occursin("TraceCite", hydro_parameters)
+    @test !occursin("workspace", lowercase(hydro_parameters))
+    @test !occursin("task 0224", lowercase(hydro_parameters))
+
     comparison = read_doc("editions", "comparison.md")
-    for required in ("price year", "real or nominal", "one-to-many", "many-to-one", "inner join")
+    for required in (
+        "model archive comparison",
+        "scenario directories",
+        "Wind, solar, and timeslice",
+        "CSV schemas",
+        "model-XML references",
+    )
         @test occursin(required, comparison)
+    end
+
+    model_archive_comparison = read_doc(
+        "generated",
+        "comparison",
+        "analyses",
+        "model-archive-comparison.md",
+    )
+    for required in (
+        "Progressive Change",
+        "Slower Growth",
+        "Green Energy Exports",
+        "Accelerated Transition",
+        "PLEXOS solver parameters",
+        "345",
+        "DNSP",
+        "Rooftop PV",
+        "2025-inputs-assumptions-and-scenarios-report.pdf#page=20",
+    )
+        @test occursin(required, model_archive_comparison)
     end
 
     trace_coverage = read_doc("editions", "trace-coverage.md")
     for required in ("14 historical reference years", "16 for 2026", "DNSP", "probability of exceedance")
         @test occursin(required, trace_coverage)
+    end
+
+    download_layout = read_doc("generated", "shared", "reference", "pisp-downloads-layout.md")
+    for required in (
+        "Core/ or Core scenarios/",
+        "PISP-generated intermediates",
+        "Extracted outlook directories",
+        "2024-isp-generation-and-storage-outlook.zip",
+        "2026-isp-generation-and-storage-outlook.zip",
+    )
+        @test occursin(required, download_layout)
+    end
+end
+
+@testset "Literate executable narrative structure" begin
+    read_literate(path...) = read(joinpath(TEST_DOCS_DIR, "literate", path...), String)
+    function position(needle, source)
+        match = findfirst(needle, source)
+        match === nothing && error("missing source marker: $needle")
+        return first(match)
+    end
+
+    layout = read_literate("shared", "reference", "pisp_downloads_layout.jl")
+    availability = read_literate("isp2026", "validation", "source_availability.jl")
+    archive_comparison = read_literate("comparison", "analysis", "model_archive_comparison.jl")
+
+    for source in (layout, availability, archive_comparison)
+        hidden_lines = filter(line -> occursin("#hide", line), split(source, '\n'))
+        @test !isempty(hidden_lines)
+        @test all(line -> strip(line) == "nothing #hide", hidden_lines)
+    end
+
+    @test position("download_layouts =", layout) >
+        position("# ## Observed outlook directories and source archives", layout)
+    @test position("inspection = inspect_edition", availability) >
+        position("# ## Report and archive observations", availability)
+
+    @test !occursin("const RECORDS", archive_comparison)
+    for (selection, heading) in (
+        ("archive_records =", "# ## Archive overview"),
+        ("scenario_records_2024 =", "# ## Scenario continuity"),
+        ("xml_records =", "# ## XML packaging"),
+        ("trace_records_2024 =", "# ## Trace families inside the model ZIPs"),
+        ("filename_records =", "# ## Representative filenames"),
+        ("verification_records =", "# ## Verification"),
+    )
+        @test position(selection, archive_comparison) > position(heading, archive_comparison)
+    end
+end
+
+@testset "Downloaded source layout filtering" begin
+    mktempdir() do root
+        for directory in (
+            "Core",
+            "Sensitivities",
+            "Auxiliary",
+            "Traces",
+            "2024 ISP Model",
+            "manifests",
+            "zip",
+            "__MACOSX",
+        )
+            mkpath(joinpath(root, directory))
+        end
+        write(joinpath(root, "zip", "2024-isp-model.zip"), "model")
+        write(joinpath(root, "zip", "2024-isp-generation-and-storage-outlook.zip"), "outlook")
+        mkpath(joinpath(root, "zip", "Traces"))
+        write(joinpath(root, "zip", "Traces", "2024-isp-solar-traces.zip"), "trace")
+
+        @test outlook_directories(root) == ["Core", "Sensitivities"]
+        @test source_archives(root) == [
+            "2024-isp-generation-and-storage-outlook.zip",
+            "2024-isp-model.zip",
+        ]
     end
 end
 
@@ -203,6 +381,7 @@ function renderer_page(
     editions,
     status,
     kind="reference",
+    data_layer="source-data",
     nav_order=10,
 )
     return PageSpec(
@@ -211,7 +390,7 @@ function renderer_page(
         kind=kind,
         track=track,
         editions=editions,
-        data_layer="source-data",
+        data_layer=data_layer,
         source="literate/fixture/$(id).jl",
         output="generated/fixture/$(id).md",
         status=status,
@@ -582,6 +761,40 @@ end
                 status="archived",
                 nav_order=40,
             ),
+            renderer_page(
+                id="comparison-source-data",
+                track="comparison",
+                editions=["2024", "2026"],
+                status="published",
+                kind="analysis",
+                data_layer="source-data",
+                nav_order=20,
+            ),
+            renderer_page(
+                id="comparison-pisp-dataset",
+                track="comparison",
+                editions=["2024", "2026"],
+                status="published",
+                kind="reference",
+                data_layer="pisp-dataset",
+                nav_order=10,
+            ),
+            renderer_page(
+                id="comparison-package-workflow-draft",
+                track="comparison",
+                editions=["2024", "2026"],
+                status="draft",
+                data_layer="package-workflow",
+                nav_order=10,
+            ),
+            renderer_page(
+                id="comparison-cross-layer-archived",
+                track="comparison",
+                editions=["2024", "2026"],
+                status="archived",
+                data_layer="cross-layer",
+                nav_order=10,
+            ),
         ]
         navigation = registry_navigation(pages)
 
@@ -601,46 +814,63 @@ end
 
         shared_material = navigation_by_title["Understand PISP and ISP data"]
         @test first.(shared_material) == [
-            "Supported ISP editions",
-            "Domain concepts",
-            "Output data model",
-            "Assumptions and scope",
-            "What each ISP edition publishes",
-            "Downloaded source inventory by edition",
-            "Trace families, schemas, and coverage",
-            "Parameters and mappings across editions",
+            "ISP source data",
+            "PISP transformation",
+            "PISP datasets",
         ]
-        @test last.(shared_material) == [
+        @test first.(last(shared_material[1])) == [
+            "Source material by edition",
+            "Trace families and source meaning",
+            "Downloaded source layout by edition",
+        ]
+        @test last.(last(shared_material[1])) == [
+            "editions/source-material.md",
+            "editions/trace-coverage.md",
+            "generated/shared/reference/pisp-downloads-layout.md",
+        ]
+        @test first.(last(shared_material[2])) == [
+            "Workflow support by edition",
+            "Source-to-dataset processing",
+            "Parameters, mappings, and constants",
+        ]
+        @test last.(last(shared_material[2])) == [
             "editions/supported-editions.md",
+            "editions/source-inventory.md",
+            "editions/parameters-and-mappings.md",
+        ]
+        @test first.(last(shared_material[3])) == [
+            "Assets, relationships, and schedules",
+            "Output tables, fields, and units",
+            "Dataset interpretation and study bounds",
+        ]
+        @test last.(last(shared_material[3])) == [
             "concepts.md",
             "editions/output-data-model.md",
             "assumptions.md",
-            "editions/source-material.md",
-            "editions/source-inventory.md",
-            "editions/trace-coverage.md",
-            "editions/parameters-and-mappings.md",
         ]
 
         isp2024_navigation = navigation_by_title["ISP 2024"]
         @test first.(isp2024_navigation) == [
             "Overview",
+            "Preprocessing workflow",
             "Reference and inputs",
             "Tutorials",
             "Data validation",
             "Analyses and case studies",
         ]
         @test last(isp2024_navigation[1]) == "editions/isp2024.md"
-        @test first.(last(isp2024_navigation[2])) == [
+        @test last(isp2024_navigation[2]) == "editions/isp2024-preprocessing.md"
+        @test first.(last(isp2024_navigation[3])) == [
             "Renderer isp2024-reference-first",
             "Renderer isp2024-reference-later",
         ]
-        @test last.(last(isp2024_navigation[2])) == [
+        @test last.(last(isp2024_navigation[3])) == [
             "generated/fixture/isp2024-reference-first.md",
             "generated/fixture/isp2024-reference-later.md",
         ]
-        @test first.(last(isp2024_navigation[3])) == ["Renderer isp2024-tutorial"]
-        @test first.(last(isp2024_navigation[4])) == ["Renderer isp2024-validation"]
-        @test first.(last(isp2024_navigation[5])) == ["Renderer isp2024-analysis"]
+        @test first.(last(isp2024_navigation[4])) == ["Renderer isp2024-tutorial"]
+        @test first.(last(isp2024_navigation[5])) == ["Renderer isp2024-validation"]
+        @test first.(last(isp2024_navigation[6])) == ["Renderer isp2024-analysis"]
         @test !occursin("draft", repr(isp2024_navigation))
         @test !occursin("archived", repr(isp2024_navigation))
 
@@ -650,6 +880,82 @@ end
         comparison_navigation = navigation_by_title["Compare ISP 2024 and ISP 2026"]
         @test comparison_navigation == Any[
             "Overview and comparison rules"=>"editions/comparison.md",
+            "ISP source data"=>Any[
+                "Renderer comparison-source-data"=>
+                    "generated/fixture/comparison-source-data.md",
+            ],
+            "PISP datasets"=>Any[
+                "Renderer comparison-pisp-dataset"=>
+                    "generated/fixture/comparison-pisp-dataset.md",
+            ],
         ]
+        @test !occursin("package-workflow-draft", repr(comparison_navigation))
+        @test !occursin("cross-layer-archived", repr(comparison_navigation))
+    end
+
+    @testset "every published page is nav-reachable" begin
+        function flatten_nav_outputs(navigation)
+            outputs = String[]
+            for (_, value) in navigation
+                if value isa AbstractString
+                    push!(outputs, value)
+                else
+                    append!(outputs, flatten_nav_outputs(value))
+                end
+            end
+            return outputs
+        end
+
+        # Sanity-check the assertion mechanism itself: a published page whose
+        # kind has no entry in its track's KIND_LABELS is never selected by
+        # track_sections, so it must be detected as unreachable.
+        reachable_pages = [
+            renderer_page(id="covered-page", track="isp2024", editions=["2024"], status="published"),
+        ]
+        reachable_outputs = Set(flatten_nav_outputs(registry_navigation(reachable_pages)))
+        @test reachable_pages[1].output in reachable_outputs
+
+        orphan_pages = [
+            renderer_page(
+                id="orphan-page",
+                track="isp2024",
+                editions=["2024"],
+                status="published",
+                kind="unregistered-kind",
+            ),
+        ]
+        orphan_outputs = Set(flatten_nav_outputs(registry_navigation(orphan_pages)))
+        @test !(orphan_pages[1].output in orphan_outputs)
+
+        # Sanity-check the actual original failure mode: `registry_navigation`
+        # has no dynamic handler for the `shared` track at all (unlike
+        # `isp2024`/`isp2026`/`comparison`, which go through `track_navigation`
+        # or `comparison_navigation`). Only one `shared` page is placed, by a
+        # hand-written literal entry in the "Understand" tree; any other
+        # `shared` page is unreachable until it also gets a literal entry.
+        unhandled_track_pages = [
+            renderer_page(
+                id="future-shared-page",
+                track="shared",
+                editions=["2024", "2026"],
+                status="published",
+                kind="reference",
+            ),
+        ]
+        unhandled_track_outputs = Set(flatten_nav_outputs(registry_navigation(unhandled_track_pages)))
+        @test !(unhandled_track_pages[1].output in unhandled_track_outputs)
+
+        # The real registry: every published page's output must appear
+        # somewhere in the rendered navigation tree.
+        real_pages = load_page_registry(
+            joinpath(TEST_DOCS_DIR, "page-registry.toml");
+            require_published_outputs=true,
+            check_generated_outputs=true,
+        )
+        real_outputs = Set(flatten_nav_outputs(registry_navigation(real_pages)))
+        for page in real_pages
+            is_published(page) || continue
+            @test page.output in real_outputs
+        end
     end
 end

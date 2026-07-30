@@ -1,5 +1,7 @@
 # Output data model
 
+The PISP dataset layer consists of exported tables, fields, units, identifiers, and static-to-schedule relationships.
+
 PISP's documented output contract applies to the ISP 2024 build.
 The build can write CSV and Arrow representations of static asset tables and time-varying schedule tables.
 
