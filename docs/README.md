@@ -24,6 +24,10 @@ Its committed source override resolves PISP from the same checkout:
 PISP = {path = ".."}
 ```
 
+These are the local-maintainer environment defaults.
+The documentation scripts use the project selected when Julia starts and do not activate `docs/Project.toml` themselves.
+A separate environment with the required documentation dependencies can therefore be selected with `--project=<environment>`; `build_all.jl` and `render_changed.jl` preserve that active project when they start another documentation stage.
+
 The repository does not commit `Manifest.toml` files.
 Instantiate each environment from its `Project.toml`, and change dependency constraints only when dependencies are intentionally updated.
 Package and documentation-infrastructure tests use fixture or source-code checks unless a test explicitly declares an external-data prerequisite.
@@ -46,8 +50,7 @@ julia --project=docs docs/render_changed.jl
 ```
 
 `render_changed.jl` resolves the changed `docs/literate/**/*.jl` files (staged, unstaged, or untracked, versus `HEAD`) to their registry page IDs and re-renders just those in place through `PISP_LITERATE_PAGES`.
-It reports when a shared file changed (`eda_support.jl`, an EDA producer, or `page-registry.toml`), since those can affect many pages.
-Set `PISP_RUN_PRODUCERS=false` to reuse existing EDA evidence instead of re-running the producers.
+It reports changed documentation `.jl` files that are not registered page sources, such as `eda_support.jl` or `page_registry.jl`, since those can affect many pages.
 Run the full `docs/render_literate.jl` before committing regenerated Markdown; the changed-only path skips the whole-set completeness and atomic-replacement checks.
 
 ## Prepare local data for complete regeneration
@@ -166,7 +169,6 @@ The registry validates page metadata, source and output paths, navigation positi
 | `nav_order` | Position within a track and kind. |
 | `snapshot` | Whether the page describes a dated source or generated-data state. |
 | `data_requirements` | Typed local files or directories required before page execution. |
-| `producer` and `evidence_dir` | Optional external evidence producer and its directory. |
 | `related_reference_pages` | Static or generated pages defining the relevant package contract. |
 
 Use relative paths in registry metadata; paths that escape their declared root are rejected.
@@ -233,7 +235,7 @@ generated Markdown and local-observation tables. An absent root is not skipped
 by selected-page rendering. The optional skip-versus-fail behavior belongs only
 to the package-root fixture checks in `test/runtests.jl`.
 
-Before any producer or Literate page runs, the renderer resolves each selected requirement through the relevant edition profile and checks its type.
+Before any Literate page runs, the renderer resolves each selected requirement through the relevant edition profile and checks its type.
 The render plan prints selected page IDs, track and edition scope, resolved profiles, and resolved requirements.
 
 ## Validation commands
@@ -317,7 +319,7 @@ Use two complementary structures for executable documentation:
 6. Update related reference pages whenever a source, output, mapping, or support boundary changes.
 
 Executable validation and analysis pages should keep reader-facing evidence and interpretation with the code that computes them.
-Use `producer` and `evidence_dir` only when a separate producer is necessary; every registered path must be valid, and `evidence_dir` requires a `producer`.
+Keep executable page work in the registered source under `docs/literate/` or in a shared helper under `docs/`; do not route a page through a repository-external script.
 
 ## Implementation locations
 

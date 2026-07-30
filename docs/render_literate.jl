@@ -1,7 +1,7 @@
 # Regenerate committed Markdown for every active registry-managed Literate page.
 #
 # Run this script before the Documenter build whenever package code, local data,
-# EDA evidence, or a Literate source changes.
+# a documentation helper, or a Literate source changes.
 
 using Literate
 
@@ -14,13 +14,6 @@ const REPO_ROOT = normpath(joinpath(DOCS_DIR, ".."))
 const REGISTRY_PATH = joinpath(DOCS_DIR, "page-registry.toml")
 const TRACK_ORDER = Dict("shared" => 1, "isp2024" => 2, "isp2026" => 3, "comparison" => 4)
 const KIND_ORDER = Dict("reference" => 1, "tutorial" => 2, "validation" => 3, "analysis" => 4)
-
-function env_flag(name, default)
-    value = lowercase(strip(get(ENV, name, default ? "true" : "false")))
-    value in ("1", "true", "yes", "on") && return true
-    value in ("0", "false", "no", "off") && return false
-    error("$name must be one of true/false, yes/no, on/off, or 1/0")
-end
 
 function select_pages(registry_pages)
     explicit_ids = strip(get(ENV, "PISP_LITERATE_PAGES", ""))
@@ -141,50 +134,6 @@ function print_render_plan(pages, profiles)
     requirements_found || println("  - none")
 end
 
-function selected_producers(pages)
-    producers = Pair{String, Vector{String}}[]
-    index_by_path = Dict{String, Int}()
-
-    for page in pages
-        page.producer === nothing && continue
-        if haskey(index_by_path, page.producer)
-            push!(producers[index_by_path[page.producer]].second, page.id)
-        else
-            push!(producers, page.producer => [page.id])
-            index_by_path[page.producer] = length(producers)
-        end
-    end
-
-    return producers
-end
-
-function run_producer(relative_path, page_ids)
-    producer_path = joinpath(REPO_ROOT, relative_path)
-    command = `$(Base.julia_cmd()) --project=$(REPO_ROOT) $(producer_path)`
-    println("\n=== EDA producer: $relative_path ===")
-    println("Pages: $(join(page_ids, ", "))")
-
-    try
-        run(Cmd(command; dir = REPO_ROOT))
-    catch
-        println(stderr, "\nERROR: EDA producer failed: $relative_path")
-        println(stderr, "Affected pages: $(join(page_ids, ", "))")
-        println(stderr, "No Literate page using this producer was rendered.")
-        rethrow()
-    end
-end
-
-function run_selected_producers(pages)
-    env_flag("PISP_RUN_PRODUCERS", true) || begin
-        println("Skipping registered EDA producers because PISP_RUN_PRODUCERS=false.")
-        return
-    end
-
-    for (producer, page_ids) in selected_producers(pages)
-        run_producer(producer, page_ids)
-    end
-end
-
 function collapse_julia_source(markdown)
     lines = split(markdown, '\n'; keepempty = true)
     output = String[]
@@ -239,17 +188,6 @@ function set_edit_url(markdown, source_path, final_output_path)
     return join(lines, '\n')
 end
 
-function validate_render_preconditions(page)
-    if page.evidence_dir !== nothing
-        evidence_path = joinpath(REPO_ROOT, page.evidence_dir)
-        isdir(evidence_path) || error(
-            "page \"$(page.id)\" expects EDA evidence at \"$evidence_path\"; " *
-            "run julia --project=. $(page.producer) from the repository root first",
-        )
-    end
-
-end
-
 function validate_selected_requirements(pages, profiles)
     for page in pages
         PISPDocsPageRegistry.validate_data_requirements(
@@ -282,8 +220,6 @@ function with_page_environment(callback, output_dir)
 end
 
 function render_page(page; src_dir = SRC_DIR)
-    validate_render_preconditions(page)
-
     source_path = joinpath(DOCS_DIR, page.source)
     output_path = joinpath(src_dir, page.output)
     output_dir = dirname(output_path)
@@ -438,8 +374,6 @@ function main()
     selected_ids = Set(page.id for page in selected_pages)
     rendering_all_published = selected_ids == published_ids
     try
-        run_selected_producers(selected_pages)
-
         if rendering_all_published
             render_all_published(selected_pages)
             println("Validated all published generated outputs against the page registry.")

@@ -314,6 +314,7 @@ function fixture_page(
     nav_order=10,
     snapshot=false,
     data_requirements=nothing,
+    extra_fields="",
 )
     edition_values = join(repr.(editions), ", ")
     requirement_line = data_requirements === nothing ? "" : "\ndata_requirements = $(data_requirements)"
@@ -329,7 +330,7 @@ function fixture_page(
     output = "$(output)"
     status = "$(status)"
     nav_order = $(nav_order)
-    snapshot = $(snapshot)$(requirement_line)
+    snapshot = $(snapshot)$(requirement_line)$(extra_fields)
     """
     return (; id, source, output, status, block)
 end
@@ -491,6 +492,16 @@ end
             with_registry_fixture([invalid_page]) do registry_path, _
                 @test_throws ErrorException load_page_registry(registry_path)
             end
+        end
+    end
+
+    @testset "unsupported page fields are rejected" begin
+        page = fixture_page(
+            id="unsupported-field",
+            extra_fields="\nexternal_step = \"script.jl\"",
+        )
+        with_registry_fixture([page]) do registry_path, _
+            @test_throws ErrorException load_page_registry(registry_path)
         end
     end
 

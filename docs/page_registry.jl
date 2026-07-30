@@ -17,6 +17,22 @@ const VALID_TRACKS = Set(["shared", "isp2024", "isp2026", "comparison"])
 const VALID_EDITIONS = Set(["2024", "2026"])
 const VALID_REQUIREMENT_ROOTS = Set(["repo", "report", "download", "output"])
 const VALID_REQUIREMENT_TYPES = Set(["file", "directory", "path"])
+const VALID_PAGE_FIELDS = Set([
+    "id",
+    "title",
+    "kind",
+    "track",
+    "editions",
+    "data_layer",
+    "source",
+    "output",
+    "status",
+    "nav_order",
+    "snapshot",
+    "data_requirements",
+    "related_reference_pages",
+    "notes",
+])
 
 struct DataRequirement
     root::String
@@ -37,8 +53,6 @@ Base.@kwdef struct PageSpec
     status::String
     nav_order::Int
     snapshot::Bool
-    evidence_dir::Union{Nothing, String} = nothing
-    producer::Union{Nothing, String} = nothing
     data_requirements::Vector{DataRequirement} = DataRequirement[]
     related_reference_pages::Vector{String} = String[]
     notes::Union{Nothing, String} = nothing
@@ -78,6 +92,13 @@ function relative_path(value, field, page_id)
         error("page \"$page_id\" field \"$field\" escapes its root: $value")
     normalized == "." && error("page \"$page_id\" field \"$field\" cannot be current directory")
     return normalized
+end
+
+function validate_page_fields(entry, page_number)
+    unsupported = sort!(filter(key -> !(key in VALID_PAGE_FIELDS), String.(collect(keys(entry)))))
+    isempty(unsupported) || error(
+        "page $page_number has unsupported field(s): $(join(unsupported, ", "))",
+    )
 end
 
 function validate_track_editions(track, editions, page_id)
@@ -151,6 +172,8 @@ function parse_data_requirements(entry, page_id, page_number, page_editions)
 end
 
 function parse_page(entry, page_number)
+    validate_page_fields(entry, page_number)
+
     id = required_string(entry, "id", page_number)
     title = required_string(entry, "title", page_number)
     kind = required_string(entry, "kind", page_number)
@@ -176,14 +199,6 @@ function parse_page(entry, page_number)
     snapshot = get(entry, "snapshot", nothing)
     snapshot isa Bool || error("page \"$id\" requires boolean field \"snapshot\"")
 
-    evidence_dir = optional_string(entry, "evidence_dir", page_number)
-    evidence_dir === nothing || (evidence_dir = relative_path(evidence_dir, "evidence_dir", id))
-
-    producer = optional_string(entry, "producer", page_number)
-    producer === nothing || (producer = relative_path(producer, "producer", id))
-    evidence_dir !== nothing && producer === nothing &&
-        error("page \"$id\" requires a producer when evidence_dir is set")
-
     related_reference_pages = [
         relative_path(path, "related_reference_pages", id)
         for path in string_vector(entry, "related_reference_pages", page_number)
@@ -201,8 +216,6 @@ function parse_page(entry, page_number)
         status = status,
         nav_order = Int(nav_order),
         snapshot = snapshot,
-        evidence_dir = evidence_dir,
-        producer = producer,
         data_requirements = parse_data_requirements(entry, id, page_number, editions),
         related_reference_pages = related_reference_pages,
         notes = optional_string(entry, "notes", page_number),
@@ -238,18 +251,12 @@ function validate_files(
     check_generated_outputs,
 )
     docs_dir = dirname(registry_path)
-    repo_root = normpath(joinpath(docs_dir, ".."))
     src_root = joinpath(docs_dir, "src")
     registered_outputs = Set(page.output for page in pages)
 
     for page in pages
         source_path = joinpath(docs_dir, page.source)
         isfile(source_path) || error("page \"$(page.id)\" source does not exist: $source_path")
-
-        if page.producer !== nothing
-            producer_path = joinpath(repo_root, page.producer)
-            isfile(producer_path) || error("page \"$(page.id)\" producer does not exist: $producer_path")
-        end
 
         for reference_page in page.related_reference_pages
             reference_path = joinpath(src_root, reference_page)
