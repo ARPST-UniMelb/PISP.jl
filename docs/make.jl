@@ -16,6 +16,22 @@ const SRC = joinpath(DOCS_DIR, "src")
 const STAGED_SRC = joinpath(DOCS_DIR, ".documenter-source")
 const BUILD = joinpath(DOCS_DIR, "build")
 const REGISTRY_PATH = joinpath(DOCS_DIR, "page-registry.toml")
+const REPO_ROOT = realpath(dirname(DOCS_DIR))
+const PISP_REMOTE = Documenter.Remotes.GitHub("ARPST-UniMelb", "PISP.jl")
+const PISP_SOURCE_ROOT = realpath(dirname(dirname(pathof(PISP))))
+
+# Preserve source and edit links when the repository or PISP package is supplied
+# as an archive rather than a Git checkout.
+const DOCUMENTATION_REMOTES = let
+    remotes = Dict{String, Any}()
+    if !ispath(joinpath(REPO_ROOT, ".git"))
+        remotes[REPO_ROOT] = (PISP_REMOTE, "main")
+    end
+    if PISP_SOURCE_ROOT != REPO_ROOT
+        remotes[PISP_SOURCE_ROOT] = (PISP_REMOTE, "v$(pkgversion(PISP))")
+    end
+    remotes
+end
 
 include(joinpath(DOCS_DIR, "source_links.jl"))
 using .SourceLinks
@@ -51,6 +67,7 @@ makedocs(;
     linkcheck = false,
     warnonly = link_target == :local ? :cross_references : false,
     pages = registry_navigation(registry_pages),
+    remotes = DOCUMENTATION_REMOTES,
 )
 
 if get(ENV, "GITHUB_ACTIONS", "false") == "true"
