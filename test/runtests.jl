@@ -16,4 +16,6 @@ include("test_source_availability.jl")
     include("test_report_downloader_2026.jl")
     include("test_source_downloader_2026.jl")
     include("test_buildout_defaults_documentation_2024.jl")
+    include("test_source_specs.jl")
+    include("test_pipeline_integration_2024.jl")
 end
