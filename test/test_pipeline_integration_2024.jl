@@ -1,22 +1,16 @@
-# Integration characterization test for the 2024 populate stage: exercises
-# PISP.populate_time_static!/PISP.populate_time_varying! end-to-end against the real
-# local data/2024/pisp-downloads/ checkout, for one scenario and one short date window.
-# This is the call graph PISP.build_ISP24_datasets itself runs after the one-time
-# PISP.build_pipeline data-preparation step, so it reaches almost every function in
-# src/parsers/PISP-2024parser.jl, src/parsers/PISP-2024core.jl, src/parsers/PISP-2024ev.jl,
-# and the df-evs/df-hydro/general utils — the largest previously-0%-covered source files.
-# PISP.build_pipeline itself is deliberately never called here: it downloads/re-extracts
-# archives and regenerates Auxiliary/ outlook workbooks and 4006 traces in place, mutating
-# the real local checkout, which a test must never do. Skipped gracefully when the real
-# AEMO data is absent, since CI has no access to it.
+# Integration test for the 2024 data-population stage.
 #
-# Note: populate_time_static! -> generator_table creates a scratch test/.tmp/ directory
-# (relative to the process's working directory) with ~26 intermediate workbooks; this is
-# pre-existing src/ behaviour, not introduced here, and test/.tmp/ is already gitignored.
+# Runs `populate_time_static!` and `populate_time_varying!` end to end using the
+# real local AEMO data, one Step Change scenario, and one day of simulation.
+# This exercises the population stage used by `build_ISP24_datasets`.
 #
-# Takes noticeably longer than the rest of the suite (real workbook/CSV I/O). Set
-# PISP_SKIP_SLOW_TESTS=1 to skip it for a fast local inner loop; CI already skips it via
-# the data-presence check below, so this is purely a local dev convenience.
+# `build_pipeline` is not run because it rebuilds and modifies the local data.
+# 
+# The test is skipped when the data is unavailable or `PISP_SKIP_SLOW_TESTS=1`.
+#
+# Note: populate_time_static! -> generator_table creates a scratch test/.tmp/
+# (gitignored)directory (relative to the process's working directory) with ~26
+# intermediate workbooks. This is pre-existing PISP.jl/src behaviour.
 
 using DataFrames
 using Dates
