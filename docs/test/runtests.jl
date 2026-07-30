@@ -121,6 +121,7 @@ end
         "Package-defined defaults",
         "Unverified provenance",
         "ISP 2024 build-out defaults",
+        "ISP 2024 hydro parameters and constants",
     )
         @test occursin(required, mappings)
     end
@@ -159,6 +160,34 @@ end
     @test occursin("Source status", buildout_defaults)
     @test occursin("original external source", buildout_defaults)
     @test !occursin("\n````\ntrue\n````", buildout_defaults)
+
+    hydro_parameters = read_doc(
+        "generated",
+        "isp2024",
+        "reference",
+        "hydro-parameters-and-constants.md",
+    )
+    for required in (
+        "# ISP 2024: Hydro parameters and constants",
+        "HYDRO2FILE",
+        "HYDRO2CNS",
+        "WEATHER_YEARS",
+        "DAM_SHARES",
+        "HYDRO_DAMS_GENS",
+        "SNOWY_HYDRO_GROUPS",
+        "HYDRO_DAMS_STORAGE",
+        "HYDRO_STORAGE_GEN",
+        "2023-inputs-assumptions-and-scenarios-report.pdf#page=97",
+        "2023-inputs-assumptions-and-scenarios-report.pdf#page=98",
+        "2023-inputs-assumptions-and-scenarios-report.pdf#page=99",
+        "Hydro inflow variability across reference weather years – Snowy Hydro",
+        "generator and storage inflow schedules",
+    )
+        @test occursin(required, hydro_parameters)
+    end
+    @test !occursin("TraceCite", hydro_parameters)
+    @test !occursin("workspace", lowercase(hydro_parameters))
+    @test !occursin("task 0224", lowercase(hydro_parameters))
 
     comparison = read_doc("editions", "comparison.md")
     for required in (

@@ -36,6 +36,8 @@ fields consumed by the parser.
 
 The [ISP 2024 build-out defaults](../generated/isp2024/reference/buildout-defaults.md) page separates workbook fields, generated identities, calculations, placeholders, and package template values for optional generator and storage additions.
 
+The [ISP 2024 hydro parameters and constants](../generated/isp2024/reference/hydro-parameters-and-constants.md) page lists the package values used to assign hydro traces, annual energy limits, hydrological years, and Snowy inflows.
+
 These package-defined values are modelling inputs rather than incidental
 filenames. A change to a mapping can change generated datasets even when the
 downloaded source files are unchanged. See [Assumptions and scope](../assumptions.md)
