@@ -107,19 +107,13 @@ function normalise_markdown_text(text::AbstractString)
     return escape_dollar_signs(replace(strip(text), r"\s*\n\s*" => " "))
 end
 
-function markdown_cell(
-    value;
-    nothing_text = "",
-    line_break = " ",
-    escape_dollars = false,
-)
+function markdown_cell(value; nothing_text = "")
     text = value === nothing ? nothing_text : string(value)
-    text = replace(text, "\n" => line_break, "\r" => "", "|" => "\\|")
-    return escape_dollars ? escape_dollar_signs(text) : text
+    return replace(text, "\n" => " ", "\r" => "", "|" => "\\|")
 end
 
-function markdown_items(values; empty_text = "—", nothing_text = "")
-    isempty(values) && return empty_text
+function markdown_items(values; nothing_text = "")
+    isempty(values) && return "—"
     return join(
         ("`$(markdown_cell(value; nothing_text = nothing_text))`" for value in values),
         ", ",
