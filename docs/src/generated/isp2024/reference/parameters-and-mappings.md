@@ -4,8 +4,9 @@ EditURL = "../../../../literate/isp2024/reference/parameters_and_mappings.jl"
 
 # ISP 2024: Parameters and mappings
 
-PISP uses package-defined identifiers and mappings to reconcile source files that do not share one canonical naming system. The tables below list the current scenario, bus, area, weather-year, and reliability-field mappings.
-They focus on mappings with identified parser or builder roles, not an inventory of every constant in the package's parameter files.
+PISP combines values published by AEMO with package-defined identifiers, defaults, aliases, and source-to-output mappings.
+The distinction matters because a downloaded workbook can remain unchanged while a package convention changes the generated dataset.
+This page identifies the authority for each parameter and mapping family, then presents the general mappings shared across the ISP 2024 workflow.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -18,20 +19,228 @@ using Dates
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles
-
-const ISP2024_PROFILE = edition_profile(REPO_ROOT, "2024")
-
 include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
 using .EdaSupport
+
+include(joinpath(REPO_ROOT, "docs", "source_material_support.jl"))
+using .PISPDocsSourceMaterialSupport
+
+coverage = coverage_document(REPO_ROOT)
+parameter_families = coverage_table(coverage, "parameter_family")
+mapping_families = coverage_table(coverage, "mapping_family")
+
+length(unique(parameter_families.id)) == nrow(parameter_families) || error("parameter-family IDs must be unique")
+length(unique(mapping_families.id)) == nrow(mapping_families) || error("mapping-family IDs must be unique")
 ````
 
 ```@raw html
 </details>
 ```
 
+## AEMO values and PISP conventions
+
+AEMO source values remain attributable to the workbook, model archive, report, or CSV that publishes them.
+PISP conventions are maintained in package parameter files, parser-local mappings, or user-controlled build-out inputs.
+Parsed representations are mechanical normalisations or runtime joins derived from those sources rather than independent external facts.
+
+```@raw html
+<details class="source-code"><summary>Show source code</summary>
+```
+
+````julia
+classification_roles = DataFrame([
+    (
+        classification = friendly_classification("aemo_raw_source"),
+        authority = "AEMO publication",
+        meaning = "A value or record read directly from an AEMO workbook, model CSV, or report-backed source.",
+    ),
+    (
+        classification = friendly_classification("parsed_representation"),
+        authority = "PISP transformation",
+        meaning = "A normalised label, runtime lookup, or join derived from source records.",
+    ),
+    (
+        classification = friendly_classification("pisp_generated_intermediate"),
+        authority = "PISP preprocessing",
+        meaning = "An Auxiliary workbook generated from AEMO outlook workbooks and consumed by the parser.",
+    ),
+    (
+        classification = friendly_classification("package_convention"),
+        authority = "PISP package",
+        meaning = "A maintained identifier, default, alias, allocation rule, or source-file convention.",
+    ),
+    (
+        classification = friendly_classification("user_input"),
+        authority = "PISP user",
+        meaning = "An optional build-out or other value supplied when the workflow is run.",
+    ),
+    (
+        classification = friendly_classification("pisp_output"),
+        authority = "PISP data model",
+        meaning = "A generated table, field, or schema contract exposed to dataset users.",
+    ),
+])
+markdown_table(classification_roles)
+````
+
+```@raw html
+</details>
+```
+
+| **classification** | **authority** | **meaning** |
+|:--|:--|:--|
+| AEMO raw source | AEMO publication | A value or record read directly from an AEMO workbook, model CSV, or report-backed source. |
+| Parsed representation | PISP transformation | A normalised label, runtime lookup, or join derived from source records. |
+| PISP-generated intermediate | PISP preprocessing | An Auxiliary workbook generated from AEMO outlook workbooks and consumed by the parser. |
+| PISP package convention | PISP package | A maintained identifier, default, alias, allocation rule, or source-file convention. |
+| User input | PISP user | An optional build-out or other value supplied when the workflow is run. |
+| PISP output | PISP data model | A generated table, field, or schema contract exposed to dataset users. |
+
+
+## Parameter-file ownership
+
+`PISPparameters.jl` includes six parameter files.
+Each file has one canonical documentation owner so that the package does not maintain a second handwritten copy of its constants.
+Subject pages describe how the relevant source data and conventions interact; the tables displayed there are generated from the imported PISP objects wherever practical.
+
+```@raw html
+<details class="source-code"><summary>Show source code</summary>
+```
+
+````julia
+parameter_owners = select(
+    parameter_families,
+    :source_path => ByRow(basename) => :parameter_file,
+    :family,
+    :classification,
+    :owner => :canonical_page_id,
+    :notes,
+)
+parameter_owners.classification = friendly_classification.(parameter_owners.classification)
+markdown_table(parameter_owners)
+````
+
+```@raw html
+</details>
+```
+
+| **parameter\_file** | **family** | **classification** | **canonical\_page\_id** | **notes** |
+|:--|:--|:--|:--|:--|
+| general2024ISP.jl | scenario, geography, bus, area, source labels, and weather-year identifiers | PISP package convention | isp2024-parameters-and-mappings | Canonical package identifiers used across the 2024 pipeline. |
+| retirements2024ISP.jl | retirement reductions and reviewed retirement overrides | PISP package convention | shared-source-generator-reliability-retirement | Package-defined retirement adjustments applied after source parsing. |
+| ess2024ISP.jl | battery and pumped-hydro defaults | PISP package convention | shared-source-existing-generation-storage | Static storage records that supplement or normalise source data. |
+| gens2024ISP.jl | generator unit, fuel-type, and trace-file mappings | PISP package convention | shared-source-existing-generation-storage | Generation identifiers and source-file naming conventions. |
+| hydro2024ISP.jl | hydro files, constraints, weather years, dam shares, and groupings | PISP package convention | shared-source-hydro-inflows | Hydro source-file and allocation conventions. |
+| buildout2024ISP.jl | generator and storage build-out templates | PISP package convention | isp2024-buildout-defaults | Complete default records used when a user requests optional build-outs. |
+
+
+## Mapping-family ownership
+
+The mapping ledger covers source downloads, scenarios, geography, generation, storage, retirement, reliability, renewable energy zones, demand-side participation, electric vehicles, hydro, optional build-outs, and output schemas.
+Package conventions and parsed representations are listed separately because only the former are maintained as project choices.
+
+```@raw html
+<details class="source-code"><summary>Show source code</summary>
+```
+
+````julia
+mapping_owner_summary = combine(
+    groupby(mapping_families, [:classification, :owner]),
+    nrow => :mapping_families,
+)
+sort!(mapping_owner_summary, [:classification, :owner])
+mapping_owner_summary.classification = friendly_classification.(mapping_owner_summary.classification)
+markdown_table(mapping_owner_summary)
+````
+
+```@raw html
+</details>
+```
+
+| **classification** | **owner** | **mapping\_families** |
+|:--|:--|--:|
+| Excluded trace material | editions/trace-coverage.md | 1 |
+| PISP package convention | isp2024-buildout-defaults | 2 |
+| PISP package convention | isp2024-data-sources | 1 |
+| PISP package convention | isp2024-output-tables | 2 |
+| PISP package convention | shared-source-demand-side-participation | 2 |
+| PISP package convention | shared-source-electric-vehicles | 4 |
+| PISP package convention | shared-source-existing-generation-storage | 4 |
+| PISP package convention | shared-source-hydro-inflows | 1 |
+| PISP package convention | shared-source-renewable-energy-zones | 2 |
+| Parsed representation | shared-source-demand-distributed-resources | 1 |
+| Parsed representation | shared-source-electric-vehicles | 5 |
+| Parsed representation | shared-source-existing-generation-storage | 5 |
+| Parsed representation | shared-source-hydro-inflows | 3 |
+| Parsed representation | shared-source-network-transmission | 1 |
+| User input | isp2024-buildout-defaults | 1 |
+
+
+```@raw html
+<details class="source-code"><summary>Show source code</summary>
+```
+
+````julia
+mapping_inventory = select(
+    mapping_families,
+    :family,
+    :classification,
+    :owner => :canonical_page_id,
+    :source_path,
+)
+sort!(mapping_inventory, [:classification, :canonical_page_id, :family])
+mapping_inventory.classification = friendly_classification.(mapping_inventory.classification)
+markdown_table(mapping_inventory)
+````
+
+```@raw html
+</details>
+```
+
+| **family** | **classification** | **canonical\_page\_id** | **source\_path** |
+|:--|:--|:--|:--|
+| trace years to processed trace tables | Excluded trace material | editions/trace-coverage.md | src/scrappers/PISP-scrapper-build.jl |
+| battery duration labels | PISP package convention | isp2024-buildout-defaults | src/parsers/PISP-2024buildout.jl |
+| user build-out technology labels | PISP package convention | isp2024-buildout-defaults | src/parsers/PISP-2024buildout.jl |
+| fixed source-download keys and metadata | PISP package convention | isp2024-data-sources | src/scrappers/PISP-scrapper-2024files.jl |
+| output table aliases | PISP package convention | isp2024-output-tables | src/utils/writing/PISPutils-writing.jl |
+| schema declarations to Julia types | PISP package convention | isp2024-output-tables | src/utils/mappers/PISPutils-mappers.jl |
+| DSP price-band identifiers | PISP package convention | shared-source-demand-side-participation | src/parsers/PISP-2024parser.jl |
+| scenario/region/season DSP ranges | PISP package convention | shared-source-demand-side-participation | src/parsers/PISP-2024parser.jl |
+| EV number worksheet to output field | PISP package convention | shared-source-electric-vehicles | src/utils/dataframes/PISPutils-df-evs-2024.jl |
+| EV scenario name to package ID | PISP package convention | shared-source-electric-vehicles | src/utils/dataframes/PISPutils-df-evs-2024.jl |
+| EV state name to NEM code | PISP package convention | shared-source-electric-vehicles | src/utils/dataframes/PISPutils-df-evs-2024.jl |
+| EV vehicle types to demand categories | PISP package convention | shared-source-electric-vehicles | src/utils/dataframes/PISPutils-df-evs-2024.jl |
+| generator-unit aliases | PISP package convention | shared-source-existing-generation-storage | src/parsers/PISP-2024parser.jl |
+| technology cost-curve slopes | PISP package convention | shared-source-existing-generation-storage | src/parsers/PISP-2024parser.jl |
+| technology emissions fallbacks | PISP package convention | shared-source-existing-generation-storage | src/parsers/PISP-2024parser.jl |
+| technology inertia constants | PISP package convention | shared-source-existing-generation-storage | src/parsers/PISP-2024parser.jl |
+| hydro scheme groups | PISP package convention | shared-source-hydro-inflows | src/parsers/PISP-2024parser.jl |
+| scenario to cost-development path for solar | PISP package convention | shared-source-renewable-energy-zones | src/parsers/PISP-2024parser.jl |
+| scenario to cost-development path for wind | PISP package convention | shared-source-renewable-energy-zones | src/parsers/PISP-2024parser.jl |
+| bus IDs to demand records | Parsed representation | shared-source-demand-distributed-resources | src/parsers/PISP-2024parser.jl |
+| EV output tables by vehicle number field | Parsed representation | shared-source-electric-vehicles | src/parsers/PISP-2024parser.jl |
+| EV worksheet tables by source name | Parsed representation | shared-source-electric-vehicles | src/parsers/PISP-2024parser.jl |
+| bus IDs to demand records | Parsed representation | shared-source-electric-vehicles | src/utils/dataframes/PISPutils-df-evs-2024.jl |
+| bus names to bus IDs | Parsed representation | shared-source-electric-vehicles | src/utils/dataframes/PISPutils-df-evs-2024.jl |
+| demand and DER relationship lookups | Parsed representation | shared-source-electric-vehicles | src/utils/dataframes/PISPutils-df-evs-2024.jl |
+| month labels to calendar months | Parsed representation | shared-source-existing-generation-storage | src/parsers/PISP-2024parser.jl |
+| solar source names to trace names | Parsed representation | shared-source-existing-generation-storage | src/parsers/PISP-2024parser.jl |
+| solar source rows to generated IDs | Parsed representation | shared-source-existing-generation-storage | src/parsers/PISP-2024parser.jl |
+| storage source rows to generated IDs | Parsed representation | shared-source-existing-generation-storage | src/parsers/PISP-2024parser.jl |
+| wind source rows to generated IDs | Parsed representation | shared-source-existing-generation-storage | src/parsers/PISP-2024parser.jl |
+| hydro generator IDs to row numbers | Parsed representation | shared-source-hydro-inflows | src/parsers/PISP-2024parser.jl |
+| inflow files to generator groups | Parsed representation | shared-source-hydro-inflows | src/parsers/PISP-2024parser.jl |
+| month labels to calendar months | Parsed representation | shared-source-hydro-inflows | src/utils/dataframes/PISPutils-df-hydro.jl |
+| named interconnector reliability rows | Parsed representation | shared-source-network-transmission | src/parsers/PISP-2024parser.jl |
+| scenario IDs to optional build-out names | User input | isp2024-buildout-defaults | src/main/pipeline-add-buildouts.jl |
+
+
 ## Scenario identifiers and source labels
+
+The problem-table and build-out paths iterate `PISP.ID2SCE` to create rows for the package's three scenario IDs.
+The hydro parser uses `PISP.HYDROSCE` to select PLEXOS hydro labels, while the 4006 demand builder uses `PISP.DEMSCE` in source and output filenames.
+These mappings therefore affect generated data rather than serving only as display labels.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -61,9 +270,10 @@ markdown_table(scenario_mappings)
 | 3 | Green Energy Exports | HydrogenSuperpower | HYDROGEN\_EXPORT |
 
 
-The problem-table and build-out paths iterate `PISP.ID2SCE` to create rows for the package's three scenario IDs. The hydro parser uses `PISP.HYDROSCE` to select PLEXOS hydro labels, while the 4006 demand builder uses `PISP.DEMSCE` in source and output filenames. These mappings therefore affect generated data rather than serving only as display labels.
-
 ## Bus and area constants
+
+The bus constants provide the package's stable spatial identifiers, display names, area assignments, and representative coordinates.
+Source rows are assigned to these identifiers during parsing, so the aliases are part of the PISP data contract rather than AEMO workbook values.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -108,11 +318,15 @@ markdown_table(bus_area_mappings)
 
 ## Reference trace 4006 weather-year mapping
 
-The composite trace maps each financial-year interval to a historical reference year. Repeated historical years are part of the mapping and should be considered when comparing planning periods.
+The composite trace maps each financial-year interval to a historical reference year.
+Repeated historical years are part of the mapping and should be considered when comparing planning periods.
 
-AEMO explains the rolling-reference-year method in the [2024 ISP PLEXOS Model Instructions, p. 5](../../../../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=5). The Reference Year and VRE Reference Year sequence is in Table 1 of the [2024 ISP PLEXOS Model Instructions, p. 6](../../../../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=6); the table's Hydrological Reference Year is a distinct sequence. PISP stores the ending year of each report range: for example, AEMO's `2018-19` reference year is represented as `2019` for the interval from 1 July 2024 through 30 June 2025.
+AEMO explains the rolling-reference-year method in the [2024 ISP PLEXOS Model Instructions, p. 5](../../../../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=5).
+The Reference Year and VRE Reference Year sequence is in Table 1 of the [2024 ISP PLEXOS Model Instructions, p. 6](../../../../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=6); the table's Hydrological Reference Year is a distinct sequence.
+PISP stores the ending year of each report range: AEMO's `2018-19` reference year, for example, is represented as `2019` for the interval from 1 July 2024 through 30 June 2025.
 
-The 4006 solar, wind, and demand builders consume `PISP.ISPdatabuilder.DATE_RANGES_REFYEARS`; the current implementation does not parse this mapping from the 2024 Inputs and Assumptions workbook.
+The 4006 solar, wind, and demand builders consume `PISP.ISPdatabuilder.DATE_RANGES_REFYEARS`.
+The current implementation does not parse this mapping from the 2024 Inputs and Assumptions workbook.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -168,6 +382,9 @@ markdown_table(weather_year_mapping)
 
 ## Reliability fields represented in static schemas
 
+PISP's static schemas distinguish full outages, partial outages, derating, repair time, and state-dependent output where the asset table supports them.
+The AEMO reliability and retirement source records that populate these fields are described in [Generator reliability and retirement](../../shared/source-material/generator-reliability-and-retirement.md) and [Network and transmission assumptions](../../shared/source-material/network-and-transmission.md).
+
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
 ```
@@ -203,11 +420,16 @@ markdown_table(reliability_schema)
 
 ## Using the mappings
 
-Scenario labels, source-specific aliases, bus assignments, weather-year mappings, technology groupings, retirement schedules, and build-out templates are modelling inputs rather than incidental filenames. Changes to these mappings can change generated datasets without any change to the downloaded source files.
+Scenario labels, source-specific aliases, bus assignments, weather-year mappings, technology groupings, retirement schedules, and build-out templates are modelling inputs rather than incidental filenames.
+Changes to these mappings can change generated datasets without any change to the downloaded source files.
 
-Optional build-out technology labels select complete PISP generator or storage templates. See [ISP 2024 build-out defaults](buildout-defaults.md) for the field-level values, calculated fields, placeholders, and override rules.
+Optional build-out technology labels select complete PISP generator or storage templates.
+See [ISP 2024 build-out defaults](buildout-defaults.md) for the field-level values, calculated fields, placeholders, and override rules.
 
-Rooftop PV and utility-scale renewable capacity fields require special care. The time-varying schedule is the relevant maximum-output series for solar and wind; the static `pmax` field is not a universal capacity-factor denominator. See [Assumptions and scope](@ref).
+Rooftop PV and utility-scale renewable capacity fields require special care.
+The time-varying schedule is the relevant maximum-output series for solar and wind; the static `pmax` field is not a universal capacity-factor denominator.
+See [Assumptions and scope](@ref).
 
-Both `gen_pmax_wind` and `gen_pmax_solar` ([`src/parsers/PISP-2024parser.jl`](https://github.com/ARPST-UniMelb/PISP.jl/blob/main/src/parsers/PISP-2024parser.jl)) read the same two sheets of the 2024 ISP Inputs and Assumptions workbook: `Existing Gen Data Summary` (cell range `B11:K297`) for the operating-capacity figures, and `Renewable Energy Zones` (cell range `B7:G50`) for REZ-to-bus assignment.
+The source selections for operating capacity, storage, renewable energy zones, and other workbook subjects are documented in the shared [AEMO ISP source coverage and ownership](../../shared/source-material/coverage-and-ownership.md) family.
+That family keeps workbook evidence beside its data meaning while this page remains the canonical index for package-defined parameters and mappings.
 

@@ -100,12 +100,32 @@ end
 
     source_material = read_doc("editions", "source-material.md")
     for required in (
+        "AEMO source data -> PISP transformation -> PISP datasets",
         "A2, A3, A4, A6, and A7",
         "2023 IASR EV workbook",
         "2025 IASR EV workbook",
         "`Auxiliary`",
+        "coverage-and-ownership.md",
+        "raw-source-comparison.md",
+        "Hydro inflows and energy constraints",
     )
         @test occursin(required, source_material)
+    end
+
+    source_coverage = read_doc(
+        "generated",
+        "shared",
+        "source-material",
+        "coverage-and-ownership.md",
+    )
+    for required in (
+        "# AEMO ISP source coverage and ownership",
+        "Source-read classifications",
+        "PISP-generated intermediates",
+        "Parameter-file ownership",
+        "Mapping-family ownership",
+    )
+        @test occursin(required, source_coverage)
     end
 
     mappings = read_doc("editions", "parameters-and-mappings.md")
@@ -114,8 +134,7 @@ end
         "Twelve package bus aliases",
         "PISP.ISPdatabuilder.DATE_RANGES_REFYEARS",
         "problem-table and build-out paths",
-        "B11:K297",
-        "B7:G50",
+        "source coverage and ownership",
         "Report-defined mappings",
         "Workbook-derived values",
         "Package-defined defaults",
@@ -137,7 +156,7 @@ end
     @test occursin("2024-isp-plexos-model-instructions.pdf#page=5", generated_mappings)
     @test occursin("2024-isp-plexos-model-instructions.pdf#page=6", generated_mappings)
     @test occursin("4006 demand builder", generated_mappings)
-    @test occursin("not an inventory of every constant", generated_mappings)
+    @test occursin("Each file has one canonical documentation owner", generated_mappings)
     @test occursin("Reference Year and VRE Reference Year", generated_mappings)
     @test occursin("PISP.ISPdatabuilder.DATE_RANGES_REFYEARS", generated_mappings)
     @test !occursin("PISP.WEATHER_YEARS_ISP", generated_mappings)
@@ -191,6 +210,8 @@ end
 
     comparison = read_doc("editions", "comparison.md")
     for required in (
+        "raw-source comparison",
+        "non-trace inputs and assumptions workbooks",
         "model archive comparison",
         "scenario directories",
         "Wind, solar, and timeslice",
@@ -198,6 +219,23 @@ end
         "model-XML references",
     )
         @test occursin(required, comparison)
+    end
+
+
+    raw_source_comparison = read_doc(
+        "generated",
+        "comparison",
+        "analyses",
+        "raw-source-comparison.md",
+    )
+    for required in (
+        "# ISP 2024 and ISP 2026 raw-source comparison",
+        "Publication scale",
+        "Worksheet presence",
+        "Declared worksheet dimensions",
+        "Semantic source-family changes",
+    )
+        @test occursin(required, raw_source_comparison)
     end
 
     model_archive_comparison = read_doc(
@@ -724,6 +762,27 @@ end
     @testset "edition navigation from published registry pages" begin
         pages = [
             renderer_page(
+                id="shared-source-first",
+                track="shared",
+                editions=["2024", "2026"],
+                status="published",
+                nav_order=10,
+            ),
+            renderer_page(
+                id="shared-source-later",
+                track="shared",
+                editions=["2024", "2026"],
+                status="published",
+                nav_order=20,
+            ),
+            renderer_page(
+                id="shared-source-draft",
+                track="shared",
+                editions=["2024", "2026"],
+                status="draft",
+                nav_order=30,
+            ),
+            renderer_page(
                 id="isp2024-reference-later",
                 track="isp2024",
                 editions=["2024"],
@@ -831,14 +890,17 @@ end
         ]
         @test first.(last(shared_material[1])) == [
             "Source material by edition",
+            "Renderer shared-source-first",
+            "Renderer shared-source-later",
             "Trace families and source meaning",
-            "Downloaded source layout by edition",
         ]
         @test last.(last(shared_material[1])) == [
             "editions/source-material.md",
+            "generated/fixture/shared-source-first.md",
+            "generated/fixture/shared-source-later.md",
             "editions/trace-coverage.md",
-            "generated/shared/reference/pisp-downloads-layout.md",
         ]
+        @test !occursin("shared-source-draft", repr(shared_material))
         @test first.(last(shared_material[2])) == [
             "Workflow support by edition",
             "Source-to-dataset processing",
@@ -938,13 +1000,8 @@ end
         orphan_outputs = Set(flatten_nav_outputs(registry_navigation(orphan_pages)))
         @test !(orphan_pages[1].output in orphan_outputs)
 
-        # Sanity-check the actual original failure mode: `registry_navigation`
-        # has no dynamic handler for the `shared` track at all (unlike
-        # `isp2024`/`isp2026`/`comparison`, which go through `track_navigation`
-        # or `comparison_navigation`). Only one `shared` page is placed, by a
-        # hand-written literal entry in the "Understand" tree; any other
-        # `shared` page is unreachable until it also gets a literal entry.
-        unhandled_track_pages = [
+        # Shared source-data pages are placed dynamically in registry order.
+        shared_track_pages = [
             renderer_page(
                 id="future-shared-page",
                 track="shared",
@@ -953,8 +1010,8 @@ end
                 kind="reference",
             ),
         ]
-        unhandled_track_outputs = Set(flatten_nav_outputs(registry_navigation(unhandled_track_pages)))
-        @test !(unhandled_track_pages[1].output in unhandled_track_outputs)
+        shared_track_outputs = Set(flatten_nav_outputs(registry_navigation(shared_track_pages)))
+        @test shared_track_pages[1].output in shared_track_outputs
 
         # The real registry: every published page's output must appear
         # somewhere in the rendered navigation tree.

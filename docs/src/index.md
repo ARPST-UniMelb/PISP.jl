@@ -10,17 +10,21 @@ PISP.jl also provides ISP 2026 report and source-asset acquisition plus archive 
 ## Choose an entry point
 
 - [Quickstart](quickstart.md) installs PISP.jl, builds a small ISP 2024 dataset, and checks representative outputs.
+- [AEMO ISP source material](editions/source-material.md) explains the non-trace workbooks, outlook material, and model CSVs before PISP transformation.
 - [ISP 2024](editions/isp2024.md) leads to the implemented source, output, tutorial, validation, and analysis documentation.
 - [Supported ISP editions](editions/supported-editions.md) is the support authority for acquisition, parsing, construction, outputs, validation, and analysis.
 - [ISP 2026](editions/isp2026.md) describes report/source acquisition, archive extraction, separate parser work, and the current integration boundary.
 - [Compare ISP 2024 and ISP 2026](editions/comparison.md) defines the reconciliation required before cross-release comparison.
 
-## ISP 2024 source context
+## Source material and transformation boundary
 
 AEMO describes the ISP as a collection of supporting materials, including workbooks, outlook material, traces, and appendices ([2024 Integrated System Plan, p. 92](../../data/2024/pisp-reports/2024-integrated-system-plan.pdf#page=92)).
 The public market-model package includes PLEXOS model instructions ([2024 ISP PLEXOS Model Instructions, p. 2](../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=2)) and scenario-specific model data ([2024 ISP PLEXOS Model Instructions, p. 5](../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=5)).
 The source documents define reference-trace and network conventions ([2024 ISP PLEXOS Model Instructions, pp. 5–7](../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=5); [2023 Inputs, Assumptions and Scenarios Report, p. 141](../../data/2024/pisp-reports/2023-inputs-assumptions-and-scenarios-report.pdf#page=141)) and capacity-outlook probability-of-exceedance profiles ([ISP Methodology, p. 39](../../data/2024/pisp-reports/2023-isp-methodology.pdf#page=39)).
 AEMO publishes and maintains all of this material on its [2024 Integrated System Plan page](https://www.aemo.com.au/energy-systems/major-publications/integrated-system-plan-isp/2024-integrated-system-plan-isp), the same live page PISP.jl's own downloader targets, rather than only as the dated PDF snapshots cited above.
+
+The [source-material guide](editions/source-material.md) organises the non-trace source evidence by data meaning across ISP 2024 and ISP 2026.
+It separates AEMO publications, PISP-generated preprocessing intermediates, package conventions, and generated datasets so that a familiar worksheet name is not mistaken for an implemented cross-edition mapping.
 
 ## ISP 2024 output model
 

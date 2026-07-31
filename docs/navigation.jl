@@ -67,6 +67,39 @@ function comparison_navigation(registry_pages)
     return navigation
 end
 
+function shared_source_pages(registry_pages)
+    pages = sort(
+        filter(
+            page -> is_published(page) &&
+                page.track == "shared" &&
+                page.data_layer == "source-data",
+            registry_pages,
+        );
+        by = page -> (page.nav_order, page.id),
+    )
+    return Any[page.title => page.output for page in pages]
+end
+
+function shared_lifecycle_navigation(registry_pages)
+    source_pages = Any["Source material by edition" => "editions/source-material.md"]
+    append!(source_pages, shared_source_pages(registry_pages))
+    push!(source_pages, "Trace families and source meaning" => "editions/trace-coverage.md")
+
+    return Any[
+        "ISP source data" => source_pages,
+        "PISP transformation" => Any[
+            "Workflow support by edition" => "editions/supported-editions.md",
+            "Source-to-dataset processing" => "editions/source-inventory.md",
+            "Parameters, mappings, and constants" => "editions/parameters-and-mappings.md",
+        ],
+        "PISP datasets" => Any[
+            "Assets, relationships, and schedules" => "concepts.md",
+            "Output tables, fields, and units" => "editions/output-data-model.md",
+            "Dataset interpretation and study bounds" => "assumptions.md",
+        ],
+    ]
+end
+
 function registry_navigation(registry_pages)
     navigation = Any[
         "Home" => "index.md",
@@ -75,23 +108,7 @@ function registry_navigation(registry_pages)
 
     push!(
         navigation,
-        "Understand PISP and ISP data" => Any[
-            "ISP source data" => Any[
-                "Source material by edition" => "editions/source-material.md",
-                "Trace families and source meaning" => "editions/trace-coverage.md",
-                "Downloaded source layout by edition" => "generated/shared/reference/pisp-downloads-layout.md",
-            ],
-            "PISP transformation" => Any[
-                "Workflow support by edition" => "editions/supported-editions.md",
-                "Source-to-dataset processing" => "editions/source-inventory.md",
-                "Parameters, mappings, and constants" => "editions/parameters-and-mappings.md",
-            ],
-            "PISP datasets" => Any[
-                "Assets, relationships, and schedules" => "concepts.md",
-                "Output tables, fields, and units" => "editions/output-data-model.md",
-                "Dataset interpretation and study bounds" => "assumptions.md",
-            ],
-        ],
+        "Understand PISP and ISP data" => shared_lifecycle_navigation(registry_pages),
     )
     isp2024_navigation = track_navigation(registry_pages, "isp2024", "Overview", "editions/isp2024.md")
     insert!(isp2024_navigation, 2, "Preprocessing workflow" => "editions/isp2024-preprocessing.md")
