@@ -1,3 +1,23 @@
+const ISP2024_BUILDOUT_TABLE_SOURCE = XlsxSourceSpec(
+    id = :buildout_schedule,
+    edition = 2024,
+    workbook = "PISP-buildouts/buildouts.xlsx",
+    worksheet = "buildout_1",
+    cell_range = nothing,
+    description = "User-provided generation and storage buildout schedule.",
+    columns = ColumnSpec[
+        ColumnSpec(name = "tech"),
+        ColumnSpec(name = "subregion"),
+        ColumnSpec(name = "year", data_type = :Integer),
+        ColumnSpec(name = "capacity", data_type = :Real, unit = "MW"),
+        ColumnSpec(name = "n", data_type = :Integer),
+    ],
+    source_family = :buildout,
+    consumer = :read_buildout_table,
+)
+
+register_source_specs!(ISP2024_BUILDOUT_TABLE_SOURCE)
+
 """
     read_buildout_table(filepath; sheetname) → (static_data, tvarying_data)
 
@@ -7,11 +27,16 @@ Parse a buildout schedule workbook sheet and return two DataFrames:
 
 `name` is `uppercase(tech * "_" * subregion) * "_NEW"`.
 """
-function read_buildout_table(filepath::AbstractString; sheetname::AbstractString="buildout_1")
+function read_buildout_table(
+    filepath::AbstractString;
+    source_spec::XlsxSourceSpec = ISP2024_BUILDOUT_TABLE_SOURCE,
+    sheetname::AbstractString = source_spec.worksheet,
+)
     raw = XLSX.openxlsx(filepath) do xf
         data = XLSX.getdata(xf[sheetname])
         DataFrame(data[2:end, :], Symbol.(vec(data[1, :])))
     end
+    validate_source_columns(raw, source_spec)
 
     raw.tech      = String.(raw.tech)
     raw.subregion = String.(raw.subregion)

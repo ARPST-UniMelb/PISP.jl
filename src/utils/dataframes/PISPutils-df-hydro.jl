@@ -1,5 +1,34 @@
 using CSV
 using DataFrames
+
+const ISP2024_HYDRO_SCHEME_INFLOWS_SOURCE = XlsxSourceSpec(
+    id = :hydro_scheme_inflows,
+    edition = 2024,
+    workbook = "2024-isp-inputs-and-assumptions-workbook.xlsx",
+    worksheet = "Hydro Scheme Inflows",
+    cell_range = "B34:N47",
+    description = "Monthly reference-year inflows used to construct the Snowy hydro schedule.",
+    columns = ColumnSpec[
+        ColumnSpec(name = "Reference Year (FYE)", data_type = :Integer),
+        ColumnSpec(name = "Jul", data_type = :Real),
+        ColumnSpec(name = "Aug", data_type = :Real),
+        ColumnSpec(name = "Sep", data_type = :Real),
+        ColumnSpec(name = "Oct", data_type = :Real),
+        ColumnSpec(name = "Nov", data_type = :Real),
+        ColumnSpec(name = "Dec", data_type = :Real),
+        ColumnSpec(name = "Jan", data_type = :Real),
+        ColumnSpec(name = "Feb", data_type = :Real),
+        ColumnSpec(name = "Mar", data_type = :Real),
+        ColumnSpec(name = "Apr", data_type = :Real),
+        ColumnSpec(name = "May", data_type = :Real),
+        ColumnSpec(name = "Jun", data_type = :Real),
+    ],
+    source_family = :hydro,
+    consumer = :build_hourly_snowy,
+)
+
+register_source_specs!(ISP2024_HYDRO_SCHEME_INFLOWS_SOURCE)
+
 function weather_years_df(d::Dict)
     parse_date(x) = x isa Date ? x : Date(x, dateformat"yyyy-mm-dd")
     rows = [(parse_date(s), parse_date(e), string(v)) for ((s,e), v) in d]
@@ -50,8 +79,9 @@ end
 function build_hourly_snowy(
     ispdata24;
     weather_years = PISP.WEATHER_YEARS,
-    sheet_name = "Hydro Scheme Inflows",
-    cell_range = "B34:N47",
+    source_spec::XlsxSourceSpec = ISP2024_HYDRO_SCHEME_INFLOWS_SOURCE,
+    sheet_name = nothing,
+    cell_range = nothing,
 )
     monthly_cols = Symbol.([:Jul, :Aug, :Sep, :Oct, :Nov, :Dec, :Jan, :Feb, :Mar, :Apr, :May, :Jun])
     month_map = Dict(
@@ -61,7 +91,12 @@ function build_hourly_snowy(
 
     weather_df = weather_years_df(weather_years)
 
-    data = PISP.read_xlsx_with_header(ispdata24, sheet_name, cell_range)
+    data = PISP.read_xlsx_with_header(
+        ispdata24,
+        source_spec;
+        worksheet = something(sheet_name, source_spec.worksheet),
+        cell_range = something(cell_range, source_spec.cell_range),
+    )
     rename!(data, Symbol("Reference Year (FYE)") => :ref_year)
 
     monthly_lookup = select(data, :ref_year => ByRow(string) => :label, monthly_cols...)

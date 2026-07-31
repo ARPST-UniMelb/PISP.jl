@@ -11,16 +11,17 @@ auxiliary outlook files required by the build pipeline.
   the downloaded ISP data structure. Paths are combined using `normpath`.
 """
 function default_data_paths(;filepath=@__DIR__)
+    spec(id) = source_spec(id, 2024)
     return (
-        ispdata19          = normpath(filepath, "2019-input-and-assumptions-workbook-v1-3-dec-19.xlsx"),
-        ispdata24          = normpath(filepath, "2024-isp-inputs-and-assumptions-workbook.xlsx"),
-        iasr23_ev_workbook = normpath(filepath, "2023-iasr-ev-workbook.xlsx"),
+        ispdata19          = source_path(filepath, spec(:legacy_generator_minimum_up_time)),
+        ispdata24          = source_path(filepath, spec(:network_capability)),
+        iasr23_ev_workbook = source_path(filepath, spec(:ev_bev_phev_profile_weekend)),
         ispmodel           = normpath(filepath, "2024 ISP Model"),
         profiledata        = normpath(filepath, "Traces/"),
         outlookdata        = normpath(filepath, "Core"),
-        outlookAEMO        = normpath(filepath, "Auxiliary/CapacityOutlook2024_Condensed.xlsx"),
-        vpp_cap            = normpath(filepath, "Auxiliary/StorageCapacityOutlook_2024_ISP.xlsx"),
-        vpp_ene            = normpath(filepath, "Auxiliary/StorageEnergyOutlook_2024_ISP.xlsx"),
+        outlookAEMO        = source_path(filepath, spec(:condensed_capacity_outlook)),
+        vpp_cap            = source_path(filepath, spec(:vpp_capacity_outlook)),
+        vpp_ene            = source_path(filepath, spec(:vpp_energy_outlook)),
     )
 end
 

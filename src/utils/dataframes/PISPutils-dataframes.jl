@@ -54,6 +54,83 @@ function read_xlsx_with_header(filepath::AbstractString,
     return DataFrame(rows, colnames; makeunique=makeunique)
 end
 
+function _resolved_xlsx_location(
+    spec::XlsxSourceSpec;
+    worksheet::AbstractString = spec.worksheet,
+    cell_range = spec.cell_range,
+)
+    resolved_worksheet = String(strip(String(worksheet)))
+    isempty(resolved_worksheet) &&
+        throw(ArgumentError("Resolved worksheet must not be empty for source $(spec.id)."))
+
+    cell_range === nothing &&
+        throw(ArgumentError("Source $(spec.id) does not define a cell range."))
+    resolved_range = String(strip(String(cell_range)))
+    is_valid_excel_range(resolved_range) ||
+        throw(ArgumentError("Invalid Excel range `$(resolved_range)` for source $(spec.id)."))
+
+    return resolved_worksheet, resolved_range
+end
+
+function validate_source_columns(table, spec::SourceSpec)
+    isempty(spec.columns) && return table
+    available = Set(string.(names(table)))
+    missing_columns = [
+        column.name for column in spec.columns
+        if column.required && !(column.name in available)
+    ]
+    isempty(missing_columns) || throw(ArgumentError(
+        "Source $(spec.id) is missing required columns: $(join(missing_columns, ", ")).",
+    ))
+    return table
+end
+
+function read_xlsx_rows(
+    filepath::AbstractString,
+    spec::XlsxSourceSpec;
+    worksheet::AbstractString = spec.worksheet,
+    cell_range = spec.cell_range,
+)
+    resolved_worksheet, resolved_range = _resolved_xlsx_location(
+        spec;
+        worksheet = worksheet,
+        cell_range = cell_range,
+    )
+    return XLSX.readdata(filepath, resolved_worksheet, resolved_range)
+end
+
+function read_xlsx_with_header(
+    filepath::AbstractString,
+    spec::XlsxSourceSpec;
+    worksheet::AbstractString = spec.worksheet,
+    cell_range = spec.cell_range,
+    makeunique::Bool = true,
+    validate_columns::Bool = false,
+)
+    resolved_worksheet, resolved_range = _resolved_xlsx_location(
+        spec;
+        worksheet = worksheet,
+        cell_range = cell_range,
+    )
+    table = read_xlsx_with_header(
+        filepath,
+        resolved_worksheet,
+        resolved_range;
+        makeunique = makeunique,
+    )
+    return validate_columns ? validate_source_columns(table, spec) : table
+end
+
+function read_csv_source(
+    filepath::AbstractString,
+    spec::CsvSourceSpec;
+    validate_columns::Bool = false,
+    kwargs...
+)
+    table = CSV.File(filepath; kwargs...) |> DataFrame
+    return validate_columns ? validate_source_columns(table, spec) : table
+end
+
 """
     schema_to_dataframe(schema::OrderedDict{String,String})
     Convert a schema (SQL-like column definitions) into an empty DataFrame with correct Julia column types.
@@ -77,6 +154,5 @@ function schema_to_dataframe(schema::OrderedDict{String,String})
     end
     return DataFrame(cols, names)
 end
-
 
 

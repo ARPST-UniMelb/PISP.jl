@@ -247,3 +247,4 @@ markdown_table(hydro_conventions)
 
 This page covers bounded hydro inputs required by the parser, not the bulk renewable or demand trace payloads.
 ISP 2026 workbook inflows are observed source evidence and are not presented as an integrated PISP 2026 hydro workflow.
+

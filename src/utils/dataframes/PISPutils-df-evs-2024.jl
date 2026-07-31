@@ -7,12 +7,71 @@ if !isdefined(@__MODULE__, :NEMAREAS)
     include(joinpath(dirname(dirname(@__DIR__)), "parameters", "general2024ISP.jl"))
 end
 
-if !isdefined(@__MODULE__, :EV_2024_BEV_PHEV_PROFILE_WEEKEND_SHEET)
-    const EV_2024_BEV_PHEV_PROFILE_WEEKEND_SHEET = "BEV_PHEV_Profile_kW (Weekend)"
-    const EV_2024_BEV_PHEV_PROFILE_WEEKDAY_SHEET = "BEV_PHEV_Profile_kW (Weekday)"
-    const EV_2024_BEV_PHEV_CHARGE_TYPE_SHEET = "BEV_PHEV_Charge_Type (%)"
-    const EV_2024_VEHICLE_NUMBERS_SHEET_SUFFIX = "_Numbers"
-    const EV_2024_SUBREGIONAL_DEMAND_ALLOCATION_SHEET = "Sub-regional demand allocation"
+if !isdefined(@__MODULE__, :EV_2024_BEV_PHEV_PROFILE_WEEKEND_SOURCE)
+    const EV_2024_BEV_PHEV_PROFILE_WEEKEND_SOURCE = XlsxSourceSpec(
+        id = :ev_bev_phev_profile_weekend,
+        edition = 2024,
+        workbook = "2023-iasr-ev-workbook.xlsx",
+        worksheet = "BEV_PHEV_Profile_kW (Weekend)",
+        cell_range = "B:AY",
+        description = "Weekend BEV and PHEV charging profiles by state and vehicle type.",
+        source_family = :electric_vehicles,
+        consumer = :ev_der_sched,
+    )
+    const EV_2024_BEV_PHEV_PROFILE_WEEKDAY_SOURCE = XlsxSourceSpec(
+        id = :ev_bev_phev_profile_weekday,
+        edition = 2024,
+        workbook = "2023-iasr-ev-workbook.xlsx",
+        worksheet = "BEV_PHEV_Profile_kW (Weekday)",
+        cell_range = "B:AY",
+        description = "Weekday BEV and PHEV charging profiles by state and vehicle type.",
+        source_family = :electric_vehicles,
+        consumer = :ev_der_sched,
+    )
+    const EV_2024_BEV_PHEV_CHARGE_TYPE_SOURCE = XlsxSourceSpec(
+        id = :ev_bev_phev_charge_type,
+        edition = 2024,
+        workbook = "2023-iasr-ev-workbook.xlsx",
+        worksheet = "BEV_PHEV_Charge_Type (%)",
+        cell_range = "B:BF",
+        description = "BEV and PHEV charging-type shares by state, scenario, category and year.",
+        source_family = :electric_vehicles,
+        consumer = :ev_der_sched,
+    )
+    const EV_2024_VEHICLE_NUMBERS_SOURCE = XlsxSourceSpec(
+        id = :ev_vehicle_numbers,
+        edition = 2024,
+        workbook = "2023-iasr-ev-workbook.xlsx",
+        worksheet = "*_Numbers",
+        cell_range = "B:AZ",
+        description = "Vehicle-number sheets selected by the `_Numbers` worksheet suffix.",
+        source_family = :electric_vehicles,
+        consumer = :ev_der_sched,
+    )
+    const EV_2024_SUBREGIONAL_DEMAND_ALLOCATION_SOURCE = XlsxSourceSpec(
+        id = :ev_subregional_demand_allocation,
+        edition = 2024,
+        workbook = "2024-isp-inputs-and-assumptions-workbook.xlsx",
+        worksheet = "Sub-regional demand allocation",
+        cell_range = "B127:AG182",
+        description = "Subregional EV demand allocations by scenario and financial year.",
+        source_family = :electric_vehicles,
+        consumer = :ev_der_sched,
+    )
+
+    register_source_specs!(
+        EV_2024_BEV_PHEV_PROFILE_WEEKEND_SOURCE,
+        EV_2024_BEV_PHEV_PROFILE_WEEKDAY_SOURCE,
+        EV_2024_BEV_PHEV_CHARGE_TYPE_SOURCE,
+        EV_2024_VEHICLE_NUMBERS_SOURCE,
+        EV_2024_SUBREGIONAL_DEMAND_ALLOCATION_SOURCE,
+    )
+
+    const EV_2024_BEV_PHEV_PROFILE_WEEKEND_SHEET = EV_2024_BEV_PHEV_PROFILE_WEEKEND_SOURCE.worksheet
+    const EV_2024_BEV_PHEV_PROFILE_WEEKDAY_SHEET = EV_2024_BEV_PHEV_PROFILE_WEEKDAY_SOURCE.worksheet
+    const EV_2024_BEV_PHEV_CHARGE_TYPE_SHEET = EV_2024_BEV_PHEV_CHARGE_TYPE_SOURCE.worksheet
+    const EV_2024_VEHICLE_NUMBERS_SHEET_SUFFIX = replace(EV_2024_VEHICLE_NUMBERS_SOURCE.worksheet, "*" => "")
+    const EV_2024_SUBREGIONAL_DEMAND_ALLOCATION_SHEET = EV_2024_SUBREGIONAL_DEMAND_ALLOCATION_SOURCE.worksheet
     const EV_2024_VEHICLE_NUMBER_VALUE_COLUMN_BY_SHEET = OrderedDict(
         "BEV_Numbers" => :number_bev,
         "PHEV_Numbers" => :number_phev,
@@ -47,6 +106,19 @@ end
 function ev_read_non_empty_rows(workbook_path::AbstractString, sheet_name::AbstractString, range_ref::AbstractString)
     raw_sheet = XLSX.readdata(workbook_path, sheet_name, range_ref)
     return [collect(raw_sheet[row_index, :]) for row_index in axes(raw_sheet, 1) if !ev_is_blank_row(raw_sheet[row_index, :])]
+end
+
+function ev_read_non_empty_rows(
+    workbook_path::AbstractString,
+    spec::XlsxSourceSpec;
+    worksheet::AbstractString = spec.worksheet,
+)
+    raw_sheet = read_xlsx_rows(workbook_path, spec; worksheet = worksheet)
+    return [
+        collect(raw_sheet[row_index, :])
+        for row_index in axes(raw_sheet, 1)
+        if !ev_is_blank_row(raw_sheet[row_index, :])
+    ]
 end
 
 function ev_ensure_columns!(columns::Dict{Symbol, Vector}, column_order::Vector{Symbol}, new_columns::Vector{Symbol}, factory::Function)
@@ -161,8 +233,18 @@ function ev_melt_year_columns_dataframe(
     return long_df[:, [id_columns..., :year, value_name]]
 end
 
-function ev_build_bev_phev_profile_dataframe(workbook_path::AbstractString, sheet_name::AbstractString; day_type::AbstractString)
-    non_empty_rows = ev_read_non_empty_rows(workbook_path, sheet_name, "B:AY")
+function ev_build_bev_phev_profile_dataframe(
+    workbook_path::AbstractString,
+    source_spec::XlsxSourceSpec;
+    day_type::AbstractString,
+    worksheet::AbstractString = source_spec.worksheet,
+)
+    sheet_name = String(worksheet)
+    non_empty_rows = ev_read_non_empty_rows(
+        workbook_path,
+        source_spec;
+        worksheet = sheet_name,
+    )
 
     current_state = nothing
     profile_time_indices = Int[]
@@ -208,8 +290,33 @@ function ev_build_bev_phev_profile_dataframe(workbook_path::AbstractString, shee
     return ev_dataframe_from_columns(column_order, columns)
 end
 
-function ev_build_vehicle_numbers_dataframe(workbook_path::AbstractString, sheet_name::AbstractString)
-    non_empty_rows = ev_read_non_empty_rows(workbook_path, sheet_name, "B:AZ")
+function ev_build_bev_phev_profile_dataframe(
+    workbook_path::AbstractString,
+    sheet_name::AbstractString;
+    day_type::AbstractString,
+)
+    source_spec = sheet_name == EV_2024_BEV_PHEV_PROFILE_WEEKEND_SOURCE.worksheet ?
+        EV_2024_BEV_PHEV_PROFILE_WEEKEND_SOURCE :
+        EV_2024_BEV_PHEV_PROFILE_WEEKDAY_SOURCE
+    return ev_build_bev_phev_profile_dataframe(
+        workbook_path,
+        source_spec;
+        day_type = day_type,
+        worksheet = sheet_name,
+    )
+end
+
+function ev_build_vehicle_numbers_dataframe(
+    workbook_path::AbstractString,
+    source_spec::XlsxSourceSpec;
+    worksheet::AbstractString = source_spec.worksheet,
+)
+    sheet_name = String(worksheet)
+    non_empty_rows = ev_read_non_empty_rows(
+        workbook_path,
+        source_spec;
+        worksheet = sheet_name,
+    )
 
     current_scenario = nothing
     current_state = nothing
@@ -268,9 +375,20 @@ function ev_build_vehicle_numbers_dataframe(workbook_path::AbstractString, sheet
     return ev_dataframe_from_columns(column_order, columns)
 end
 
-function ev_get_vehicle_numbers_sheet_names(workbook_path::AbstractString)
+ev_build_vehicle_numbers_dataframe(workbook_path::AbstractString, sheet_name::AbstractString) =
+    ev_build_vehicle_numbers_dataframe(
+        workbook_path,
+        EV_2024_VEHICLE_NUMBERS_SOURCE;
+        worksheet = sheet_name,
+    )
+
+function ev_get_vehicle_numbers_sheet_names(
+    workbook_path::AbstractString,
+    source_spec::XlsxSourceSpec = EV_2024_VEHICLE_NUMBERS_SOURCE,
+)
+    worksheet_suffix = replace(source_spec.worksheet, "*" => "")
     return XLSX.openxlsx(workbook_path) do workbook
-        filter(sheet_name -> endswith(sheet_name, EV_2024_VEHICLE_NUMBERS_SHEET_SUFFIX), XLSX.sheetnames(workbook))
+        filter(sheet_name -> endswith(sheet_name, worksheet_suffix), XLSX.sheetnames(workbook))
     end
 end
 
@@ -278,8 +396,16 @@ function ev_melt_vehicle_numbers_dataframe(df::DataFrame, number_column::Symbol)
     return ev_melt_year_columns_dataframe(df, [:scenario, :state, :vehicle_type, :category], number_column)
 end
 
-function ev_build_bev_phev_charge_type_dataframe(workbook_path::AbstractString, sheet_name::AbstractString)
-    non_empty_rows = ev_read_non_empty_rows(workbook_path, sheet_name, "B:BF")
+function ev_build_bev_phev_charge_type_dataframe(
+    workbook_path::AbstractString,
+    source_spec::XlsxSourceSpec;
+    worksheet::AbstractString = source_spec.worksheet,
+)
+    non_empty_rows = ev_read_non_empty_rows(
+        workbook_path,
+        source_spec;
+        worksheet = worksheet,
+    )
 
     current_state = nothing
     current_scenario = nothing
@@ -343,8 +469,18 @@ function ev_build_bev_phev_charge_type_dataframe(workbook_path::AbstractString, 
     ])
 end
 
-function ev_build_subregional_demand_allocation_dataframe(workbook_path::AbstractString)
-    non_empty_rows = ev_read_non_empty_rows(workbook_path, EV_2024_SUBREGIONAL_DEMAND_ALLOCATION_SHEET, "B127:AG182")
+ev_build_bev_phev_charge_type_dataframe(workbook_path::AbstractString, sheet_name::AbstractString) =
+    ev_build_bev_phev_charge_type_dataframe(
+        workbook_path,
+        EV_2024_BEV_PHEV_CHARGE_TYPE_SOURCE;
+        worksheet = sheet_name,
+    )
+
+function ev_build_subregional_demand_allocation_dataframe(
+    workbook_path::AbstractString;
+    source_spec::XlsxSourceSpec = EV_2024_SUBREGIONAL_DEMAND_ALLOCATION_SOURCE,
+)
+    non_empty_rows = ev_read_non_empty_rows(workbook_path, source_spec)
 
     current_scenario = nothing
     current_state = nothing
