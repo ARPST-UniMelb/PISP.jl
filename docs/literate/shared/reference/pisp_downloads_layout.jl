@@ -22,12 +22,8 @@
 const REPO_ROOT = normpath(
     get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..", "..")),
 )
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-include(joinpath(REPO_ROOT, "docs", "download_layout.jl"))
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .PISPDocsEditionProfiles: edition_profiles
-using .PISPDocsDownloadLayout: inspect_download_layout
-using .EdaSupport
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 nothing #hide
 
 # ## Observed outlook directories and source archives
@@ -40,20 +36,20 @@ nothing #hide
 # `zip/Traces/` remain part of the trace source family.
 
 download_layouts = [
-    inspect_download_layout(profile.label, profile.download_root)
-    for profile in edition_profiles(REPO_ROOT)
+    PISPDocUtils.inspect_download_layout(profile.label, profile.download_root)
+    for profile in PISPDocUtils.edition_profiles(REPO_ROOT)
 ]
 
 layout_rows = [
     Any[
         layout.edition,
-        markdown_items(layout.outlook_directories; nothing_text = "nothing"),
-        markdown_items(layout.source_archives; nothing_text = "nothing"),
+        PISPDocUtils.markdown_items(layout.outlook_directories; nothing_text = "nothing"),
+        PISPDocUtils.markdown_items(layout.source_archives; nothing_text = "nothing"),
     ]
     for layout in download_layouts
 ]
 
-markdown_table(
+PISPDocUtils.markdown_table(
     ["Edition", "Extracted outlook directories", "Retained source archives"],
     layout_rows;
     nothing_text = "nothing",

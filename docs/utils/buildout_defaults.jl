@@ -1,24 +1,3 @@
-module PISPDocsBuildoutDefaults
-
-using PISP
-using DataFrames
-
-export ESS_TEMPLATE_FIELDS,
-    GEN_TEMPLATE_FIELDS,
-    ESS_FIELD_METADATA,
-    GEN_FIELD_METADATA,
-    buildout_technology_rows,
-    buildout_origin_rows,
-    buildout_placeholder_rows,
-    template_comparison_rows,
-    split_common_rows,
-    comparison_frame,
-    field_metadata_frame,
-    technology_value_frame,
-    buildout_reference_tables,
-    parser_template_fields,
-    validate_buildout_defaults_contract
-
 const ESS_TEMPLATE_FIELDS = [
     "tech", "type", "investment", "active", "ch_eff", "dch_eff", "eini", "emin",
     "pmin", "lmin", "fullout", "partialout", "mttrfull", "mttrpart", "inertia",
@@ -333,6 +312,4 @@ function validate_buildout_defaults_contract(parser_path)
     end
 
     return true
-end
-
 end

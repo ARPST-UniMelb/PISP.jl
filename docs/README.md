@@ -50,7 +50,7 @@ julia --project=docs docs/render_changed.jl
 ```
 
 `render_changed.jl` resolves the changed `docs/literate/**/*.jl` files (staged, unstaged, or untracked, versus `HEAD`) to their registry page IDs and re-renders just those in place through `PISP_LITERATE_PAGES`.
-It reports changed documentation `.jl` files that are not registered page sources, such as `eda_support.jl` or `page_registry.jl`, since those can affect many pages.
+It reports changed documentation `.jl` files that are not registered page sources, including shared files under `docs/utils/`, since those can affect many pages.
 Run the full `docs/render_literate.jl` before committing regenerated Markdown; the changed-only path skips the whole-set completeness and atomic-replacement checks.
 
 ## Prepare local data for complete regeneration
@@ -138,11 +138,11 @@ Local data are required for complete Literate regeneration, but not for a site b
 | `docs/literate/shared/source_material/` | Executable non-trace source documentation organised by data meaning across ISP 2024 and ISP 2026. |
 | `docs/literate/isp2024/` | Executable ISP 2024 reference, tutorial, validation, and analysis sources. |
 | `docs/literate/comparison/` | Executable cross-edition source comparisons and mapping evidence. |
-| `docs/source-material-coverage.toml` | Machine-readable ownership ledger for active source reads, parameter files, and mapping families. |
-| `docs/source_material_support.jl` | Shared bounded workbook, directory-inventory, and coverage-ledger helpers used by the source-material pages. |
-| `docs/page-registry.toml` | Authority for every registry-managed Literate source and generated Markdown output. |
-| `docs/edition_profiles.jl` | Edition-specific report/download roots and schedule defaults used by rendering preflight. |
-| `docs/navigation.jl` | Published-site navigation assembled from static edition pages and published registry entries. |
+| `docs/config/source-material-coverage.toml` | Machine-readable ownership ledger for active source reads, parameter files, and mapping families. |
+| `docs/config/page-registry.toml` | Authority for every registry-managed Literate source and generated Markdown output. |
+| `docs/config/source-links.toml` | Local-to-public source-link registry used by the Documenter staging step. |
+| `docs/utils/PISPDocUtils.jl` | Module facade for documentation and tutorial support used with qualified `PISPDocUtils.*` calls. |
+| `docs/utils/` | Reusable tutorial support and documentation build helpers. |
 | `docs/src/generated/` | Markdown and figures generated from registered Literate pages. |
 | `docs/render_literate.jl` | Literate selection, profile resolution, data preflight, execution, and generated-output installation. |
 | `docs/make.jl` | Target-specific source-link staging and Documenter site build. |
@@ -171,11 +171,11 @@ Processed-data compatibility still requires edition-specific parser and schema v
 | Raw-source comparison | `docs/literate/comparison/analysis/raw_source_comparison.jl` | `docs/src/generated/comparison/analyses/raw-source-comparison.md` |
 
 The source-material family reads the two inputs workbooks, both EV workbooks, the edition-specific outlook directories, the 2019 operating-assumptions supplement used by the current parser, and bounded hydro CSVs under the 2024 model directory.
-Each page declares its exact local prerequisites in `docs/page-registry.toml`; no source-selection path is maintained in this table.
+Each page declares its exact local prerequisites in `docs/config/page-registry.toml`; no source-selection path is maintained in this table.
 
 ## Page registry
 
-Each `[[page]]` entry in `docs/page-registry.toml` describes one executable Literate page.
+Each `[[page]]` entry in `docs/config/page-registry.toml` describes one executable Literate page.
 The registry validates page metadata, source and output paths, navigation positions, related pages, registered sources, and generated Markdown.
 
 | Field | Meaning |
@@ -230,7 +230,7 @@ Published `shared` pages in the `source-data` layer are placed automatically und
 
 ## Edition profiles and data preflight
 
-`docs/edition_profiles.jl` centralises local roots and schedule defaults used by documentation rendering.
+`docs/utils/edition_profiles.jl`, loaded through `PISPDocUtils`, centralises local roots and schedule defaults used by documentation rendering.
 Relative environment-variable values are resolved from the repository root.
 
 | Edition | Environment variable | Default |
@@ -268,14 +268,13 @@ Run checks from the repository root.
 | Lifecycle action | Command | Reads and writes | Local ISP data required? |
 | --- | --- | --- | --- |
 | Package tests | `julia --project=. -e 'using Pkg; Pkg.test()'` | Reads the package and root test environment; writes normal Julia caches and temporary test artefacts. | No for fixture-based checks; local source-root checks skip when configured material is absent. |
-| Documentation infrastructure tests | `julia --project=docs docs/test/runtests.jl` | Reads registry, navigation, renderer, and helper fixtures; writes temporary test directories. | No. |
-| Source-link routing | `julia --project=docs docs/test_source_links.jl` | Reads maintained Markdown and source-link configuration; writes temporary staged files. | No. |
+| Documentation infrastructure tests | `julia --project=docs docs/test/runtests.jl` | Reads registry, navigation, renderer, utility, and source-link fixtures; writes temporary test directories. | No. |
 | Literate render | `julia --project=docs docs/render_literate.jl` | Reads registered sources and their declared data requirements; writes committed generated Markdown and figures. | Yes for selected data-dependent pages. |
 | Local-link site build | `julia --project=docs docs/make.jl` | Reads maintained and committed generated Markdown; writes `docs/.documenter-source/` and `docs/build/`. | No. |
 | Public-link site build | `PISP_DOCS_LINK_TARGET=public julia --project=docs docs/make.jl` | Reads source-link mappings and documentation sources; writes staged public-link pages and `docs/build/`. | No. |
 | Render and local build | `julia --project=docs docs/build_all.jl` | Runs the registered Literate render followed by the local-link site build. | Yes for data-dependent published pages. |
 
-Package tests, documentation tests, and source-link tests are normal contributor checks.
+Package tests and documentation tests are normal contributor checks.
 A complete Literate render and both link-target builds are publication checks because they validate committed generated sources and the rendered reader experience.
 
 ## Rendering and site builds
@@ -309,7 +308,7 @@ generated Markdown and therefore does not require local source roots.
 ## Source links and validation
 
 Maintained Markdown keeps repository-local links to registered source PDFs.
-`docs/source-links.toml` maps those local paths to official publisher URLs for public builds, while `docs/make.jl` stages a target-specific copy rather than rewriting `docs/src/`.
+`docs/config/source-links.toml` maps those local paths to official publisher URLs for public builds, while `docs/make.jl` stages a target-specific copy rather than rewriting `docs/src/`.
 
 Build the public-link variant with:
 
@@ -317,10 +316,10 @@ Build the public-link variant with:
 PISP_DOCS_LINK_TARGET=public julia --project=docs docs/make.jl
 ```
 
-Validate source-link routing independently with:
+Validate source-link routing with the documentation infrastructure tests:
 
 ```sh
-julia --project=docs docs/test_source_links.jl
+julia --project=docs docs/test/runtests.jl
 ```
 
 ## Adding or changing a registry-managed page

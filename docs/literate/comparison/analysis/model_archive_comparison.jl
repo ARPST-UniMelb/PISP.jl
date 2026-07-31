@@ -16,13 +16,11 @@ using Printf
 const REPO_ROOT = normpath(
     get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..", "..")),
 )
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .PISPDocsEditionProfiles: edition_profiles
-using .EdaSupport
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
 const EXPECTED_YEARS = (2024, 2026)
-const PROFILES = Dict(parse(Int, profile.edition) => profile for profile in edition_profiles(REPO_ROOT))
+const PROFILES = Dict(parse(Int, profile.edition) => profile for profile in PISPDocUtils.edition_profiles(REPO_ROOT))
 const ARCHIVES = Dict(
     year => joinpath(PROFILES[year].download_root, "zip", "$(year)-isp-model.zip")
     for year in EXPECTED_YEARS
@@ -249,7 +247,7 @@ for year in EXPECTED_YEARS
     )
 end
 
-markdown_table(
+PISPDocUtils.markdown_table(
     [
         "ISP year",
         "Archive",
@@ -307,7 +305,7 @@ scenarios_2026 = unique_sorted(record.scenario for record in scenario_records_20
 @assert sort([row.scenario_2024 for row in scenario_mapping]) == scenarios_2024
 @assert sort([row.scenario_2026 for row in scenario_mapping]) == scenarios_2026
 
-markdown_table(
+PISPDocUtils.markdown_table(
     ["ISP 2024 scenario", "ISP 2026 scenario", "Relationship", "Evidence"],
     [
         Any[row.scenario_2024, row.scenario_2026, row.relationship, row.citation]
@@ -339,7 +337,7 @@ for role in ["PLEXOS model", "PLEXOS solver parameters"]
     )
 end
 
-markdown_table(
+PISPDocUtils.markdown_table(
     ["XML role", "ISP 2024 files", "ISP 2026 files"],
     xml_role_rows;
     alignment = [:left, :right, :right],
@@ -385,7 +383,7 @@ push!(
     ],
 )
 
-markdown_table(
+PISPDocUtils.markdown_table(
     ["Trace family", "ISP 2024", "ISP 2026", "Archive coverage"],
     trace_family_rows;
     alignment = [:left, :right, :right, :left],
@@ -410,7 +408,7 @@ for category in filename_categories, year in EXPECTED_YEARS
     push!(filename_rows, Any[humanise_category(category), year, filename])
 end
 
-markdown_table(
+PISPDocUtils.markdown_table(
     ["Trace family", "ISP year", "Example filename"],
     filename_rows;
     alignment = [:left, :right, :left],

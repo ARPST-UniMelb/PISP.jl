@@ -5,13 +5,14 @@
 
 using Literate
 
-include(joinpath(@__DIR__, "page_registry.jl"))
-include(joinpath(@__DIR__, "edition_profiles.jl"))
+include(joinpath(@__DIR__, "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
+include(joinpath(@__DIR__, "utils", "page_registry.jl"))
 
 const DOCS_DIR = @__DIR__
 const SRC_DIR = joinpath(DOCS_DIR, "src")
 const REPO_ROOT = normpath(joinpath(DOCS_DIR, ".."))
-const REGISTRY_PATH = joinpath(DOCS_DIR, "page-registry.toml")
+const REGISTRY_PATH = joinpath(DOCS_DIR, "config", "page-registry.toml")
 const TRACK_ORDER = Dict("shared" => 1, "isp2024" => 2, "isp2026" => 3, "comparison" => 4)
 const KIND_ORDER = Dict("reference" => 1, "tutorial" => 2, "validation" => 3, "analysis" => 4)
 
@@ -38,18 +39,18 @@ function select_pages(registry_pages)
         isempty(unknown_ids) || error("unknown page IDs in PISP_LITERATE_PAGES: $(join(unknown_ids, ", "))")
         selected = [pages_by_id[id] for id in requested_ids]
         archived_ids = [
-            page.id for page in selected if !PISPDocsPageRegistry.is_renderable(page)
+            page.id for page in selected if !is_renderable(page)
         ]
         isempty(archived_ids) || error("PISP_LITERATE_PAGES cannot render archived page IDs: $(join(archived_ids, ", "))")
         return sort(selected; by = page -> (TRACK_ORDER[page.track], KIND_ORDER[page.kind], page.nav_order, page.id))
     end
 
     selected = if source_set == "published"
-        filter(PISPDocsPageRegistry.is_published, registry_pages)
+        filter(is_published, registry_pages)
     elseif source_set == "draft" || source_set == "eda-drafts"
-        filter(PISPDocsPageRegistry.is_draft, registry_pages)
+        filter(is_draft, registry_pages)
     elseif source_set == "all"
-        filter(PISPDocsPageRegistry.is_renderable, registry_pages)
+        filter(is_renderable, registry_pages)
     else
         error(
             "unsupported PISP_LITERATE_SET=\"$source_set\"; " *
@@ -73,7 +74,7 @@ function select_pages(registry_pages)
 end
 
 function profile_lookup()
-    profiles = PISPDocsEditionProfiles.edition_profiles(REPO_ROOT)
+    profiles = PISPDocUtils.edition_profiles(REPO_ROOT)
     return Dict(profile.edition => profile for profile in profiles)
 end
 
@@ -190,7 +191,7 @@ end
 
 function validate_selected_requirements(pages, profiles)
     for page in pages
-        PISPDocsPageRegistry.validate_data_requirements(
+        validate_data_requirements(
             page;
             repo_root = REPO_ROOT,
             profile_for = edition -> profile_for(profiles, edition),
@@ -336,7 +337,7 @@ function render_all_published(pages)
 
             backup_root = install_generated_tree(staged_src_dir)
             try
-                PISPDocsPageRegistry.load_page_registry(
+                load_page_registry(
                     REGISTRY_PATH;
                     require_published_outputs = true,
                 )
@@ -359,7 +360,7 @@ function render_all_published(pages)
 end
 
 function main()
-    registry_pages = PISPDocsPageRegistry.load_page_registry(
+    registry_pages = load_page_registry(
         REGISTRY_PATH;
         check_generated_outputs = false,
     )
@@ -369,7 +370,7 @@ function main()
     validate_selected_requirements(selected_pages, profiles)
 
     published_ids = Set(
-        page.id for page in registry_pages if PISPDocsPageRegistry.is_published(page)
+        page.id for page in registry_pages if is_published(page)
     )
     selected_ids = Set(page.id for page in selected_pages)
     rendering_all_published = selected_ids == published_ids

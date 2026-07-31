@@ -8,18 +8,18 @@
 #   julia --project=docs docs/render_changed.jl
 #
 # SCOPE / CAVEAT: this tracks only changed docs/literate/**/*.jl page sources.
-# It does NOT detect changes to shared helpers (eda_support.jl, page_registry.jl),
+# It does NOT detect changes to shared helpers under docs/utils/,
 # package src/, or local data -- any of which can change many rendered pages.
 # It also skips the full-set completeness/atomic-swap validation that
 # render_literate.jl performs for the whole published set.
 # Always run docs/render_literate.jl with the same active project before you
 # commit regenerated Markdown.
 
-include(joinpath(@__DIR__, "page_registry.jl"))
+include(joinpath(@__DIR__, "utils", "page_registry.jl"))
 
 const DOCS_DIR = @__DIR__
 const REPO_ROOT = normpath(joinpath(DOCS_DIR, ".."))
-const REGISTRY_PATH = joinpath(DOCS_DIR, "page-registry.toml")
+const REGISTRY_PATH = joinpath(DOCS_DIR, "config", "page-registry.toml")
 const RENDER_SCRIPT = joinpath(DOCS_DIR, "render_literate.jl")
 
 function git_lines(args)
@@ -42,7 +42,7 @@ function changed_docs_jl()
 end
 
 function main()
-    pages = PISPDocsPageRegistry.load_page_registry(REGISTRY_PATH; check_generated_outputs = false)
+    pages = load_page_registry(REGISTRY_PATH; check_generated_outputs = false)
     by_repo_path = Dict(normpath(joinpath("docs", page.source)) => page for page in pages)
 
     changed_pages = String[]
@@ -52,7 +52,7 @@ function main()
         key = normpath(path)
         if haskey(by_repo_path, key)
             page = by_repo_path[key]
-            if PISPDocsPageRegistry.is_renderable(page)
+            if is_renderable(page)
                 push!(changed_pages, page.id)
             else
                 push!(skipped_archived, page.id)

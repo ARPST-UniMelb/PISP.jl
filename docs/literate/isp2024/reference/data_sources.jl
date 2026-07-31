@@ -7,14 +7,12 @@ using DataFrames
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
-const ISP2024_PROFILE = edition_profile(REPO_ROOT, "2024")
+const ISP2024_PROFILE = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
 const INPUT_ROOT = ISP2024_PROFILE.download_root
 
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
 
 replace(relpath(INPUT_ROOT, REPO_ROOT), '\\' => '/')
 
@@ -29,7 +27,7 @@ configured_downloads = DataFrame(
     local_filename = [something(target.filename, "derived from URL") for target in targets],
     subdirectory = [something(target.subdir, "") for target in targets],
 )
-markdown_table(configured_downloads)
+PISPDocUtils.markdown_table(configured_downloads)
 
 # Demand, solar, and wind traces are discovered from the configured ISP publication page and downloaded separately from the fixed reference-file targets.
 
@@ -40,7 +38,7 @@ trace_downloader = DataFrame([
         link_selector = string(PISP.ISPTraceDownloader.TRACE_SELECTOR),
     ),
 ])
-markdown_table(trace_downloader)
+PISPDocUtils.markdown_table(trace_downloader)
 
 # ## Expected build inputs
 #
@@ -56,7 +54,7 @@ expected_input_status = DataFrame([
     )
     for (name, path) in pairs(expected_paths)
 ])
-markdown_table(expected_input_status)
+PISPDocUtils.markdown_table(expected_input_status)
 
 # ## Source roles
 #
@@ -101,7 +99,7 @@ let
         construction, schedule_inputs = SOURCE_CONTRIBUTION[table]
         push!(rows, "| `$table` | $construction | $schedule_inputs |")
     end
-    RawMarkdown(join(rows, "\n"))
+    PISPDocUtils.RawMarkdown(join(rows, "\n"))
 end
 
 # ## Local inventory

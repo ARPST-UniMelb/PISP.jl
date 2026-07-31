@@ -24,14 +24,12 @@ using XLSX
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
 
 const SCRIPT_STEM = "isp2024_12_storage_characteristics"
-const ISP2024_PROFILE = edition_profile(REPO_ROOT, "2024")
+const ISP2024_PROFILE = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
 const DOWNLOADS = relpath(ISP2024_PROFILE.download_root, REPO_ROOT)  # kept relative: this is the path form recorded below
 const IASR_WORKBOOK = joinpath(DOWNLOADS, "2024-isp-inputs-and-assumptions-workbook.xlsx")
 abs_path(relative_path) = joinpath(REPO_ROOT, relative_path)  # resolves a DOWNLOADS-relative path to an absolute location for reading
@@ -296,7 +294,7 @@ println("Workbook exists: ", isfile(abs_path(IASR_WORKBOOK)))
 isfile(abs_path(IASR_WORKBOOK)) || error("IASR workbook not found at $IASR_WORKBOOK")
 
 storage_matrix, phes_limit_matrix = XLSX.openxlsx(abs_path(IASR_WORKBOOK)) do xf
-    trim_sheet(xf["Storage properties"][:]), trim_sheet(xf["Build limits - PHES"][:])
+    PISPDocUtils.trim_sheet(xf["Storage properties"][:]), PISPDocUtils.trim_sheet(xf["Build limits - PHES"][:])
 end
 println("Trimmed \"Storage properties\" sheet shape: ", size(storage_matrix))
 println("Trimmed \"Build limits - PHES\" sheet shape: ", size(phes_limit_matrix))
@@ -305,7 +303,7 @@ nothing #hide
 # ## Battery and PHES characteristics
 
 battery_df = battery_properties(storage_matrix)
-write_table(battery_df, SCRIPT_STEM, "battery_properties")
+PISPDocUtils.write_table(battery_df, SCRIPT_STEM, "battery_properties")
 battery_display = DataFrame(
     :Technology => battery_df.technology_label,
     Symbol("Duration (h)") => battery_df.duration_hours_from_energy_to_power,
@@ -322,7 +320,7 @@ battery_display = DataFrame(
         nrow(battery_df),
     ),
 )
-markdown_table(battery_display)
+PISPDocUtils.markdown_table(battery_display)
 
 # Energy capacity is reported directly by the workbook. Duration is the ratio of
 # that source value to the corresponding maximum-power value.
@@ -330,7 +328,7 @@ markdown_table(battery_display)
 #-
 
 phes_scheme_df = phes_scheme_properties(storage_matrix)
-write_table(phes_scheme_df, SCRIPT_STEM, "phes_scheme_properties")
+PISPDocUtils.write_table(phes_scheme_df, SCRIPT_STEM, "phes_scheme_properties")
 phes_scheme_display = DataFrame(
     Symbol("Project / technology") => phes_scheme_df.scheme_label,
     Symbol("Generation capacity (MW)") => phes_scheme_df.installed_generation_capacity_mw,
@@ -345,7 +343,7 @@ phes_scheme_display = DataFrame(
         nrow(phes_scheme_df),
     ),
 )
-markdown_table(phes_scheme_display)
+PISPDocUtils.markdown_table(phes_scheme_display)
 
 # The inspected source supplies pumping efficiency, not round-trip efficiency.
 # The table keeps that distinction explicit rather than converting between them.
@@ -353,7 +351,7 @@ markdown_table(phes_scheme_display)
 # ## PHES build limits
 
 phes_limits_df = phes_build_limits(phes_limit_matrix)
-write_table(phes_limits_df, SCRIPT_STEM, "phes_build_limits")
+PISPDocUtils.write_table(phes_limits_df, SCRIPT_STEM, "phes_build_limits")
 phes_limits_display = select(
     phes_limits_df,
     :name => Symbol("Location"),
@@ -364,12 +362,12 @@ phes_limits_display = select(
     :phes_48hrs_storage_mw => Symbol("48-hour limit (MW)"),
     :botn_cethana_mw => Symbol("BOTN - Cethana (MW)"),
 )
-markdown_table(phes_limits_display)
+PISPDocUtils.markdown_table(phes_limits_display)
 
 # ## Storage-class comparison
 
 comparison_df = comparison_summary(battery_df, phes_scheme_df, phes_limits_df)
-write_table(comparison_df, SCRIPT_STEM, "storage_class_availability_summary")
+PISPDocUtils.write_table(comparison_df, SCRIPT_STEM, "storage_class_availability_summary")
 comparison_display = select(
     comparison_df,
     :storage_class => Symbol("Storage class"),
@@ -377,12 +375,12 @@ comparison_display = select(
     :round_trip_efficiency_status => Symbol("Efficiency evidence"),
     :buildable_capacity_status => Symbol("Build-limit evidence"),
 )
-markdown_table(comparison_display)
+PISPDocUtils.markdown_table(comparison_display)
 
 # ## PHES concentration
 
 concentration_df = phes_concentration(phes_limits_df)
-write_table(concentration_df, SCRIPT_STEM, "phes_regional_category_concentration")
+PISPDocUtils.write_table(concentration_df, SCRIPT_STEM, "phes_regional_category_concentration")
 concentration_display = select(
     first(concentration_df, min(10, nrow(concentration_df))),
     :concentration_axis => Symbol("Grouping"),
@@ -390,7 +388,7 @@ concentration_display = select(
     :total_phes_build_limit_mw => Symbol("PHES build limit (MW)"),
     :share_of_total_phes_build_limit_pct => Symbol("Share of total (%)"),
 )
-markdown_table(concentration_display)
+PISPDocUtils.markdown_table(concentration_display)
 
 # ## Summary metrics
 
@@ -410,7 +408,7 @@ top_subregion = first(subregion_rows)
 println("PHES round-trip efficiency: unavailable in inspected source; pumping efficiency is reported separately.")
 println("Battery buildable capacity: unavailable in general Build limits; not fabricated.")
 
-metric_value_table([
+PISPDocUtils.metric_value_table([
     "Battery rows" => nrow(battery_df),
     "PHES scheme rows" => nrow(phes_scheme_df),
     "PHES build-limit rows" => nrow(phes_limits_df),

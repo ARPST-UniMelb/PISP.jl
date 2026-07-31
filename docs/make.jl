@@ -6,16 +6,14 @@
 using Documenter
 using PISP
 
-include(joinpath(@__DIR__, "page_registry.jl"))
-using .PISPDocsPageRegistry
-include(joinpath(@__DIR__, "navigation.jl"))
-using .PISPDocsNavigation
+include(joinpath(@__DIR__, "utils", "page_registry.jl"))
+include(joinpath(@__DIR__, "utils", "navigation.jl"))
 
 const DOCS_DIR = @__DIR__
 const SRC = joinpath(DOCS_DIR, "src")
 const STAGED_SRC = joinpath(DOCS_DIR, ".documenter-source")
 const BUILD = joinpath(DOCS_DIR, "build")
-const REGISTRY_PATH = joinpath(DOCS_DIR, "page-registry.toml")
+const REGISTRY_PATH = joinpath(DOCS_DIR, "config", "page-registry.toml")
 const REPO_ROOT = realpath(dirname(DOCS_DIR))
 const PISP_REMOTE = Documenter.Remotes.GitHub("ARPST-UniMelb", "PISP.jl")
 const PISP_SOURCE_ROOT = realpath(dirname(dirname(pathof(PISP))))
@@ -33,13 +31,12 @@ const DOCUMENTATION_REMOTES = let
     remotes
 end
 
-include(joinpath(DOCS_DIR, "source_links.jl"))
-using .SourceLinks
+include(joinpath(DOCS_DIR, "utils", "source_links.jl"))
 
 link_target_name = get(ENV, "PISP_DOCS_LINK_TARGET", "local")
 link_target_name in ("local", "public") || error("PISP_DOCS_LINK_TARGET must be local or public")
 link_target = Symbol(link_target_name)
-stage_documentation!(SRC, STAGED_SRC, joinpath(DOCS_DIR, "source-links.toml"), link_target;
+stage_documentation!(SRC, STAGED_SRC, joinpath(DOCS_DIR, "config", "source-links.toml"), link_target;
     repo_root = dirname(DOCS_DIR))
 
 registry_pages = try

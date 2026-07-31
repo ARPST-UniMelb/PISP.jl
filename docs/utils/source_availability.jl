@@ -1,9 +1,4 @@
-module PISPDocsSourceAvailability
-
-export EditionProfile, Requirement, Observation, Inspection, AvailabilitySummary
-export source_availability_profiles, edition_requirements, inspect_edition, source_availability_summary
-
-Base.@kwdef struct EditionProfile
+Base.@kwdef struct SourceAvailabilityProfile
     edition::String
     report_root::String
     download_root::String
@@ -82,14 +77,14 @@ function configured_root(repo_root, env, variable, default)
 end
 
 function source_availability_profiles(repo_root; env = ENV)
-    profiles = EditionProfile[]
+    profiles = SourceAvailabilityProfile[]
     for (edition, report_default, download_default) in (
         ("2024", joinpath("data", "2024", "pisp-reports"), joinpath("data", "2024", "pisp-downloads")),
         ("2026", joinpath("data", "2026", "pisp-reports"), joinpath("data", "2026", "pisp-downloads")),
     )
         report_root, report_source = configured_root(repo_root, env, "PISP_ISP$(edition)_REPORT_ROOT", report_default)
         download_root, download_source = configured_root(repo_root, env, "PISP_ISP$(edition)_DOWNLOAD_ROOT", download_default)
-        push!(profiles, EditionProfile(
+        push!(profiles, SourceAvailabilityProfile(
             edition = edition,
             report_root = report_root,
             download_root = download_root,
@@ -139,7 +134,7 @@ function requirement_observed(root, requirement)
     throw(ArgumentError("unsupported requirement kind: $(requirement.kind)"))
 end
 
-function inspect_edition(profile::EditionProfile)
+function inspect_edition(profile::SourceAvailabilityProfile)
     requirements = edition_requirements(profile.edition)
     roots_present = ispath(profile.report_root) || ispath(profile.download_root)
     observations = Observation[]
@@ -155,7 +150,7 @@ function inspect_edition(profile::EditionProfile)
     Inspection(edition = profile.edition, state = state, observations = observations)
 end
 
-function source_availability_summary(profile::EditionProfile)
+function source_availability_summary(profile::SourceAvailabilityProfile)
     trace_directories = String[]
     trace_archive_files = String[]
     demand_group_paths = String[]
@@ -191,6 +186,4 @@ function source_availability_summary(profile::EditionProfile)
         demand_trace_files = demand_trace_files,
         poe_labels = sort(collect(poe_labels)),
     )
-end
-
 end

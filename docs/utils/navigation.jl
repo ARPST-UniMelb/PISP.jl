@@ -1,9 +1,3 @@
-module PISPDocsNavigation
-
-using ..PISPDocsPageRegistry: is_published
-
-export registry_navigation
-
 const KIND_LABELS = Dict(
     "isp2024" => [
         "reference" => "Reference and inputs",
@@ -121,6 +115,4 @@ function registry_navigation(registry_pages)
     push!(navigation, "Contributing" => "contributing.md")
     push!(navigation, "API Reference" => "api.md")
     return navigation
-end
-
 end

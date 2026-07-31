@@ -1,25 +1,3 @@
-module PISPDocsSourceMaterialSupport
-
-using CSV
-using DataFrames
-using TOML
-using XLSX
-
-export cells_table,
-    compact_path,
-    coverage_table,
-    coverage_document,
-    coverage_owner_summary,
-    directory_workbook_inventory,
-    fill_down!,
-    first_matching_file,
-    friendly_classification,
-    nonempty_rows,
-    sheet_dimension_table,
-    sheet_names,
-    workbook_inventory,
-    worksheet_presence
-
 const RANGE_WORKBOOK_CACHE = Dict{String, XLSX.XLSXFile}()
 
 const CLASSIFICATION_LABELS = Dict(
@@ -202,7 +180,7 @@ function first_matching_file(root::AbstractString, pattern::Regex)
 end
 
 function coverage_document(repo_root::AbstractString)
-    path = joinpath(repo_root, "docs", "source-material-coverage.toml")
+    path = joinpath(repo_root, "docs", "config", "source-material-coverage.toml")
     isfile(path) || error("source-material coverage ledger not found: $path")
     return TOML.parsefile(path)
 end
@@ -221,6 +199,4 @@ function coverage_owner_summary(document::AbstractDict, section::AbstractString)
     counts = combine(groupby(coverage_table(document, section), [:classification, :owner]), nrow => :items)
     sort!(counts, [:classification, :owner])
     return counts
-end
-
 end
