@@ -1,3 +1,491 @@
+const ISP2024_INPUTS_WORKBOOK = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+const ISP2019_INPUTS_WORKBOOK = "2019-input-and-assumptions-workbook-v1-3-dec-19.xlsx"
+const ISP2024_CONDENSED_CAPACITY_WORKBOOK = "Auxiliary/CapacityOutlook2024_Condensed.xlsx"
+const ISP2024_REZ_CAPACITY_WORKBOOK_PATTERN = "Auxiliary/2024 ISP - {scenario} - Core_REZCAP.xlsx"
+const ISP2024_VPP_CAPACITY_WORKBOOK = "Auxiliary/StorageCapacityOutlook_2024_ISP.xlsx"
+const ISP2024_VPP_ENERGY_WORKBOOK = "Auxiliary/StorageEnergyOutlook_2024_ISP.xlsx"
+
+_source_spec_slug(value) = replace(lowercase(strip(string(value))), r"[^a-z0-9]+" => "_")
+
+function _isp2024_xlsx_source(;
+    id,
+    worksheet,
+    cell_range,
+    description,
+    source_family,
+    consumer,
+    workbook = ISP2024_INPUTS_WORKBOOK,
+    columns = ColumnSpec[],
+)
+    return XlsxSourceSpec(
+        id = id,
+        edition = 2024,
+        workbook = workbook,
+        worksheet = worksheet,
+        cell_range = cell_range,
+        description = description,
+        columns = columns,
+        source_family = source_family,
+        consumer = consumer,
+    )
+end
+
+const ISP2024_TRACE_DATE_COLUMNS = ColumnSpec[
+    ColumnSpec(name = "Year", data_type = :Integer),
+    ColumnSpec(name = "Month", data_type = :Integer),
+    ColumnSpec(name = "Day", data_type = :Integer),
+]
+
+const ISP2024_NETWORK_CAPABILITY_SOURCE = _isp2024_xlsx_source(
+    id = :network_capability,
+    worksheet = "Network Capability",
+    cell_range = "B6:H21",
+    description = "Forward and reverse transfer capability assumptions for ISP flow paths.",
+    source_family = :network,
+    consumer = :line_table,
+)
+const ISP2024_TRANSMISSION_RELIABILITY_SOURCE = _isp2024_xlsx_source(
+    id = :transmission_reliability,
+    worksheet = "Transmission Reliability",
+    cell_range = "B7:G11",
+    description = "Transmission reliability assumptions applied to inter-regional flow paths.",
+    source_family = :network,
+    consumer = :line_table,
+)
+const ISP2024_FLOW_PATH_AUGMENTATION_SOURCE = _isp2024_xlsx_source(
+    id = :flow_path_augmentation_options,
+    worksheet = "Flow Path Augmentation options",
+    cell_range = "B11:N94",
+    description = "Candidate flow-path augmentations and their capability increments.",
+    source_family = :network,
+    consumer = :line_invoptions,
+)
+const ISP2024_GENERATOR_MAPPING_NAMES_SOURCE = _isp2024_xlsx_source(
+    id = :generator_summary_mapping_names,
+    worksheet = "Summary Mapping",
+    cell_range = "B6:B680",
+    description = "Generator identifiers used to align summary-mapping rows.",
+    source_family = :generation,
+    consumer = :generator_table,
+)
+const ISP2024_GENERATOR_MAPPING_MLF_SOURCE = _isp2024_xlsx_source(
+    id = :generator_summary_mapping_mlf,
+    worksheet = "Summary Mapping",
+    cell_range = "AA6:AA680",
+    description = "Marginal-loss-factor values aligned with generator summary rows.",
+    source_family = :generation,
+    consumer = :generator_table,
+)
+const ISP2024_EXISTING_GENERATOR_MAX_CAPACITY_SOURCE = _isp2024_xlsx_source(
+    id = :existing_generator_maximum_capacity,
+    worksheet = "Maximum capacity",
+    cell_range = "B8:D260",
+    description = "Maximum capacity assumptions for existing generating units.",
+    source_family = :generation,
+    consumer = :generator_table,
+)
+const ISP2024_COMMITTED_GENERATOR_MAX_CAPACITY_SOURCE = _isp2024_xlsx_source(
+    id = :committed_generator_maximum_capacity,
+    worksheet = "Maximum capacity",
+    cell_range = "F8:I35",
+    description = "Maximum capacity assumptions for committed generation projects.",
+    source_family = :generation,
+    consumer = :generator_table,
+)
+const ISP2024_ANTICIPATED_GENERATOR_MAX_CAPACITY_SOURCE = _isp2024_xlsx_source(
+    id = :anticipated_generator_maximum_capacity,
+    worksheet = "Maximum capacity",
+    cell_range = "K8:N24",
+    description = "Maximum capacity assumptions for anticipated generation projects.",
+    source_family = :generation,
+    consumer = :generator_table,
+)
+const ISP2024_GENERATOR_SUMMARY_MAPPING_SOURCE = _isp2024_xlsx_source(
+    id = :generator_summary_mapping,
+    worksheet = "Summary Mapping",
+    cell_range = "B4:I680",
+    description = "Generator-to-summary mapping used during generator asset construction.",
+    source_family = :generation,
+    consumer = :generator_table,
+)
+const ISP2024_COAL_MINIMUM_STABLE_GENERATION_SOURCE = _isp2024_xlsx_source(
+    id = :coal_minimum_stable_generation,
+    worksheet = "Generation limits",
+    cell_range = "B8:D52",
+    description = "Minimum stable generation assumptions for coal units.",
+    source_family = :generation,
+    consumer = :generator_table,
+)
+const ISP2024_GPG_MINIMUM_STABLE_GENERATION_SOURCE = _isp2024_xlsx_source(
+    id = :gpg_minimum_stable_generation,
+    worksheet = "GPG Min Stable Level",
+    cell_range = "B9:E34",
+    description = "Minimum stable generation assumptions for gas-powered generation.",
+    source_family = :generation,
+    consumer = :generator_table,
+)
+const ISP2024_GENERATOR_MIN_UP_DOWN_SOURCE = _isp2024_xlsx_source(
+    id = :generator_minimum_up_down_times,
+    worksheet = "Min Up&Down Times",
+    cell_range = "B8:E25",
+    description = "Minimum up- and down-time assumptions available in the 2024 workbook.",
+    source_family = :generation,
+    consumer = :generator_table,
+)
+const ISP2024_LEGACY_GENERATOR_MIN_UP_SOURCE = _isp2024_xlsx_source(
+    id = :legacy_generator_minimum_up_time,
+    workbook = ISP2019_INPUTS_WORKBOOK,
+    worksheet = "Generation limits",
+    cell_range = "O9:Q69",
+    description = "Legacy 2019 unit-level minimum up times retained by the 2024 parser.",
+    columns = ColumnSpec[
+        ColumnSpec(name = "Generator Station"),
+        ColumnSpec(name = "Generating unit"),
+        ColumnSpec(name = "Min Up Time (hours)", data_type = :Real, unit = "h"),
+    ],
+    source_family = :generation,
+    consumer = :generator_table,
+)
+const ISP2024_GENERATOR_RAMP_RATES_SOURCE = _isp2024_xlsx_source(
+    id = :generator_maximum_ramp_rates,
+    worksheet = "Max Ramp Rates",
+    cell_range = "B8:F72",
+    description = "Maximum ramp-rate assumptions for unit commitment parameters.",
+    source_family = :generation,
+    consumer = :generator_table,
+)
+const ISP2024_GENERATOR_RETIREMENTS_SOURCE = _isp2024_xlsx_source(
+    id = :generator_retirements,
+    worksheet = "Retirement",
+    cell_range = "B9:D460",
+    description = "Generator retirement timing assumptions.",
+    source_family = :generation,
+    consumer = :generator_table,
+)
+const ISP2024_EXISTING_GENERATOR_RELIABILITY_SOURCE = _isp2024_xlsx_source(
+    id = :existing_generator_reliability,
+    worksheet = "Generator Reliability Settings",
+    cell_range = "B20:G28",
+    description = "Reliability settings for existing generator technology groups.",
+    source_family = :generation,
+    consumer = :generator_table,
+)
+const ISP2024_NEW_GENERATOR_RELIABILITY_SOURCE = _isp2024_xlsx_source(
+    id = :new_generator_reliability,
+    worksheet = "Generator Reliability Settings",
+    cell_range = "I20:N40",
+    description = "Reliability settings for new generator and storage technology groups.",
+    source_family = :generation,
+    consumer = :generator_table,
+)
+const ISP2024_EXISTING_GENERATOR_SUMMARY_SOURCE = _isp2024_xlsx_source(
+    id = :existing_generator_summary,
+    worksheet = "Existing Gen Data Summary",
+    cell_range = "B10:U319",
+    description = "Primary existing-generator summary used to construct generator assets.",
+    source_family = :generation,
+    consumer = :generator_table,
+)
+const ISP2024_ADDITIONAL_GENERATOR_SUMMARY_SOURCE = _isp2024_xlsx_source(
+    id = :additional_generator_summary,
+    worksheet = "Existing Gen Data Summary",
+    cell_range = "B382:U397",
+    description = "Additional generator summary rows appended to the primary existing fleet.",
+    source_family = :generation,
+    consumer = :generator_table,
+)
+const ISP2024_GENERATOR_EMISSIONS_SOURCE = _isp2024_xlsx_source(
+    id = :generator_emissions_intensity,
+    worksheet = "Emissions intensity",
+    cell_range = "B7:D73",
+    description = "Generator emissions-intensity assumptions.",
+    source_family = :generation,
+    consumer = :generator_table,
+)
+const ISP2024_BESS_PROPERTIES_SOURCE = _isp2024_xlsx_source(
+    id = :bess_storage_properties,
+    worksheet = "Storage properties",
+    cell_range = "B4:H13",
+    description = "Battery storage efficiency, duration and operating-property assumptions.",
+    source_family = :storage,
+    consumer = :ess_tables,
+)
+const ISP2024_PUMPED_STORAGE_PROPERTIES_SOURCE = _isp2024_xlsx_source(
+    id = :pumped_storage_properties,
+    worksheet = "Storage properties",
+    cell_range = "B22:K26",
+    description = "Pumped-hydro storage operating-property assumptions.",
+    source_family = :storage,
+    consumer = :ess_tables,
+)
+const ISP2024_BESS_MAX_CAPACITY_SOURCE = _isp2024_xlsx_source(
+    id = :bess_maximum_capacity,
+    worksheet = "Maximum capacity",
+    cell_range = "P8:U62",
+    description = "Maximum capacity assumptions for battery storage projects.",
+    source_family = :storage,
+    consumer = :ess_tables,
+)
+const ISP2024_BESS_SUMMARY_MAPPING_SOURCE = _isp2024_xlsx_source(
+    id = :bess_summary_mapping,
+    worksheet = "Summary Mapping",
+    cell_range = "B314:AB370",
+    description = "Storage-project mapping rows used to construct ESS assets.",
+    source_family = :storage,
+    consumer = :ess_tables,
+)
+const ISP2024_EXISTING_GENERATORS_SOURCE = _isp2024_xlsx_source(
+    id = :existing_generators,
+    worksheet = "Existing Gen Data Summary",
+    cell_range = "B11:K297",
+    description = "Existing generator records used to allocate installed solar and wind capacity.",
+    source_family = :generation,
+    consumer = :renewable_generation_schedules,
+)
+const ISP2024_RENEWABLE_ENERGY_ZONES_SOURCE = _isp2024_xlsx_source(
+    id = :renewable_energy_zones,
+    worksheet = "Renewable Energy Zones",
+    cell_range = "B7:G50",
+    description = "Renewable energy zone identifiers and ISP subregion mappings.",
+    source_family = :renewable_energy_zones,
+    consumer = :renewable_generation_schedules,
+)
+const ISP2024_CONDENSED_CAPACITY_OUTLOOK_SOURCE = _isp2024_xlsx_source(
+    id = :condensed_capacity_outlook,
+    workbook = ISP2024_CONDENSED_CAPACITY_WORKBOOK,
+    worksheet = "CapacityOutlook",
+    cell_range = "A1:G14356",
+    description = "Condensed scenario capacity outlook generated from the AEMO core workbooks.",
+    columns = ColumnSpec[
+        ColumnSpec(name = "Scenario"),
+        ColumnSpec(name = "Subregion"),
+        ColumnSpec(name = "Technology"),
+        ColumnSpec(name = "date"),
+        ColumnSpec(name = "value", data_type = :Real, unit = "MW"),
+    ],
+    source_family = :generation_outlook,
+    consumer = :renewable_generation_schedules,
+)
+const ISP2024_AUXILIARY_REZ_CAPACITY_SOURCE = _isp2024_xlsx_source(
+    id = :auxiliary_rez_generation_capacity,
+    workbook = ISP2024_REZ_CAPACITY_WORKBOOK_PATTERN,
+    worksheet = "REZ Generation Capacity",
+    cell_range = "A1:AG2238",
+    description = "Scenario-specific REZ generation capacities generated from the AEMO core workbooks.",
+    columns = ColumnSpec[
+        ColumnSpec(name = "CDP"),
+        ColumnSpec(name = "REZ"),
+        ColumnSpec(name = "Technology"),
+    ],
+    source_family = :generation_outlook,
+    consumer = :renewable_generation_schedules,
+)
+const ISP2024_VPP_CAPACITY_SOURCE = _isp2024_xlsx_source(
+    id = :vpp_capacity_outlook,
+    workbook = ISP2024_VPP_CAPACITY_WORKBOOK,
+    worksheet = "{scenario}",
+    cell_range = "A1:AG1769",
+    description = "Scenario-specific coordinated CER storage capacity outlook.",
+    source_family = :storage,
+    consumer = :ess_vpps,
+)
+const ISP2024_VPP_ENERGY_SOURCE = _isp2024_xlsx_source(
+    id = :vpp_energy_outlook,
+    workbook = ISP2024_VPP_ENERGY_WORKBOOK,
+    worksheet = "{scenario}",
+    cell_range = "A1:AG1769",
+    description = "Scenario-specific coordinated CER storage energy outlook.",
+    source_family = :storage,
+    consumer = :ess_vpps,
+)
+
+const ISP2024_DISTRIBUTED_PV_TRACE_SOURCE = CsvSourceSpec(
+    id = :distributed_pv_demand_trace,
+    edition = 2024,
+    filename_pattern = "demand_{subregion}_{scenario}/{subregion}_RefYear_{reference_year}_{scenario_code}_POE{poe}_PV_TOT.csv",
+    description = "Distributed-PV traces embedded in the AEMO demand-trace publication.",
+    columns = ISP2024_TRACE_DATE_COLUMNS,
+    keys = ["Year", "Month", "Day"],
+    source_family = :demand_traces,
+    consumer = :gen_pmax_distpv,
+)
+const ISP2024_OPERATIONAL_DEMAND_TRACE_SOURCE = CsvSourceSpec(
+    id = :operational_demand_trace,
+    edition = 2024,
+    filename_pattern = "demand_{subregion}_{scenario}/{subregion}_RefYear_{reference_year}_{scenario_code}_POE{poe}_OPSO_MODELLING_PVLITE.csv",
+    description = "Operational demand traces net of rooftop PV-lite profiles.",
+    columns = ISP2024_TRACE_DATE_COLUMNS,
+    keys = ["Year", "Month", "Day"],
+    source_family = :demand_traces,
+    consumer = :dem_load_sched,
+)
+const ISP2024_EXISTING_SOLAR_TRACE_SOURCE = CsvSourceSpec(
+    id = :existing_solar_trace,
+    edition = 2024,
+    filename_pattern = "solar_{reference_year}/{generator_file}",
+    description = "Existing utility-scale solar trace selected for an existing generator.",
+    columns = ISP2024_TRACE_DATE_COLUMNS,
+    keys = ["Year", "Month", "Day"],
+    source_family = :solar_traces,
+    consumer = :gen_pmax_solar,
+)
+const ISP2024_REZ_SOLAR_TRACE_SOURCE = CsvSourceSpec(
+    id = :rez_solar_trace,
+    edition = 2024,
+    filename_pattern = "solar_{reference_year}/{rez_trace_file}",
+    description = "Renewable-energy-zone solar trace used for future capacity profiles.",
+    columns = ISP2024_TRACE_DATE_COLUMNS,
+    keys = ["Year", "Month", "Day"],
+    source_family = :solar_traces,
+    consumer = :gen_pmax_solar,
+)
+const ISP2024_EXISTING_WIND_TRACE_SOURCE = CsvSourceSpec(
+    id = :existing_wind_trace,
+    edition = 2024,
+    filename_pattern = "wind_{reference_year}/{generator_file}",
+    description = "Existing wind trace selected for an existing generator.",
+    columns = ISP2024_TRACE_DATE_COLUMNS,
+    keys = ["Year", "Month", "Day"],
+    source_family = :wind_traces,
+    consumer = :gen_pmax_wind,
+)
+const ISP2024_REZ_WIND_TRACE_SOURCE = CsvSourceSpec(
+    id = :rez_wind_trace,
+    edition = 2024,
+    filename_pattern = "wind_{reference_year}/{rez_trace_file}",
+    description = "Renewable-energy-zone wind trace used for future capacity profiles.",
+    columns = ISP2024_TRACE_DATE_COLUMNS,
+    keys = ["Year", "Month", "Day"],
+    source_family = :wind_traces,
+    consumer = :gen_pmax_wind,
+)
+const ISP2024_HYDRO_NATURAL_INFLOW_TRACE_SOURCE = CsvSourceSpec(
+    id = :hydro_natural_inflow_trace,
+    edition = 2024,
+    filename_pattern = "2024 ISP {scenario}/Traces/hydro/{file_name}_{hydro_scenario}.csv",
+    description = "Daily natural hydro inflow trace for a mapped hydro generator group.",
+    columns = ColumnSpec[
+        ISP2024_TRACE_DATE_COLUMNS...,
+        ColumnSpec(name = "Inflows", data_type = :Real),
+    ],
+    keys = ["Year", "Month", "Day"],
+    source_family = :hydro,
+    consumer = :gen_inflow_sched,
+)
+const ISP2024_HYDRO_ANNUAL_ENERGY_TRACE_SOURCE = CsvSourceSpec(
+    id = :hydro_annual_energy_limit_trace,
+    edition = 2024,
+    filename_pattern = "2024 ISP {scenario}/Traces/hydro/{file_name}_{hydro_scenario}.csv",
+    description = "Annual hydro energy-limit trace with one column per mapped constraint.",
+    columns = ColumnSpec[
+        ColumnSpec(name = "Year", data_type = :Integer),
+    ],
+    keys = ["Year"],
+    source_family = :hydro,
+    consumer = :gen_inflow_sched,
+)
+
+const ISP2024_DSP_SOURCE_LAYOUTS = [
+    (scenario = "Progressive Change", region = "QLD", season = "SUMMER", cell_range = "B128:AG133"),
+    (scenario = "Progressive Change", region = "QLD", season = "WINTER", cell_range = "B137:AG142"),
+    (scenario = "Progressive Change", region = "NSW", season = "SUMMER", cell_range = "B108:AG113"),
+    (scenario = "Progressive Change", region = "NSW", season = "WINTER", cell_range = "B118:AG123"),
+    (scenario = "Progressive Change", region = "SA", season = "SUMMER", cell_range = "B147:AG152"),
+    (scenario = "Progressive Change", region = "SA", season = "WINTER", cell_range = "B156:AG161"),
+    (scenario = "Progressive Change", region = "TAS", season = "SUMMER", cell_range = "B166:AG171"),
+    (scenario = "Progressive Change", region = "TAS", season = "WINTER", cell_range = "B175:AG180"),
+    (scenario = "Progressive Change", region = "VIC", season = "SUMMER", cell_range = "B185:AG190"),
+    (scenario = "Progressive Change", region = "VIC", season = "WINTER", cell_range = "B194:AG199"),
+    (scenario = "Step Change", region = "QLD", season = "SUMMER", cell_range = "B226:AG231"),
+    (scenario = "Step Change", region = "QLD", season = "WINTER", cell_range = "B235:AG240"),
+    (scenario = "Step Change", region = "NSW", season = "SUMMER", cell_range = "B206:AG211"),
+    (scenario = "Step Change", region = "NSW", season = "WINTER", cell_range = "B216:AG221"),
+    (scenario = "Step Change", region = "SA", season = "SUMMER", cell_range = "B245:AG250"),
+    (scenario = "Step Change", region = "SA", season = "WINTER", cell_range = "B254:AG259"),
+    (scenario = "Step Change", region = "TAS", season = "SUMMER", cell_range = "B264:AG269"),
+    (scenario = "Step Change", region = "TAS", season = "WINTER", cell_range = "B273:AG278"),
+    (scenario = "Step Change", region = "VIC", season = "SUMMER", cell_range = "B283:AG288"),
+    (scenario = "Step Change", region = "VIC", season = "WINTER", cell_range = "B292:AG297"),
+    (scenario = "Green Energy Exports", region = "QLD", season = "SUMMER", cell_range = "B30:AG35"),
+    (scenario = "Green Energy Exports", region = "QLD", season = "WINTER", cell_range = "B39:AG44"),
+    (scenario = "Green Energy Exports", region = "NSW", season = "SUMMER", cell_range = "B10:AG15"),
+    (scenario = "Green Energy Exports", region = "NSW", season = "WINTER", cell_range = "B20:AG25"),
+    (scenario = "Green Energy Exports", region = "SA", season = "SUMMER", cell_range = "B49:AG54"),
+    (scenario = "Green Energy Exports", region = "SA", season = "WINTER", cell_range = "B58:AG63"),
+    (scenario = "Green Energy Exports", region = "TAS", season = "SUMMER", cell_range = "B68:AG73"),
+    (scenario = "Green Energy Exports", region = "TAS", season = "WINTER", cell_range = "B77:AG82"),
+    (scenario = "Green Energy Exports", region = "VIC", season = "SUMMER", cell_range = "B87:AG92"),
+    (scenario = "Green Energy Exports", region = "VIC", season = "WINTER", cell_range = "B96:AG101"),
+]
+
+const ISP2024_DSP_SOURCE_SPECS = XlsxSourceSpec[
+    _isp2024_xlsx_source(
+        id = Symbol(
+            "dsp_",
+            _source_spec_slug(layout.scenario),
+            "_",
+            lowercase(layout.region),
+            "_",
+            lowercase(layout.season),
+        ),
+        worksheet = "DSP",
+        cell_range = layout.cell_range,
+        description = "$(layout.scenario) $(layout.region) $(lowercase(layout.season)) demand-side participation profile.",
+        source_family = :demand_side_participation,
+        consumer = :der_pred_sched,
+    )
+    for layout in ISP2024_DSP_SOURCE_LAYOUTS
+]
+
+const ISP2024_DSP_SOURCE_SPEC_BY_KEY = Dict(
+    (layout.scenario, layout.region, layout.season) => spec
+    for (layout, spec) in zip(ISP2024_DSP_SOURCE_LAYOUTS, ISP2024_DSP_SOURCE_SPECS)
+)
+
+const ISP2024_PARSER_SOURCE_SPECS = SourceSpec[
+    ISP2024_NETWORK_CAPABILITY_SOURCE,
+    ISP2024_TRANSMISSION_RELIABILITY_SOURCE,
+    ISP2024_FLOW_PATH_AUGMENTATION_SOURCE,
+    ISP2024_GENERATOR_MAPPING_NAMES_SOURCE,
+    ISP2024_GENERATOR_MAPPING_MLF_SOURCE,
+    ISP2024_EXISTING_GENERATOR_MAX_CAPACITY_SOURCE,
+    ISP2024_COMMITTED_GENERATOR_MAX_CAPACITY_SOURCE,
+    ISP2024_ANTICIPATED_GENERATOR_MAX_CAPACITY_SOURCE,
+    ISP2024_GENERATOR_SUMMARY_MAPPING_SOURCE,
+    ISP2024_COAL_MINIMUM_STABLE_GENERATION_SOURCE,
+    ISP2024_GPG_MINIMUM_STABLE_GENERATION_SOURCE,
+    ISP2024_GENERATOR_MIN_UP_DOWN_SOURCE,
+    ISP2024_LEGACY_GENERATOR_MIN_UP_SOURCE,
+    ISP2024_GENERATOR_RAMP_RATES_SOURCE,
+    ISP2024_GENERATOR_RETIREMENTS_SOURCE,
+    ISP2024_EXISTING_GENERATOR_RELIABILITY_SOURCE,
+    ISP2024_NEW_GENERATOR_RELIABILITY_SOURCE,
+    ISP2024_EXISTING_GENERATOR_SUMMARY_SOURCE,
+    ISP2024_ADDITIONAL_GENERATOR_SUMMARY_SOURCE,
+    ISP2024_GENERATOR_EMISSIONS_SOURCE,
+    ISP2024_BESS_PROPERTIES_SOURCE,
+    ISP2024_PUMPED_STORAGE_PROPERTIES_SOURCE,
+    ISP2024_BESS_MAX_CAPACITY_SOURCE,
+    ISP2024_BESS_SUMMARY_MAPPING_SOURCE,
+    ISP2024_EXISTING_GENERATORS_SOURCE,
+    ISP2024_RENEWABLE_ENERGY_ZONES_SOURCE,
+    ISP2024_CONDENSED_CAPACITY_OUTLOOK_SOURCE,
+    ISP2024_AUXILIARY_REZ_CAPACITY_SOURCE,
+    ISP2024_VPP_CAPACITY_SOURCE,
+    ISP2024_VPP_ENERGY_SOURCE,
+    ISP2024_DISTRIBUTED_PV_TRACE_SOURCE,
+    ISP2024_OPERATIONAL_DEMAND_TRACE_SOURCE,
+    ISP2024_EXISTING_SOLAR_TRACE_SOURCE,
+    ISP2024_REZ_SOLAR_TRACE_SOURCE,
+    ISP2024_EXISTING_WIND_TRACE_SOURCE,
+    ISP2024_REZ_WIND_TRACE_SOURCE,
+    ISP2024_HYDRO_NATURAL_INFLOW_TRACE_SOURCE,
+    ISP2024_HYDRO_ANNUAL_ENERGY_TRACE_SOURCE,
+]
+
+register_source_specs!(ISP2024_PARSER_SOURCE_SPECS...)
+register_source_specs!(ISP2024_DSP_SOURCE_SPECS...)
+
 """
     bus_table(ts)
 
@@ -59,8 +547,8 @@ generation routines.
 function line_table(ts::PISPtimeStatic, tv::PISPtimeVarying, ispdata24::String)
     bust = ts.bus
     # Read ISP Workbook with line capacities
-    DATALINES   = PISP.read_xlsx_with_header(ispdata24, "Network Capability", "B6:H21")
-    RELIALINES  = PISP.read_xlsx_with_header(ispdata24, "Transmission Reliability", "B7:G11")
+    DATALINES   = PISP.read_xlsx_with_header(ispdata24, ISP2024_NETWORK_CAPABILITY_SOURCE)
+    RELIALINES  = PISP.read_xlsx_with_header(ispdata24, ISP2024_TRANSMISSION_RELIABILITY_SOURCE)
     Results = DataFrame(name = String[], busA = String[], busB = String[], idbusA = Int64[], idbusB = Int64[], fwd_peak = Float64[], fwd_summer = Float64[], fwd_winter = Float64[], rev_peak = Float64[], rev_summer = Float64[], rev_winter = Float64[])
     # Link names
     NEMTX = ["CQ->NQ", "CQ->GG", "SQ->CQ", "QNI North", "Terranora", "QNI South","CNSW->SNW North","CNSW->SNW South", "VNI North","VNI South","Heywood","SESA->CSA","Murraylink", "Basslink"]
@@ -251,7 +739,7 @@ ratings, and activation flags.
 function line_invoptions(ts::PISPtimeStatic, ispdata24::String)
     bust = ts.bus
     maxidlin = isempty(ts.line) ? 0 : maximum(ts.line.id_lin)
-    DATALININV = PISP.read_xlsx_with_header(ispdata24, "Flow Path Augmentation options", "B11:N94")
+    DATALININV = PISP.read_xlsx_with_header(ispdata24, ISP2024_FLOW_PATH_AUGMENTATION_SOURCE)
     skip = ["Option Name",""]
     df = DataFrame(Option = String[], Direction = String[], Forward = Float64[], Reverse = Float64[], Cost = Float64[], LeadYears = Float64[])
 
@@ -330,21 +818,21 @@ function generator_table(ts::PISPtimeStatic, ispdata19::String, ispdata24::Strin
                 "january" => 1, "february" => 2, "march" => 3, "april" => 4, "may" => 5, "june" => 6, "july" => 7, "august" => 8, "september" => 9, "october" => 10, "november" => 11, "december" => 12)
 
     str2date(date) = date isa Number ? Dates.DateTime(1899, 12, 30) + Dates.Day(date) : DateTime(parse(Int64,split(date,' ')[2]),m2n[lowercase(split(date,' ')[1])])
-    MAPPING  = PISP.read_xlsx_with_header(ispdata24, "Summary Mapping", "B6:B680")      # EXISTING GENERATOR
-    MAPPING2 = PISP.read_xlsx_with_header(ispdata24, "Summary Mapping", "AA6:AA680")    # MLF
+    MAPPING  = PISP.read_xlsx_with_header(ispdata24, ISP2024_GENERATOR_MAPPING_NAMES_SOURCE)      # EXISTING GENERATOR
+    MAPPING2 = PISP.read_xlsx_with_header(ispdata24, ISP2024_GENERATOR_MAPPING_MLF_SOURCE)    # MLF
     namedict = PISP.OrderedDict(zip(MAPPING[!,1], MAPPING2[!,1]))
 
     # ====================================== #
     # ==== General list of Power Plants ==== #
     # ====================================== #
-    GENS = PISP.read_xlsx_with_header(ispdata24, "Maximum capacity", "B8:D260")
+    GENS = PISP.read_xlsx_with_header(ispdata24, ISP2024_EXISTING_GENERATOR_MAX_CAPACITY_SOURCE)
     GENS[!, :Generator] = [k == "Bogong / Mackay" ? "Bogong / MacKay" : k for k in GENS[!, :Generator]] # Fix for Bogong / Mackay
     GENS[!, :Generator] = [k == "Lincoln Gap Wind Farm - Stage 2" ? "Lincoln Gap Wind Farm - stage 2" : k for k in GENS[!, :Generator]] # Fix for Bogong / Mackay
 
-    COMGEN_MAXCAP = PISP.read_xlsx_with_header(ispdata24, "Maximum capacity", "F8:I35")
-    ADVGEN_MAXCAP = PISP.read_xlsx_with_header(ispdata24, "Maximum capacity", "K8:N24")
+    COMGEN_MAXCAP = PISP.read_xlsx_with_header(ispdata24, ISP2024_COMMITTED_GENERATOR_MAX_CAPACITY_SOURCE)
+    ADVGEN_MAXCAP = PISP.read_xlsx_with_header(ispdata24, ISP2024_ANTICIPATED_GENERATOR_MAX_CAPACITY_SOURCE)
 
-    MAPPING3 = PISP.read_xlsx_with_header(ispdata24, "Summary Mapping", "B4:I680")
+    MAPPING3 = PISP.read_xlsx_with_header(ispdata24, ISP2024_GENERATOR_SUMMARY_MAPPING_SOURCE)
     MAPPING3 = MAPPING3[completecases(MAPPING3),:]                              # SELECT ONLY ROWS OF MAPPING3 WITHOUT MISSING VALUES
     rename!(MAPPING3, 1 => :Generator)                                          # Rename first column to "Generator" 
 
@@ -377,17 +865,17 @@ function generator_table(ts::PISPtimeStatic, ispdata19::String, ispdata24::Strin
     # Units with unit commitment and ramping #
     # ====================================== #
     # Generation limits and stable levels for coal and gas generators
-    DATA_COALMSG = PISP.read_xlsx_with_header(ispdata24, "Generation limits", "B8:D52")
-    DATA_GPGMSG = PISP.read_xlsx_with_header(ispdata24, "GPG Min Stable Level", "B9:E34")
+    DATA_COALMSG = PISP.read_xlsx_with_header(ispdata24, ISP2024_COAL_MINIMUM_STABLE_GENERATION_SOURCE)
+    DATA_GPGMSG = PISP.read_xlsx_with_header(ispdata24, ISP2024_GPG_MINIMUM_STABLE_GENERATION_SOURCE)
     select!(DATA_GPGMSG, Not(Symbol("Technology Type")))
 
     # Minimum up times for different units
-    DATA_MINUP_UNITS = PISP.read_xlsx_with_header(ispdata24, "Min Up&Down Times", "B8:E25")
-    DATA_MINUP_UNITS19 = PISP.read_xlsx_with_header(ispdata19, "Generation limits", "O9:Q69") # Min UP and DW - GAS+COAL UNITS (2019)
+    DATA_MINUP_UNITS = PISP.read_xlsx_with_header(ispdata24, ISP2024_GENERATOR_MIN_UP_DOWN_SOURCE)
+    DATA_MINUP_UNITS19 = PISP.read_xlsx_with_header(ispdata19, ISP2024_LEGACY_GENERATOR_MIN_UP_SOURCE) # Min UP and DW - GAS+COAL UNITS (2019)
     select!(DATA_MINUP_UNITS, Not(Symbol("Technology Type")))
     XLSX.writetable(".tmp/DATA_MINUP_UNITS19.xlsx", Tables.columntable(DATA_MINUP_UNITS19); sheetname="Generators19", overwrite=true)
     # Ramp rates for different units
-    UC = PISP.read_xlsx_with_header(ispdata24, "Max Ramp Rates", "B8:F72")
+    UC = PISP.read_xlsx_with_header(ispdata24, ISP2024_GENERATOR_RAMP_RATES_SOURCE)
     select!(UC, Not(Symbol("Technology Type")))
     XLSX.writetable(".tmp/UC.xlsx", Tables.columntable(UC); sheetname="UC", overwrite=true)
 
@@ -457,7 +945,7 @@ function generator_table(ts::PISPtimeStatic, ispdata19::String, ispdata24::Strin
     # ====================================== #
     # ============= RETIREMENTS ============ #
     # ====================================== #
-    UNITS = PISP.read_xlsx_with_header(ispdata24, "Retirement", "B9:D460")
+    UNITS = PISP.read_xlsx_with_header(ispdata24, ISP2024_GENERATOR_RETIREMENTS_SOURCE)
     rename!(UNITS, 1 => "Generator")
     UNITS[!,:RETIRE] = DateTime.(PISP.parseif(UNITS[:,3]))
 
@@ -475,15 +963,15 @@ function generator_table(ts::PISPtimeStatic, ispdata19::String, ispdata24::Strin
     # ====================================== #
     # ============= RELIABILITY ============ #
     # ====================================== #
-    RELIA = PISP.read_xlsx_with_header(ispdata24, "Generator Reliability Settings", "B20:G28")
-    RELIANEW = PISP.read_xlsx_with_header(ispdata24, "Generator Reliability Settings", "I20:N40")
+    RELIA = PISP.read_xlsx_with_header(ispdata24, ISP2024_EXISTING_GENERATOR_RELIABILITY_SOURCE)
+    RELIANEW = PISP.read_xlsx_with_header(ispdata24, ISP2024_NEW_GENERATOR_RELIABILITY_SOURCE)
 
 
     # ====================================== #
     # ========= GENERATION SUMMARY ========= #
     # ====================================== #
-    GENSUM     = PISP.read_xlsx_with_header(ispdata24, "Existing Gen Data Summary", "B10:U319")
-    GENSUM_ADD = PISP.read_xlsx_with_header(ispdata24, "Existing Gen Data Summary", "B382:U397")
+    GENSUM     = PISP.read_xlsx_with_header(ispdata24, ISP2024_EXISTING_GENERATOR_SUMMARY_SOURCE)
+    GENSUM_ADD = PISP.read_xlsx_with_header(ispdata24, ISP2024_ADDITIONAL_GENERATOR_SUMMARY_SOURCE)
     GENSUM     = vcat(GENSUM, GENSUM_ADD)
     GENSUM     = GENSUM[3:end,:]
     flagrow    = [!all(ismissing.(Matrix(GENSUM[k:k,2:end]))) for k in 1:nrow(GENSUM)]
@@ -630,7 +1118,7 @@ function generator_table(ts::PISPtimeStatic, ispdata19::String, ispdata24::Strin
     # ====================================== #
     # ============ EMMISSIONS ============== #
     # ====================================== #
-    EMI = PISP.read_xlsx_with_header(ispdata24, "Emissions intensity", "B7:D73")
+    EMI = PISP.read_xlsx_with_header(ispdata24, ISP2024_GENERATOR_EMISSIONS_SOURCE)
     select!(EMI, Not(2))
     rename!(EMI, 2 => "Emissions")
     EMI[!,:Generator] = strip.(EMI[!,:Generator])
@@ -933,11 +1421,11 @@ loss factors.
 function ess_tables(ts::PISPtimeStatic, tv::PISPtimeVarying, PSESS::DataFrame, ispdata24::String)
     bust = ts.bus
 
-    BESS_PROP   = PISP.read_xlsx_with_header(ispdata24, "Storage properties", "B4:H13")
-    PS_PROP     = PISP.read_xlsx_with_header(ispdata24, "Storage properties", "B22:K26")
-    BESS_CAP    = PISP.read_xlsx_with_header(ispdata24, "Maximum capacity", "P8:U62")
-    BESS_SUM    = PISP.read_xlsx_with_header(ispdata24, "Summary Mapping", "B314:AB370")
-    RELIANEW    = PISP.read_xlsx_with_header(ispdata24, "Generator Reliability Settings", "I20:N40")
+    BESS_PROP   = PISP.read_xlsx_with_header(ispdata24, ISP2024_BESS_PROPERTIES_SOURCE)
+    PS_PROP     = PISP.read_xlsx_with_header(ispdata24, ISP2024_PUMPED_STORAGE_PROPERTIES_SOURCE)
+    BESS_CAP    = PISP.read_xlsx_with_header(ispdata24, ISP2024_BESS_MAX_CAPACITY_SOURCE)
+    BESS_SUM    = PISP.read_xlsx_with_header(ispdata24, ISP2024_BESS_SUMMARY_MAPPING_SOURCE)
+    RELIANEW    = PISP.read_xlsx_with_header(ispdata24, ISP2024_NEW_GENERATOR_RELIABILITY_SOURCE)
 
     BESS_SUM = BESS_SUM[3:end,:]
     BESS_SUM[!,:cheff] = [replace(BESS_SUM[i,Symbol("VOM (\$/MWh sent-out)")], "All " => "") for i in 1:nrow(BESS_SUM)]
@@ -1089,7 +1577,16 @@ function gen_pmax_distpv(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVar
             scid = probs[p,:scenario][1]
             sc = PISP.ID2SCE[scid]
 
-            df = CSV.File(string(profilespath,"demand_$(st)_$(sc)/",st,"_RefYear_$(refyear)_",replace(uppercase(PISP.ID2SCE2[scid]), " " => "_"),"_POE$(poe)_PV_TOT.csv")) |> DataFrame
+            trace_path = PISP.source_path(
+                profilespath,
+                ISP2024_DISTRIBUTED_PV_TRACE_SOURCE;
+                subregion = st,
+                scenario = sc,
+                reference_year = refyear,
+                scenario_code = replace(uppercase(PISP.ID2SCE2[scid]), " " => "_"),
+                poe = poe,
+            )
+            df = PISP.read_csv_source(trace_path, ISP2024_DISTRIBUTED_PV_TRACE_SOURCE)
 
             dstart = probs[p,:dstart]
             dend = probs[p,:dend]
@@ -1157,7 +1654,16 @@ function dem_load_sched(tc::PISPtimeConfig, tv::PISPtimeVarying, profilespath::S
             scid = probs[p,:scenario][1]
             sc = PISP.ID2SCE[scid]
 
-            df = CSV.File(string(profilespath,"demand_$(st)_$(sc)/",st,"_RefYear_$(refyear)_",replace(uppercase(PISP.ID2SCE2[scid]), " " => "_"),"_POE$(poe)_OPSO_MODELLING_PVLITE.csv")) |> DataFrame
+            trace_path = PISP.source_path(
+                profilespath,
+                ISP2024_OPERATIONAL_DEMAND_TRACE_SOURCE;
+                subregion = st,
+                scenario = sc,
+                reference_year = refyear,
+                scenario_code = replace(uppercase(PISP.ID2SCE2[scid]), " " => "_"),
+                poe = poe,
+            )
+            df = PISP.read_csv_source(trace_path, ISP2024_OPERATIONAL_DEMAND_TRACE_SOURCE)
 
             dstart = probs[p,:dstart]
             dend   = probs[p,:dend]
@@ -1199,11 +1705,11 @@ function gen_pmax_solar(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVary
     pmaxid = isempty(tv.gen_pmax.id) ? 0 : maximum(tv.gen_pmax.id);
 
     tch = "Solar"
-    EXIST_TECH = PISP.read_xlsx_with_header(ispdata24, "Existing Gen Data Summary", "B11:K297")
+    EXIST_TECH = PISP.read_xlsx_with_header(ispdata24, ISP2024_EXISTING_GENERATORS_SOURCE)
     EXIST_SOLAR = EXIST_TECH[occursin.(tch[2:end], coalesce.(EXIST_TECH[!,2],"")),:]
     # @warn("Anticipated solar PV projects not considered in the existing data")
 
-    REZ_BUS = PISP.read_xlsx_with_header(ispdata24, "Renewable Energy Zones", "B7:G50")
+    REZ_BUS = PISP.read_xlsx_with_header(ispdata24, ISP2024_RENEWABLE_ENERGY_ZONES_SOURCE)
     # println(REZ_BUS)
 
     genid = Dict()
@@ -1236,11 +1742,14 @@ function gen_pmax_solar(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVary
         dend = probs[p,:dend]
         yr = Dates.year(dstart)
         ms = Dates.month(dstart)
-        # outlookfile = string(outlookdata,"/Auxiliary/2024 ISP - ",sc," - Core_REZCAP.xlsx")
-        outlookfile = normpath(outlookdata, "..", "Auxiliary", "2024 ISP - $(sc) - Core_REZCAP.xlsx")
+        outlookfile = PISP.source_path(
+            normpath(outlookdata, ".."),
+            ISP2024_AUXILIARY_REZ_CAPACITY_SOURCE;
+            scenario = sc,
+        )
 
-        TECH_CAP = PISP.read_xlsx_with_header(outlookAEMO, "CapacityOutlook", "A1:G14356")
-        SOLAR_CAP = PISP.read_xlsx_with_header(outlookfile, "REZ Generation Capacity", "A1:AG2238")
+        TECH_CAP = PISP.read_xlsx_with_header(outlookAEMO, ISP2024_CONDENSED_CAPACITY_OUTLOOK_SOURCE)
+        SOLAR_CAP = PISP.read_xlsx_with_header(outlookfile, ISP2024_AUXILIARY_REZ_CAPACITY_SOURCE)
         # println(SOLAR_CAP)
         # print first rows of SOLAR_CAP
         # println(first(SOLAR_CAP,5))
@@ -1287,7 +1796,13 @@ function gen_pmax_solar(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVary
                         end
                     end
 
-                    df = CSV.File(string(foldertech,file)) |> DataFrame
+                    trace_path = PISP.source_path(
+                        profilespath,
+                        ISP2024_EXISTING_SOLAR_TRACE_SOURCE;
+                        reference_year = refyear,
+                        generator_file = file,
+                    )
+                    df = PISP.read_csv_source(trace_path, ISP2024_EXISTING_SOLAR_TRACE_SOURCE)
 
                     df2 = select_trace_date_window(df, dstart, dend)
                     dataexi = dataexi .+ vec(permutedims(Tables.matrix(df2[:,4:end]))) * EXIST_SOLAR[r,10]
@@ -1311,7 +1826,13 @@ function gen_pmax_solar(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVary
                     for f in filter(f -> !startswith(f, "._"), readdir(foldertech))
                         sub = split(f,['_','.'])
                         if "REZ" in sub && "SAT" in sub && sub[2] in REZs
-                            df = CSV.File(string(foldertech,f)) |> DataFrame
+                            trace_path = PISP.source_path(
+                                profilespath,
+                                ISP2024_REZ_SOLAR_TRACE_SOURCE;
+                                reference_year = refyear,
+                                rez_trace_file = f,
+                            )
+                            df = PISP.read_csv_source(trace_path, ISP2024_REZ_SOLAR_TRACE_SOURCE)
                             df2 = select_trace_date_window(df, dstart, dend)
                             datanew = datanew .+ vec(permutedims(Tables.matrix(df2[:,4:end])))
                             naux += 1
@@ -1380,9 +1901,9 @@ function gen_pmax_wind(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVaryi
     pmaxid = isempty(tv.gen_pmax.id) ? 0 : maximum(tv.gen_pmax.id);
 
     tch = "Wind"
-    EXIST_TECH = PISP.read_xlsx_with_header(ispdata24, "Existing Gen Data Summary", "B11:K297")
+    EXIST_TECH = PISP.read_xlsx_with_header(ispdata24, ISP2024_EXISTING_GENERATORS_SOURCE)
     EXIST_WIND = EXIST_TECH[occursin.(tch[2:end], coalesce.(EXIST_TECH[!,2],"")),:]
-    REZ_BUS = PISP.read_xlsx_with_header(ispdata24, "Renewable Energy Zones", "B7:G50")
+    REZ_BUS = PISP.read_xlsx_with_header(ispdata24, ISP2024_RENEWABLE_ENERGY_ZONES_SOURCE)
 
     genid = Dict()
     for st in setdiff(keys(PISP.NEMBUSNAME),["GG"]) ## Buses with no large-scale solar projects or REZ are not considered
@@ -1419,12 +1940,15 @@ function gen_pmax_wind(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVaryi
         dend = probs[p,:dend]
         yr = Dates.year(dstart)
         ms = Dates.month(dstart)
-        # outlookfile = string(outlookdata,"/Auxiliary/2024 ISP - ",sc," - Core_REZCAP.xlsx")
         # normpath outlook data going one level above
-        outlookfile = normpath(outlookdata, "..", "Auxiliary", "2024 ISP - $(sc) - Core_REZCAP.xlsx")
+        outlookfile = PISP.source_path(
+            normpath(outlookdata, ".."),
+            ISP2024_AUXILIARY_REZ_CAPACITY_SOURCE;
+            scenario = sc,
+        )
 
-        TECH_CAP = PISP.read_xlsx_with_header(outlookAEMO, "CapacityOutlook", "A1:G14356")
-        WIND_CAP = PISP.read_xlsx_with_header(outlookfile, "REZ Generation Capacity", "A1:AG2238")
+        TECH_CAP = PISP.read_xlsx_with_header(outlookAEMO, ISP2024_CONDENSED_CAPACITY_OUTLOOK_SOURCE)
+        WIND_CAP = PISP.read_xlsx_with_header(outlookfile, ISP2024_AUXILIARY_REZ_CAPACITY_SOURCE)
         WIND_CAP = dropmissing(WIND_CAP,:CDP)
         
         y = ms < 7 ? yr - 1 : yr
@@ -1470,7 +1994,13 @@ function gen_pmax_wind(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVaryi
                     end
                     # println(" $(k) ======>", file)
 
-                    df = CSV.File(string(foldertech,file)) |> DataFrame
+                    trace_path = PISP.source_path(
+                        profilespath,
+                        ISP2024_EXISTING_WIND_TRACE_SOURCE;
+                        reference_year = refyear,
+                        generator_file = file,
+                    )
+                    df = PISP.read_csv_source(trace_path, ISP2024_EXISTING_WIND_TRACE_SOURCE)
 
                     df2 = select_trace_date_window(df, dstart, dend)
                     dataexi = dataexi .+ vec(permutedims(Tables.matrix(df2[:,4:end]))) * EXIST_WIND[r,7]
@@ -1494,7 +2024,13 @@ function gen_pmax_wind(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVaryi
                 for f in filter(f -> !startswith(f, "._"), readdir(foldertech))
                     sub = split(f,['_','.'])
                     if sub[1] in REZs && "WH" in sub#f[1] == st[1]
-                        df = CSV.File(string(foldertech,f)) |> DataFrame
+                        trace_path = PISP.source_path(
+                            profilespath,
+                            ISP2024_REZ_WIND_TRACE_SOURCE;
+                            reference_year = refyear,
+                            rez_trace_file = f,
+                        )
+                        df = PISP.read_csv_source(trace_path, ISP2024_REZ_WIND_TRACE_SOURCE)
                         df2 = select_trace_date_window(df, dstart, dend)
                         datanew = datanew .+ vec(permutedims(Tables.matrix(df2[:,4:end])))
                         naux += 1
@@ -1569,12 +2105,12 @@ function ess_vpps(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, v
 
     sc = collect(keys(PISP.SCE))[2]
     # CER STORAGE CAPACITY
-    VPPCAP = PISP.read_xlsx_with_header(vpp_cap, "$(sc)", "A1:AG1769")
+    VPPCAP = PISP.read_xlsx_with_header(vpp_cap, ISP2024_VPP_CAPACITY_SOURCE; worksheet = string(sc))
     VPPCAP = VPPCAP[(VPPCAP[!,1] .== "CDP14") .& (VPPCAP[!,Symbol("storage category")] .== "Coordinated CER storage"),:]
     rename!(VPPCAP, Dict(:Subregion => :bus))
 
     #CER STORAGE ENERGY
-    VPPENE = PISP.read_xlsx_with_header(vpp_ene, "$(sc)", "A1:AG1769")
+    VPPENE = PISP.read_xlsx_with_header(vpp_ene, ISP2024_VPP_ENERGY_SOURCE; worksheet = string(sc))
     VPPENE = VPPENE[(VPPENE[!,1] .== "CDP14") .& (VPPENE[!,Symbol("Technology")] .== "Coordinated CER storage"),:]
     rename!(VPPENE, Dict(:Subregion => :bus))
 
@@ -1602,10 +2138,8 @@ function ess_vpps(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, v
         me = Dates.month(dend)
 
         yr = ms < 7 ? yr - 1 : yr
-        # VPPCAP = PISP.read_xlsx_with_header(vpp_cap, "$(sc)", "A1:AE2080")
-        # VPPENE = PISP.read_xlsx_with_header(vpp_ene, "$(sc)", "A1:AE2080")
-        VPPCAP = PISP.read_xlsx_with_header(vpp_cap, "$(sc)", "A1:AG1769")
-        VPPENE = PISP.read_xlsx_with_header(vpp_ene, "$(sc)", "A1:AG1769")
+        VPPCAP = PISP.read_xlsx_with_header(vpp_cap, ISP2024_VPP_CAPACITY_SOURCE; worksheet = string(sc))
+        VPPENE = PISP.read_xlsx_with_header(vpp_ene, ISP2024_VPP_ENERGY_SOURCE; worksheet = string(sc))
         for st in keys(PISP.NEMBUSES)
             # CER STORAGE CAPACITY
             VPPCAP = VPPCAP[(VPPCAP[!,1] .== "CDP14") .& (VPPCAP[!,Symbol("storage category")] .== "Coordinated CER storage"),:]
@@ -1699,40 +2233,23 @@ inserted by `der_tables`.
 - `dsp_data::String`: Path to the DSP workbook or data file.
 """
 function der_pred_sched(ts::PISPtimeStatic, tv::PISPtimeVarying, ispdata24::String)
-    sce_dsp = Dict("Progressive Change"     => Dict("QLD" => Dict("SUMMER"  => "B128:AG133", "WINTER"  =>"B137:AG142"), 
-                                                    "NSW" => Dict("SUMMER"  => "B108:AG113", "WINTER"  =>"B118:AG123"), 
-                                                    "SA"  => Dict("SUMMER"  => "B147:AG152", "WINTER"  => "B156:AG161"),
-                                                    "TAS" => Dict("SUMMER"  => "B166:AG171", "WINTER"  => "B175:AG180"),
-                                                    "VIC" => Dict("SUMMER"  => "B185:AG190", "WINTER"  => "B194:AG199")),
-
-                   "Step Change"            => Dict("QLD" => Dict("SUMMER" => "B226:AG231", "WINTER" => "B235:AG240"), 
-                                                    "NSW" => Dict("SUMMER" => "B206:AG211", "WINTER" => "B216:AG221"), 
-                                                    "SA"  => Dict("SUMMER" => "B245:AG250", "WINTER" => "B254:AG259"),
-                                                    "TAS" => Dict("SUMMER" => "B264:AG269", "WINTER" => "B273:AG278"),
-                                                    "VIC" => Dict("SUMMER" => "B283:AG288", "WINTER" => "B292:AG297")),
-
-                   "Green Energy Exports"   => Dict("QLD" => Dict("SUMMER"  => "B30:AG35", "WINTER" =>"B39:AG44"), 
-                                                    "NSW" => Dict("SUMMER"  => "B10:AG15", "WINTER" => "B20:AG25"), 
-                                                    "SA"  => Dict("SUMMER"  =>"B49:AG54", "WINTER"  =>"B58:AG63"), 
-                                                    "TAS" => Dict("SUMMER"  =>"B68:AG73", "WINTER"  =>"B77:AG82"),
-                                                    "VIC" => Dict("SUMMER"  =>"B87:AG92", "WINTER"  =>"B96:AG101")))
+    dsp_sources = ISP2024_DSP_SOURCE_SPEC_BY_KEY
 
     for scenario in collect(keys(PISP.SCE))
-        sce_map = sce_dsp[scenario]
-        QLD_SUM = PISP.read_xlsx_with_header(ispdata24, "DSP", sce_map["QLD"]["SUMMER"])
-        QLD_WIN = PISP.read_xlsx_with_header(ispdata24, "DSP", sce_map["QLD"]["WINTER"])
+        QLD_SUM = PISP.read_xlsx_with_header(ispdata24, dsp_sources[(scenario, "QLD", "SUMMER")])
+        QLD_WIN = PISP.read_xlsx_with_header(ispdata24, dsp_sources[(scenario, "QLD", "WINTER")])
 
-        NSW_SUM = PISP.read_xlsx_with_header(ispdata24, "DSP", sce_map["NSW"]["SUMMER"])
-        NSW_WIN = PISP.read_xlsx_with_header(ispdata24, "DSP", sce_map["NSW"]["WINTER"])
+        NSW_SUM = PISP.read_xlsx_with_header(ispdata24, dsp_sources[(scenario, "NSW", "SUMMER")])
+        NSW_WIN = PISP.read_xlsx_with_header(ispdata24, dsp_sources[(scenario, "NSW", "WINTER")])
 
-        SA_SUM = PISP.read_xlsx_with_header(ispdata24, "DSP", sce_map["SA"]["SUMMER"])
-        SA_WIN = PISP.read_xlsx_with_header(ispdata24, "DSP", sce_map["SA"]["WINTER"])
+        SA_SUM = PISP.read_xlsx_with_header(ispdata24, dsp_sources[(scenario, "SA", "SUMMER")])
+        SA_WIN = PISP.read_xlsx_with_header(ispdata24, dsp_sources[(scenario, "SA", "WINTER")])
 
-        TAS_SUM = PISP.read_xlsx_with_header(ispdata24, "DSP", sce_map["TAS"]["SUMMER"])
-        TAS_WIN = PISP.read_xlsx_with_header(ispdata24, "DSP", sce_map["TAS"]["WINTER"])
+        TAS_SUM = PISP.read_xlsx_with_header(ispdata24, dsp_sources[(scenario, "TAS", "SUMMER")])
+        TAS_WIN = PISP.read_xlsx_with_header(ispdata24, dsp_sources[(scenario, "TAS", "WINTER")])
 
-        VIC_SUM = PISP.read_xlsx_with_header(ispdata24, "DSP", sce_map["VIC"]["SUMMER"])
-        VIC_WIN = PISP.read_xlsx_with_header(ispdata24, "DSP", sce_map["VIC"]["WINTER"])
+        VIC_SUM = PISP.read_xlsx_with_header(ispdata24, dsp_sources[(scenario, "VIC", "SUMMER")])
+        VIC_WIN = PISP.read_xlsx_with_header(ispdata24, dsp_sources[(scenario, "VIC", "WINTER")])
         # ======================================== #
         # <><><> QLD
         # ++ NQ
@@ -1854,7 +2371,6 @@ function gen_inflow_sched(ts::PISPtimeStatic, tv::PISPtimeVarying, tc::PISPtimeC
 
     # 1 - Hydro Inflows
     for scenario in keys(PISP.SCE)
-        hydro_root    = "$(ispmodel)/2024 ISP $(scenario)/Traces/hydro/"
         sce_label     = PISP.SCE[scenario]      # Scenario number
         hydro_sce     = PISP.HYDROSCE[scenario] # Hydro scenario from PLEXOS model
 
@@ -1867,8 +2383,17 @@ function gen_inflow_sched(ts::PISPtimeStatic, tv::PISPtimeVarying, tc::PISPtimeC
             #print gen_entries id_gen, gen_totcap, partial
             # println(gen_entries[:, [:id_gen, :name, :gen_totcap, :partial]])
 
-            filepath = normpath(hydro_root, file_name * "_" * hydro_sce * ".csv")
-            inflow_data = CSV.read(filepath, DataFrame)
+            filepath = PISP.source_path(
+                ispmodel,
+                ISP2024_HYDRO_NATURAL_INFLOW_TRACE_SOURCE;
+                scenario = scenario,
+                file_name = file_name,
+                hydro_scenario = hydro_sce,
+            )
+            inflow_data = PISP.read_csv_source(
+                filepath,
+                ISP2024_HYDRO_NATURAL_INFLOW_TRACE_SOURCE,
+            )
 
             # Create timestamped DataFrame with daily inflows
             df_timestamped = select(
@@ -1910,7 +2435,6 @@ function gen_inflow_sched(ts::PISPtimeStatic, tv::PISPtimeVarying, tc::PISPtimeC
 
     # 2 - Yearly Energy Limits
     for scenario in keys(PISP.SCE)
-        hydro_root    = "$(ispmodel)/2024 ISP $(scenario)/Traces/hydro/"
         sce_label     = PISP.SCE[scenario]      # Scenario number
         hydro_sce     = PISP.HYDROSCE[scenario] # Hydro scenario from PLEXOS model
 
@@ -1920,8 +2444,17 @@ function gen_inflow_sched(ts::PISPtimeStatic, tv::PISPtimeVarying, tc::PISPtimeC
             gen_entries = hydro_groups[file_name]
             gen_entries[!, :constraint] = [PISP.HYDRO2CNS[row.id_gen] for row in eachrow(gen_entries)] # Map generator to its energy constraint
 
-            filepath    = normpath(hydro_root, file_name * "_" * hydro_sce * ".csv") # Path to energy constraint file
-            inflow_data = CSV.read(filepath, DataFrame) # Read energy constraint data
+            filepath = PISP.source_path(
+                ispmodel,
+                ISP2024_HYDRO_ANNUAL_ENERGY_TRACE_SOURCE;
+                scenario = scenario,
+                file_name = file_name,
+                hydro_scenario = hydro_sce,
+            )
+            inflow_data = PISP.read_csv_source(
+                filepath,
+                ISP2024_HYDRO_ANNUAL_ENERGY_TRACE_SOURCE,
+            )
 
             for constraint in unique(values(PISP.HYDRO2CNS))                        # Loop over unique constraints (many generators may be associated to one constraint)
                 cns_gens = filter(row -> row.constraint == constraint, gen_entries) # Get generators under this constraint
@@ -2157,19 +2690,26 @@ subregional allocation workbook, ensure matching EV DER entries exist in
 function ev_der_sched(tc, ts, tv, iasr2024_path::AbstractString, evworkbook_path::AbstractString)
     bev_phev_profile_weekend_df = ev_build_bev_phev_profile_dataframe(
         evworkbook_path,
-        EV_2024_BEV_PHEV_PROFILE_WEEKEND_SHEET;
+        EV_2024_BEV_PHEV_PROFILE_WEEKEND_SOURCE;
         day_type = "Weekend",
     )
     bev_phev_profile_weekday_df = ev_build_bev_phev_profile_dataframe(
         evworkbook_path,
-        EV_2024_BEV_PHEV_PROFILE_WEEKDAY_SHEET;
+        EV_2024_BEV_PHEV_PROFILE_WEEKDAY_SOURCE;
         day_type = "Weekday",
     )
     profiles = vcat(bev_phev_profile_weekend_df, bev_phev_profile_weekday_df)
 
     vehicle_numbers_wide_dfs = OrderedDict(
-        sheet_name => ev_build_vehicle_numbers_dataframe(evworkbook_path, sheet_name)
-        for sheet_name in ev_get_vehicle_numbers_sheet_names(evworkbook_path)
+        sheet_name => ev_build_vehicle_numbers_dataframe(
+            evworkbook_path,
+            EV_2024_VEHICLE_NUMBERS_SOURCE;
+            worksheet = sheet_name,
+        )
+        for sheet_name in ev_get_vehicle_numbers_sheet_names(
+            evworkbook_path,
+            EV_2024_VEHICLE_NUMBERS_SOURCE,
+        )
     )
     vehicle_numbers_dfs = OrderedDict(
         sheet_name => ev_melt_vehicle_numbers_dataframe(vehicle_numbers_wide_dfs[sheet_name], number_column)
@@ -2186,10 +2726,13 @@ function ev_der_sched(tc, ts, tv, iasr2024_path::AbstractString, evworkbook_path
 
     bev_phev_charge_type_df = ev_build_bev_phev_charge_type_dataframe(
         evworkbook_path,
-        EV_2024_BEV_PHEV_CHARGE_TYPE_SHEET,
+        EV_2024_BEV_PHEV_CHARGE_TYPE_SOURCE,
     )
     subregional_demand_allocation_df = ev_melt_subregional_demand_allocation_dataframe(
-        ev_build_subregional_demand_allocation_dataframe(iasr2024_path),
+        ev_build_subregional_demand_allocation_dataframe(
+            iasr2024_path;
+            source_spec = EV_2024_SUBREGIONAL_DEMAND_ALLOCATION_SOURCE,
+        ),
     )
     ev_assign_subregional_bus_ids!(subregional_demand_allocation_df, ts)
 

@@ -26,6 +26,69 @@ module ISPdatabuilder
 
     const DEFAULT_DATA_ROOT = normpath(@__DIR__, "..", "..", "data-download")
 
+    const ISP2024_CORE_CAPACITY_SOURCE = PISP.XlsxSourceSpec(
+        id = :core_capacity_outlook,
+        edition = 2024,
+        workbook = "Core/{core_workbook}",
+        worksheet = "Capacity",
+        cell_range = "A3:AG5000",
+        description = "Scenario generation-capacity outlook from an AEMO 2024 ISP core workbook.",
+        source_family = :generation_outlook,
+        consumer = :build_capacity_outlook_aux,
+    )
+    const ISP2024_CORE_STORAGE_ENERGY_SOURCE = PISP.XlsxSourceSpec(
+        id = :core_storage_energy_outlook,
+        edition = 2024,
+        workbook = "Core/{core_workbook}",
+        worksheet = "Storage Energy",
+        cell_range = "A3:AG5000",
+        description = "Scenario storage-energy outlook from an AEMO 2024 ISP core workbook.",
+        source_family = :storage_outlook,
+        consumer = :build_storage_outlook_aux,
+    )
+    const ISP2024_CORE_STORAGE_CAPACITY_SOURCE = PISP.XlsxSourceSpec(
+        id = :core_storage_capacity_outlook,
+        edition = 2024,
+        workbook = "Core/{core_workbook}",
+        worksheet = "Storage Capacity",
+        cell_range = "A3:AG5000",
+        description = "Scenario storage-capacity outlook from an AEMO 2024 ISP core workbook.",
+        source_family = :storage_outlook,
+        consumer = :build_storage_outlook_aux,
+    )
+    const ISP2024_CORE_REZ_CAPACITY_SOURCE = PISP.XlsxSourceSpec(
+        id = :core_rez_generation_capacity,
+        edition = 2024,
+        workbook = "Core/{core_workbook}",
+        worksheet = "REZ Generation Capacity",
+        cell_range = "A3:AG5000",
+        description = "Scenario REZ generation-capacity table from an AEMO 2024 ISP core workbook.",
+        source_family = :generation_outlook,
+        consumer = :build_rez_capacity_aux,
+    )
+    const ISP2024_REFERENCE_YEAR_TRACE_SOURCE = PISP.CsvSourceSpec(
+        id = :reference_year_trace,
+        edition = 2024,
+        filename_pattern = "Traces/{technology}_{reference_year}/{trace_file}",
+        description = "Reference-year trace selected while constructing the synthetic RefYear4006 series.",
+        columns = PISP.ColumnSpec[
+            PISP.ColumnSpec(name = "Year", data_type = :Integer),
+            PISP.ColumnSpec(name = "Month", data_type = :Integer),
+            PISP.ColumnSpec(name = "Day", data_type = :Integer),
+        ],
+        keys = ["Year", "Month", "Day"],
+        source_family = :reference_year_traces,
+        consumer = :process_traces,
+    )
+
+    PISP.register_source_specs!(
+        ISP2024_CORE_CAPACITY_SOURCE,
+        ISP2024_CORE_STORAGE_ENERGY_SOURCE,
+        ISP2024_CORE_STORAGE_CAPACITY_SOURCE,
+        ISP2024_CORE_REZ_CAPACITY_SOURCE,
+        ISP2024_REFERENCE_YEAR_TRACE_SOURCE,
+    )
+
     default_data_root() = DEFAULT_DATA_ROOT
     # Ranges to build the 4006 trace 
     # The 4006 trace is based on the ISP model published by AEMO 
@@ -163,7 +226,10 @@ module ISPdatabuilder
                 file_path       = normpath(outlook_core_path, f)
                 parts           = split(f, " - ")
                 scenario_full   = length(parts) >= 2 ? strip(parts[2]) : ""
-                capacity_df     = PISP.read_xlsx_with_header(file_path, "Capacity", "A3:AG5000")
+                capacity_df = PISP.read_xlsx_with_header(
+                    file_path,
+                    ISP2024_CORE_CAPACITY_SOURCE,
+                )
                 insertcols!(capacity_df, 2, :Scenario => fill(scenario_full, nrow(capacity_df)))
                 capacity_df     = filter(row -> any(x -> x isa Number && !ismissing(x), row), capacity_df)
                 push!(all_capacities, capacity_df)
@@ -214,12 +280,18 @@ module ISPdatabuilder
                 parts         = split(f, " - ")
                 scenario_full = length(parts) >= 2 ? strip(parts[2]) : ""
 
-                energy_df = PISP.read_xlsx_with_header(file_path, "Storage Energy", "A3:AG5000")
+                energy_df = PISP.read_xlsx_with_header(
+                    file_path,
+                    ISP2024_CORE_STORAGE_ENERGY_SOURCE,
+                )
                 insertcols!(energy_df, 2, :Scenario => fill(scenario_full, nrow(energy_df)))
                 energy_df = filter(row -> any(x -> x isa Number && !ismissing(x), row), energy_df)
                 push!(storage_energy_dfs, energy_df)
 
-                capacity_df = PISP.read_xlsx_with_header(file_path, "Storage Capacity", "A3:AG5000")
+                capacity_df = PISP.read_xlsx_with_header(
+                    file_path,
+                    ISP2024_CORE_STORAGE_CAPACITY_SOURCE,
+                )
                 insertcols!(capacity_df, 2, :Scenario => fill(scenario_full, nrow(capacity_df)))
                 capacity_df = filter(row -> any(x -> x isa Number && !ismissing(x), row), capacity_df)
                 push!(storage_capacity_dfs, capacity_df)
@@ -263,7 +335,7 @@ module ISPdatabuilder
     end
 
     function read_rez_capacity(path::AbstractString)
-        return PISP.read_xlsx_with_header(path, "REZ Generation Capacity", "A3:AG5000")
+        return PISP.read_xlsx_with_header(path, ISP2024_CORE_REZ_CAPACITY_SOURCE)
     end
 
     function build_rez_capacity_aux(; data_root::AbstractString = DEFAULT_DATA_ROOT)
@@ -288,8 +360,11 @@ module ISPdatabuilder
         return outputs
     end
 
-    function process_traces(path::AbstractString)
-        df = CSV.read(path, DataFrame)
+    function process_traces(
+        path::AbstractString,
+        source_spec::PISP.CsvSourceSpec = ISP2024_REFERENCE_YEAR_TRACE_SOURCE,
+    )
+        df = PISP.read_csv_source(path, source_spec)
         df.date = Date.(df.Year, df.Month, df.Day)
         return df
     end
