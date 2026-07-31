@@ -6,6 +6,7 @@
 # This distinction matters for weather-aware studies: regional reference temperatures and temperature-dependent network limits are model assumptions, while an hourly weather series is an external input that needs its own source and mapping.
 
 using DataFrames
+using PISP
 using XLSX
 
 repo_root = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
@@ -96,12 +97,7 @@ markdown_table(murraylink_temperature_capability)
 # The later regional-temperature and Murraylink lookup tables are outside the range currently read by `line_table`.
 # The package source also contains no field or parser identifier named `temperature`.
 
-parser_path = joinpath(repo_root, "src", "parsers", "PISP-2024parser.jl")
-parser_text = read(parser_path, String)
-network_capability_ranges = [
-    match_result.captures[1]
-    for match_result in eachmatch(r"\"Network Capability\",\s*\"([^\"]+)\"", parser_text)
-]
+network_capability_ranges = [PISP.source_spec(:network_capability, 2024).cell_range]
 
 source_files = String[]
 for (directory, _, files) in walkdir(joinpath(repo_root, "src"))
