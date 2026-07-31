@@ -1,0 +1,1561 @@
+# Canonical coverage and ownership ledger for non-trace ISP source documentation.
+# Classifications distinguish AEMO publications, PISP representations and intermediates, package conventions, user inputs, outputs, and excluded trace material.
+
+[[source_read]]
+id = "xlsx-generic-selected-range"
+source_path = "src/utils/dataframes/PISPutils-dataframes.jl"
+line = 34
+edition = "2024"
+classification = "parsed_representation"
+artefact = "selected workbook supplied by a caller"
+worksheet = "caller-selected"
+range = "caller-selected"
+owner = "shared-source-coverage-ledger"
+status = "active"
+notes = "Shared range reader used by the parser, scraper, and documentation evidence pages."
+
+[[source_read]]
+id = "hydro-workbook-reference-years"
+source_path = "src/utils/dataframes/PISPutils-df-hydro.jl"
+line = 64
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "Hydro Scheme Inflows"
+range = "B34:N47"
+owner = "shared-source-hydro-inflows"
+status = "active"
+notes = "Default range used to build the Snowy reference-year lookup."
+
+[[source_read]]
+id = "network-capability"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 62
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "Network Capability"
+range = "B6:H21"
+owner = "shared-source-network-transmission"
+status = "active"
+notes = "Seasonal forward and reverse transfer limits."
+
+[[source_read]]
+id = "transmission-reliability"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 63
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "Transmission Reliability"
+range = "B7:G11"
+owner = "shared-source-network-transmission"
+status = "active"
+notes = "Line outage and repair assumptions."
+
+[[source_read]]
+id = "flow-path-augmentation"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 254
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "Flow Path Augmentation options"
+range = "B11:N94"
+owner = "shared-source-network-transmission"
+status = "active"
+notes = "Candidate flow-path augmentations and timing/cost fields."
+
+[[source_read]]
+id = "summary-mapping-generator"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 333
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "Summary Mapping"
+range = "B6:B680"
+owner = "shared-source-existing-generation-storage"
+status = "active"
+notes = "Existing generator name mapping."
+
+[[source_read]]
+id = "summary-mapping-mlf"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 334
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "Summary Mapping"
+range = "AA6:AA680"
+owner = "shared-source-existing-generation-storage"
+status = "active"
+notes = "Marginal loss factor source column."
+
+[[source_read]]
+id = "maximum-capacity-existing"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 340
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "Maximum capacity"
+range = "B8:D260"
+owner = "shared-source-existing-generation-storage"
+status = "active"
+notes = "Existing-generator maximum-capacity records."
+
+[[source_read]]
+id = "maximum-capacity-committed"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 344
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "Maximum capacity"
+range = "F8:I35"
+owner = "shared-source-existing-generation-storage"
+status = "active"
+notes = "Committed generator capacity and commissioning records."
+
+[[source_read]]
+id = "maximum-capacity-anticipated"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 345
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "Maximum capacity"
+range = "K8:N24"
+owner = "shared-source-existing-generation-storage"
+status = "active"
+notes = "Anticipated generator capacity and commissioning records."
+
+[[source_read]]
+id = "summary-mapping-generator-detail"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 347
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "Summary Mapping"
+range = "B4:I680"
+owner = "shared-source-existing-generation-storage"
+status = "active"
+notes = "Generator-unit identifiers, technology, and location mapping."
+
+[[source_read]]
+id = "coal-generation-limits"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 380
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "Generation limits"
+range = "B8:D52"
+owner = "shared-source-generator-operation"
+status = "active"
+notes = "Coal minimum-stable-level records."
+
+[[source_read]]
+id = "gpg-minimum-stable-level"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 381
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "GPG Min Stable Level"
+range = "B9:E34"
+owner = "shared-source-generator-operation"
+status = "active"
+notes = "Unit-level gas minimum-stable-level records."
+
+[[source_read]]
+id = "minimum-up-down-2024"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 385
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "Min Up&Down Times"
+range = "B8:E25"
+owner = "shared-source-generator-operation"
+status = "active"
+notes = "Unit-level minimum up/down times available in the 2024 workbook."
+
+[[source_read]]
+id = "minimum-up-down-2019-supplement"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 386
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2019-input-and-assumptions-workbook-v1-3-dec-19.xlsx"
+worksheet = "Generation limits"
+range = "O9:Q69"
+owner = "shared-source-generator-operation"
+status = "active"
+notes = "Supplementary 2019 minimum up/down values used where the 2024 workbook is incomplete."
+
+[[source_read]]
+id = "maximum-ramp-rates"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 390
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "Max Ramp Rates"
+range = "B8:F72"
+owner = "shared-source-generator-operation"
+status = "active"
+notes = "Existing unit ramp-up and ramp-down limits."
+
+[[source_read]]
+id = "retirement-source"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 460
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "Retirement"
+range = "B9:D460"
+owner = "shared-source-generator-reliability-retirement"
+status = "active"
+notes = "Technical-life and announced retirement source rows."
+
+[[source_read]]
+id = "reliability-existing"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 478
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "Generator Reliability Settings"
+range = "B20:G28"
+owner = "shared-source-generator-reliability-retirement"
+status = "active"
+notes = "Existing technology outage and derating assumptions."
+
+[[source_read]]
+id = "reliability-new-entrant-generator"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 479
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "Generator Reliability Settings"
+range = "I20:N40"
+owner = "shared-source-generator-reliability-retirement"
+status = "active"
+notes = "New-entrant generator outage and repair assumptions."
+
+[[source_read]]
+id = "existing-generator-summary"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 485
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "Existing Gen Data Summary"
+range = "B10:U319"
+owner = "shared-source-existing-generation-storage"
+status = "active"
+notes = "Station-level source summary used to populate generator records."
+
+[[source_read]]
+id = "existing-generator-summary-additional"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 486
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "Existing Gen Data Summary"
+range = "B382:U397"
+owner = "shared-source-existing-generation-storage"
+status = "active"
+notes = "Additional existing/committed source summary rows."
+
+[[source_read]]
+id = "emissions-intensity"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 633
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "Emissions intensity"
+range = "B7:D73"
+owner = "shared-source-existing-generation-storage"
+status = "active"
+notes = "Existing-generator emissions intensities."
+
+[[source_read]]
+id = "battery-properties"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 936
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "Storage properties"
+range = "B4:H13"
+owner = "shared-source-existing-generation-storage"
+status = "active"
+notes = "Battery duration, efficiency, and operating assumptions."
+
+[[source_read]]
+id = "pumped-hydro-properties"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 937
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "Storage properties"
+range = "B22:K26"
+owner = "shared-source-existing-generation-storage"
+status = "active"
+notes = "Pumped-hydro duration, efficiency, and operating assumptions."
+
+[[source_read]]
+id = "battery-maximum-capacity"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 938
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "Maximum capacity"
+range = "P8:U62"
+owner = "shared-source-existing-generation-storage"
+status = "active"
+notes = "Existing, committed, and anticipated battery capacities."
+
+[[source_read]]
+id = "battery-summary-mapping"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 939
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "Summary Mapping"
+range = "B314:AB370"
+owner = "shared-source-existing-generation-storage"
+status = "active"
+notes = "Storage identifiers and source mapping."
+
+[[source_read]]
+id = "reliability-new-entrant-storage"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 940
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "Generator Reliability Settings"
+range = "I20:N40"
+owner = "shared-source-generator-reliability-retirement"
+status = "active"
+notes = "The same new-entrant reliability table supplies storage reliability assumptions."
+
+[[source_read]]
+id = "renewable-existing-solar-source"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1202
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "Existing Gen Data Summary"
+range = "B11:K297"
+owner = "shared-source-existing-generation-storage"
+status = "active"
+notes = "Operating-capacity source for utility-scale solar."
+
+[[source_read]]
+id = "renewable-rez-solar-source"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1206
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "Renewable Energy Zones"
+range = "B7:G50"
+owner = "shared-source-renewable-energy-zones"
+status = "active"
+notes = "REZ-to-bus mapping used for utility-scale solar."
+
+[[source_read]]
+id = "renewable-existing-wind-source"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1383
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "Existing Gen Data Summary"
+range = "B11:K297"
+owner = "shared-source-existing-generation-storage"
+status = "active"
+notes = "Operating-capacity source for wind."
+
+[[source_read]]
+id = "renewable-rez-wind-source"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1385
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "Renewable Energy Zones"
+range = "B7:G50"
+owner = "shared-source-renewable-energy-zones"
+status = "active"
+notes = "REZ-to-bus mapping used for wind."
+
+[[source_read]]
+id = "aux-capacity-outlook-solar"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1242
+edition = "2024"
+classification = "pisp_generated_intermediate"
+artefact = "Auxiliary/CapacityOutlook2024_Condensed.xlsx"
+worksheet = "CapacityOutlook"
+range = "A1:G14356"
+owner = "shared-source-generation-storage-outlook"
+status = "active"
+notes = "Condensed capacity outlook used for solar schedule construction."
+
+[[source_read]]
+id = "aux-rez-capacity-solar"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1243
+edition = "2024"
+classification = "pisp_generated_intermediate"
+artefact = "Auxiliary/<scenario>_REZCAP.xlsx"
+worksheet = "REZ Generation Capacity"
+range = "A1:AG2238"
+owner = "shared-source-generation-storage-outlook"
+status = "active"
+notes = "Scenario-specific REZ capacity intermediate used for solar."
+
+[[source_read]]
+id = "aux-capacity-outlook-wind"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1426
+edition = "2024"
+classification = "pisp_generated_intermediate"
+artefact = "Auxiliary/CapacityOutlook2024_Condensed.xlsx"
+worksheet = "CapacityOutlook"
+range = "A1:G14356"
+owner = "shared-source-generation-storage-outlook"
+status = "active"
+notes = "Condensed capacity outlook used for wind schedule construction."
+
+[[source_read]]
+id = "aux-rez-capacity-wind"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1427
+edition = "2024"
+classification = "pisp_generated_intermediate"
+artefact = "Auxiliary/<scenario>_REZCAP.xlsx"
+worksheet = "REZ Generation Capacity"
+range = "A1:AG2238"
+owner = "shared-source-generation-storage-outlook"
+status = "active"
+notes = "Scenario-specific REZ capacity intermediate used for wind."
+
+[[source_read]]
+id = "aux-storage-capacity-vpp"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1572
+edition = "2024"
+classification = "pisp_generated_intermediate"
+artefact = "Auxiliary/StorageCapacityOutlook_2024_ISP.xlsx"
+worksheet = "<scenario>"
+range = "A1:AG1769"
+owner = "shared-source-generation-storage-outlook"
+status = "active"
+notes = "PISP-generated scenario storage-capacity intermediate."
+
+[[source_read]]
+id = "aux-storage-energy-vpp"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1577
+edition = "2024"
+classification = "pisp_generated_intermediate"
+artefact = "Auxiliary/StorageEnergyOutlook_2024_ISP.xlsx"
+worksheet = "<scenario>"
+range = "A1:AG1769"
+owner = "shared-source-generation-storage-outlook"
+status = "active"
+notes = "PISP-generated scenario storage-energy intermediate."
+
+[[source_read]]
+id = "aux-storage-capacity-vpp-loop"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1607
+edition = "2024"
+classification = "pisp_generated_intermediate"
+artefact = "Auxiliary/StorageCapacityOutlook_2024_ISP.xlsx"
+worksheet = "<scenario>"
+range = "A1:AG1769"
+owner = "shared-source-generation-storage-outlook"
+status = "active"
+notes = "Repeated active read during VPP schedule construction."
+
+[[source_read]]
+id = "aux-storage-energy-vpp-loop"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1608
+edition = "2024"
+classification = "pisp_generated_intermediate"
+artefact = "Auxiliary/StorageEnergyOutlook_2024_ISP.xlsx"
+worksheet = "<scenario>"
+range = "A1:AG1769"
+owner = "shared-source-generation-storage-outlook"
+status = "active"
+notes = "Repeated active read during VPP schedule construction."
+
+[[source_read]]
+id = "outlook-capacity"
+source_path = "src/scrappers/PISP-scrapper-build.jl"
+line = 166
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "Core/*.xlsx and Sensitivities/*.xlsx"
+worksheet = "Capacity"
+range = "A3:AG5000"
+owner = "shared-source-generation-storage-outlook"
+status = "active"
+notes = "Capacity outlook by technology and region."
+
+[[source_read]]
+id = "outlook-storage-energy"
+source_path = "src/scrappers/PISP-scrapper-build.jl"
+line = 217
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "Core/*.xlsx and Sensitivities/*.xlsx"
+worksheet = "Storage Energy"
+range = "A3:AG5000"
+owner = "shared-source-generation-storage-outlook"
+status = "active"
+notes = "Storage energy outlook by technology and region."
+
+[[source_read]]
+id = "outlook-storage-capacity"
+source_path = "src/scrappers/PISP-scrapper-build.jl"
+line = 222
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "Core/*.xlsx and Sensitivities/*.xlsx"
+worksheet = "Storage Capacity"
+range = "A3:AG5000"
+owner = "shared-source-generation-storage-outlook"
+status = "active"
+notes = "Storage power capacity outlook by technology and region."
+
+[[source_read]]
+id = "outlook-rez-capacity"
+source_path = "src/scrappers/PISP-scrapper-build.jl"
+line = 266
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "Core/*.xlsx and Sensitivities/*.xlsx"
+worksheet = "REZ Generation Capacity"
+range = "A3:AG5000"
+owner = "shared-source-generation-storage-outlook"
+status = "active"
+notes = "REZ generation-capacity outlook."
+
+[[source_read]]
+id = "dsp-progressive-change-qld-summer"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1722
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "DSP"
+range = "B128:AG133"
+owner = "shared-source-demand-side-participation"
+status = "active"
+notes = "Progressive Change, QLD, Summer response blocks."
+
+[[source_read]]
+id = "dsp-progressive-change-qld-winter"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1723
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "DSP"
+range = "B137:AG142"
+owner = "shared-source-demand-side-participation"
+status = "active"
+notes = "Progressive Change, QLD, Winter response blocks."
+
+[[source_read]]
+id = "dsp-progressive-change-nsw-summer"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1725
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "DSP"
+range = "B108:AG113"
+owner = "shared-source-demand-side-participation"
+status = "active"
+notes = "Progressive Change, NSW, Summer response blocks."
+
+[[source_read]]
+id = "dsp-progressive-change-nsw-winter"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1726
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "DSP"
+range = "B118:AG123"
+owner = "shared-source-demand-side-participation"
+status = "active"
+notes = "Progressive Change, NSW, Winter response blocks."
+
+[[source_read]]
+id = "dsp-progressive-change-sa-summer"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1728
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "DSP"
+range = "B147:AG152"
+owner = "shared-source-demand-side-participation"
+status = "active"
+notes = "Progressive Change, SA, Summer response blocks."
+
+[[source_read]]
+id = "dsp-progressive-change-sa-winter"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1729
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "DSP"
+range = "B156:AG161"
+owner = "shared-source-demand-side-participation"
+status = "active"
+notes = "Progressive Change, SA, Winter response blocks."
+
+[[source_read]]
+id = "dsp-progressive-change-tas-summer"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1731
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "DSP"
+range = "B166:AG171"
+owner = "shared-source-demand-side-participation"
+status = "active"
+notes = "Progressive Change, TAS, Summer response blocks."
+
+[[source_read]]
+id = "dsp-progressive-change-tas-winter"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1732
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "DSP"
+range = "B175:AG180"
+owner = "shared-source-demand-side-participation"
+status = "active"
+notes = "Progressive Change, TAS, Winter response blocks."
+
+[[source_read]]
+id = "dsp-progressive-change-vic-summer"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1734
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "DSP"
+range = "B185:AG190"
+owner = "shared-source-demand-side-participation"
+status = "active"
+notes = "Progressive Change, VIC, Summer response blocks."
+
+[[source_read]]
+id = "dsp-progressive-change-vic-winter"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1735
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "DSP"
+range = "B194:AG199"
+owner = "shared-source-demand-side-participation"
+status = "active"
+notes = "Progressive Change, VIC, Winter response blocks."
+
+[[source_read]]
+id = "dsp-step-change-qld-summer"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1722
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "DSP"
+range = "B226:AG231"
+owner = "shared-source-demand-side-participation"
+status = "active"
+notes = "Step Change, QLD, Summer response blocks."
+
+[[source_read]]
+id = "dsp-step-change-qld-winter"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1723
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "DSP"
+range = "B235:AG240"
+owner = "shared-source-demand-side-participation"
+status = "active"
+notes = "Step Change, QLD, Winter response blocks."
+
+[[source_read]]
+id = "dsp-step-change-nsw-summer"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1725
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "DSP"
+range = "B206:AG211"
+owner = "shared-source-demand-side-participation"
+status = "active"
+notes = "Step Change, NSW, Summer response blocks."
+
+[[source_read]]
+id = "dsp-step-change-nsw-winter"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1726
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "DSP"
+range = "B216:AG221"
+owner = "shared-source-demand-side-participation"
+status = "active"
+notes = "Step Change, NSW, Winter response blocks."
+
+[[source_read]]
+id = "dsp-step-change-sa-summer"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1728
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "DSP"
+range = "B245:AG250"
+owner = "shared-source-demand-side-participation"
+status = "active"
+notes = "Step Change, SA, Summer response blocks."
+
+[[source_read]]
+id = "dsp-step-change-sa-winter"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1729
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "DSP"
+range = "B254:AG259"
+owner = "shared-source-demand-side-participation"
+status = "active"
+notes = "Step Change, SA, Winter response blocks."
+
+[[source_read]]
+id = "dsp-step-change-tas-summer"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1731
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "DSP"
+range = "B264:AG269"
+owner = "shared-source-demand-side-participation"
+status = "active"
+notes = "Step Change, TAS, Summer response blocks."
+
+[[source_read]]
+id = "dsp-step-change-tas-winter"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1732
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "DSP"
+range = "B273:AG278"
+owner = "shared-source-demand-side-participation"
+status = "active"
+notes = "Step Change, TAS, Winter response blocks."
+
+[[source_read]]
+id = "dsp-step-change-vic-summer"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1734
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "DSP"
+range = "B283:AG288"
+owner = "shared-source-demand-side-participation"
+status = "active"
+notes = "Step Change, VIC, Summer response blocks."
+
+[[source_read]]
+id = "dsp-step-change-vic-winter"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1735
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "DSP"
+range = "B292:AG297"
+owner = "shared-source-demand-side-participation"
+status = "active"
+notes = "Step Change, VIC, Winter response blocks."
+
+[[source_read]]
+id = "dsp-green-energy-exports-qld-summer"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1722
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "DSP"
+range = "B30:AG35"
+owner = "shared-source-demand-side-participation"
+status = "active"
+notes = "Green Energy Exports, QLD, Summer response blocks."
+
+[[source_read]]
+id = "dsp-green-energy-exports-qld-winter"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1723
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "DSP"
+range = "B39:AG44"
+owner = "shared-source-demand-side-participation"
+status = "active"
+notes = "Green Energy Exports, QLD, Winter response blocks."
+
+[[source_read]]
+id = "dsp-green-energy-exports-nsw-summer"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1725
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "DSP"
+range = "B10:AG15"
+owner = "shared-source-demand-side-participation"
+status = "active"
+notes = "Green Energy Exports, NSW, Summer response blocks."
+
+[[source_read]]
+id = "dsp-green-energy-exports-nsw-winter"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1726
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "DSP"
+range = "B20:AG25"
+owner = "shared-source-demand-side-participation"
+status = "active"
+notes = "Green Energy Exports, NSW, Winter response blocks."
+
+[[source_read]]
+id = "dsp-green-energy-exports-sa-summer"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1728
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "DSP"
+range = "B49:AG54"
+owner = "shared-source-demand-side-participation"
+status = "active"
+notes = "Green Energy Exports, SA, Summer response blocks."
+
+[[source_read]]
+id = "dsp-green-energy-exports-sa-winter"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1729
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "DSP"
+range = "B58:AG63"
+owner = "shared-source-demand-side-participation"
+status = "active"
+notes = "Green Energy Exports, SA, Winter response blocks."
+
+[[source_read]]
+id = "dsp-green-energy-exports-tas-summer"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1731
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "DSP"
+range = "B68:AG73"
+owner = "shared-source-demand-side-participation"
+status = "active"
+notes = "Green Energy Exports, TAS, Summer response blocks."
+
+[[source_read]]
+id = "dsp-green-energy-exports-tas-winter"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1732
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "DSP"
+range = "B77:AG82"
+owner = "shared-source-demand-side-participation"
+status = "active"
+notes = "Green Energy Exports, TAS, Winter response blocks."
+
+[[source_read]]
+id = "dsp-green-energy-exports-vic-summer"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1734
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "DSP"
+range = "B87:AG92"
+owner = "shared-source-demand-side-participation"
+status = "active"
+notes = "Green Energy Exports, VIC, Summer response blocks."
+
+[[source_read]]
+id = "dsp-green-energy-exports-vic-winter"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1735
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "DSP"
+range = "B96:AG101"
+owner = "shared-source-demand-side-participation"
+status = "active"
+notes = "Green Energy Exports, VIC, Winter response blocks."
+
+[[source_read]]
+id = "buildout-user-selected-sheet"
+source_path = "src/parsers/PISP-2024buildout.jl"
+line = 12
+edition = "2024"
+classification = "user_input"
+artefact = "user-supplied build-out workbook"
+worksheet = "user-selected"
+range = "whole worksheet"
+owner = "isp2024-buildout-defaults"
+status = "active"
+notes = "Optional build-out input supplied by the package user."
+
+[[source_read]]
+id = "ev-weekend-profile"
+source_path = "src/utils/dataframes/PISPutils-df-evs-2024.jl"
+line = 48
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2023-iasr-ev-workbook.xlsx"
+worksheet = "BEV_PHEV_Profile_kW (Weekend)"
+range = "B:AY"
+owner = "shared-source-electric-vehicles"
+status = "active"
+notes = "Half-hourly weekend charging profiles."
+
+[[source_read]]
+id = "ev-weekday-profile"
+source_path = "src/utils/dataframes/PISPutils-df-evs-2024.jl"
+line = 48
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2023-iasr-ev-workbook.xlsx"
+worksheet = "BEV_PHEV_Profile_kW (Weekday)"
+range = "B:AY"
+owner = "shared-source-electric-vehicles"
+status = "active"
+notes = "Half-hourly weekday charging profiles."
+
+[[source_read]]
+id = "ev-bev-numbers"
+source_path = "src/utils/dataframes/PISPutils-df-evs-2024.jl"
+line = 48
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2023-iasr-ev-workbook.xlsx"
+worksheet = "BEV_Numbers"
+range = "B:AZ"
+owner = "shared-source-electric-vehicles"
+status = "active"
+notes = "BEV stock projections."
+
+[[source_read]]
+id = "ev-phev-numbers"
+source_path = "src/utils/dataframes/PISPutils-df-evs-2024.jl"
+line = 48
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2023-iasr-ev-workbook.xlsx"
+worksheet = "PHEV_Numbers"
+range = "B:AZ"
+owner = "shared-source-electric-vehicles"
+status = "active"
+notes = "PHEV stock projections."
+
+[[source_read]]
+id = "ev-fcev-numbers"
+source_path = "src/utils/dataframes/PISPutils-df-evs-2024.jl"
+line = 48
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2023-iasr-ev-workbook.xlsx"
+worksheet = "FCEV_Numbers"
+range = "B:AZ"
+owner = "shared-source-electric-vehicles"
+status = "active"
+notes = "FCEV stock projections."
+
+[[source_read]]
+id = "ev-ice-numbers"
+source_path = "src/utils/dataframes/PISPutils-df-evs-2024.jl"
+line = 48
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2023-iasr-ev-workbook.xlsx"
+worksheet = "ICE_Numbers"
+range = "B:AZ"
+owner = "shared-source-electric-vehicles"
+status = "active"
+notes = "Internal-combustion vehicle stock projections."
+
+[[source_read]]
+id = "ev-charge-type"
+source_path = "src/utils/dataframes/PISPutils-df-evs-2024.jl"
+line = 48
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2023-iasr-ev-workbook.xlsx"
+worksheet = "BEV_PHEV_Charge_Type (%)"
+range = "B:BF"
+owner = "shared-source-electric-vehicles"
+status = "active"
+notes = "Charging-mode shares."
+
+[[source_read]]
+id = "ev-subregional-allocation"
+source_path = "src/utils/dataframes/PISPutils-df-evs-2024.jl"
+line = 347
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024-isp-inputs-and-assumptions-workbook.xlsx"
+worksheet = "Sub-regional demand allocation"
+range = "B127:AG182"
+owner = "shared-source-electric-vehicles"
+status = "active"
+notes = "Subregional EV demand allocation."
+
+[[source_read]]
+id = "ev-number-sheet-discovery"
+source_path = "src/utils/dataframes/PISPutils-df-evs-2024.jl"
+line = 272
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2023-iasr-ev-workbook.xlsx"
+worksheet = "*_Numbers"
+range = "sheet-name discovery"
+owner = "shared-source-electric-vehicles"
+status = "active"
+notes = "EV number worksheets discovered by suffix."
+
+[[source_read]]
+id = "hydro-natural-inflow"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1871
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024 ISP Model/**/MonthlyNaturalInflow*.csv"
+worksheet = "CSV"
+range = "all columns"
+owner = "shared-source-hydro-inflows"
+status = "active"
+notes = "Daily natural inflow records grouped into monthly and reference-year profiles."
+
+[[source_read]]
+id = "hydro-annual-energy-limit"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1924
+edition = "2024"
+classification = "aemo_raw_source"
+artefact = "2024 ISP Model/**/MaxEnergyYear*.csv"
+worksheet = "CSV"
+range = "all columns"
+owner = "shared-source-hydro-inflows"
+status = "active"
+notes = "Annual hydro energy constraints."
+
+[[source_read]]
+id = "trace-demand-pv-total"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1092
+edition = "2024"
+classification = "excluded_trace_material"
+artefact = "demand_*/**_PV_TOT.csv"
+worksheet = "CSV"
+range = "all columns"
+owner = "editions/trace-coverage.md"
+status = "active"
+notes = "Half-hourly demand/PV trace payload."
+
+[[source_read]]
+id = "trace-demand-pvlite"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1160
+edition = "2024"
+classification = "excluded_trace_material"
+artefact = "demand_*/**_PVLITE.csv"
+worksheet = "CSV"
+range = "all columns"
+owner = "editions/trace-coverage.md"
+status = "active"
+notes = "Half-hourly demand trace payload."
+
+[[source_read]]
+id = "trace-solar-primary"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1290
+edition = "2024"
+classification = "excluded_trace_material"
+artefact = "solar traces/*.csv"
+worksheet = "CSV"
+range = "all columns"
+owner = "editions/trace-coverage.md"
+status = "active"
+notes = "Bulk solar trace payload."
+
+[[source_read]]
+id = "trace-solar-fallback"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1314
+edition = "2024"
+classification = "excluded_trace_material"
+artefact = "solar traces/*.csv"
+worksheet = "CSV"
+range = "all columns"
+owner = "editions/trace-coverage.md"
+status = "active"
+notes = "Alternative solar trace-file match."
+
+[[source_read]]
+id = "trace-wind-primary"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1473
+edition = "2024"
+classification = "excluded_trace_material"
+artefact = "wind traces/*.csv"
+worksheet = "CSV"
+range = "all columns"
+owner = "editions/trace-coverage.md"
+status = "active"
+notes = "Bulk wind trace payload."
+
+[[source_read]]
+id = "trace-wind-fallback"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1497
+edition = "2024"
+classification = "excluded_trace_material"
+artefact = "wind traces/*.csv"
+worksheet = "CSV"
+range = "all columns"
+owner = "editions/trace-coverage.md"
+status = "active"
+notes = "Alternative wind trace-file match."
+
+[[source_read]]
+id = "trace-scraper-preprocessing"
+source_path = "src/scrappers/PISP-scrapper-build.jl"
+line = 292
+edition = "2024"
+classification = "excluded_trace_material"
+artefact = "downloaded trace CSV"
+worksheet = "CSV"
+range = "all columns"
+owner = "editions/trace-coverage.md"
+status = "active"
+notes = "Trace preprocessing is outside the non-trace source-material family."
+
+[[parameter_family]]
+id = "parameters-general"
+source_path = "src/parameters/general2024ISP.jl"
+classification = "package_convention"
+family = "scenario, geography, bus, area, source labels, and weather-year identifiers"
+owner = "isp2024-parameters-and-mappings"
+notes = "Canonical package identifiers used across the 2024 pipeline."
+
+[[parameter_family]]
+id = "parameters-retirements"
+source_path = "src/parameters/retirements2024ISP.jl"
+classification = "package_convention"
+family = "retirement reductions and reviewed retirement overrides"
+owner = "shared-source-generator-reliability-retirement"
+notes = "Package-defined retirement adjustments applied after source parsing."
+
+[[parameter_family]]
+id = "parameters-storage"
+source_path = "src/parameters/ess2024ISP.jl"
+classification = "package_convention"
+family = "battery and pumped-hydro defaults"
+owner = "shared-source-existing-generation-storage"
+notes = "Static storage records that supplement or normalise source data."
+
+[[parameter_family]]
+id = "parameters-generators"
+source_path = "src/parameters/gens2024ISP.jl"
+classification = "package_convention"
+family = "generator unit, fuel-type, and trace-file mappings"
+owner = "shared-source-existing-generation-storage"
+notes = "Generation identifiers and source-file naming conventions."
+
+[[parameter_family]]
+id = "parameters-hydro"
+source_path = "src/parameters/hydro2024ISP.jl"
+classification = "package_convention"
+family = "hydro files, constraints, weather years, dam shares, and groupings"
+owner = "shared-source-hydro-inflows"
+notes = "Hydro source-file and allocation conventions."
+
+[[parameter_family]]
+id = "parameters-buildout"
+source_path = "src/parameters/buildout2024ISP.jl"
+classification = "package_convention"
+family = "generator and storage build-out templates"
+owner = "isp2024-buildout-defaults"
+notes = "Complete default records used when a user requests optional build-outs."
+
+[[mapping_family]]
+id = "source-download-lookup"
+source_path = "src/scrappers/PISP-scrapper-2024files.jl"
+line = 80
+family = "fixed source-download keys and metadata"
+classification = "package_convention"
+owner = "isp2024-data-sources"
+notes = "Maps downloader keys to published AEMO artefacts."
+
+[[mapping_family]]
+id = "buildout-generator-technology"
+source_path = "src/parsers/PISP-2024buildout.jl"
+line = 33
+family = "user build-out technology labels"
+classification = "package_convention"
+owner = "isp2024-buildout-defaults"
+notes = "Maps accepted labels to generator template keys."
+
+[[mapping_family]]
+id = "buildout-battery-duration"
+source_path = "src/parsers/PISP-2024buildout.jl"
+line = 34
+family = "battery duration labels"
+classification = "package_convention"
+owner = "isp2024-buildout-defaults"
+notes = "Maps battery build-out labels to storage duration."
+
+[[mapping_family]]
+id = "hydro-month-map"
+source_path = "src/utils/dataframes/PISPutils-df-hydro.jl"
+line = 57
+family = "month labels to calendar months"
+classification = "parsed_representation"
+owner = "shared-source-hydro-inflows"
+notes = "Normalises workbook month labels."
+
+[[mapping_family]]
+id = "line-reliability-map"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 67
+family = "named interconnector reliability rows"
+classification = "parsed_representation"
+owner = "shared-source-network-transmission"
+notes = "Assigns selected source rows to PISP line records."
+
+[[mapping_family]]
+id = "generator-month-map"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 329
+family = "month labels to calendar months"
+classification = "parsed_representation"
+owner = "shared-source-existing-generation-storage"
+notes = "Normalises monthly source columns."
+
+[[mapping_family]]
+id = "generator-duid-aliases"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 441
+family = "generator-unit aliases"
+classification = "package_convention"
+owner = "shared-source-existing-generation-storage"
+notes = "Resolves source naming mismatches for selected generating units."
+
+[[mapping_family]]
+id = "generator-emissions-fallbacks"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 639
+family = "technology emissions fallbacks"
+classification = "package_convention"
+owner = "shared-source-existing-generation-storage"
+notes = "Fallback values used when a source record does not supply a direct match."
+
+[[mapping_family]]
+id = "generator-cost-slopes"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 661
+family = "technology cost-curve slopes"
+classification = "package_convention"
+owner = "shared-source-existing-generation-storage"
+notes = "Package convention used in generated generator cost fields."
+
+[[mapping_family]]
+id = "generator-inertia"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 675
+family = "technology inertia constants"
+classification = "package_convention"
+owner = "shared-source-existing-generation-storage"
+notes = "Package convention used in generated generator records."
+
+[[mapping_family]]
+id = "renewable-cost-development-path-solar"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1228
+family = "scenario to cost-development path for solar"
+classification = "package_convention"
+owner = "shared-source-renewable-energy-zones"
+notes = "All current scenario identifiers select CDP14."
+
+[[mapping_family]]
+id = "renewable-cost-development-path-wind"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1411
+family = "scenario to cost-development path for wind"
+classification = "package_convention"
+owner = "shared-source-renewable-energy-zones"
+notes = "All current scenario identifiers select CDP14."
+
+[[mapping_family]]
+id = "dsp-price-bands"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1661
+family = "DSP price-band identifiers"
+classification = "package_convention"
+owner = "shared-source-demand-side-participation"
+notes = "Maps source price bands to package values."
+
+[[mapping_family]]
+id = "dsp-source-ranges"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1702
+family = "scenario/region/season DSP ranges"
+classification = "package_convention"
+owner = "shared-source-demand-side-participation"
+notes = "Selects the 30 workbook blocks listed in the source-read ledger."
+
+[[mapping_family]]
+id = "hydro-file-groups"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1849
+family = "inflow files to generator groups"
+classification = "parsed_representation"
+owner = "shared-source-hydro-inflows"
+notes = "Constructed from package hydro file mappings."
+
+[[mapping_family]]
+id = "hydro-scheme-groups"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1850
+family = "hydro scheme groups"
+classification = "package_convention"
+owner = "shared-source-hydro-inflows"
+notes = "Groups hydro units for inflow allocation."
+
+[[mapping_family]]
+id = "ev-value-column-by-sheet"
+source_path = "src/utils/dataframes/PISPutils-df-evs-2024.jl"
+line = 16
+family = "EV number worksheet to output field"
+classification = "package_convention"
+owner = "shared-source-electric-vehicles"
+notes = "Maps BEV, PHEV, FCEV, and ICE worksheets to parsed fields."
+
+[[mapping_family]]
+id = "ev-state-name"
+source_path = "src/utils/dataframes/PISPutils-df-evs-2024.jl"
+line = 22
+family = "EV state name to NEM code"
+classification = "package_convention"
+owner = "shared-source-electric-vehicles"
+notes = "Reuses package area identifiers."
+
+[[mapping_family]]
+id = "ev-scenario-name"
+source_path = "src/utils/dataframes/PISPutils-df-evs-2024.jl"
+line = 23
+family = "EV scenario name to package ID"
+classification = "package_convention"
+owner = "shared-source-electric-vehicles"
+notes = "Reuses package scenario identifiers."
+
+[[mapping_family]]
+id = "ev-vehicle-category"
+source_path = "src/utils/dataframes/PISPutils-df-evs-2024.jl"
+line = 24
+family = "EV vehicle types to demand categories"
+classification = "package_convention"
+owner = "shared-source-electric-vehicles"
+notes = "Aggregates workbook vehicle types into PISP demand categories."
+
+[[mapping_family]]
+id = "output-alternative-names"
+source_path = "src/utils/writing/PISPutils-writing.jl"
+line = 1
+family = "output table aliases"
+classification = "package_convention"
+owner = "isp2024-output-tables"
+notes = "Alternative PISP output names used by writers."
+
+[[mapping_family]]
+id = "sql-to-julia-types"
+source_path = "src/utils/mappers/PISPutils-mappers.jl"
+line = 2
+family = "schema declarations to Julia types"
+classification = "package_convention"
+owner = "isp2024-output-tables"
+notes = "Maps output schema declarations to DataFrame element types."
+
+[[mapping_family]]
+id = "pipeline-buildout-names"
+source_path = "src/main/pipeline-add-buildouts.jl"
+line = 12
+family = "scenario IDs to optional build-out names"
+classification = "user_input"
+owner = "isp2024-buildout-defaults"
+notes = "Selects user-provided build-out tables for each scenario."
+
+[[mapping_family]]
+id = "solar-generator-id-runtime"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1209
+family = "solar source rows to generated IDs"
+classification = "parsed_representation"
+owner = "shared-source-existing-generation-storage"
+notes = "Derived during parsing; not a separately maintained constant."
+
+[[mapping_family]]
+id = "solar-trace-name-runtime"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1224
+family = "solar source names to trace names"
+classification = "parsed_representation"
+owner = "shared-source-existing-generation-storage"
+notes = "Derived during parsing from source and package trace mappings."
+
+[[mapping_family]]
+id = "wind-generator-id-runtime"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1387
+family = "wind source rows to generated IDs"
+classification = "parsed_representation"
+owner = "shared-source-existing-generation-storage"
+notes = "Derived during parsing; not a separately maintained constant."
+
+[[mapping_family]]
+id = "storage-id-runtime"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1568
+family = "storage source rows to generated IDs"
+classification = "parsed_representation"
+owner = "shared-source-existing-generation-storage"
+notes = "Derived during storage parsing."
+
+[[mapping_family]]
+id = "hydro-generator-number-runtime"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 1985
+family = "hydro generator IDs to row numbers"
+classification = "parsed_representation"
+owner = "shared-source-hydro-inflows"
+notes = "Derived from the generated hydro table."
+
+[[mapping_family]]
+id = "demand-by-bus-runtime"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 2107
+family = "bus IDs to demand records"
+classification = "parsed_representation"
+owner = "shared-source-demand-distributed-resources"
+notes = "Derived from the generated demand table."
+
+[[mapping_family]]
+id = "ev-vehicle-number-tables-runtime"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 2170
+family = "EV worksheet tables by source name"
+classification = "parsed_representation"
+owner = "shared-source-electric-vehicles"
+notes = "Ordered collection assembled from the four selected number worksheets."
+
+[[mapping_family]]
+id = "ev-vehicle-number-fields-runtime"
+source_path = "src/parsers/PISP-2024parser.jl"
+line = 2174
+family = "EV output tables by vehicle number field"
+classification = "parsed_representation"
+owner = "shared-source-electric-vehicles"
+notes = "Ordered collection keyed by parsed output field."
+
+[[mapping_family]]
+id = "ev-bus-id-runtime"
+source_path = "src/utils/dataframes/PISPutils-df-evs-2024.jl"
+line = 413
+family = "bus names to bus IDs"
+classification = "parsed_representation"
+owner = "shared-source-electric-vehicles"
+notes = "Derived from PISP bus records."
+
+[[mapping_family]]
+id = "ev-demand-by-bus-runtime"
+source_path = "src/utils/dataframes/PISPutils-df-evs-2024.jl"
+line = 462
+family = "bus IDs to demand records"
+classification = "parsed_representation"
+owner = "shared-source-electric-vehicles"
+notes = "Derived from PISP demand records."
+
+[[mapping_family]]
+id = "ev-demand-der-runtime"
+source_path = "src/utils/dataframes/PISPutils-df-evs-2024.jl"
+line = 498
+family = "demand and DER relationship lookups"
+classification = "parsed_representation"
+owner = "shared-source-electric-vehicles"
+notes = "Derived from PISP demand and DER tables."
+
+[[mapping_family]]
+id = "trace-year-runtime"
+source_path = "src/scrappers/PISP-scrapper-build.jl"
+line = 322
+family = "trace years to processed trace tables"
+classification = "excluded_trace_material"
+owner = "editions/trace-coverage.md"
+notes = "Bulk trace preprocessing remains outside this documentation family."

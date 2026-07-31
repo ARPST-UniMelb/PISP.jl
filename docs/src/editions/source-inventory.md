@@ -25,15 +25,15 @@ For ISP 2026, PISP.jl provides source download and archive extraction, while par
 
 ## Observed local availability
 
-The [ISP 2026 source-availability page](../generated/isp2026/validation/source-availability.md)
-reports selected report, archive, and extracted-path observations from the
-configured ISP 2026 roots.
+The shared [source-material guide](source-material.md) organises non-trace evidence by data meaning across the two editions.
+Its [coverage and ownership ledger](../generated/shared/source-material/coverage-and-ownership.md) separates original AEMO sources, parsed representations, PISP-generated intermediates, package conventions, user inputs, outputs, and excluded trace material.
 
-The [model archive comparison](../generated/comparison/analyses/model-archive-comparison.md)
-reads the ISP 2024 and ISP 2026 model ZIPs directly. It compares scenario
-directories, XML packaging, trace families, file counts, sizes, and
-representative filenames as the first concrete input to a 2024-to-2026 parser
-crosswalk.
+The [ISP 2026 source-availability page](../generated/isp2026/validation/source-availability.md) reports selected report, archive, and extracted-path observations from the configured ISP 2026 roots.
+
+The [model archive comparison](../generated/comparison/analyses/model-archive-comparison.md) reads the ISP 2024 and ISP 2026 model ZIPs directly.
+It compares scenario directories, XML packaging, trace families, file counts, sizes, and representative filenames as the first concrete input to a 2024-to-2026 parser crosswalk.
+
+The [raw-source comparison](../generated/comparison/analyses/raw-source-comparison.md) separately compares non-trace workbooks and outlook packages, including source-family additions, removals, relocations, and schema changes.
 
 For the implemented 2024 workflow, consult [data sources](../generated/isp2024/reference/data-sources.md) and [output tables](../generated/isp2024/reference/output-tables.md).
 For 2026 source material, consult the [ISP 2026 overview](isp2026.md).

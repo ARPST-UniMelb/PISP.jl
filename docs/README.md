@@ -135,8 +135,11 @@ Local data are required for complete Literate regeneration, but not for a site b
 | `docs/src/concepts.md` | Stable explanation of the ISP 2024 asset, scenario, trace, and static/schedule model. |
 | `docs/src/assumptions.md` | ISP 2024 modelling scope, caveats, validation responsibilities, and external checks. |
 | `docs/src/api.md` | Public ISP 2024 build and source-acquisition API boundary. |
+| `docs/literate/shared/source_material/` | Executable non-trace source documentation organised by data meaning across ISP 2024 and ISP 2026. |
 | `docs/literate/isp2024/` | Executable ISP 2024 reference, tutorial, validation, and analysis sources. |
 | `docs/literate/comparison/` | Executable cross-edition source comparisons and mapping evidence. |
+| `docs/source-material-coverage.toml` | Machine-readable ownership ledger for active source reads, parameter files, and mapping families. |
+| `docs/source_material_support.jl` | Shared bounded workbook, directory-inventory, and coverage-ledger helpers used by the source-material pages. |
 | `docs/page-registry.toml` | Authority for every registry-managed Literate source and generated Markdown output. |
 | `docs/edition_profiles.jl` | Edition-specific report/download roots and schedule defaults used by rendering preflight. |
 | `docs/navigation.jl` | Published-site navigation assembled from static edition pages and published registry entries. |
@@ -144,11 +147,31 @@ Local data are required for complete Literate regeneration, but not for a site b
 | `docs/render_literate.jl` | Literate selection, profile resolution, data preflight, execution, and generated-output installation. |
 | `docs/make.jl` | Target-specific source-link staging and Documenter site build. |
 
-The public site separates shared explanatory pages from ISP 2024, ISP 2026, and comparison tracks.
-The ISP 2026 track publishes source-availability evidence, while the comparison
-track analyses release-level source structures needed for explicit crosswalks.
-Processed-data compatibility still requires edition-specific parser and schema
-validation.
+The public site separates shared source explanations from ISP 2024, ISP 2026, and comparison tracks.
+Shared source-data pages describe AEMO material by subject and are placed automatically in the lifecycle navigation.
+The ISP 2026 track publishes source-availability evidence, while the comparison track analyses release-level source structures needed for explicit crosswalks.
+Processed-data compatibility still requires edition-specific parser and schema validation.
+
+### Source-material page ownership
+
+| Subject | Authoritative Literate source | Generated Markdown |
+| --- | --- | --- |
+| Coverage and ownership | `docs/literate/shared/source_material/coverage_and_ownership.jl` | `docs/src/generated/shared/source-material/coverage-and-ownership.md` |
+| Scenarios and sensitivities | `docs/literate/shared/source_material/scenarios_and_sensitivities.jl` | `docs/src/generated/shared/source-material/scenarios-and-sensitivities.md` |
+| Existing generation and storage | `docs/literate/shared/source_material/existing_generation_and_storage.jl` | `docs/src/generated/shared/source-material/existing-generation-and-storage.md` |
+| Generator operation | `docs/literate/shared/source_material/generator_operation.jl` | `docs/src/generated/shared/source-material/generator-operation.md` |
+| Generator reliability and retirement | `docs/literate/shared/source_material/generator_reliability_and_retirement.jl` | `docs/src/generated/shared/source-material/generator-reliability-and-retirement.md` |
+| Generation and storage outlook | `docs/literate/shared/source_material/generation_and_storage_outlook.jl` | `docs/src/generated/shared/source-material/generation-and-storage-outlook.md` |
+| Network and transmission | `docs/literate/shared/source_material/network_and_transmission.jl` | `docs/src/generated/shared/source-material/network-and-transmission.md` |
+| Renewable energy zones | `docs/literate/shared/source_material/renewable_energy_zones.jl` | `docs/src/generated/shared/source-material/renewable-energy-zones.md` |
+| Demand and distributed resources | `docs/literate/shared/source_material/demand_and_distributed_resources.jl` | `docs/src/generated/shared/source-material/demand-and-distributed-resources.md` |
+| Demand-side participation | `docs/literate/shared/source_material/demand_side_participation.jl` | `docs/src/generated/shared/source-material/demand-side-participation.md` |
+| Electric vehicles | `docs/literate/shared/source_material/electric_vehicles.jl` | `docs/src/generated/shared/source-material/electric-vehicles.md` |
+| Hydro inflows and energy constraints | `docs/literate/shared/source_material/hydro_inflows_and_energy_constraints.jl` | `docs/src/generated/shared/source-material/hydro-inflows-and-energy-constraints.md` |
+| Raw-source comparison | `docs/literate/comparison/analysis/raw_source_comparison.jl` | `docs/src/generated/comparison/analyses/raw-source-comparison.md` |
+
+The source-material family reads the two inputs workbooks, both EV workbooks, the edition-specific outlook directories, the 2019 operating-assumptions supplement used by the current parser, and bounded hydro CSVs under the 2024 model directory.
+Each page declares its exact local prerequisites in `docs/page-registry.toml`; no source-selection path is maintained in this table.
 
 ## Page registry
 
@@ -202,8 +225,8 @@ PISP_LITERATE_PAGES=isp2024-historical-trace-years julia --project=docs docs/ren
 
 `isp2024` and `isp2026` pages are placed automatically, grouped by `kind` under their track's section.
 `comparison` pages are placed automatically, grouped by `data_layer` under "Compare ISP 2024 and ISP 2026".
-`shared` pages have no automatic placement: add the page's entry by hand to the relevant group in `docs/navigation.jl`'s "Understand PISP and ISP data" tree.
-`docs/test/runtests.jl` fails and names any published page whose output path is not reachable from the built navigation, so a missing `shared` entry is caught rather than silently building an unreachable page.
+Published `shared` pages in the `source-data` layer are placed automatically under "Understand PISP and ISP data" in registry order.
+`docs/test/runtests.jl` fails and names any published page whose output path is not reachable from the built navigation.
 
 ## Edition profiles and data preflight
 
@@ -312,7 +335,7 @@ Use two complementary structures for executable documentation:
 `docs/literate/isp2024/validation/temperature_data_coverage.jl` is the local reference pattern.
 
 1. Choose the page's reader purpose, track, edition scope, and data layer.
-2. Add or update the Literate source and its registry entry together. For a `shared`-track page, also add its entry to `docs/navigation.jl` by hand (see "Navigation placement by track" above); `isp2024`, `isp2026`, and `comparison` pages are placed automatically.
+2. Add or update the Literate source and its registry entry together. Published `shared` source-data pages, `isp2024`, `isp2026`, and `comparison` pages are placed automatically by their registry metadata.
 3. Declare every direct local input through typed `data_requirements` instead of embedding untracked path assumptions in the renderer.
 4. Use the edition profile for source or output roots in edition-specific Literate pages.
 5. Render the affected page, inspect its Markdown and figures, then run the appropriate site and source-link checks.
