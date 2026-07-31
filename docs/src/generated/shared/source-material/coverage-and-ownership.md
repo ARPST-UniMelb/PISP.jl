@@ -231,3 +231,4 @@ markdown_table(mapping_owners)
 ISP 2024 rows describe implementation evidence in the current package.
 ISP 2026 has no integrated PISP preprocessing or dataset workflow, so its pages report observed source structure and mark semantic correspondences for review instead of presenting them as implemented mappings.
 The machine-readable authority is `docs/source-material-coverage.toml` in the repository.
+

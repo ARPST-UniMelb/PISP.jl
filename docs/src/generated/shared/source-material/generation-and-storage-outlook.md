@@ -235,3 +235,4 @@ markdown_table(storage_capacity_2026)
 The current scraper reads the 2024 capacity, storage, and REZ worksheets and writes condensed `Auxiliary/` workbooks used by the ISP 2024 parser.
 Those intermediates are PISP-generated material, not AEMO source publications.
 No corresponding integrated ISP 2026 scraper-to-dataset workflow is claimed here.
+
