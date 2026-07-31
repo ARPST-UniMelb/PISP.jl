@@ -125,40 +125,12 @@ const COOL_SUMMERS = [2011, 2016, 2020, 2022]
 const SOLAR_LOC = "Bannerton_SAT"
 const WIND_LOC = "DUNDWF1"
 
-function add_datetime!(df::DataFrame)
-    df.datetime = Date.(df.Year, df.Month, df.Day)
-    return df
-end
-
 function load_trace(tech, yr, loc)
     file = joinpath(TRACES, "$(tech)_$(yr)", "$(loc)_RefYear$(yr).csv")
     isfile(abs_path(file)) || return nothing
     df = CSV.read(abs_path(file), DataFrame)
     add_datetime!(df)
     return df
-end
-
-row_mean(df::DataFrame, cols) = [mean(row[col] for col in cols) for row in eachrow(df)]
-````
-
-```@raw html
-</details>
-```
-
-A simple trailing rolling mean: the first `window - 1` entries have no full window of preceding values yet, so they are left `missing`.
-
-```@raw html
-<details class="source-code"><summary>Show source code</summary>
-```
-
-````julia
-function rolling_mean(values, window)
-    n = length(values)
-    result = Vector{Union{Missing, Float64}}(missing, n)
-    for i in window:n
-        result[i] = mean(values[(i - window + 1):i])
-    end
-    return result
 end
 ````
 
@@ -546,6 +518,7 @@ markdown_table(monthly_cf_2019_summary)
 The `RefYear2019` trace reuses the 2019 historical weather pattern across the projected planning horizon rather than representing only one 2018-19 season.
 The historical label includes the 2019-20 Black Summer context, but this capacity-factor trace does not isolate effects from heat, smoke, cloud, or bushfire conditions.
 The table previews 15 rows; the complete series is written to `eda/tables/julia/04_seasonal_extremes/black_summer_2019_daily_cf.csv`.
+`rolling3_cf` is a trailing 3-day mean, so its first two values are `missing`.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>

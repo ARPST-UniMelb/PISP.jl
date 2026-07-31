@@ -45,24 +45,6 @@ const DOWNLOADS = relpath(ISP2024_PROFILE.download_root, REPO_ROOT)  # kept rela
 const IASR_WORKBOOK = joinpath(DOWNLOADS, "2024-isp-inputs-and-assumptions-workbook.xlsx")
 abs_path(relative_path) = joinpath(REPO_ROOT, relative_path)  # resolves a DOWNLOADS-relative path to an absolute location for reading
 
-function trim_sheet(matrix)
-    nrows, ncols = size(matrix)
-    last_row = 0
-    for r in 1:nrows
-        if any(x -> x !== missing, view(matrix, r, :))
-            last_row = r
-        end
-    end
-    last_col = 0
-    for c in 1:ncols
-        if any(x -> x !== missing, view(matrix, :, c))
-            last_col = c
-        end
-    end
-    (last_row == 0 || last_col == 0) && return Matrix{Any}(undef, 0, 0)
-    return matrix[1:last_row, 1:last_col]
-end
-
 source_string(x::Missing) = ""
 source_string(x) = string(x)
 

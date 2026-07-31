@@ -68,11 +68,6 @@ markdown_table(expected_input_status)
 #
 # PISP combines AEMO source files with package-defined mappings and records derived during dataset construction. The table summarises how each static output table is created and identifies additional source families used for its time-varying schedules.
 
-struct RawMarkdown
-    markdown::String
-end
-Base.show(io::IO, ::MIME"text/markdown", table::RawMarkdown) = print(io, table.markdown)
-
 _, static_container, _ = PISP.initialise_time_structures()
 static_output_tables = [
     get(PISP.alt_names, field, string(field))

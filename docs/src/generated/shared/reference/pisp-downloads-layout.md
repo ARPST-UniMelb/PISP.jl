@@ -33,29 +33,10 @@ const REPO_ROOT = normpath(
 )
 include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
 include(joinpath(REPO_ROOT, "docs", "download_layout.jl"))
+include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
 using .PISPDocsEditionProfiles: edition_profiles
 using .PISPDocsDownloadLayout: inspect_download_layout
-
-struct MarkdownTable
-    text::String
-end
-
-Base.show(io::IO, ::MIME"text/markdown", table::MarkdownTable) = print(io, table.text)
-Base.show(io::IO, ::MIME"text/plain", table::MarkdownTable) = print(io, table.text)
-
-markdown_cell(value) = replace(replace(string(value), '\n' => " "), '|' => "\\|")
-markdown_items(values) = isempty(values) ? "—" : join(("`$(markdown_cell(value))`" for value in values), ", ")
-
-function markdown_table(headers, rows)
-    lines = String[]
-    push!(lines, "| " * join(markdown_cell.(headers), " | ") * " |")
-    push!(lines, "| " * join(fill(":---", length(headers)), " | ") * " |")
-    for row in rows
-        length(row) == length(headers) || error("table row does not match the headers")
-        push!(lines, "| " * join(markdown_cell.(row), " | ") * " |")
-    end
-    return MarkdownTable(join(lines, "\n"))
-end
+using .EdaSupport
 ````
 
 ```@raw html
@@ -84,15 +65,16 @@ download_layouts = [
 layout_rows = [
     Any[
         layout.edition,
-        markdown_items(layout.outlook_directories),
-        markdown_items(layout.source_archives),
+        markdown_items(layout.outlook_directories; nothing_text = "nothing"),
+        markdown_items(layout.source_archives; nothing_text = "nothing"),
     ]
     for layout in download_layouts
 ]
 
 markdown_table(
     ["Edition", "Extracted outlook directories", "Retained source archives"],
-    layout_rows,
+    layout_rows;
+    nothing_text = "nothing",
 )
 ````
 

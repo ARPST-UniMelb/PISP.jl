@@ -38,26 +38,6 @@ const SHEET_NAME = "Build costs"
 abs_path(relative_path) = joinpath(REPO_ROOT, relative_path)  # resolves a DOWNLOADS-relative path to an absolute location for reading
 nothing #hide
 
-# Trim a raw XLSX matrix down to the bounding box of non-missing cells: this workbook's declared sheet dimension carries trailing all-missing rows/columns beyond its real content (this sheet reports max_row 1191 but its last populated row is 223).
-function trim_sheet(matrix)
-    nrows, ncols = size(matrix)
-    last_row = 0
-    for r in 1:nrows
-        if any(x -> x !== missing, view(matrix, r, :))
-            last_row = r
-        end
-    end
-    last_col = 0
-    for c in 1:ncols
-        if any(x -> x !== missing, view(matrix, :, c))
-            last_col = c
-        end
-    end
-    (last_row == 0 || last_col == 0) && return Matrix{Any}(undef, 0, 0)
-    return matrix[1:last_row, 1:last_col]
-end
-nothing #hide
-
 # The sheet keyword-matches "utility-scale solar" to Large scale Solar PV only (not Solar Thermal, a distinct CSP technology), "onshore/offshore wind" to all 3 Wind rows, and "battery storage" to all 4 duration variants. Pumped hydro/BOTN rows are excluded here: they are pumped-hydro storage, the subject of the separate PHES-versus-battery storage characteristics page.
 const TARGET_KEYWORDS = ["solar pv", "wind", "battery storage"]
 

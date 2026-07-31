@@ -73,11 +73,6 @@ function read_trace(path)
     return CSV.read(path, DataFrame)
 end
 
-function add_datetime!(df::DataFrame)
-    df.datetime = Date.(df.Year, df.Month, df.Day)
-    return df
-end
-
 function daily_cf(df::DataFrame, half_hour_cols)
     return [mean(row[col] for col in half_hour_cols) for row in eachrow(df)]
 end
@@ -106,22 +101,6 @@ function validate_curated_locations(tech, trace_year, locations)
         "update the curated location list or confirm the trace download",
     )
     return
-end
-
-"""
-    rolling_mean(values, window)
-
-Rolling mean with a `window`-sized minimum period: the first `window - 1`
-entries of the result are `missing` because no full window of prior values
-exists yet.
-"""
-function rolling_mean(values, window)
-    n = length(values)
-    result = Vector{Union{Missing, Float64}}(missing, n)
-    for i in window:n
-        result[i] = mean(values[(i - window + 1):i])
-    end
-    return result
 end
 
 """

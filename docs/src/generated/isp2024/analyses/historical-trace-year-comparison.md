@@ -57,11 +57,6 @@ const SOLAR_LOC = "Bannerton_SAT"  # VIC solar
 const WIND_LOC = "DUNDWF1"         # VIC wind
 abs_path(relative_path) = joinpath(REPO_ROOT, relative_path)  # resolves a TRACES-relative path to an absolute file location for reading
 
-function add_datetime!(df::DataFrame)
-    df.datetime = Date.(df.Year, df.Month, df.Day)
-    return df
-end
-
 function load_location_all_years(tech, location, years)
     dfs = Dict{Int, DataFrame}()
     for yr in years
@@ -75,7 +70,6 @@ function load_location_all_years(tech, location, years)
     return dfs
 end
 
-row_mean(df::DataFrame, cols) = [mean(row[col] for col in cols) for row in eachrow(df)]
 row_max(df::DataFrame, cols) = [maximum(row[col] for col in cols) for row in eachrow(df)]
 ````
 

@@ -148,11 +148,6 @@ PISP combines AEMO source files with package-defined mappings and records derive
 ```
 
 ````julia
-struct RawMarkdown
-    markdown::String
-end
-Base.show(io::IO, ::MIME"text/markdown", table::RawMarkdown) = print(io, table.markdown)
-
 _, static_container, _ = PISP.initialise_time_structures()
 static_output_tables = [
     get(PISP.alt_names, field, string(field))

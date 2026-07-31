@@ -1,5 +1,6 @@
 using Test
 using DataFrames
+using Dates
 
 const TEST_DOCS_DIR = normpath(joinpath(@__DIR__, ".."))
 
@@ -60,6 +61,35 @@ using .PISPDocsDownloadLayout
 
     table_interface = markdown_table((Label=["alpha"], Value=[1.0]))
     @test occursin("alpha", table_interface.text)
+
+    manual = markdown_table(
+        ["Name", "Value"],
+        [Any["alpha|beta", nothing], Any["line\nbreak", 2]];
+        alignment = [:left, :right],
+        nothing_text = "—",
+    )
+    @test occursin("alpha\\|beta", manual.text)
+    @test occursin("line break", manual.text)
+    @test occursin("| — |", manual.text)
+    @test occursin("---:", manual.text)
+
+    raw = RawMarkdown("**unescaped Markdown**")
+    @test sprint(show, MIME"text/markdown"(), raw) == "**unescaped Markdown**"
+    @test markdown_items(["a|b", "c"]) == "`a\\|b`, `c`"
+end
+
+@testset "Shared documentation transformations" begin
+    matrix = Any[1 missing missing; missing missing missing; 2 missing missing]
+    trimmed = trim_sheet(matrix)
+    @test size(trimmed) == (3, 1)
+    @test isequal(trimmed[:, 1], Any[1, missing, 2])
+    @test size(trim_sheet(fill(missing, 2, 2))) == (0, 0)
+
+    frame = DataFrame(Year=[2024, 2024], Month=[1, 1], Day=[1, 2], a=[1.0, 3.0], b=[3.0, 5.0])
+    @test add_datetime!(frame) === frame
+    @test frame.datetime == [Date(2024, 1, 1), Date(2024, 1, 2)]
+    @test row_mean(frame, [:a, :b]) == [2.0, 4.0]
+    @test isequal(rolling_mean([1.0, 2.0, 3.0], 2), [missing, 1.5, 2.5])
 end
 
 @testset "Human-use documentation invariants" begin

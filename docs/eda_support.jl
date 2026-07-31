@@ -2,7 +2,9 @@ module EdaSupport
 
 using CSV
 using DataFrames
+using Dates
 using PrettyTables
+using Statistics
 
 export TABLE_ROOT,
     FIGURE_ROOT,
@@ -13,8 +15,15 @@ export TABLE_ROOT,
     figure_path,
     embed_figure,
     MarkdownTable,
+    RawMarkdown,
+    markdown_cell,
+    markdown_items,
     markdown_table,
-    metric_value_table
+    metric_value_table,
+    trim_sheet,
+    add_datetime!,
+    row_mean,
+    rolling_mean
 
 const TABLE_ROOT = joinpath(normpath(joinpath(@__DIR__, "..")), "eda", "tables")
 const FIGURE_ROOT = joinpath(normpath(joinpath(@__DIR__, "..")), "eda", "figures")
@@ -66,6 +75,15 @@ end
 
 Base.show(io::IO, ::MIME"text/markdown", table::MarkdownTable) =
     print(io, table.text)
+Base.show(io::IO, ::MIME"text/plain", table::MarkdownTable) =
+    print(io, table.text)
+
+struct RawMarkdown
+    markdown::String
+end
+
+Base.show(io::IO, ::MIME"text/markdown", value::RawMarkdown) =
+    print(io, value.markdown)
 
 # A literal, unescaped `$` in generated Markdown starts Documenter interpolation.
 function escape_dollar_signs(text::AbstractString)
@@ -87,6 +105,54 @@ end
 
 function normalise_markdown_text(text::AbstractString)
     return escape_dollar_signs(replace(strip(text), r"\s*\n\s*" => " "))
+end
+
+function markdown_cell(
+    value;
+    nothing_text = "",
+    line_break = " ",
+    escape_dollars = false,
+)
+    text = value === nothing ? nothing_text : string(value)
+    text = replace(text, "\n" => line_break, "\r" => "", "|" => "\\|")
+    return escape_dollars ? escape_dollar_signs(text) : text
+end
+
+function markdown_items(values; empty_text = "—", nothing_text = "")
+    isempty(values) && return empty_text
+    return join(
+        ("`$(markdown_cell(value; nothing_text = nothing_text))`" for value in values),
+        ", ",
+    )
+end
+
+function markdown_table(
+    headers::AbstractVector,
+    rows;
+    alignment = fill(:left, length(headers)),
+    nothing_text = "",
+)
+    length(alignment) == length(headers) || error("Table alignment does not match the columns")
+    separators = Dict(
+        :left => ":---",
+        :right => "---:",
+        :centre => ":---:",
+        :l => ":---",
+        :r => "---:",
+        :c => ":---:",
+    )
+    all(item -> haskey(separators, item), alignment) ||
+        error("Unsupported Markdown alignment")
+    cell(value) = markdown_cell(value; nothing_text = nothing_text)
+
+    lines = String[]
+    push!(lines, "| " * join(cell.(headers), " | ") * " |")
+    push!(lines, "| " * join((separators[item] for item in alignment), " | ") * " |")
+    for row in rows
+        length(row) == length(headers) || error("Table row does not match the headers")
+        push!(lines, "| " * join(cell.(row), " | ") * " |")
+    end
+    return MarkdownTable(join(lines, "\n"))
 end
 
 function numeric_markdown_column(column)
@@ -138,6 +204,38 @@ function metric_value_table(metrics)
         Value = [last(pair) for pair in pairs],
     )
     return markdown_table(table; alignment = [:l, :l])
+end
+
+"""Trim trailing all-missing rows and columns from an XLSX sheet matrix."""
+function trim_sheet(matrix)
+    nrows, ncols = size(matrix)
+    last_row = 0
+    for row in 1:nrows
+        any(value -> value !== missing, view(matrix, row, :)) && (last_row = row)
+    end
+    last_col = 0
+    for column in 1:ncols
+        any(value -> value !== missing, view(matrix, :, column)) && (last_col = column)
+    end
+    (last_row == 0 || last_col == 0) && return Matrix{Any}(undef, 0, 0)
+    return matrix[1:last_row, 1:last_col]
+end
+
+function add_datetime!(frame::DataFrame)
+    frame.datetime = Date.(frame.Year, frame.Month, frame.Day)
+    return frame
+end
+
+row_mean(frame::DataFrame, columns) =
+    [mean(row[column] for column in columns) for row in eachrow(frame)]
+
+"""Return a trailing mean, leaving the first `window - 1` values as `missing`."""
+function rolling_mean(values, window)
+    result = Vector{Union{Missing, Float64}}(missing, length(values))
+    for index in window:length(values)
+        result[index] = mean(values[(index - window + 1):index])
+    end
+    return result
 end
 
 end # module EdaSupport

@@ -47,11 +47,6 @@ function container_inventory(container)
     return DataFrame(rows)
 end
 
-struct RawMarkdown
-    markdown::String
-end
-Base.show(io::IO, ::MIME"text/markdown", table::RawMarkdown) = print(io, table.markdown)
-
 _tc, static_container, schedule_container = PISP.initialise_time_structures();
 ````
 
