@@ -1,7 +1,7 @@
 const ISP2024_BUILDOUT_TABLE_SOURCE = XlsxSourceSpec(
     id = :buildout_schedule,
     edition = 2024,
-    workbook = "{buildout_workbook}",
+    workbook = "PISP-buildouts/buildouts.xlsx",
     worksheet = "buildout_1",
     cell_range = nothing,
     description = "User-provided generation and storage buildout schedule.",
