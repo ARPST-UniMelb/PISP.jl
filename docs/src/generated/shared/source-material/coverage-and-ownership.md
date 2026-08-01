@@ -16,16 +16,13 @@ using DataFrames
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
-include(joinpath(REPO_ROOT, "docs", "source_material_support.jl"))
-using .PISPDocsSourceMaterialSupport
-
-coverage = coverage_document(REPO_ROOT)
-source_reads = coverage_table(coverage, "source_read")
-parameter_families = coverage_table(coverage, "parameter_family")
-mapping_families = coverage_table(coverage, "mapping_family")
+coverage = PISPDocUtils.coverage_document(REPO_ROOT)
+source_reads = PISPDocUtils.coverage_table(coverage, "source_read")
+parameter_families = PISPDocUtils.coverage_table(coverage, "parameter_family")
+mapping_families = PISPDocUtils.coverage_table(coverage, "mapping_family")
 
 length(unique(source_reads.id)) == nrow(source_reads) || error("source-read IDs must be unique")
 length(unique(parameter_families.id)) == nrow(parameter_families) || error("parameter-family IDs must be unique")
@@ -50,8 +47,8 @@ The trace rows are retained in the ledger to make the non-trace boundary explici
 ````julia
 source_classifications = combine(groupby(source_reads, :classification), nrow => :active_items)
 sort!(source_classifications, :classification)
-source_classifications.classification = friendly_classification.(source_classifications.classification)
-markdown_table(source_classifications)
+source_classifications.classification = PISPDocUtils.friendly_classification.(source_classifications.classification)
+PISPDocUtils.markdown_table(source_classifications)
 ````
 
 ```@raw html
@@ -79,8 +76,8 @@ Repeated reads remain separate ledger entries when the current implementation ex
 ````julia
 source_owner_summary = combine(groupby(source_reads, [:owner, :classification]), nrow => :items)
 sort!(source_owner_summary, [:owner, :classification])
-source_owner_summary.classification = friendly_classification.(source_owner_summary.classification)
-markdown_table(source_owner_summary)
+source_owner_summary.classification = PISPDocUtils.friendly_classification.(source_owner_summary.classification)
+PISPDocUtils.markdown_table(source_owner_summary)
 ````
 
 ```@raw html
@@ -121,7 +118,7 @@ auxiliary_reads = select(
     :owner,
     :notes,
 )
-markdown_table(auxiliary_reads)
+PISPDocUtils.markdown_table(auxiliary_reads)
 ````
 
 ```@raw html
@@ -151,7 +148,7 @@ Every included file has one canonical documentation owner, while other pages may
 
 ````julia
 parameter_owners = select(parameter_families, :source_path, :family, :owner, :notes)
-markdown_table(parameter_owners)
+PISPDocUtils.markdown_table(parameter_owners)
 ````
 
 ```@raw html
@@ -179,8 +176,8 @@ Runtime dictionaries are classified as parsed representations rather than indepe
 
 ````julia
 mapping_owners = select(mapping_families, :family, :classification, :owner, :source_path)
-mapping_owners.classification = friendly_classification.(mapping_owners.classification)
-markdown_table(mapping_owners)
+mapping_owners.classification = PISPDocUtils.friendly_classification.(mapping_owners.classification)
+PISPDocUtils.markdown_table(mapping_owners)
 ````
 
 ```@raw html

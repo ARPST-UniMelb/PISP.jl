@@ -18,17 +18,11 @@ using XLSX
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
-
-include(joinpath(REPO_ROOT, "docs", "source_material_support.jl"))
-using .PISPDocsSourceMaterialSupport
-
-const ISP2024 = edition_profile(REPO_ROOT, "2024")
-const ISP2026 = edition_profile(REPO_ROOT, "2026")
+const ISP2024 = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
+const ISP2026 = PISPDocUtils.edition_profile(REPO_ROOT, "2026")
 const WORKBOOK2024 = joinpath(ISP2024.download_root, "2024-isp-inputs-and-assumptions-workbook.xlsx")
 const WORKBOOK2026 = joinpath(ISP2026.download_root, "2026-isp-inputs-and-assumptions-workbook.xlsm")
 all(isfile, (WORKBOOK2024, WORKBOOK2026)) || error("both selected ISP inputs workbooks are required")
@@ -48,14 +42,14 @@ The source distinguishes these futures through demand drivers, energy efficiency
 ```
 
 ````julia
-scenario_2024 = cells_table(
+scenario_2024 = PISPDocUtils.cells_table(
     WORKBOOK2024,
     "Scenarios",
     "B6:E12",
     ["Parameter", "Green Energy Exports", "Step Change", "Progressive Change"],
 )
 filter!(row -> any(value -> !ismissing(value), Tuple(row)[2:end]), scenario_2024)
-markdown_table(scenario_2024)
+PISPDocUtils.markdown_table(scenario_2024)
 ````
 
 ```@raw html
@@ -81,14 +75,14 @@ Step Change is the only retained scenario name; even there, the surrounding assu
 ```
 
 ````julia
-scenario_2026 = cells_table(
+scenario_2026 = PISPDocUtils.cells_table(
     WORKBOOK2026,
     "Scenarios",
     "B6:E12",
     ["Parameter", "Slower Growth", "Step Change", "Accelerated Transition"],
 )
 filter!(row -> any(value -> !ismissing(value), Tuple(row)[2:end]), scenario_2026)
-markdown_table(scenario_2026)
+PISPDocUtils.markdown_table(scenario_2026)
 ````
 
 ```@raw html
@@ -115,14 +109,14 @@ Each workbook is a result package with many worksheets rather than a single flat
 
 ````julia
 outlook_inventory = vcat(
-    directory_workbook_inventory(joinpath(ISP2024.download_root, "Core"), "2024"),
-    directory_workbook_inventory(joinpath(ISP2024.download_root, "Sensitivities"), "2024"),
-    directory_workbook_inventory(joinpath(ISP2026.download_root, "Core scenarios"), "2026"),
-    directory_workbook_inventory(joinpath(ISP2026.download_root, "Sensitivities"), "2026"),
+    PISPDocUtils.directory_workbook_inventory(joinpath(ISP2024.download_root, "Core"), "2024"),
+    PISPDocUtils.directory_workbook_inventory(joinpath(ISP2024.download_root, "Sensitivities"), "2024"),
+    PISPDocUtils.directory_workbook_inventory(joinpath(ISP2026.download_root, "Core scenarios"), "2026"),
+    PISPDocUtils.directory_workbook_inventory(joinpath(ISP2026.download_root, "Sensitivities"), "2026"),
 )
 outlook_counts = combine(groupby(outlook_inventory, [:edition, :group]), nrow => :workbooks)
 sort!(outlook_counts, [:edition, :group])
-markdown_table(outlook_counts)
+PISPDocUtils.markdown_table(outlook_counts)
 ````
 
 ```@raw html
@@ -143,7 +137,7 @@ markdown_table(outlook_counts)
 
 ````julia
 outlook_cases = select(outlook_inventory, :edition, :group, :scenario_or_sensitivity)
-markdown_table(outlook_cases)
+PISPDocUtils.markdown_table(outlook_cases)
 ````
 
 ```@raw html

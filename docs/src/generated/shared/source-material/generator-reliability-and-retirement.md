@@ -19,17 +19,11 @@ using XLSX
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
-
-include(joinpath(REPO_ROOT, "docs", "source_material_support.jl"))
-using .PISPDocsSourceMaterialSupport
-
-const ISP2024 = edition_profile(REPO_ROOT, "2024")
-const ISP2026 = edition_profile(REPO_ROOT, "2026")
+const ISP2024 = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
+const ISP2026 = PISPDocUtils.edition_profile(REPO_ROOT, "2026")
 const WORKBOOK2024 = joinpath(ISP2024.download_root, "2024-isp-inputs-and-assumptions-workbook.xlsx")
 const WORKBOOK2026 = joinpath(ISP2026.download_root, "2026-isp-inputs-and-assumptions-workbook.xlsm")
 ````
@@ -48,7 +42,7 @@ PISP reads the existing and new-entrant blocks separately and maps them into gen
 ```
 
 ````julia
-reliability_2024 = cells_table(
+reliability_2024 = PISPDocUtils.cells_table(
     WORKBOOK2024,
     "Generator Reliability Settings",
     "B21:G28",
@@ -57,7 +51,7 @@ reliability_2024 = cells_table(
         "Full-outage MTTR (h)", "Partial-outage MTTR (h)", "Partial derating factor",
     ],
 )
-markdown_table(reliability_2024)
+PISPDocUtils.markdown_table(reliability_2024)
 ````
 
 ```@raw html
@@ -86,13 +80,13 @@ That change is more than a renamed sheet: the source is now a property-by-year t
 ```
 
 ````julia
-long_duration_2026 = cells_table(
+long_duration_2026 = PISPDocUtils.cells_table(
     WORKBOOK2026,
     "Generator Reliability Settings",
     "B11:E16",
     ["Fuel or technology", "Property", "2025-26", "2026-27"],
 )
-markdown_table(long_duration_2026)
+PISPDocUtils.markdown_table(long_duration_2026)
 ````
 
 ```@raw html
@@ -114,13 +108,13 @@ markdown_table(long_duration_2026)
 ```
 
 ````julia
-other_outages_2026 = cells_table(
+other_outages_2026 = PISPDocUtils.cells_table(
     WORKBOOK2026,
     "Generator Reliability Settings",
     "B23:E29",
     ["Fuel or technology", "Property", "2025-26", "2026-27"],
 )
-markdown_table(other_outages_2026)
+PISPDocUtils.markdown_table(other_outages_2026)
 ````
 
 ```@raw html
@@ -148,13 +142,13 @@ For example, the sampled Callide B records move from 2028 in the 2024 source to 
 ```
 
 ````julia
-retirement_2024 = cells_table(
+retirement_2024 = PISPDocUtils.cells_table(
     WORKBOOK2024,
     "Retirement",
     "B10:D18",
     ["Station", "DUID", "Expected closure year"],
 )
-markdown_table(retirement_2024)
+PISPDocUtils.markdown_table(retirement_2024)
 ````
 
 ```@raw html
@@ -179,13 +173,13 @@ markdown_table(retirement_2024)
 ```
 
 ````julia
-retirement_2026 = cells_table(
+retirement_2026 = PISPDocUtils.cells_table(
     WORKBOOK2026,
     "Retirement",
     "B13:F20",
     ["IASR ID", "Station", "Technology", "Status", "Expected closure year"],
 )
-markdown_table(retirement_2026)
+PISPDocUtils.markdown_table(retirement_2026)
 ````
 
 ```@raw html
@@ -223,7 +217,7 @@ retirement_conventions = DataFrame([
     )
     for scenario_id in sort(collect(keys(PISP.ID2SCE)))
 ])
-markdown_table(retirement_conventions)
+PISPDocUtils.markdown_table(retirement_conventions)
 ````
 
 ```@raw html

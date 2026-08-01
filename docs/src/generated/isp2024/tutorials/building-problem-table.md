@@ -29,18 +29,19 @@ using DataFrames
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
-const ISP2024_PROFILE = edition_profile(REPO_ROOT, "2024")
-
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
+const ISP2024_PROFILE = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
 ````
 
 ```@raw html
 </details>
 ```
+
+````
+Main.var"##295".PISPDocUtils.EditionProfile("2024", "ISP 2024", "/Users/myasirroni/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/data/2024/pisp-reports", "/Users/myasirroni/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/data/2024/pisp-downloads", "/Users/myasirroni/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/data/2024/pisp-datasets/out-ref4006-poe10/csv", "schedule-2030")
+````
 
 ## Problem-table schema
 
@@ -66,7 +67,7 @@ problem_schema = DataFrame(
         "Model time step in minutes",
     ],
 )
-markdown_table(problem_schema)
+PISPDocUtils.markdown_table(problem_schema)
 ````
 
 ```@raw html
@@ -97,7 +98,7 @@ The executable `tc.problem` table is empty at initialisation; the schema is defi
 
 ````julia
 PISP.fill_problem_table_year(tc, 2030)
-markdown_table(tc.problem)
+PISPDocUtils.markdown_table(tc.problem)
 ````
 
 ```@raw html
@@ -180,7 +181,7 @@ PISP.fill_problem_table_drange(
     DateTime(2030, 4, 1, 0, 0, 0),
     DateTime(2030, 9, 30, 23, 0, 0),
 )
-markdown_table(tc3.problem[:, [:name, :dstart, :dend]])
+PISPDocUtils.markdown_table(tc3.problem[:, [:name, :dstart, :dend]])
 ````
 
 ```@raw html

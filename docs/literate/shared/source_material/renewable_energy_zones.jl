@@ -9,17 +9,11 @@ using XLSX
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
-
-include(joinpath(REPO_ROOT, "docs", "source_material_support.jl"))
-using .PISPDocsSourceMaterialSupport
-
-const ISP2024 = edition_profile(REPO_ROOT, "2024")
-const ISP2026 = edition_profile(REPO_ROOT, "2026")
+const ISP2024 = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
+const ISP2026 = PISPDocUtils.edition_profile(REPO_ROOT, "2026")
 const WORKBOOK2024 = joinpath(ISP2024.download_root, "2024-isp-inputs-and-assumptions-workbook.xlsx")
 const WORKBOOK2026 = joinpath(ISP2026.download_root, "2026-isp-inputs-and-assumptions-workbook.xlsm")
 nothing #hide
@@ -28,26 +22,26 @@ nothing #hide
 #
 # The 2024 source includes the NTNDP zone, ISP subregion, and regional cost zone beside each REZ identifier.
 
-rez_2024 = cells_table(
+rez_2024 = PISPDocUtils.cells_table(
     WORKBOOK2024,
     "Renewable Energy Zones",
     "B8:G15",
     ["ID", "Name", "NEM region", "NTNDP zone", "ISP subregion", "Regional cost zone"],
 )
-markdown_table(rez_2024)
+PISPDocUtils.markdown_table(rez_2024)
 #-
 
 # ## ISP 2026 zone records
 #
 # The corresponding 2026 table is narrower in its leading columns and no longer places the NTNDP and regional cost-zone fields in this block.
 
-rez_2026 = cells_table(
+rez_2026 = PISPDocUtils.cells_table(
     WORKBOOK2026,
     "Renewable energy zones",
     "B7:E15",
     ["ID", "Name", "NEM region", "ISP subregion"],
 )
-markdown_table(rez_2026)
+PISPDocUtils.markdown_table(rez_2026)
 #-
 
 # ## Name changes under retained identifiers
@@ -61,7 +55,7 @@ rez_names = innerjoin(
     on = :ID,
 )
 renamed_rez = filter(row -> row.name_2024 != row.name_2026, rez_names)
-markdown_table(renamed_rez)
+PISPDocUtils.markdown_table(renamed_rez)
 #-
 
 # ## Transformation boundary
@@ -74,7 +68,7 @@ rez_conventions = DataFrame([
     (subject = "Wind outlook cost-development path", convention = "CDP14 for each current PISP scenario"),
     (subject = "Subregion geography", convention = "PISP.NEMBUSNAME and PISP.BUS2AREA"),
 ])
-markdown_table(rez_conventions)
+PISPDocUtils.markdown_table(rez_conventions)
 #-
 
 # The cost-development-path choices are package conventions, not values read from the REZ worksheet.

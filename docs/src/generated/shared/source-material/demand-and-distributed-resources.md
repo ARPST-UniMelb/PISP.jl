@@ -17,17 +17,11 @@ using XLSX
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
-
-include(joinpath(REPO_ROOT, "docs", "source_material_support.jl"))
-using .PISPDocsSourceMaterialSupport
-
-const ISP2024 = edition_profile(REPO_ROOT, "2024")
-const ISP2026 = edition_profile(REPO_ROOT, "2026")
+const ISP2024 = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
+const ISP2026 = PISPDocUtils.edition_profile(REPO_ROOT, "2026")
 const WORKBOOK2024 = joinpath(ISP2024.download_root, "2024-isp-inputs-and-assumptions-workbook.xlsx")
 const WORKBOOK2026 = joinpath(ISP2026.download_root, "2026-isp-inputs-and-assumptions-workbook.xlsm")
 ````
@@ -46,7 +40,7 @@ The later edition adds dedicated data-centre, distribution-network, distribution
 ```
 
 ````julia
-demand_sheet_presence = worksheet_presence(
+demand_sheet_presence = PISPDocUtils.worksheet_presence(
     ["ISP 2024" => WORKBOOK2024, "ISP 2026" => WORKBOOK2026],
     [
         "Demand and Energy Forecasts", "Rooftop PV", "PVNSG",
@@ -55,7 +49,7 @@ demand_sheet_presence = worksheet_presence(
         "Distribution cost forecasts", "Hybrid site limits",
     ],
 )
-markdown_table(demand_sheet_presence)
+PISPDocUtils.markdown_table(demand_sheet_presence)
 ````
 
 ```@raw html
@@ -96,7 +90,7 @@ PISP uses a later block of this worksheet to distribute EV demand to buses; the 
 ```
 
 ````julia
-subregional_allocation_2024 = cells_table(
+subregional_allocation_2024 = PISPDocUtils.cells_table(
     WORKBOOK2024,
     "Sub-regional demand allocation",
     "B132:J136",
@@ -105,7 +99,7 @@ subregional_allocation_2024 = cells_table(
         "2027-28", "2028-29", "2029-30", "2030-31",
     ],
 )
-markdown_table(subregional_allocation_2024)
+PISPDocUtils.markdown_table(subregional_allocation_2024)
 ````
 
 ```@raw html
@@ -132,13 +126,13 @@ It separates an emerging load category that was not published as its own workshe
 ```
 
 ````julia
-data_centres_2026 = cells_table(
+data_centres_2026 = PISPDocUtils.cells_table(
     WORKBOOK2026,
     "Data Centre Forecasts",
     "B12:J16",
     ["Region", "2025-26", "2026-27", "2027-28", "2028-29", "2029-30", "2030-31", "2031-32", "2032-33"],
 )
-markdown_table(data_centres_2026)
+PISPDocUtils.markdown_table(data_centres_2026)
 ````
 
 ```@raw html
@@ -163,7 +157,7 @@ The distribution-network table reports provider coverage, solar-PV hosting capac
 ```
 
 ````julia
-distribution_network_2026 = cells_table(
+distribution_network_2026 = PISPDocUtils.cells_table(
     WORKBOOK2026,
     "Distribution network",
     "B20:G25",
@@ -173,7 +167,7 @@ distribution_network_2026 = cells_table(
         "Battery pipeline to 2029-30 (MW)",
     ],
 )
-markdown_table(distribution_network_2026)
+PISPDocUtils.markdown_table(distribution_network_2026)
 ````
 
 ```@raw html

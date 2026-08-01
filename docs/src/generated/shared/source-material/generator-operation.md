@@ -18,17 +18,11 @@ using XLSX
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
-
-include(joinpath(REPO_ROOT, "docs", "source_material_support.jl"))
-using .PISPDocsSourceMaterialSupport
-
-const ISP2024 = edition_profile(REPO_ROOT, "2024")
-const ISP2026 = edition_profile(REPO_ROOT, "2026")
+const ISP2024 = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
+const ISP2026 = PISPDocUtils.edition_profile(REPO_ROOT, "2026")
 const WORKBOOK2019 = joinpath(ISP2024.download_root, "2019-input-and-assumptions-workbook-v1-3-dec-19.xlsx")
 const WORKBOOK2024 = joinpath(ISP2024.download_root, "2024-isp-inputs-and-assumptions-workbook.xlsx")
 const WORKBOOK2026 = joinpath(ISP2026.download_root, "2026-isp-inputs-and-assumptions-workbook.xlsm")
@@ -48,8 +42,8 @@ ISP 2026 replaces the coal section with `Coal Min Stable Level` and does not con
 ```
 
 ````julia
-sheet_names_2024 = Set(sheet_names(WORKBOOK2024))
-sheet_names_2026 = Set(sheet_names(WORKBOOK2026))
+sheet_names_2024 = Set(PISPDocUtils.sheet_names(WORKBOOK2024))
+sheet_names_2026 = Set(PISPDocUtils.sheet_names(WORKBOOK2026))
 operating_sheet_presence = DataFrame([
     (edition = "2024", worksheet = name, present = name in sheet_names_2024)
     for name in ("Generation limits", "Coal Min Stable Level", "GPG Min Stable Level", "Min Up&Down Times", "Max Ramp Rates")
@@ -61,7 +55,7 @@ append!(
         for name in ("Generation limits", "Coal Min Stable Level", "GPG Min Stable Level", "Min Up&Down Times", "Max Ramp Rates")
     ]),
 )
-markdown_table(operating_sheet_presence)
+PISPDocUtils.markdown_table(operating_sheet_presence)
 ````
 
 ```@raw html
@@ -92,13 +86,13 @@ The 2026 coal table retains a backcast value and adds a typical lowest band, exp
 ```
 
 ````julia
-coal_2024 = cells_table(
+coal_2024 = PISPDocUtils.cells_table(
     WORKBOOK2024,
     "Generation limits",
     "B9:D14",
     ["Station", "Generating unit", "Minimum stable level (MW)"],
 )
-markdown_table(coal_2024)
+PISPDocUtils.markdown_table(coal_2024)
 ````
 
 ```@raw html
@@ -120,13 +114,13 @@ markdown_table(coal_2024)
 ```
 
 ````julia
-coal_2026 = cells_table(
+coal_2026 = PISPDocUtils.cells_table(
     WORKBOOK2026,
     "Coal Min Stable Level",
     "B14:F20",
     ["IASR ID", "Station", "Technology", "IASR 2023 backcast (MW)", "Typical lowest band (MW)"],
 )
-markdown_table(coal_2026)
+PISPDocUtils.markdown_table(coal_2026)
 ````
 
 ```@raw html
@@ -151,13 +145,13 @@ Gas-powered generation remains a unit-level table in both editions, but ISP 2026
 ```
 
 ````julia
-gpg_2024 = cells_table(
+gpg_2024 = PISPDocUtils.cells_table(
     WORKBOOK2024,
     "GPG Min Stable Level",
     "B10:E15",
     ["Station", "Generating unit", "Technology", "Minimum stable level (MW)"],
 )
-markdown_table(gpg_2024)
+PISPDocUtils.markdown_table(gpg_2024)
 ````
 
 ```@raw html
@@ -179,13 +173,13 @@ markdown_table(gpg_2024)
 ```
 
 ````julia
-gpg_2026 = cells_table(
+gpg_2026 = PISPDocUtils.cells_table(
     WORKBOOK2026,
     "GPG Min Stable Level",
     "B12:E18",
     ["IASR ID", "Station", "Technology", "Minimum stable level (MW)"],
 )
-markdown_table(gpg_2026)
+PISPDocUtils.markdown_table(gpg_2026)
 ````
 
 ```@raw html
@@ -213,13 +207,13 @@ Because ISP 2026 does not contain a directly corresponding worksheet, an updated
 ```
 
 ````julia
-minimum_up_down_2024 = cells_table(
+minimum_up_down_2024 = PISPDocUtils.cells_table(
     WORKBOOK2024,
     "Min Up&Down Times",
     "B9:E15",
     ["Station", "Generating unit", "Technology", "Minimum up/down time (h)"],
 )
-markdown_table(minimum_up_down_2024)
+PISPDocUtils.markdown_table(minimum_up_down_2024)
 ````
 
 ```@raw html
@@ -242,13 +236,13 @@ markdown_table(minimum_up_down_2024)
 ```
 
 ````julia
-minimum_up_2019 = cells_table(
+minimum_up_2019 = PISPDocUtils.cells_table(
     WORKBOOK2019,
     "Generation limits",
     "O10:Q16",
     ["Station", "Generating unit", "Minimum up time (h)"],
 )
-markdown_table(minimum_up_2019)
+PISPDocUtils.markdown_table(minimum_up_2019)
 ````
 
 ```@raw html
@@ -275,13 +269,13 @@ ISP 2026 retains separate maximum ramp-up and ramp-down values and explicitly ma
 ```
 
 ````julia
-ramp_2024 = cells_table(
+ramp_2024 = PISPDocUtils.cells_table(
     WORKBOOK2024,
     "Max Ramp Rates",
     "B9:F15",
     ["Station", "Generating unit", "Technology", "Ramp up (MW/min)", "Ramp down (MW/min)"],
 )
-markdown_table(ramp_2024)
+PISPDocUtils.markdown_table(ramp_2024)
 ````
 
 ```@raw html
@@ -304,13 +298,13 @@ markdown_table(ramp_2024)
 ```
 
 ````julia
-ramp_2026 = cells_table(
+ramp_2026 = PISPDocUtils.cells_table(
     WORKBOOK2026,
     "Max Ramp Rates",
     "B9:F15",
     ["IASR ID", "Station", "Technology", "Ramp up (MW/min)", "Ramp down (MW/min)"],
 )
-markdown_table(ramp_2026)
+PISPDocUtils.markdown_table(ramp_2026)
 ````
 
 ```@raw html

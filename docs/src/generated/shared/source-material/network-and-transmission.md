@@ -18,17 +18,11 @@ using XLSX
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
-
-include(joinpath(REPO_ROOT, "docs", "source_material_support.jl"))
-using .PISPDocsSourceMaterialSupport
-
-const ISP2024 = edition_profile(REPO_ROOT, "2024")
-const ISP2026 = edition_profile(REPO_ROOT, "2026")
+const ISP2024 = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
+const ISP2026 = PISPDocUtils.edition_profile(REPO_ROOT, "2026")
 const WORKBOOK2024 = joinpath(ISP2024.download_root, "2024-isp-inputs-and-assumptions-workbook.xlsx")
 const WORKBOOK2026 = joinpath(ISP2026.download_root, "2026-isp-inputs-and-assumptions-workbook.xlsm")
 ````
@@ -47,7 +41,7 @@ ISP 2026 also places a notes field beside the dominant constraints and revises s
 ```
 
 ````julia
-capability_2024 = cells_table(
+capability_2024 = PISPDocUtils.cells_table(
     WORKBOOK2024,
     "Network Capability",
     "B8:J12",
@@ -57,7 +51,7 @@ capability_2024 = cells_table(
         "Forward constraint", "Reverse constraint",
     ],
 )
-markdown_table(capability_2024)
+PISPDocUtils.markdown_table(capability_2024)
 ````
 
 ```@raw html
@@ -78,7 +72,7 @@ markdown_table(capability_2024)
 ```
 
 ````julia
-capability_2026 = cells_table(
+capability_2026 = PISPDocUtils.cells_table(
     WORKBOOK2026,
     "Network capability",
     "B8:K12",
@@ -89,7 +83,7 @@ capability_2026 = cells_table(
     ],
 )
 capability_2026.Notes = coalesce.(capability_2026.Notes, "Not reported")
-markdown_table(capability_2026)
+PISPDocUtils.markdown_table(capability_2026)
 ````
 
 ```@raw html
@@ -115,7 +109,7 @@ ISP 2026 instead uses separate rows for those event types and one unplanned-outa
 ```
 
 ````julia
-transmission_reliability_2024 = cells_table(
+transmission_reliability_2024 = PISPDocUtils.cells_table(
     WORKBOOK2024,
     "Transmission Reliability",
     "B8:G11",
@@ -124,7 +118,7 @@ transmission_reliability_2024 = cells_table(
         "Reclassification outage rate", "Credible-contingency MTTR", "Reclassification MTTR",
     ],
 )
-markdown_table(transmission_reliability_2024)
+PISPDocUtils.markdown_table(transmission_reliability_2024)
 ````
 
 ```@raw html
@@ -144,13 +138,13 @@ markdown_table(transmission_reliability_2024)
 ```
 
 ````julia
-transmission_reliability_2026 = cells_table(
+transmission_reliability_2026 = PISPDocUtils.cells_table(
     WORKBOOK2026,
     "Transmission Reliability",
     "B8:E13",
     ["Line or flow path and event", "Implementation", "Unplanned outage rate (%)", "Mean time to repair"],
 )
-markdown_table(transmission_reliability_2026)
+PISPDocUtils.markdown_table(transmission_reliability_2026)
 ````
 
 ```@raw html
@@ -177,7 +171,7 @@ The cost basis changes from 2023 dollars to 2025 dollars, and ISP 2026 adds prer
 ```
 
 ````julia
-augmentation_2024 = cells_table(
+augmentation_2024 = PISPDocUtils.cells_table(
     WORKBOOK2024,
     "Flow Path Augmentation options",
     "B13:N14",
@@ -187,8 +181,8 @@ augmentation_2024 = cells_table(
     ];
     columns = [1, 4, 6, 7, 8, 9, 12, 13],
 )
-fill_down!(augmentation_2024, [Symbol("Flow path"), Symbol("Power-flow direction")])
-markdown_table(augmentation_2024)
+PISPDocUtils.fill_down!(augmentation_2024, [Symbol("Flow path"), Symbol("Power-flow direction")])
+PISPDocUtils.markdown_table(augmentation_2024)
 ````
 
 ```@raw html
@@ -206,7 +200,7 @@ markdown_table(augmentation_2024)
 ```
 
 ````julia
-augmentation_2026 = cells_table(
+augmentation_2026 = PISPDocUtils.cells_table(
     WORKBOOK2026,
     "Flow path augmentation options",
     "B14:Q15",
@@ -217,9 +211,9 @@ augmentation_2026 = cells_table(
     ];
     columns = [1, 4, 7, 8, 9, 10, 13, 14, 15, 16],
 )
-fill_down!(augmentation_2026, [Symbol("Flow path"), Symbol("Power-flow direction")])
+PISPDocUtils.fill_down!(augmentation_2026, [Symbol("Flow path"), Symbol("Power-flow direction")])
 augmentation_2026.Notes = coalesce.(augmentation_2026.Notes, "Not reported")
-markdown_table(augmentation_2026)
+PISPDocUtils.markdown_table(augmentation_2026)
 ````
 
 ```@raw html
@@ -250,7 +244,7 @@ network_geography = DataFrame(
     pisp_name = collect(values(PISP.NEMBUSNAME)),
     nem_region = [PISP.BUS2AREA[key] for key in keys(PISP.NEMBUSNAME)],
 )
-markdown_table(network_geography)
+PISPDocUtils.markdown_table(network_geography)
 ````
 
 ```@raw html

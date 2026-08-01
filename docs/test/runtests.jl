@@ -25,7 +25,7 @@ include(joinpath(TEST_DOCS_DIR, "utils", "source_links.jl"))
         "utils",
     ])
     root_entries = filter(readdir(TEST_DOCS_DIR)) do name
-        name in ("build", ".documenter-source") && return false
+        name in ("build", ".documenter-source", "Manifest.toml") && return false
         startswith(name, ".literate-staging-") && return false
         return true
     end

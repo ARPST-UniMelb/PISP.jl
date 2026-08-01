@@ -20,13 +20,10 @@ using DataFrames
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
-const ISP2024_PROFILE = edition_profile(REPO_ROOT, "2024")
-
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
+const ISP2024_PROFILE = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
 
 # ## Problem-table schema
 #
@@ -47,7 +44,7 @@ problem_schema = DataFrame(
         "Model time step in minutes",
     ],
 )
-markdown_table(problem_schema)
+PISPDocUtils.markdown_table(problem_schema)
 
 # The executable `tc.problem` table is empty at initialisation; the schema is defined by `MOD_PROBLEM` in `src/datamodel/PISPdata-config.jl` and populated by the selected scenario/time workflow.
 
@@ -56,7 +53,7 @@ markdown_table(problem_schema)
 # `fill_problem_table_year` splits a planning year into January-June and July-December blocks. With all three ISP scenarios, this produces 6 rows.
 
 PISP.fill_problem_table_year(tc, 2030)
-markdown_table(tc.problem)
+PISPDocUtils.markdown_table(tc.problem)
 
 # The generated names encode scenario and half-year so later schedules remain distinguishable.
 
@@ -82,7 +79,7 @@ PISP.fill_problem_table_drange(
     DateTime(2030, 4, 1, 0, 0, 0),
     DateTime(2030, 9, 30, 23, 0, 0),
 )
-markdown_table(tc3.problem[:, [:name, :dstart, :dend]])
+PISPDocUtils.markdown_table(tc3.problem[:, [:name, :dstart, :dend]])
 
 # The first block ends at 30 June and the second starts at 1 July.
 

@@ -30,14 +30,11 @@ gr();
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles
-
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
 const SCRIPT_STEM = "isp2024_08_4006_composite_map"
-const ISP2024_PROFILE = edition_profile(REPO_ROOT, "2024")
+const ISP2024_PROFILE = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
 const TRACES = relpath(joinpath(ISP2024_PROFILE.download_root, "Traces"), REPO_ROOT)
 abs_path(relative_path) = joinpath(REPO_ROOT, relative_path)  # resolves a TRACES-relative path to an absolute file location for reading
 
@@ -106,8 +103,8 @@ mapping_table = DataFrame(
     fy_label = fy_label,
     ref_label = ref_label,
 )
-write_table(mapping_table, SCRIPT_STEM, "mapping_table")
-markdown_table(mapping_table)
+PISPDocUtils.write_table(mapping_table, SCRIPT_STEM, "mapping_table")
+PISPDocUtils.markdown_table(mapping_table)
 
 #-
 
@@ -143,8 +140,8 @@ for yr in sort(unique(mapping_table.ref_year))
     end
 end
 historical_year_vre_stats = DataFrame(historical_year_vre_stats_rows)
-write_table(historical_year_vre_stats, SCRIPT_STEM, "historical_year_vre_stats")
-markdown_table(historical_year_vre_stats)
+PISPDocUtils.write_table(historical_year_vre_stats, SCRIPT_STEM, "historical_year_vre_stats")
+PISPDocUtils.markdown_table(historical_year_vre_stats)
 
 # ## Near- and far-term composition
 #
@@ -166,7 +163,7 @@ for (tech, loc, hh_cols) in (("solar", SOLAR_LOC, HH_COLS_SOL), ("wind", WIND_LO
     end
 end
 near_vs_far_term_daily_cf = DataFrame(near_vs_far_term_rows)
-write_table(near_vs_far_term_daily_cf, SCRIPT_STEM, "near_vs_far_term_daily_cf")
+PISPDocUtils.write_table(near_vs_far_term_daily_cf, SCRIPT_STEM, "near_vs_far_term_daily_cf")
 
 near_vs_far_term_summary = combine(
     groupby(near_vs_far_term_daily_cf, [:tech, :term]),
@@ -176,7 +173,7 @@ near_vs_far_term_summary = combine(
     nrow => :n_days,
 )
 sort!(near_vs_far_term_summary, [:tech, :term])
-markdown_table(near_vs_far_term_summary)
+PISPDocUtils.markdown_table(near_vs_far_term_summary)
 
 # ## Annual capacity-factor matrix by historical year
 #
@@ -192,8 +189,8 @@ for (tech, loc, hh_cols) in (("solar", SOLAR_LOC, HH_COLS_SOL), ("wind", WIND_LO
     end
 end
 vre_heatmap = DataFrame(vre_heatmap_rows)
-write_table(vre_heatmap, SCRIPT_STEM, "vre_heatmap")
-markdown_table(vre_heatmap)
+PISPDocUtils.write_table(vre_heatmap, SCRIPT_STEM, "vre_heatmap")
+PISPDocUtils.markdown_table(vre_heatmap)
 
 # ## How often each historical year is reused
 #
@@ -205,8 +202,8 @@ println("Unique historical years used: ", sort(unique(mapping_table.ref_year)))
 
 ref_year_counts = combine(groupby(mapping_table, :ref_year), nrow => :count)
 sort!(ref_year_counts, :ref_year)
-write_table(ref_year_counts, SCRIPT_STEM, "ref_year_counts")
-markdown_table(ref_year_counts)
+PISPDocUtils.write_table(ref_year_counts, SCRIPT_STEM, "ref_year_counts")
+PISPDocUtils.markdown_table(ref_year_counts)
 
 # ## Historical-year timeline across the planning horizon
 #
@@ -229,8 +226,8 @@ end
 fy_labels = [string(year(row.fy_start)) for row in eachrow(mapping_table)]
 plot!(p1, xticks=(1:nrow(mapping_table), fy_labels), xrotation=90)
 
-savefig(p1, figure_path(SCRIPT_STEM, "08_4006_timeline_map.png"))
-EdaSupport.embed_figure(figure_path(SCRIPT_STEM, "08_4006_timeline_map.png"), "08_4006_timeline_map.png")
+savefig(p1, PISPDocUtils.figure_path(SCRIPT_STEM, "08_4006_timeline_map.png"))
+PISPDocUtils.embed_figure(PISPDocUtils.figure_path(SCRIPT_STEM, "08_4006_timeline_map.png"), "08_4006_timeline_map.png")
 nothing #hide
 
 # ![Timeline of the 4006 composite mapping, one bar per financial year coloured by source historical year](08_4006_timeline_map.png)
@@ -239,7 +236,7 @@ nothing #hide
 #
 # Reads back the historical-year statistics table reported above and plots summer mean capacity factor per historical year for solar and wind, with downward error bars to the summer 5th-percentile value.
 
-stats = CSV.read(table_path(SCRIPT_STEM, "historical_year_vre_stats"), DataFrame)
+stats = CSV.read(PISPDocUtils.table_path(SCRIPT_STEM, "historical_year_vre_stats"), DataFrame)
 
 p2 = plot(
     layout=(1,2), size=(1400, 650),
@@ -266,8 +263,8 @@ for (idx, tech) in enumerate(("solar", "wind"))
           xrotation=45, xtickfont=font(8), ylim=(0, 0.5), grid=true, gridalpha=0.3)
 end
 
-savefig(p2, figure_path(SCRIPT_STEM, "08_vre_by_historical_year.png"))
-EdaSupport.embed_figure(figure_path(SCRIPT_STEM, "08_vre_by_historical_year.png"), "08_vre_by_historical_year.png")
+savefig(p2, PISPDocUtils.figure_path(SCRIPT_STEM, "08_vre_by_historical_year.png"))
+PISPDocUtils.embed_figure(PISPDocUtils.figure_path(SCRIPT_STEM, "08_vre_by_historical_year.png"), "08_vre_by_historical_year.png")
 nothing #hide
 
 # ![Summer mean capacity factor by historical year for solar and wind, with downward error bars to the summer 5th percentile](08_vre_by_historical_year.png)
@@ -300,8 +297,8 @@ for (idx, (tech, loc, hh_cols, color)) in enumerate([("solar", SOLAR_LOC, HH_COL
           xlabel="Day of Year", ylabel="Daily Mean CF", ylim=(0, 0.6), legend=:topright, grid=true, gridalpha=0.3)
 end
 
-savefig(p3, figure_path(SCRIPT_STEM, "08_near_vs_far_term.png"))
-EdaSupport.embed_figure(figure_path(SCRIPT_STEM, "08_near_vs_far_term.png"), "08_near_vs_far_term.png")
+savefig(p3, PISPDocUtils.figure_path(SCRIPT_STEM, "08_near_vs_far_term.png"))
+PISPDocUtils.embed_figure(PISPDocUtils.figure_path(SCRIPT_STEM, "08_near_vs_far_term.png"), "08_near_vs_far_term.png")
 nothing #hide
 
 # ![Near-term versus far-term daily capacity factor for solar and wind, raw series and 30-day rolling averages](08_near_vs_far_term.png)
@@ -310,7 +307,7 @@ nothing #hide
 #
 # Reads back the year-by-year matrix reported above and renders it as a heatmap with per-cell annotations, deriving the colour range from the actual data rather than a fixed guess.
 
-heatmap_df = CSV.read(table_path(SCRIPT_STEM, "vre_heatmap"), DataFrame)
+heatmap_df = CSV.read(PISPDocUtils.table_path(SCRIPT_STEM, "vre_heatmap"), DataFrame)
 
 years_unique = sort(unique(heatmap_df.ref_year))
 solar_data = filter(row -> row.tech == "solar", heatmap_df)
@@ -344,8 +341,8 @@ for (i, tech) in enumerate(["Solar", "Wind"])
     end
 end
 
-savefig(p4, figure_path(SCRIPT_STEM, "08_vre_heatmap.png"))
-EdaSupport.embed_figure(figure_path(SCRIPT_STEM, "08_vre_heatmap.png"), "08_vre_heatmap.png")
+savefig(p4, PISPDocUtils.figure_path(SCRIPT_STEM, "08_vre_heatmap.png"))
+PISPDocUtils.embed_figure(PISPDocUtils.figure_path(SCRIPT_STEM, "08_vre_heatmap.png"), "08_vre_heatmap.png")
 nothing #hide
 
 # ![Annual mean capacity factor by historical year and technology, coloured and annotated per cell](08_vre_heatmap.png)

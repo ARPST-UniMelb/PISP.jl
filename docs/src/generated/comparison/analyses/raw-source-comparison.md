@@ -17,17 +17,11 @@ using XLSX
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
-
-include(joinpath(REPO_ROOT, "docs", "source_material_support.jl"))
-using .PISPDocsSourceMaterialSupport
-
-const ISP2024 = edition_profile(REPO_ROOT, "2024")
-const ISP2026 = edition_profile(REPO_ROOT, "2026")
+const ISP2024 = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
+const ISP2026 = PISPDocUtils.edition_profile(REPO_ROOT, "2026")
 const WORKBOOK2024 = joinpath(ISP2024.download_root, "2024-isp-inputs-and-assumptions-workbook.xlsx")
 const WORKBOOK2026 = joinpath(ISP2026.download_root, "2026-isp-inputs-and-assumptions-workbook.xlsm")
 const EV2023 = joinpath(ISP2024.download_root, "2023-iasr-ev-workbook.xlsx")
@@ -48,13 +42,13 @@ The EV publication also gains one worksheet, while the outlook package keeps thr
 ```
 
 ````julia
-publication_inventory = workbook_inventory([
+publication_inventory = PISPDocUtils.workbook_inventory([
     "ISP 2024 inputs and assumptions" => WORKBOOK2024,
     "ISP 2026 inputs and assumptions" => WORKBOOK2026,
     "2023 IASR EV" => EV2023,
     "2025 IASR EV" => EV2025,
 ])
-markdown_table(publication_inventory)
+PISPDocUtils.markdown_table(publication_inventory)
 ````
 
 ```@raw html
@@ -75,14 +69,14 @@ markdown_table(publication_inventory)
 
 ````julia
 outlook_inventory = vcat(
-    directory_workbook_inventory(joinpath(ISP2024.download_root, "Core"), "2024"),
-    directory_workbook_inventory(joinpath(ISP2024.download_root, "Sensitivities"), "2024"),
-    directory_workbook_inventory(joinpath(ISP2026.download_root, "Core scenarios"), "2026"),
-    directory_workbook_inventory(joinpath(ISP2026.download_root, "Sensitivities"), "2026"),
+    PISPDocUtils.directory_workbook_inventory(joinpath(ISP2024.download_root, "Core"), "2024"),
+    PISPDocUtils.directory_workbook_inventory(joinpath(ISP2024.download_root, "Sensitivities"), "2024"),
+    PISPDocUtils.directory_workbook_inventory(joinpath(ISP2026.download_root, "Core scenarios"), "2026"),
+    PISPDocUtils.directory_workbook_inventory(joinpath(ISP2026.download_root, "Sensitivities"), "2026"),
 )
 outlook_counts = combine(groupby(outlook_inventory, [:edition, :group]), nrow => :workbooks)
 sort!(outlook_counts, [:edition, :group])
-markdown_table(outlook_counts)
+PISPDocUtils.markdown_table(outlook_counts)
 ````
 
 ```@raw html
@@ -107,7 +101,7 @@ Presence alone is structural evidence; it does not prove that fields, units, or 
 ```
 
 ````julia
-worksheet_comparison = worksheet_presence(
+worksheet_comparison = PISPDocUtils.worksheet_presence(
     ["ISP 2024" => WORKBOOK2024, "ISP 2026" => WORKBOOK2026],
     [
         "Existing Gen Data Summary", "Generator Reliability Settings", "Retirement",
@@ -117,7 +111,7 @@ worksheet_comparison = worksheet_presence(
         "Hydro Scheme Inflows", "Data Centre Forecasts", "Distribution network", "Hybrid site limits",
     ],
 )
-markdown_table(worksheet_comparison)
+PISPDocUtils.markdown_table(worksheet_comparison)
 ````
 
 ```@raw html
@@ -172,7 +166,7 @@ They include stored cells and formatting, so they are useful for comparison but 
 ```
 
 ````julia
-dimension_2024 = sheet_dimension_table(
+dimension_2024 = PISPDocUtils.sheet_dimension_table(
     WORKBOOK2024,
     [
         "Scenarios", "Existing Gen Data Summary", "New Entrant Data Summary",
@@ -183,7 +177,7 @@ dimension_2024 = sheet_dimension_table(
 )
 dimension_2024.edition = fill("2024", nrow(dimension_2024))
 
-dimension_2026 = sheet_dimension_table(
+dimension_2026 = PISPDocUtils.sheet_dimension_table(
     WORKBOOK2026,
     [
         "Scenarios", "Existing Gen Data Summary", "New Entrant Data Summary",
@@ -200,7 +194,7 @@ source_dimensions = select(
     :worksheet,
     :workbook_declared_dimension,
 )
-markdown_table(source_dimensions)
+PISPDocUtils.markdown_table(source_dimensions)
 ````
 
 ```@raw html
@@ -317,7 +311,7 @@ source_family_changes = DataFrame([
         review_status = "Manual semantic review",
     ),
 ])
-markdown_table(source_family_changes; alignment = [:l, :l, :l, :l, :l])
+PISPDocUtils.markdown_table(source_family_changes; alignment = [:l, :l, :l, :l, :l])
 ````
 
 ```@raw html

@@ -11,17 +11,11 @@ using XLSX
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
-
-include(joinpath(REPO_ROOT, "docs", "source_material_support.jl"))
-using .PISPDocsSourceMaterialSupport
-
-const ISP2024 = edition_profile(REPO_ROOT, "2024")
-const ISP2026 = edition_profile(REPO_ROOT, "2026")
+const ISP2024 = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
+const ISP2026 = PISPDocUtils.edition_profile(REPO_ROOT, "2026")
 const WORKBOOK2024 = joinpath(ISP2024.download_root, "2024-isp-inputs-and-assumptions-workbook.xlsx")
 const WORKBOOK2026 = joinpath(ISP2026.download_root, "2026-isp-inputs-and-assumptions-workbook.xlsm")
 const MODEL2024 = joinpath(ISP2024.download_root, "2024 ISP Model")
@@ -32,7 +26,7 @@ nothing #hide
 # The 2024 sample combines public-domain interpretations for Blowering, Eucumbene, and Guthega and reports monthly values plus an annual total without restating a unit in the immediate table block.
 # The 2026 workbook separates named schemes into their own blocks; the sample below begins with Blowering and labels the values in GL.
 
-hydro_2024 = cells_table(
+hydro_2024 = PISPDocUtils.cells_table(
     WORKBOOK2024,
     "Hydro Scheme Inflows",
     "B35:O40",
@@ -41,10 +35,10 @@ hydro_2024 = cells_table(
         "Feb", "Mar", "Apr", "May", "Jun", "Annual total",
     ],
 )
-markdown_table(hydro_2024)
+PISPDocUtils.markdown_table(hydro_2024)
 #-
 
-hydro_2026 = cells_table(
+hydro_2026 = PISPDocUtils.cells_table(
     WORKBOOK2026,
     "Hydro Scheme Inflows",
     "B11:O16",
@@ -53,7 +47,7 @@ hydro_2026 = cells_table(
         "Feb", "Mar", "Apr", "May", "Jun", "Annual total",
     ],
 )
-markdown_table(hydro_2026)
+PISPDocUtils.markdown_table(hydro_2026)
 #-
 
 # ## Daily natural inflow CSV
@@ -62,18 +56,18 @@ markdown_table(hydro_2026)
 # Although its filename begins with `MonthlyNaturalInflow`, the records shown here are daily observations.
 # The parser groups files to hydro generators through package mappings and aggregates the daily records into the required temporal representation.
 
-natural_inflow_path = first_matching_file(MODEL2024, r"^MonthlyNaturalInflow_Anthony_Pieman_.*\.csv$"i)
+natural_inflow_path = PISPDocUtils.first_matching_file(MODEL2024, r"^MonthlyNaturalInflow_Anthony_Pieman_.*\.csv$"i)
 natural_inflow = CSV.read(natural_inflow_path, DataFrame)
 natural_inflow_preview = first(natural_inflow, 5)
-markdown_table(natural_inflow_preview)
+PISPDocUtils.markdown_table(natural_inflow_preview)
 #-
 
 natural_inflow_profile = DataFrame([
-    (property = "Source file", value = compact_path(natural_inflow_path, MODEL2024)),
+    (property = "Source file", value = PISPDocUtils.compact_path(natural_inflow_path, MODEL2024)),
     (property = "Rows", value = string(nrow(natural_inflow))),
     (property = "Columns", value = join(names(natural_inflow), ", ")),
 ])
-markdown_table(natural_inflow_profile)
+PISPDocUtils.markdown_table(natural_inflow_profile)
 #-
 
 # ## Annual energy-limit CSV
@@ -81,18 +75,18 @@ markdown_table(natural_inflow_profile)
 # The annual file uses one year key followed by named hydro constraints.
 # These limits are distinct from the daily inflow series and are joined to generators through maintained hydro-constraint mappings.
 
-annual_energy_path = first_matching_file(MODEL2024, r"^MaxEnergyYear_.*\.csv$"i)
+annual_energy_path = PISPDocUtils.first_matching_file(MODEL2024, r"^MaxEnergyYear_.*\.csv$"i)
 annual_energy = CSV.read(annual_energy_path, DataFrame)
 annual_energy_preview = first(select(annual_energy, 1:6), 5)
-markdown_table(annual_energy_preview)
+PISPDocUtils.markdown_table(annual_energy_preview)
 #-
 
 annual_energy_profile = DataFrame([
-    (property = "Source file", value = compact_path(annual_energy_path, MODEL2024)),
+    (property = "Source file", value = PISPDocUtils.compact_path(annual_energy_path, MODEL2024)),
     (property = "Rows", value = string(nrow(annual_energy))),
     (property = "Columns", value = string(ncol(annual_energy))),
 ])
-markdown_table(annual_energy_profile)
+PISPDocUtils.markdown_table(annual_energy_profile)
 #-
 
 # ## Package hydro conventions
@@ -106,7 +100,7 @@ hydro_conventions = DataFrame([
     (object = "PISP.HYDROSCE", role = "PISP scenario to model hydro scenario", entries = length(PISP.HYDROSCE)),
     (object = "PISP.SNOWY_HYDRO_GROUPS", role = "Grouped Snowy scheme units", entries = length(PISP.SNOWY_HYDRO_GROUPS)),
 ])
-markdown_table(hydro_conventions)
+PISPDocUtils.markdown_table(hydro_conventions)
 #-
 
 # This page covers bounded hydro inputs required by the parser, not the bulk renewable or demand trace payloads.

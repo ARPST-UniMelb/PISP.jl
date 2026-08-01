@@ -18,14 +18,11 @@ gr();
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles
-
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
 const SCRIPT_STEM = "isp2024_06_pisp_outputs"
-const ISP2024_PROFILE = edition_profile(REPO_ROOT, "2024")
+const ISP2024_PROFILE = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
 const OUTPUT_ROOT = ISP2024_PROFILE.output_root
 OUTPUT_ROOT === nothing && error(
     "ISP 2024 profile does not define output_root; set PISP_DOCS_ISP2024_OUTPUT_ROOT to select a local output build.",
@@ -148,8 +145,8 @@ build_metadata = DataFrame([
         schedule_directory = replace(relpath(SCHEDULE_DIR, REPO_ROOT), '\\' => '/'),
     ),
 ])
-write_table(build_metadata, SCRIPT_STEM, "build_metadata")
-markdown_table(build_metadata)
+PISPDocUtils.write_table(build_metadata, SCRIPT_STEM, "build_metadata")
+PISPDocUtils.markdown_table(build_metadata)
 
 # ## Generator coverage
 #
@@ -159,14 +156,14 @@ println("=== Generator Table ===")
 println("Shape: ", (nrow(gen_df), ncol(gen_df)))
 
 generator_fuel_counts = combine(groupby(gen_df, :fuel), nrow => :count)
-write_table(generator_fuel_counts, SCRIPT_STEM, "generator_fuel_counts")
-markdown_table(generator_fuel_counts)
+PISPDocUtils.write_table(generator_fuel_counts, SCRIPT_STEM, "generator_fuel_counts")
+PISPDocUtils.markdown_table(generator_fuel_counts)
 
 #-
 
 generator_tech_counts = combine(groupby(gen_df, :tech), nrow => :count)
-write_table(generator_tech_counts, SCRIPT_STEM, "generator_tech_counts")
-markdown_table(generator_tech_counts)
+PISPDocUtils.write_table(generator_tech_counts, SCRIPT_STEM, "generator_tech_counts")
+PISPDocUtils.markdown_table(generator_tech_counts)
 
 # ## Schedule coverage
 #
@@ -181,8 +178,8 @@ schedule_shapes = DataFrame([
     (schedule = "Generator_pmax_sched", n_rows = nrow(gen_pmax), n_cols = ncol(gen_pmax)),
     (schedule = "Demand_load_sched", n_rows = nrow(dem_load), n_cols = ncol(dem_load)),
 ])
-write_table(schedule_shapes, SCRIPT_STEM, "schedule_shapes")
-markdown_table(schedule_shapes)
+PISPDocUtils.write_table(schedule_shapes, SCRIPT_STEM, "schedule_shapes")
+PISPDocUtils.markdown_table(schedule_shapes)
 
 #-
 
@@ -204,8 +201,8 @@ for (schedule_name, schedule) in [
     )
 end
 schedule_time_coverage = DataFrame(schedule_time_coverage_rows)
-write_table(schedule_time_coverage, SCRIPT_STEM, "schedule_time_coverage")
-markdown_table(schedule_time_coverage)
+PISPDocUtils.write_table(schedule_time_coverage, SCRIPT_STEM, "schedule_time_coverage")
+PISPDocUtils.markdown_table(schedule_time_coverage)
 
 # ## Static-to-schedule join coverage
 #
@@ -252,7 +249,7 @@ append_relationship_diagnostics!(
 )
 
 join_coverage = DataFrame(join_summary_rows)
-write_table(join_coverage, SCRIPT_STEM, "join_coverage")
+PISPDocUtils.write_table(join_coverage, SCRIPT_STEM, "join_coverage")
 join_coverage_display = select(
     join_coverage,
     :relationship => Symbol("Relationship"),
@@ -261,27 +258,27 @@ join_coverage_display = select(
     :unmatched_unique_ids => Symbol("Unmatched IDs"),
     :unmatched_pct => Symbol("Unmatched (%)"),
 )
-markdown_table(join_coverage_display)
+PISPDocUtils.markdown_table(join_coverage_display)
 
 #-
 
 unmatched_ids = isempty(join_detail_rows) ? DataFrame(relationship = String[], unmatched_side = String[], id = String[]) : DataFrame(join_detail_rows)
-write_table(unmatched_ids, SCRIPT_STEM, "unmatched_ids")
+PISPDocUtils.write_table(unmatched_ids, SCRIPT_STEM, "unmatched_ids")
 if isempty(unmatched_ids)
-    metric_value_table(["Unmatched identifiers" => 0])
+    PISPDocUtils.metric_value_table(["Unmatched identifiers" => 0])
 else
     unmatched_summary = combine(
         groupby(unmatched_ids, [:relationship, :unmatched_side]),
         nrow => :unmatched_count,
     )
-    markdown_table(unmatched_summary; column_labels = ["Relationship", "Unmatched side", "Count"])
+    PISPDocUtils.markdown_table(unmatched_summary; column_labels = ["Relationship", "Unmatched side", "Count"])
 
     unmatched_examples = vcat(
         [first(group, min(5, nrow(group))) for group in groupby(unmatched_ids, :relationship)]...;
         cols = :union,
     )
     ## At most five identifiers per relationship are shown; the complete list remains in `unmatched_ids.csv`.
-    markdown_table(unmatched_examples; column_labels = ["Relationship", "Unmatched side", "Identifier"])
+    PISPDocUtils.markdown_table(unmatched_examples; column_labels = ["Relationship", "Unmatched side", "Identifier"])
 end
 
 # ## Renewable classification
@@ -297,8 +294,8 @@ solar_wind_generator_counts = DataFrame([
     (category = "solar", n_generators = nrow(solar_gens)),
     (category = "wind", n_generators = nrow(wind_gens)),
 ])
-write_table(solar_wind_generator_counts, SCRIPT_STEM, "solar_wind_generator_counts")
-markdown_table(solar_wind_generator_counts)
+PISPDocUtils.write_table(solar_wind_generator_counts, SCRIPT_STEM, "solar_wind_generator_counts")
+PISPDocUtils.markdown_table(solar_wind_generator_counts)
 
 #-
 
@@ -307,8 +304,8 @@ solar_wind_tech_counts_solar.category .= "solar"
 solar_wind_tech_counts_wind = combine(groupby(wind_gens, :tech), nrow => :count)
 solar_wind_tech_counts_wind.category .= "wind"
 solar_wind_tech_counts = vcat(solar_wind_tech_counts_solar, solar_wind_tech_counts_wind)[:, [:category, :tech, :count]]
-write_table(solar_wind_tech_counts, SCRIPT_STEM, "solar_wind_tech_counts")
-markdown_table(solar_wind_tech_counts)
+PISPDocUtils.write_table(solar_wind_tech_counts, SCRIPT_STEM, "solar_wind_tech_counts")
+PISPDocUtils.markdown_table(solar_wind_tech_counts)
 
 # ## Annual mean available output
 #
@@ -326,8 +323,8 @@ wind_annual = combine(groupby(wind_sched, :id_gen), :value => mean => :mean_pmax
 wind_annual.tech .= "wind"
 
 annual_mean_pmax = vcat(sol_annual, wind_annual)[:, [:tech, :id_gen, :mean_pmax]]
-write_table(annual_mean_pmax, SCRIPT_STEM, "annual_mean_pmax")
-markdown_table(annual_mean_pmax)
+PISPDocUtils.write_table(annual_mean_pmax, SCRIPT_STEM, "annual_mean_pmax")
+PISPDocUtils.markdown_table(annual_mean_pmax)
 
 # ## Capacity-factor duration
 #
@@ -337,8 +334,8 @@ capacity_factor_duration = vcat(
     capacity_factor_duration_frame(gen_pmax, solar_gens, "solar"),
     capacity_factor_duration_frame(gen_pmax, wind_gens, "wind"),
 )
-write_table(capacity_factor_duration, SCRIPT_STEM, "capacity_factor_duration")
-markdown_table(capacity_factor_duration)
+PISPDocUtils.write_table(capacity_factor_duration, SCRIPT_STEM, "capacity_factor_duration")
+PISPDocUtils.markdown_table(capacity_factor_duration)
 
 # ## Demand by area
 #
@@ -349,7 +346,7 @@ dem_load_full = build_dem_load_full(dem_load, dem_df, bus_df)
 dem_load_full.date_only = Date.(dem_load_full.datetime)
 demand_by_area_daily = combine(groupby(dem_load_full, [:date_only, :area_name]), :value => sum => :total_demand_mw)
 rename!(demand_by_area_daily, :date_only => :date)
-write_table(demand_by_area_daily, SCRIPT_STEM, "demand_by_area_daily")
+PISPDocUtils.write_table(demand_by_area_daily, SCRIPT_STEM, "demand_by_area_daily")
 
 demand_by_area_summary = combine(
     groupby(demand_by_area_daily, :area_name),
@@ -357,7 +354,7 @@ demand_by_area_summary = combine(
     :total_demand_mw => minimum => :min_daily_mw,
     :total_demand_mw => maximum => :max_daily_mw,
 )
-markdown_table(demand_by_area_summary)
+PISPDocUtils.markdown_table(demand_by_area_summary)
 
 # ## Daily aggregate profiles
 #
@@ -381,8 +378,8 @@ daily_gw = DataFrame(
     wind_gw = daily_joined.total_wind ./ 1000,
     demand_gw = daily_joined.total_demand ./ 1000,
 )
-write_table(daily_gw, SCRIPT_STEM, "daily_solar_wind_demand_gw")
-markdown_table(first(daily_gw, 10))
+PISPDocUtils.write_table(daily_gw, SCRIPT_STEM, "daily_solar_wind_demand_gw")
+PISPDocUtils.markdown_table(first(daily_gw, 10))
 
 # ## Hourly available-output profile
 #
@@ -402,13 +399,13 @@ wind_profile = combine(groupby(wind_subset, [:id_gen, :hour]), :value => mean =>
 wind_profile.tech .= "wind"
 
 hourly_pmax_profile = vcat(sol_profile, wind_profile)[:, [:tech, :id_gen, :hour, :mean_pmax]]
-write_table(hourly_pmax_profile, SCRIPT_STEM, "hourly_pmax_profile")
+PISPDocUtils.write_table(hourly_pmax_profile, SCRIPT_STEM, "hourly_pmax_profile")
 
 hourly_pmax_profile_fleet_mean = combine(
     groupby(hourly_pmax_profile, [:tech, :hour]),
     :mean_pmax => mean => :fleet_mean_pmax,
 )
-markdown_table(hourly_pmax_profile_fleet_mean)
+PISPDocUtils.markdown_table(hourly_pmax_profile_fleet_mean)
 
 # ## Renewable availability and demand summaries
 #
@@ -426,8 +423,8 @@ vre_vs_demand_summary = DataFrame([(
     max_vre_gw = maximum(vre_daily),
     corr_demand_vre = cor(demand_daily, vre_daily),
 )])
-write_table(vre_vs_demand_summary, SCRIPT_STEM, "vre_vs_demand_summary")
-metric_value_table([
+PISPDocUtils.write_table(vre_vs_demand_summary, SCRIPT_STEM, "vre_vs_demand_summary")
+PISPDocUtils.metric_value_table([
     "Days" => vre_vs_demand_summary.n_days[1],
     "Mean demand (GW)" => vre_vs_demand_summary.mean_demand_gw[1],
     "Mean VRE (GW)" => vre_vs_demand_summary.mean_vre_gw[1],
@@ -448,8 +445,8 @@ demand_distribution_summary = DataFrame([(
     max_mw = maximum(dem_daily_ts.total_demand),
     median_mw = median(dem_daily_ts.total_demand),
 )])
-write_table(demand_distribution_summary, SCRIPT_STEM, "demand_distribution_summary")
-metric_value_table([
+PISPDocUtils.write_table(demand_distribution_summary, SCRIPT_STEM, "demand_distribution_summary")
+PISPDocUtils.metric_value_table([
     "Days" => demand_distribution_summary.n[1],
     "Mean demand (MW)" => demand_distribution_summary.mean_mw[1],
     "Demand standard deviation (MW)" => demand_distribution_summary.std_mw[1],
@@ -520,8 +517,8 @@ plot!(p_cf, wind_cf_sorted, label="Wind CF", color=:steelblue, linewidth=1.5, al
 
 p_overview = plot(p_sol_bar, p_wind_bar, p_demand, p_cf, layout=(2,2), size=(1200, 1000), left_margin=8Plots.mm, top_margin=8Plots.mm)
 
-savefig(p_overview, figure_path(SCRIPT_STEM, "06_pisp_outputs_overview.png"))
-EdaSupport.embed_figure(figure_path(SCRIPT_STEM, "06_pisp_outputs_overview.png"), "06_pisp_outputs_overview.png")
+savefig(p_overview, PISPDocUtils.figure_path(SCRIPT_STEM, "06_pisp_outputs_overview.png"))
+PISPDocUtils.embed_figure(PISPDocUtils.figure_path(SCRIPT_STEM, "06_pisp_outputs_overview.png"), "06_pisp_outputs_overview.png")
 nothing #hide
 
 # ![PISP outputs overview: annual mean pmax by generator for solar and wind, daily demand by NEM area, and the solar/wind capacity-factor duration curve](06_pisp_outputs_overview.png)
@@ -544,8 +541,8 @@ plot!(p_ts, sol_daily_ts.date_only, sol_daily_ts.total ./ 1000, label="Solar PMa
 plot!(p_ts, wind_daily_ts.date_only, wind_daily_ts.total ./ 1000, label="Wind PMax (GW)", color=:steelblue, linewidth=1, alpha=0.7)
 plot!(p_ts, dem_daily_ts_plot.date_only, dem_daily_ts_plot.total_demand ./ 1000, label="Total Demand (GW)", color=:grey, linewidth=1, alpha=0.7)
 
-savefig(p_ts, figure_path(SCRIPT_STEM, "06_solar_wind_vs_demand_ts.png"))
-EdaSupport.embed_figure(figure_path(SCRIPT_STEM, "06_solar_wind_vs_demand_ts.png"), "06_solar_wind_vs_demand_ts.png")
+savefig(p_ts, PISPDocUtils.figure_path(SCRIPT_STEM, "06_solar_wind_vs_demand_ts.png"))
+PISPDocUtils.embed_figure(PISPDocUtils.figure_path(SCRIPT_STEM, "06_solar_wind_vs_demand_ts.png"), "06_solar_wind_vs_demand_ts.png")
 nothing #hide
 
 # ![Daily solar PMax, wind PMax, and total demand over the scheduled horizon, each in GW](06_solar_wind_vs_demand_ts.png)
@@ -596,8 +593,8 @@ histogram!(p_detailed[4], dem_daily_ts_plot.total_demand, bins=50, alpha=0.6, co
 plot!(p_detailed[4], title="Daily Total Demand Distribution (2030)", xlabel="Demand (MW)", ylabel="",
       grid=true, gridalpha=0.3, legend=false)
 
-savefig(p_detailed, figure_path(SCRIPT_STEM, "06_pisp_detailed.png"))
-EdaSupport.embed_figure(figure_path(SCRIPT_STEM, "06_pisp_detailed.png"), "06_pisp_detailed.png")
+savefig(p_detailed, PISPDocUtils.figure_path(SCRIPT_STEM, "06_pisp_detailed.png"))
+PISPDocUtils.embed_figure(PISPDocUtils.figure_path(SCRIPT_STEM, "06_pisp_detailed.png"), "06_pisp_detailed.png")
 nothing #hide
 
 # ![PISP detailed view: hourly pmax profiles for solar and wind generators, VRE-vs-demand scatter, and daily demand distribution](06_pisp_detailed.png)

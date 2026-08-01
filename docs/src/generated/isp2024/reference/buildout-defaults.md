@@ -21,14 +21,11 @@ using DataFrames
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
-
-include(joinpath(REPO_ROOT, "docs", "buildout_defaults_support.jl"))
-using .PISPDocsBuildoutDefaults
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
 const BUILDOUT_PARSER = joinpath(REPO_ROOT, "src", "parsers", "PISP-2024buildout.jl")
-validate_buildout_defaults_contract(BUILDOUT_PARSER)
+PISPDocUtils.validate_buildout_defaults_contract(BUILDOUT_PARSER)
 ````
 
 ```@raw html
@@ -50,8 +47,8 @@ A workbook label selects one PISP template. Storage labels also select the durat
 ```
 
 ````julia
-reference_tables = buildout_reference_tables()
-markdown_table(reference_tables.technology; allow_markdown_in_cells = true)
+reference_tables = PISPDocUtils.buildout_reference_tables()
+PISPDocUtils.markdown_table(reference_tables.technology; allow_markdown_in_cells = true)
 ````
 
 ```@raw html
@@ -80,7 +77,7 @@ PISP does not copy a complete static row from the workbook. Each output field ha
 ```
 
 ````julia
-markdown_table(reference_tables.origins; allow_markdown_in_cells = true)
+PISPDocUtils.markdown_table(reference_tables.origins; allow_markdown_in_cells = true)
 ````
 
 ```@raw html
@@ -110,7 +107,7 @@ markdown_table(reference_tables.origins; allow_markdown_in_cells = true)
 ```
 
 ````julia
-markdown_table(reference_tables.placeholders; allow_markdown_in_cells = true)
+PISPDocUtils.markdown_table(reference_tables.placeholders; allow_markdown_in_cells = true)
 ````
 
 ```@raw html
@@ -151,7 +148,7 @@ The static `n = 0` value is distinct from the time-varying unit count supplied b
 ```
 
 ````julia
-markdown_table(reference_tables.ess_common; allow_markdown_in_cells = true)
+PISPDocUtils.markdown_table(reference_tables.ess_common; allow_markdown_in_cells = true)
 ````
 
 ```@raw html
@@ -192,7 +189,7 @@ Meaning and unit of each varying field:
 ```
 
 ````julia
-markdown_table(reference_tables.ess_varying_fields; allow_markdown_in_cells = true)
+PISPDocUtils.markdown_table(reference_tables.ess_varying_fields; allow_markdown_in_cells = true)
 ````
 
 ```@raw html
@@ -216,7 +213,7 @@ Value of each varying field by storage technology:
 ```
 
 ````julia
-markdown_table(reference_tables.ess_varying_values; allow_markdown_in_cells = true)
+PISPDocUtils.markdown_table(reference_tables.ess_varying_values; allow_markdown_in_cells = true)
 ````
 
 ```@raw html
@@ -245,7 +242,7 @@ The static `n = 0` value is distinct from the time-varying unit count supplied b
 ```
 
 ````julia
-markdown_table(reference_tables.gen_common; allow_markdown_in_cells = true)
+PISPDocUtils.markdown_table(reference_tables.gen_common; allow_markdown_in_cells = true)
 ````
 
 ```@raw html
@@ -288,7 +285,7 @@ markdown_table(reference_tables.gen_common; allow_markdown_in_cells = true)
 ```
 
 ````julia
-markdown_table(reference_tables.gen_varying; allow_markdown_in_cells = true)
+PISPDocUtils.markdown_table(reference_tables.gen_varying; allow_markdown_in_cells = true)
 ````
 
 ```@raw html

@@ -28,25 +28,19 @@ gr();
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles
-
-include(joinpath(REPO_ROOT, "docs", "source_availability.jl"))
-using .PISPDocsSourceAvailability: source_availability_summary
-
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
 const SCRIPT_STEM = "isp2024_01_data_loading"
-const ISP2024_PROFILE = edition_profile(REPO_ROOT, "2024")
-const SOURCE_PROFILE = PISPDocsSourceAvailability.EditionProfile(
+const ISP2024_PROFILE = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
+const SOURCE_PROFILE = PISPDocUtils.SourceAvailabilityProfile(
     edition = ISP2024_PROFILE.edition,
     report_root = ISP2024_PROFILE.report_root,
     download_root = ISP2024_PROFILE.download_root,
     report_root_source = :profile,
     download_root_source = :profile,
 )
-const SOURCE_SUMMARY = source_availability_summary(SOURCE_PROFILE)
+const SOURCE_SUMMARY = PISPDocUtils.source_availability_summary(SOURCE_PROFILE)
 const TRACES = relpath(joinpath(ISP2024_PROFILE.download_root, "Traces"), REPO_ROOT)  # kept relative: this is the path form recorded in the tables below
 abs_path(relative_path) = joinpath(REPO_ROOT, relative_path)  # resolves a TRACES-relative path to an absolute file location for reading
 
@@ -162,8 +156,8 @@ Both traces share the same layout: three metadata columns (`Year`, `Month`, `Day
 ````julia
 traces = [("solar", sol_file, df_sol), ("wind", wind_file, df_wind)]
 trace_shape_columns = DataFrame([trace_shape_row(t...) for t in traces])
-write_table(trace_shape_columns, SCRIPT_STEM, "trace_shape_columns")
-markdown_table(trace_shape_columns)
+PISPDocUtils.write_table(trace_shape_columns, SCRIPT_STEM, "trace_shape_columns")
+PISPDocUtils.markdown_table(trace_shape_columns)
 ````
 
 ```@raw html
@@ -182,8 +176,8 @@ markdown_table(trace_shape_columns)
 
 ````julia
 trace_date_ranges = DataFrame([trace_date_range_row(t...) for t in traces])
-write_table(trace_date_ranges, SCRIPT_STEM, "trace_date_ranges")
-markdown_table(trace_date_ranges)
+PISPDocUtils.write_table(trace_date_ranges, SCRIPT_STEM, "trace_date_ranges")
+PISPDocUtils.markdown_table(trace_date_ranges)
 ````
 
 ```@raw html
@@ -208,8 +202,8 @@ The minimum and maximum values describe the numeric range in each sampled trace.
 
 ````julia
 trace_value_ranges = DataFrame([trace_value_range_row(t...) for t in traces])
-write_table(trace_value_ranges, SCRIPT_STEM, "trace_value_ranges")
-markdown_table(trace_value_ranges)
+PISPDocUtils.write_table(trace_value_ranges, SCRIPT_STEM, "trace_value_ranges")
+PISPDocUtils.markdown_table(trace_value_ranges)
 ````
 
 ```@raw html
@@ -244,8 +238,8 @@ solar_midday_low_days = DataFrame([
         low_percent = 100 * n_low / n_total,
     ),
 ])
-write_table(solar_midday_low_days, SCRIPT_STEM, "solar_midday_low_days")
-metric_value_table([
+PISPDocUtils.write_table(solar_midday_low_days, SCRIPT_STEM, "solar_midday_low_days")
+PISPDocUtils.metric_value_table([
     "Trace type" => solar_midday_low_days.trace_type[1],
     "File" => solar_midday_low_days.file_name[1],
     "Midday columns" => solar_midday_low_days.midday_columns[1],
@@ -327,8 +321,8 @@ else
         ),
     ])
 end
-write_table(demand_sample_metadata, SCRIPT_STEM, "demand_sample_metadata")
-metric_value_table([
+PISPDocUtils.write_table(demand_sample_metadata, SCRIPT_STEM, "demand_sample_metadata")
+PISPDocUtils.metric_value_table([
     "Demand directory" => demand_sample_metadata.demand_dir[1],
     "Files" => demand_sample_metadata.file_count[1],
     "Sample file" => demand_sample_metadata.sample_file[1],
@@ -384,8 +378,8 @@ for yr in [2011, 2015, 2019, 2023]
 end
 
 available_year_checks = DataFrame(available_year_rows)
-write_table(available_year_checks, SCRIPT_STEM, "available_year_checks")
-markdown_table(available_year_checks)
+PISPDocUtils.write_table(available_year_checks, SCRIPT_STEM, "available_year_checks")
+PISPDocUtils.markdown_table(available_year_checks)
 ````
 
 ```@raw html
@@ -423,10 +417,10 @@ p1 = plot(sol_datetime, sol_hourly, linewidth = 0.8, color = :orange, label = ""
 p2 = plot(wind_datetime, wind_hourly, linewidth = 0.8, color = :steelblue, label = "", title = "Wind 4006 — ARWF1 (first 30 days)", ylabel = "Mean half-hourly CF", legend = false)
 fig = plot(p1, p2, layout = (2, 1), size = (1600, 900), left_margin = 5Plots.mm, bottom_margin = 4Plots.mm, top_margin = 4Plots.mm)
 
-const CANONICAL_FIGURE_PATH = figure_path(SCRIPT_STEM, "01_sample_traces.png")
+const CANONICAL_FIGURE_PATH = PISPDocUtils.figure_path(SCRIPT_STEM, "01_sample_traces.png")
 savefig(fig, CANONICAL_FIGURE_PATH)
 
-EdaSupport.embed_figure(CANONICAL_FIGURE_PATH, "01_sample_traces.png")
+PISPDocUtils.embed_figure(CANONICAL_FIGURE_PATH, "01_sample_traces.png")
 ````
 
 ```@raw html

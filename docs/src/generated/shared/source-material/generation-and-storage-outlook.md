@@ -17,17 +17,11 @@ using XLSX
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
-
-include(joinpath(REPO_ROOT, "docs", "source_material_support.jl"))
-using .PISPDocsSourceMaterialSupport
-
-const ISP2024 = edition_profile(REPO_ROOT, "2024")
-const ISP2026 = edition_profile(REPO_ROOT, "2026")
+const ISP2024 = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
+const ISP2026 = PISPDocUtils.edition_profile(REPO_ROOT, "2026")
 const CORE2024 = joinpath(ISP2024.download_root, "Core")
 const SENS2024 = joinpath(ISP2024.download_root, "Sensitivities")
 const CORE2026 = joinpath(ISP2026.download_root, "Core scenarios")
@@ -50,10 +44,10 @@ The two editions retain the core-plus-sensitivity packaging pattern, but the cas
 
 ````julia
 outlook_inventory = vcat(
-    directory_workbook_inventory(CORE2024, "2024"),
-    directory_workbook_inventory(SENS2024, "2024"),
-    directory_workbook_inventory(CORE2026, "2026"),
-    directory_workbook_inventory(SENS2026, "2026"),
+    PISPDocUtils.directory_workbook_inventory(CORE2024, "2024"),
+    PISPDocUtils.directory_workbook_inventory(SENS2024, "2024"),
+    PISPDocUtils.directory_workbook_inventory(CORE2026, "2026"),
+    PISPDocUtils.directory_workbook_inventory(SENS2026, "2026"),
 )
 outlook_summary = combine(
     groupby(outlook_inventory, [:edition, :group]),
@@ -62,7 +56,7 @@ outlook_summary = combine(
     :worksheet_count => maximum => :maximum_worksheets,
 )
 sort!(outlook_summary, [:edition, :group])
-markdown_table(outlook_summary)
+PISPDocUtils.markdown_table(outlook_summary)
 ````
 
 ```@raw html
@@ -87,11 +81,11 @@ Worksheet presence does not guarantee identical fields or interpretation.
 ```
 
 ````julia
-outlook_sheet_presence = worksheet_presence(
+outlook_sheet_presence = PISPDocUtils.worksheet_presence(
     ["ISP 2024" => SAMPLE2024, "ISP 2026" => SAMPLE2026],
     ["Capacity", "Storage Capacity", "Storage Energy", "REZ Generation Capacity", "Retirements"],
 )
-markdown_table(outlook_sheet_presence)
+PISPDocUtils.markdown_table(outlook_sheet_presence)
 ````
 
 ```@raw html
@@ -122,13 +116,13 @@ The later sample starts in 2025-26 and retains the same leading keys before its 
 ```
 
 ````julia
-capacity_2024 = cells_table(
+capacity_2024 = PISPDocUtils.cells_table(
     SAMPLE2024,
     "Capacity",
     "A4:H8",
     ["CDP", "Region", "Subregion", "Technology", "2023-24", "2024-25", "2025-26", "2026-27"],
 )
-markdown_table(capacity_2024)
+PISPDocUtils.markdown_table(capacity_2024)
 ````
 
 ```@raw html
@@ -149,13 +143,13 @@ markdown_table(capacity_2024)
 ```
 
 ````julia
-capacity_2026 = cells_table(
+capacity_2026 = PISPDocUtils.cells_table(
     SAMPLE2026,
     "Capacity",
     "A4:H8",
     ["CDP", "Region", "Subregion", "Technology", "2025-26", "2026-27", "2027-28", "2028-29"],
 )
-markdown_table(capacity_2026)
+PISPDocUtils.markdown_table(capacity_2026)
 ````
 
 ```@raw html
@@ -181,13 +175,13 @@ Category labels changed: ISP 2026 distinguishes utility-scale storage depths exp
 ```
 
 ````julia
-storage_capacity_2024 = cells_table(
+storage_capacity_2024 = PISPDocUtils.cells_table(
     SAMPLE2024,
     "Storage Capacity",
     "A4:H8",
     ["CDP", "Region", "Subregion", "Storage category", "2024-25", "2025-26", "2026-27", "2027-28"],
 )
-markdown_table(storage_capacity_2024)
+PISPDocUtils.markdown_table(storage_capacity_2024)
 ````
 
 ```@raw html
@@ -208,13 +202,13 @@ markdown_table(storage_capacity_2024)
 ```
 
 ````julia
-storage_capacity_2026 = cells_table(
+storage_capacity_2026 = PISPDocUtils.cells_table(
     SAMPLE2026,
     "Storage Capacity",
     "A4:H8",
     ["CDP", "Region", "Subregion", "Storage category", "2026-27", "2027-28", "2028-29", "2029-30"],
 )
-markdown_table(storage_capacity_2026)
+PISPDocUtils.markdown_table(storage_capacity_2026)
 ````
 
 ```@raw html

@@ -18,17 +18,11 @@ using XLSX
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
-
-include(joinpath(REPO_ROOT, "docs", "source_material_support.jl"))
-using .PISPDocsSourceMaterialSupport
-
-const ISP2024 = edition_profile(REPO_ROOT, "2024")
-const ISP2026 = edition_profile(REPO_ROOT, "2026")
+const ISP2024 = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
+const ISP2026 = PISPDocUtils.edition_profile(REPO_ROOT, "2026")
 const WORKBOOK2024 = joinpath(ISP2024.download_root, "2024-isp-inputs-and-assumptions-workbook.xlsx")
 const WORKBOOK2026 = joinpath(ISP2026.download_root, "2026-isp-inputs-and-assumptions-workbook.xlsm")
 ````
@@ -47,7 +41,7 @@ PISP uses this source with `Summary Mapping`, maximum-capacity, emissions, relia
 ```
 
 ````julia
-existing_2024 = cells_table(
+existing_2024 = PISPDocUtils.cells_table(
     WORKBOOK2024,
     "Existing Gen Data Summary",
     "B13:K18",
@@ -56,7 +50,7 @@ existing_2024 = cells_table(
         "Maximum capacity (MW)", "Summer peak (MW)", "Summer typical (MW)", "Winter (MW)",
     ],
 )
-markdown_table(existing_2024)
+PISPDocUtils.markdown_table(existing_2024)
 ````
 
 ```@raw html
@@ -83,7 +77,7 @@ Bayswater therefore appears as four records rather than one station aggregate.
 ```
 
 ````julia
-existing_2026 = cells_table(
+existing_2026 = PISPDocUtils.cells_table(
     WORKBOOK2026,
     "Existing Gen Data Summary",
     "B13:Q18",
@@ -94,7 +88,7 @@ existing_2026 = cells_table(
     ];
     columns = collect(1:16),
 )
-markdown_table(existing_2026)
+PISPDocUtils.markdown_table(existing_2026)
 ````
 
 ```@raw html
@@ -122,7 +116,7 @@ A blank ISP 2024 source cell is shown as `Not reported` rather than as a Julia m
 ```
 
 ````julia
-storage_2024 = cells_table(
+storage_2024 = PISPDocUtils.cells_table(
     WORKBOOK2024,
     "Storage properties",
     "B5:H13",
@@ -131,7 +125,7 @@ storage_2024 = cells_table(
 for column in names(storage_2024)
     storage_2024[!, column] = coalesce.(storage_2024[!, column], "Not reported")
 end
-markdown_table(storage_2024)
+PISPDocUtils.markdown_table(storage_2024)
 ````
 
 ```@raw html
@@ -156,7 +150,7 @@ markdown_table(storage_2024)
 ```
 
 ````julia
-storage_2026 = cells_table(
+storage_2026 = PISPDocUtils.cells_table(
     WORKBOOK2026,
     "Storage properties",
     "B6:I13",
@@ -166,7 +160,7 @@ storage_2026 = cells_table(
         "Round-trip efficiency (%)",
     ],
 )
-markdown_table(storage_2026)
+PISPDocUtils.markdown_table(storage_2026)
 ````
 
 ```@raw html
@@ -200,7 +194,7 @@ package_collections = DataFrame([
     (collection = "Battery defaults", object = "PISP.databess", entries = length(PISP.databess)),
     (collection = "Pumped-hydro defaults", object = "PISP.dataps", entries = length(PISP.dataps)),
 ])
-markdown_table(package_collections)
+PISPDocUtils.markdown_table(package_collections)
 ````
 
 ```@raw html

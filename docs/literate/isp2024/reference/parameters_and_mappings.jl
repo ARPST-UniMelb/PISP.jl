@@ -10,15 +10,12 @@ using Dates
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
-include(joinpath(REPO_ROOT, "docs", "source_material_support.jl"))
-using .PISPDocsSourceMaterialSupport
-
-coverage = coverage_document(REPO_ROOT)
-parameter_families = coverage_table(coverage, "parameter_family")
-mapping_families = coverage_table(coverage, "mapping_family")
+coverage = PISPDocUtils.coverage_document(REPO_ROOT)
+parameter_families = PISPDocUtils.coverage_table(coverage, "parameter_family")
+mapping_families = PISPDocUtils.coverage_table(coverage, "mapping_family")
 
 length(unique(parameter_families.id)) == nrow(parameter_families) || error("parameter-family IDs must be unique")
 length(unique(mapping_families.id)) == nrow(mapping_families) || error("mapping-family IDs must be unique")
@@ -32,37 +29,37 @@ nothing #hide
 
 classification_roles = DataFrame([
     (
-        classification = friendly_classification("aemo_raw_source"),
+        classification = PISPDocUtils.friendly_classification("aemo_raw_source"),
         authority = "AEMO publication",
         meaning = "A value or record read directly from an AEMO workbook, model CSV, or report-backed source.",
     ),
     (
-        classification = friendly_classification("parsed_representation"),
+        classification = PISPDocUtils.friendly_classification("parsed_representation"),
         authority = "PISP transformation",
         meaning = "A normalised label, runtime lookup, or join derived from source records.",
     ),
     (
-        classification = friendly_classification("pisp_generated_intermediate"),
+        classification = PISPDocUtils.friendly_classification("pisp_generated_intermediate"),
         authority = "PISP preprocessing",
         meaning = "An Auxiliary workbook generated from AEMO outlook workbooks and consumed by the parser.",
     ),
     (
-        classification = friendly_classification("package_convention"),
+        classification = PISPDocUtils.friendly_classification("package_convention"),
         authority = "PISP package",
         meaning = "A maintained identifier, default, alias, allocation rule, or source-file convention.",
     ),
     (
-        classification = friendly_classification("user_input"),
+        classification = PISPDocUtils.friendly_classification("user_input"),
         authority = "PISP user",
         meaning = "An optional build-out or other value supplied when the workflow is run.",
     ),
     (
-        classification = friendly_classification("pisp_output"),
+        classification = PISPDocUtils.friendly_classification("pisp_output"),
         authority = "PISP data model",
         meaning = "A generated table, field, or schema contract exposed to dataset users.",
     ),
 ])
-markdown_table(classification_roles)
+PISPDocUtils.markdown_table(classification_roles)
 #-
 
 # ## Parameter-file ownership
@@ -79,8 +76,8 @@ parameter_owners = select(
     :owner => :canonical_page_id,
     :notes,
 )
-parameter_owners.classification = friendly_classification.(parameter_owners.classification)
-markdown_table(parameter_owners)
+parameter_owners.classification = PISPDocUtils.friendly_classification.(parameter_owners.classification)
+PISPDocUtils.markdown_table(parameter_owners)
 #-
 
 # ## Mapping-family ownership
@@ -93,8 +90,8 @@ mapping_owner_summary = combine(
     nrow => :mapping_families,
 )
 sort!(mapping_owner_summary, [:classification, :owner])
-mapping_owner_summary.classification = friendly_classification.(mapping_owner_summary.classification)
-markdown_table(mapping_owner_summary)
+mapping_owner_summary.classification = PISPDocUtils.friendly_classification.(mapping_owner_summary.classification)
+PISPDocUtils.markdown_table(mapping_owner_summary)
 #-
 
 mapping_inventory = select(
@@ -105,8 +102,8 @@ mapping_inventory = select(
     :source_path,
 )
 sort!(mapping_inventory, [:classification, :canonical_page_id, :family])
-mapping_inventory.classification = friendly_classification.(mapping_inventory.classification)
-markdown_table(mapping_inventory)
+mapping_inventory.classification = PISPDocUtils.friendly_classification.(mapping_inventory.classification)
+PISPDocUtils.markdown_table(mapping_inventory)
 #-
 
 # ## Scenario identifiers and source labels
@@ -124,7 +121,7 @@ scenario_mappings = DataFrame([
     )
     for (scenario_id, scenario_name) in PISP.ID2SCE
 ])
-markdown_table(scenario_mappings)
+PISPDocUtils.markdown_table(scenario_mappings)
 #-
 
 # ## Bus and area constants
@@ -145,7 +142,7 @@ bus_area_mappings = DataFrame([
     )
     for (index, alias) in enumerate(bus_aliases)
 ])
-markdown_table(bus_area_mappings)
+PISPDocUtils.markdown_table(bus_area_mappings)
 #-
 
 # ## Reference trace 4006 weather-year mapping
@@ -168,7 +165,7 @@ weather_year_mapping = DataFrame([
     )
     for (financial_year_start, financial_year_end, reference_year_ending) in PISP.ISPdatabuilder.DATE_RANGES_REFYEARS
 ])
-markdown_table(weather_year_mapping)
+PISPDocUtils.markdown_table(weather_year_mapping)
 #-
 
 # ## Reliability fields represented in static schemas
@@ -190,7 +187,7 @@ reliability_schema = DataFrame([
     (asset_table = table_name, fields = reliability_fields(table_name))
     for table_name in ("Generator", "ESS", "Line")
 ])
-markdown_table(reliability_schema)
+PISPDocUtils.markdown_table(reliability_schema)
 #-
 
 # ## Using the mappings

@@ -16,13 +16,11 @@ using DataFrames
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
-const ISP2024_PROFILE = edition_profile(REPO_ROOT, "2024")
+const ISP2024_PROFILE = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
 
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
 
 function container_inventory(container)
     rows = NamedTuple[]
@@ -64,7 +62,7 @@ Static tables define asset identity and time-invariant attributes. Schedule rows
 
 ````julia
 static_tables = container_inventory(static_container)
-markdown_table(static_tables)
+PISPDocUtils.markdown_table(static_tables)
 ````
 
 ```@raw html
@@ -88,7 +86,7 @@ The `Bus` table fixes the spatial resolution of the dataset.
 ```
 
 ````julia
-RawMarkdown(
+PISPDocUtils.RawMarkdown(
     "The static tables represent the NEM as $(length(PISP.NEMBUSES)) sub-regional network " *
     "nodes spanning the $(length(unique(values(PISP.BUS2AREA)))) NEM regions - Queensland, " *
     "New South Wales, Victoria, Tasmania, and South Australia - interconnected by the `Line` records.",
@@ -111,7 +109,7 @@ Schedule tables carry scenario- and time-dependent values. The output filename i
 
 ````julia
 schedule_tables = container_inventory(schedule_container)
-markdown_table(schedule_tables)
+PISPDocUtils.markdown_table(schedule_tables)
 ````
 
 ```@raw html
@@ -170,7 +168,7 @@ let live = schedule_tables.output_table
         meaning, unit, relationship = SCHEDULE_SEMANTICS[name]
         push!(rows, "| `$name` | $meaning | $unit | $relationship |")
     end
-    RawMarkdown(join(rows, "\n"))
+    PISPDocUtils.RawMarkdown(join(rows, "\n"))
 end
 ````
 
@@ -230,7 +228,7 @@ let asset_columns = Dict(row.output_table => Set(split(row.columns, ", ")) for r
         expression = "`" * join(factors, " × ") * "`"
         push!(rows, "| $asset | $quantity | $expression | $unit |")
     end
-    RawMarkdown(join(rows, "\n"))
+    PISPDocUtils.RawMarkdown(join(rows, "\n"))
 end
 ````
 
@@ -373,7 +371,7 @@ function field_glossary(table)
         field in live || error("`$table.$field` is documented but is not a current column")
         push!(rows, "| `$field` | $meaning |")
     end
-    RawMarkdown(join(rows, "\n"))
+    PISPDocUtils.RawMarkdown(join(rows, "\n"))
 end
 ````
 

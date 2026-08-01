@@ -24,14 +24,11 @@ using Statistics
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles
-
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
 const SCRIPT_STEM = "isp2024_10_build_cost_trajectories"
-const ISP2024_PROFILE = edition_profile(REPO_ROOT, "2024")
+const ISP2024_PROFILE = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
 const DOWNLOADS = relpath(ISP2024_PROFILE.download_root, REPO_ROOT)  # kept relative: this is the path form recorded below
 const IASR_WORKBOOK = joinpath(DOWNLOADS, "2024-isp-inputs-and-assumptions-workbook.xlsx")
 const SHEET_NAME = "Build costs"
@@ -131,7 +128,7 @@ println("Workbook exists: ", isfile(abs_path(IASR_WORKBOOK)))
 isfile(abs_path(IASR_WORKBOOK)) || error("IASR workbook not found at $IASR_WORKBOOK")
 
 matrix = XLSX.openxlsx(abs_path(IASR_WORKBOOK)) do xf
-    trim_sheet(xf[SHEET_NAME][:])
+    PISPDocUtils.trim_sheet(xf[SHEET_NAME][:])
 end
 println("Trimmed \"$SHEET_NAME\" sheet shape: ", size(matrix))
 nothing #hide
@@ -158,22 +155,22 @@ technology_match = DataFrame(
     technology = all_technologies,
     is_target_technology = [is_target_technology(t) ? 1 : 0 for t in all_technologies],
 )
-write_table(technology_match, SCRIPT_STEM, "technology_match")
-markdown_table(technology_match)
+PISPDocUtils.write_table(technology_match, SCRIPT_STEM, "technology_match")
+PISPDocUtils.markdown_table(technology_match)
 
 #-
 
 target_long = filter(:technology => is_target_technology, long_table)
-write_table(target_long, SCRIPT_STEM, "build_cost_trajectory")
+PISPDocUtils.write_table(target_long, SCRIPT_STEM, "build_cost_trajectory")
 println("Target-technology long-format rows saved as supporting data: ", nrow(target_long))
-markdown_table(first(target_long, 8))
+PISPDocUtils.markdown_table(first(target_long, 8))
 
 # ## Cost trajectories
 
 decline = decline_summary(target_long)
 decline = sort(decline, :annualized_decline_rate_pct)
-write_table(decline, SCRIPT_STEM, "build_cost_decline_summary")
-markdown_table(decline)
+PISPDocUtils.write_table(decline, SCRIPT_STEM, "build_cost_decline_summary")
+PISPDocUtils.markdown_table(decline)
 
 # ## Cost-trajectory findings
 #

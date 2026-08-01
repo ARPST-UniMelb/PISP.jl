@@ -17,14 +17,11 @@ using Printf
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles
-
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
 const SCRIPT_STEM = "isp2024_09_download_inventory"
-const ISP2024_PROFILE = edition_profile(REPO_ROOT, "2024")
+const ISP2024_PROFILE = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
 const DOWNLOAD_ROOT = relpath(ISP2024_PROFILE.download_root, REPO_ROOT)  # kept relative: this is the path form recorded in the tables below
 const MAX_TREE_DEPTH = 3
 const MAX_TREE_CHILDREN_PER_DIR = 3
@@ -246,11 +243,11 @@ Total files discovered under data/2024/pisp-downloads: 8324
 
 ````julia
 file_inventory = DataFrame(files)
-write_table(file_inventory, SCRIPT_STEM, "file_inventory")
+PISPDocUtils.write_table(file_inventory, SCRIPT_STEM, "file_inventory")
 println("Full file inventory written: ", nrow(file_inventory), " rows (previewing the ten largest files below)")
 
 largest_files = first(sort(file_inventory, :size_bytes; rev = true), 10)
-markdown_table(largest_files)
+PISPDocUtils.markdown_table(largest_files)
 ````
 
 ```@raw html
@@ -277,8 +274,8 @@ markdown_table(largest_files)
 
 ````julia
 top_level_summary = summarize_top_level(abs_path(DOWNLOAD_ROOT), files)
-write_table(top_level_summary, SCRIPT_STEM, "top_level_summary")
-markdown_table(top_level_summary)
+PISPDocUtils.write_table(top_level_summary, SCRIPT_STEM, "top_level_summary")
+PISPDocUtils.markdown_table(top_level_summary)
 ````
 
 ```@raw html
@@ -306,8 +303,8 @@ markdown_table(top_level_summary)
 
 ````julia
 extension_summary = summarize_extensions(files)
-write_table(extension_summary, SCRIPT_STEM, "extension_summary")
-markdown_table(extension_summary)
+PISPDocUtils.write_table(extension_summary, SCRIPT_STEM, "extension_summary")
+PISPDocUtils.markdown_table(extension_summary)
 ````
 
 ```@raw html
@@ -332,7 +329,7 @@ The tree below mirrors the on-disk folder layout down to three levels deep. Some
 
 ````julia
 directory_tree = DataFrame(tree_rows)
-write_table(directory_tree, SCRIPT_STEM, "directory_tree")
+PISPDocUtils.write_table(directory_tree, SCRIPT_STEM, "directory_tree")
 nrow(directory_tree)
 ````
 
@@ -742,8 +739,8 @@ inventory_summary = DataFrame([
         largest_entry_bytes = maximum(top_level_summary.total_bytes),
     ),
 ])
-write_table(inventory_summary, SCRIPT_STEM, "inventory_summary")
-metric_value_table([
+PISPDocUtils.write_table(inventory_summary, SCRIPT_STEM, "inventory_summary")
+PISPDocUtils.metric_value_table([
     "Download root" => inventory_summary.download_root[1],
     "Total files" => inventory_summary.total_files[1],
     "Total bytes" => inventory_summary.total_bytes[1],
