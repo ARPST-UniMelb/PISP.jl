@@ -174,6 +174,76 @@ end
     @test frame.datetime == [Date(2024, 1, 1), Date(2024, 1, 2)]
     @test PISPDocUtils.row_mean(frame, [:a, :b]) == [2.0, 4.0]
     @test isequal(PISPDocUtils.rolling_mean([1.0, 2.0, 3.0], 2), [missing, 1.5, 2.5])
+
+end
+
+@testset "Documentation source-reading boundaries" begin
+    utils_dir = joinpath(TEST_DOCS_DIR, "utils")
+    source_material_path = joinpath(utils_dir, "source_material.jl")
+    source_material = read(source_material_path, String)
+
+    @test !isfile(joinpath(utils_dir, "source_material_specs.jl"))
+    for retired in (
+        "cells_table",
+        "preview_table",
+        "source_evidence_spec",
+        "range_workbook",
+        "RANGE_WORKBOOK_CACHE",
+        "sheet_names",
+        "sheet_dimension_table",
+        "worksheet_presence",
+        "directory_workbook_inventory",
+        "first_matching_file",
+        "XLSX.readdata",
+    )
+        @test !occursin(retired, source_material)
+    end
+
+    literate_root = joinpath(TEST_DOCS_DIR, "literate")
+    literate_sources = String[]
+    for (directory, _, files) in walkdir(literate_root)
+        for filename in files
+            endswith(filename, ".jl") || continue
+            push!(literate_sources, read(joinpath(directory, filename), String))
+        end
+    end
+    literate_source = join(literate_sources, "\n")
+
+    for retired in (
+        "PISPDocUtils.cells_table",
+        "PISPDocUtils.preview_table",
+        "PISPDocUtils.source_evidence_spec",
+        "PISPDocUtils.sheet_names",
+        "PISPDocUtils.sheet_dimension_table",
+        "PISPDocUtils.worksheet_presence",
+        "PISPDocUtils.workbook_inventory",
+        "PISPDocUtils.directory_workbook_inventory",
+        "PISPDocUtils.first_matching_file",
+        "validate_columns",
+    )
+        @test !occursin(retired, literate_source)
+    end
+
+    spec_driven_2024_pages = [
+        "demand_and_distributed_resources.jl",
+        "demand_side_participation.jl",
+        "electric_vehicles.jl",
+        "existing_generation_and_storage.jl",
+        "generation_and_storage_outlook.jl",
+        "generator_operation.jl",
+        "generator_reliability_and_retirement.jl",
+        "hydro_inflows_and_energy_constraints.jl",
+        "network_and_transmission.jl",
+        "renewable_energy_zones.jl",
+    ]
+    shared_source_root = joinpath(literate_root, "shared", "source_material")
+    for filename in spec_driven_2024_pages
+        source = read(joinpath(shared_source_root, filename), String)
+        @test occursin("PISP.source_spec(", source)
+        @test occursin("PISP.source_path(", source)
+        @test occursin(r"PISP\.read_(xlsx_rows|csv_source)\(", source)
+        @test occursin("XLSX.readdata(", source)
+    end
 end
 
 @testset "Human-use documentation invariants" begin
@@ -1143,3 +1213,15 @@ end
 end
 
 include(joinpath(@__DIR__, "test_source_links.jl"))
+
+@testset "Generated documentation does not leak the renderer's home directory" begin
+    generated_root = joinpath(TEST_DOCS_DIR, "src", "generated")
+    home = homedir()
+    for (directory, _, files) in walkdir(generated_root)
+        for filename in files
+            endswith(filename, ".md") || continue
+            path = joinpath(directory, filename)
+            @test !occursin(home, read(path, String))
+        end
+    end
+end

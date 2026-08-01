@@ -12,6 +12,7 @@ The workbooks contain capacity, storage energy, storage power, REZ build, retire
 ```
 
 ````julia
+using PISP
 using DataFrames
 using XLSX
 
@@ -26,7 +27,14 @@ const CORE2024 = joinpath(ISP2024.download_root, "Core")
 const SENS2024 = joinpath(ISP2024.download_root, "Sensitivities")
 const CORE2026 = joinpath(ISP2026.download_root, "Core scenarios")
 const SENS2026 = joinpath(ISP2026.download_root, "Sensitivities")
-const SAMPLE2024 = joinpath(CORE2024, "2024 ISP - Green Energy Exports - Core.xlsx")
+const CORE_WORKBOOK_2024 = "2024 ISP - Green Energy Exports - Core.xlsx"
+const CAPACITY_OUTLOOK_2024 = PISP.source_spec(:core_capacity_outlook, 2024)
+const STORAGE_CAPACITY_OUTLOOK_2024 = PISP.source_spec(:core_storage_capacity_outlook, 2024)
+const SAMPLE2024 = PISP.source_path(
+    ISP2024.download_root,
+    CAPACITY_OUTLOOK_2024;
+    core_workbook = CORE_WORKBOOK_2024,
+)
 const SAMPLE2026 = joinpath(CORE2026, "2026 ISP - Accelerated Transition - Core.xlsx")
 ````
 
@@ -44,10 +52,10 @@ The two editions retain the core-plus-sensitivity packaging pattern, but the cas
 
 ````julia
 outlook_inventory = vcat(
-    PISPDocUtils.directory_workbook_inventory(CORE2024, "2024"),
-    PISPDocUtils.directory_workbook_inventory(SENS2024, "2024"),
-    PISPDocUtils.directory_workbook_inventory(CORE2026, "2026"),
-    PISPDocUtils.directory_workbook_inventory(SENS2026, "2026"),
+    PISPDocUtils.read_outlook_inventory(CORE2024, "2024"),
+    PISPDocUtils.read_outlook_inventory(SENS2024, "2024"),
+    PISPDocUtils.read_outlook_inventory(CORE2026, "2026"),
+    PISPDocUtils.read_outlook_inventory(SENS2026, "2026"),
 )
 outlook_summary = combine(
     groupby(outlook_inventory, [:edition, :group]),
@@ -81,10 +89,20 @@ Worksheet presence does not guarantee identical fields or interpretation.
 ```
 
 ````julia
-outlook_sheet_presence = PISPDocUtils.worksheet_presence(
-    ["ISP 2024" => SAMPLE2024, "ISP 2026" => SAMPLE2026],
-    ["Capacity", "Storage Capacity", "Storage Energy", "REZ Generation Capacity", "Retirements"],
-)
+outlook_sheets = ["Capacity", "Storage Capacity", "Storage Energy", "REZ Generation Capacity", "Retirements"]
+outlook_sheet_names = [
+    ("ISP 2024", XLSX.openxlsx(SAMPLE2024) do workbook
+        Set(XLSX.sheetnames(workbook))
+    end),
+    ("ISP 2026", XLSX.openxlsx(SAMPLE2026) do workbook
+        Set(XLSX.sheetnames(workbook))
+    end),
+]
+outlook_sheet_presence = DataFrame([
+    (edition = edition, worksheet = sheet, present = sheet in available)
+    for (edition, available) in outlook_sheet_names
+    for sheet in outlook_sheets
+])
 PISPDocUtils.markdown_table(outlook_sheet_presence)
 ````
 
@@ -116,11 +134,11 @@ The later sample starts in 2025-26 and retains the same leading keys before its 
 ```
 
 ````julia
-capacity_2024 = PISPDocUtils.cells_table(
-    SAMPLE2024,
-    "Capacity",
-    "A4:H8",
-    ["CDP", "Region", "Subregion", "Technology", "2023-24", "2024-25", "2025-26", "2026-27"],
+capacity_source_2024 = PISP.read_xlsx_rows(SAMPLE2024, CAPACITY_OUTLOOK_2024)
+capacity_2024 = DataFrame(
+    capacity_source_2024[2:6, 1:8],
+    Symbol.(["CDP", "Region", "Subregion", "Technology", "2023-24", "2024-25", "2025-26", "2026-27"]);
+    makeunique = true,
 )
 PISPDocUtils.markdown_table(capacity_2024)
 ````
@@ -143,11 +161,10 @@ PISPDocUtils.markdown_table(capacity_2024)
 ```
 
 ````julia
-capacity_2026 = PISPDocUtils.cells_table(
-    SAMPLE2026,
-    "Capacity",
-    "A4:H8",
-    ["CDP", "Region", "Subregion", "Technology", "2025-26", "2026-27", "2027-28", "2028-29"],
+capacity_2026 = DataFrame(
+    XLSX.readdata(SAMPLE2026, "Capacity", "A4:H8"),
+    Symbol.(["CDP", "Region", "Subregion", "Technology", "2025-26", "2026-27", "2027-28", "2028-29"]);
+    makeunique = true,
 )
 PISPDocUtils.markdown_table(capacity_2026)
 ````
@@ -175,11 +192,11 @@ Category labels changed: ISP 2026 distinguishes utility-scale storage depths exp
 ```
 
 ````julia
-storage_capacity_2024 = PISPDocUtils.cells_table(
-    SAMPLE2024,
-    "Storage Capacity",
-    "A4:H8",
-    ["CDP", "Region", "Subregion", "Storage category", "2024-25", "2025-26", "2026-27", "2027-28"],
+storage_capacity_source_2024 = PISP.read_xlsx_rows(SAMPLE2024, STORAGE_CAPACITY_OUTLOOK_2024)
+storage_capacity_2024 = DataFrame(
+    storage_capacity_source_2024[2:6, 1:8],
+    Symbol.(["CDP", "Region", "Subregion", "Storage category", "2024-25", "2025-26", "2026-27", "2027-28"]);
+    makeunique = true,
 )
 PISPDocUtils.markdown_table(storage_capacity_2024)
 ````
@@ -202,11 +219,10 @@ PISPDocUtils.markdown_table(storage_capacity_2024)
 ```
 
 ````julia
-storage_capacity_2026 = PISPDocUtils.cells_table(
-    SAMPLE2026,
-    "Storage Capacity",
-    "A4:H8",
-    ["CDP", "Region", "Subregion", "Storage category", "2026-27", "2027-28", "2028-29", "2029-30"],
+storage_capacity_2026 = DataFrame(
+    XLSX.readdata(SAMPLE2026, "Storage Capacity", "A4:H8"),
+    Symbol.(["CDP", "Region", "Subregion", "Storage category", "2026-27", "2027-28", "2028-29", "2029-30"]);
+    makeunique = true,
 )
 PISPDocUtils.markdown_table(storage_capacity_2026)
 ````

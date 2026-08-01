@@ -14,7 +14,8 @@ import .PISPDocUtils
 
 const ISP2024 = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
 const ISP2026 = PISPDocUtils.edition_profile(REPO_ROOT, "2026")
-const WORKBOOK2024 = joinpath(ISP2024.download_root, "2024-isp-inputs-and-assumptions-workbook.xlsx")
+const RENEWABLE_ENERGY_ZONES_2024 = PISP.source_spec(:renewable_energy_zones, 2024)
+const WORKBOOK2024 = PISP.source_path(ISP2024.download_root, RENEWABLE_ENERGY_ZONES_2024)
 const WORKBOOK2026 = joinpath(ISP2026.download_root, "2026-isp-inputs-and-assumptions-workbook.xlsm")
 nothing #hide
 
@@ -22,11 +23,11 @@ nothing #hide
 #
 # The 2024 source includes the NTNDP zone, ISP subregion, and regional cost zone beside each REZ identifier.
 
-rez_2024 = PISPDocUtils.cells_table(
-    WORKBOOK2024,
-    "Renewable Energy Zones",
-    "B8:G15",
-    ["ID", "Name", "NEM region", "NTNDP zone", "ISP subregion", "Regional cost zone"],
+rez_source_2024 = PISP.read_xlsx_rows(WORKBOOK2024, RENEWABLE_ENERGY_ZONES_2024)
+rez_2024 = DataFrame(
+    rez_source_2024[2:9, 1:6],
+    Symbol.(["ID", "Name", "NEM region", "NTNDP zone", "ISP subregion", "Regional cost zone"]);
+    makeunique = true,
 )
 PISPDocUtils.markdown_table(rez_2024)
 #-
@@ -35,11 +36,10 @@ PISPDocUtils.markdown_table(rez_2024)
 #
 # The corresponding 2026 table is narrower in its leading columns and no longer places the NTNDP and regional cost-zone fields in this block.
 
-rez_2026 = PISPDocUtils.cells_table(
-    WORKBOOK2026,
-    "Renewable energy zones",
-    "B7:E15",
-    ["ID", "Name", "NEM region", "ISP subregion"],
+rez_2026 = DataFrame(
+    XLSX.readdata(WORKBOOK2026, "Renewable energy zones", "B7:E15"),
+    Symbol.(["ID", "Name", "NEM region", "ISP subregion"]);
+    makeunique = true,
 )
 PISPDocUtils.markdown_table(rez_2026)
 #-

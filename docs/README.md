@@ -174,6 +174,10 @@ Processed-data compatibility still requires edition-specific parser and schema v
 The source-material family reads the two inputs workbooks, both EV workbooks, the edition-specific outlook directories, the 2019 operating-assumptions supplement used by the current parser, and bounded hydro CSVs under the 2024 model directory.
 Each page declares its exact local prerequisites in `docs/config/page-registry.toml`; no source-selection path is maintained in this table.
 
+For ISP 2024 sources registered by the package, Literate pages resolve the canonical `PISP.SourceSpec`, derive the path with `PISP.source_path`, and read through the corresponding PISP source reader.
+ISP 2026 source evidence, and ISP 2024 evidence without a package specification, uses explicit `XLSX.jl` access in the owning Literate page.
+`PISPDocUtils` receives already-read matrices or tables for documentation-specific preparation and presentation; it does not own workbook paths, worksheet names, cell ranges, or source-file discovery.
+
 ## Page registry
 
 Each `[[page]]` entry in `docs/config/page-registry.toml` describes one executable Literate page.

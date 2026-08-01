@@ -24,6 +24,7 @@ include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
 import .PISPDocUtils
 
 const ISP2024_PROFILE = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
+nothing #hide
 
 # ## Problem-table schema
 #

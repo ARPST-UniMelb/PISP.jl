@@ -24,7 +24,9 @@ import .PISPDocUtils
 
 const ISP2024 = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
 const ISP2026 = PISPDocUtils.edition_profile(REPO_ROOT, "2026")
-const EV2023 = joinpath(ISP2024.download_root, "2023-iasr-ev-workbook.xlsx")
+const EV_NUMBERS_2024 = PISP.source_spec(:ev_vehicle_numbers, 2024)
+const EV_CHARGE_TYPES_2024 = PISP.source_spec(:ev_bev_phev_charge_type, 2024)
+const EV2023 = PISP.source_path(ISP2024.download_root, EV_NUMBERS_2024)
 const EV2025 = joinpath(ISP2026.download_root, "aemo-2025-iasr-ev-workbook.xlsx")
 ````
 
@@ -42,14 +44,24 @@ The 2025 workbook adds a hybrid-vehicle numbers worksheet and revises the chargi
 ```
 
 ````julia
-ev_sheet_presence = PISPDocUtils.worksheet_presence(
-    ["2023 IASR" => EV2023, "2025 IASR" => EV2025],
-    [
-        "BEV_Numbers", "PHEV_Numbers", "FCEV_Numbers", "ICE_Numbers", "Hybrid_Numbers",
-        "BEV_PHEV_Consumption (GWh)", "BEV_PHEV_Charge_Type (%)",
-        "BEV_PHEV_Profile_kW (Weekday)", "BEV_PHEV_Profile_kW (Weekend)",
-    ],
-)
+ev_sheets = [
+    "BEV_Numbers", "PHEV_Numbers", "FCEV_Numbers", "ICE_Numbers", "Hybrid_Numbers",
+    "BEV_PHEV_Consumption (GWh)", "BEV_PHEV_Charge_Type (%)",
+    "BEV_PHEV_Profile_kW (Weekday)", "BEV_PHEV_Profile_kW (Weekend)",
+]
+ev_sheet_names = [
+    ("2023 IASR", XLSX.openxlsx(EV2023) do workbook
+        Set(XLSX.sheetnames(workbook))
+    end),
+    ("2025 IASR", XLSX.openxlsx(EV2025) do workbook
+        Set(XLSX.sheetnames(workbook))
+    end),
+]
+ev_sheet_presence = DataFrame([
+    (edition = edition, worksheet = sheet, present = sheet in available)
+    for (edition, available) in ev_sheet_names
+    for sheet in ev_sheets
+])
 PISPDocUtils.markdown_table(ev_sheet_presence)
 ````
 
@@ -89,11 +101,15 @@ The planning years and scenario names shift between publications, so the values 
 ```
 
 ````julia
-bev_2023 = PISPDocUtils.cells_table(
+bev_numbers_source_2024 = PISP.read_xlsx_rows(
     EV2023,
-    "BEV_Numbers",
-    "B8:J14",
-    ["Vehicle type", "2022-23", "2023-24", "2024-25", "2025-26", "2026-27", "2027-28", "2028-29", "2029-30"],
+    EV_NUMBERS_2024;
+    worksheet = "BEV_Numbers",
+)
+bev_2023 = DataFrame(
+    bev_numbers_source_2024[8:14, 1:9],
+    Symbol.(["Vehicle type", "2022-23", "2023-24", "2024-25", "2025-26", "2026-27", "2027-28", "2028-29", "2029-30"]);
+    makeunique = true,
 )
 PISPDocUtils.markdown_table(bev_2023)
 ````
@@ -118,11 +134,10 @@ PISPDocUtils.markdown_table(bev_2023)
 ```
 
 ````julia
-bev_2025 = PISPDocUtils.cells_table(
-    EV2025,
-    "BEV_Numbers",
-    "B8:J14",
-    ["Vehicle type", "2025-26", "2026-27", "2027-28", "2028-29", "2029-30", "2030-31", "2031-32", "2032-33"],
+bev_2025 = DataFrame(
+    XLSX.readdata(EV2025, "BEV_Numbers", "B8:J14"),
+    Symbol.(["Vehicle type", "2025-26", "2026-27", "2027-28", "2028-29", "2029-30", "2030-31", "2031-32", "2032-33"]);
+    makeunique = true,
 )
 PISPDocUtils.markdown_table(bev_2025)
 ````
@@ -152,11 +167,10 @@ The current ISP 2024 EV parser has no maintained output-field mapping for this w
 ```
 
 ````julia
-hybrid_2025 = PISPDocUtils.cells_table(
-    EV2025,
-    "Hybrid_Numbers",
-    "B8:J14",
-    ["Vehicle type", "2025-26", "2026-27", "2027-28", "2028-29", "2029-30", "2030-31", "2031-32", "2032-33"],
+hybrid_2025 = DataFrame(
+    XLSX.readdata(EV2025, "Hybrid_Numbers", "B8:J14"),
+    Symbol.(["Vehicle type", "2025-26", "2026-27", "2027-28", "2028-29", "2029-30", "2030-31", "2031-32", "2032-33"]);
+    makeunique = true,
 )
 PISPDocUtils.markdown_table(hybrid_2025)
 ````
@@ -186,11 +200,11 @@ The later source uses unscheduled, public, off-peak-and-solar, and time-of-use c
 ```
 
 ````julia
-charge_type_2023 = PISPDocUtils.cells_table(
-    EV2023,
-    "BEV_PHEV_Charge_Type (%)",
-    "B11:J14",
-    ["Charging mode", "2022-23", "2023-24", "2024-25", "2025-26", "2026-27", "2027-28", "2028-29", "2029-30"],
+charge_type_source_2024 = PISP.read_xlsx_rows(EV2023, EV_CHARGE_TYPES_2024)
+charge_type_2023 = DataFrame(
+    charge_type_source_2024[11:14, 1:9],
+    Symbol.(["Charging mode", "2022-23", "2023-24", "2024-25", "2025-26", "2026-27", "2027-28", "2028-29", "2029-30"]);
+    makeunique = true,
 )
 PISPDocUtils.markdown_table(charge_type_2023)
 ````
@@ -212,11 +226,10 @@ PISPDocUtils.markdown_table(charge_type_2023)
 ```
 
 ````julia
-charge_type_2025 = PISPDocUtils.cells_table(
-    EV2025,
-    "BEV_PHEV_Charge_Type (%)",
-    "B9:J14",
-    ["Charging mode", "2025-26", "2026-27", "2027-28", "2028-29", "2029-30", "2030-31", "2031-32", "2032-33"],
+charge_type_2025 = DataFrame(
+    XLSX.readdata(EV2025, "BEV_PHEV_Charge_Type (%)", "B9:J14"),
+    Symbol.(["Charging mode", "2025-26", "2026-27", "2027-28", "2028-29", "2029-30", "2030-31", "2031-32", "2032-33"]);
+    makeunique = true,
 )
 PISPDocUtils.markdown_table(charge_type_2025)
 ````

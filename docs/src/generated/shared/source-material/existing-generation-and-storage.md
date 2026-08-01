@@ -23,7 +23,9 @@ import .PISPDocUtils
 
 const ISP2024 = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
 const ISP2026 = PISPDocUtils.edition_profile(REPO_ROOT, "2026")
-const WORKBOOK2024 = joinpath(ISP2024.download_root, "2024-isp-inputs-and-assumptions-workbook.xlsx")
+const EXISTING_GENERATORS_2024 = PISP.source_spec(:existing_generator_summary, 2024)
+const STORAGE_PROPERTIES_2024 = PISP.source_spec(:bess_storage_properties, 2024)
+const WORKBOOK2024 = PISP.source_path(ISP2024.download_root, EXISTING_GENERATORS_2024)
 const WORKBOOK2026 = joinpath(ISP2026.download_root, "2026-isp-inputs-and-assumptions-workbook.xlsm")
 ````
 
@@ -41,14 +43,14 @@ PISP uses this source with `Summary Mapping`, maximum-capacity, emissions, relia
 ```
 
 ````julia
-existing_2024 = PISPDocUtils.cells_table(
-    WORKBOOK2024,
-    "Existing Gen Data Summary",
-    "B13:K18",
-    [
+existing_source_2024 = PISP.read_xlsx_rows(WORKBOOK2024, EXISTING_GENERATORS_2024)
+existing_2024 = DataFrame(
+    existing_source_2024[4:9, 1:10],
+    Symbol.([
         "Station", "Generator type", "Region", "ISP sub-region", "REZ", "Fuel/technology",
         "Maximum capacity (MW)", "Summer peak (MW)", "Summer typical (MW)", "Winter (MW)",
-    ],
+    ]);
+    makeunique = true,
 )
 PISPDocUtils.markdown_table(existing_2024)
 ````
@@ -77,16 +79,14 @@ Bayswater therefore appears as four records rather than one station aggregate.
 ```
 
 ````julia
-existing_2026 = PISPDocUtils.cells_table(
-    WORKBOOK2026,
-    "Existing Gen Data Summary",
-    "B13:Q18",
-    [
+existing_2026 = DataFrame(
+    XLSX.readdata(WORKBOOK2026, "Existing Gen Data Summary", "B13:Q18"),
+    Symbol.([
         "IASR ID", "Station", "Technology", "Fuel", "Region", "ISP sub-region", "REZ", "Cost zone",
         "Status", "Storage capacity", "Maximum capacity (MW)", "Minimum load", "Summer peak (MW)",
         "Summer typical (MW)", "Winter (MW)", "Minimum stable level (MW)",
-    ];
-    columns = collect(1:16),
+    ]);
+    makeunique = true,
 )
 PISPDocUtils.markdown_table(existing_2026)
 ````
@@ -116,11 +116,11 @@ A blank ISP 2024 source cell is shown as `Not reported` rather than as a Julia m
 ```
 
 ````julia
-storage_2024 = PISPDocUtils.cells_table(
-    WORKBOOK2024,
-    "Storage properties",
-    "B5:H13",
-    ["Property", "Battery 1 h", "Battery 2 h", "Battery 4 h", "Battery 8 h", "VPP", "Units"],
+storage_source_2024 = PISP.read_xlsx_rows(WORKBOOK2024, STORAGE_PROPERTIES_2024)
+storage_2024 = DataFrame(
+    storage_source_2024[2:10, 1:7],
+    Symbol.(["Property", "Battery 1 h", "Battery 2 h", "Battery 4 h", "Battery 8 h", "VPP", "Units"]);
+    makeunique = true,
 )
 for column in names(storage_2024)
     storage_2024[!, column] = coalesce.(storage_2024[!, column], "Not reported")
@@ -150,15 +150,14 @@ PISPDocUtils.markdown_table(storage_2024)
 ```
 
 ````julia
-storage_2026 = PISPDocUtils.cells_table(
-    WORKBOOK2026,
-    "Storage properties",
-    "B6:I13",
-    [
+storage_2026 = DataFrame(
+    XLSX.readdata(WORKBOOK2026, "Storage properties", "B6:I13"),
+    Symbol.([
         "Technology", "Maximum power (MW)", "Energy capacity (h)", "Charge efficiency (%)",
         "Discharge efficiency (%)", "Maximum state of charge (%)", "Minimum state of charge (%)",
         "Round-trip efficiency (%)",
-    ],
+    ]);
+    makeunique = true,
 )
 PISPDocUtils.markdown_table(storage_2026)
 ````

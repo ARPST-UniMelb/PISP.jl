@@ -14,7 +14,6 @@ The [2023 IASR, pp. 97–98](../../../../../data/2024/pisp-reports/2023-inputs-a
 
 ````julia
 using PISP
-using CSV
 using DataFrames
 using XLSX
 
@@ -25,7 +24,10 @@ import .PISPDocUtils
 
 const ISP2024 = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
 const ISP2026 = PISPDocUtils.edition_profile(REPO_ROOT, "2026")
-const WORKBOOK2024 = joinpath(ISP2024.download_root, "2024-isp-inputs-and-assumptions-workbook.xlsx")
+const HYDRO_INFLOWS_2024 = PISP.source_spec(:hydro_scheme_inflows, 2024)
+const HYDRO_NATURAL_INFLOW_2024 = PISP.source_spec(:hydro_natural_inflow_trace, 2024)
+const HYDRO_ANNUAL_ENERGY_2024 = PISP.source_spec(:hydro_annual_energy_limit_trace, 2024)
+const WORKBOOK2024 = PISP.source_path(ISP2024.download_root, HYDRO_INFLOWS_2024)
 const WORKBOOK2026 = joinpath(ISP2026.download_root, "2026-isp-inputs-and-assumptions-workbook.xlsm")
 const MODEL2024 = joinpath(ISP2024.download_root, "2024 ISP Model")
 ````
@@ -36,22 +38,22 @@ const MODEL2024 = joinpath(ISP2024.download_root, "2024 ISP Model")
 
 ## Workbook reference-year tables
 
-The 2024 sample combines public-domain interpretations for Blowering, Eucumbene, and Guthega and reports monthly values plus an annual total without restating a unit in the immediate table block.
-The 2026 workbook separates named schemes into their own blocks; the sample below begins with Blowering and labels the values in GL.
+The 2024 PISP source selection combines public-domain interpretations for Blowering, Eucumbene, and Guthega and reads the monthly values used by the current parser.
+The 2026 workbook separates named schemes into their own blocks; the sample below begins with Blowering, labels the values in GL, and includes the published annual total.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
 ```
 
 ````julia
-hydro_2024 = PISPDocUtils.cells_table(
-    WORKBOOK2024,
-    "Hydro Scheme Inflows",
-    "B35:O40",
-    [
+hydro_source_2024 = PISP.read_xlsx_rows(WORKBOOK2024, HYDRO_INFLOWS_2024)
+hydro_2024 = DataFrame(
+    hydro_source_2024[2:7, 1:13],
+    Symbol.([
         "Reference year", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan",
-        "Feb", "Mar", "Apr", "May", "Jun", "Annual total",
-    ],
+        "Feb", "Mar", "Apr", "May", "Jun",
+    ]);
+    makeunique = true,
 )
 PISPDocUtils.markdown_table(hydro_2024)
 ````
@@ -60,14 +62,14 @@ PISPDocUtils.markdown_table(hydro_2024)
 </details>
 ```
 
-| **Reference year** | **Jul** | **Aug** | **Sep** | **Oct** | **Nov** | **Dec** | **Jan** | **Feb** | **Mar** | **Apr** | **May** | **Jun** | **Annual total** |
-|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|
-| 2011 | 865.691 | 527.611 | 566.513 | 663.15 | 347.269 | 485.622 | 380.484 | 375.399 | 113.097 | 371.662 | 498.06 | 861.194 | 6055.75 |
-| 2012 | 682.051 | 421.48 | 446.644 | 504.713 | 244.146 | 340.126 | 300.053 | 294.298 | 88.4854 | 290.871 | 391.582 | 677.175 | 4681.62 |
-| 2013 | 549.799 | 331.752 | 348.095 | 386.675 | 181.598 | 270.421 | 241.482 | 239.259 | 72.1848 | 237.164 | 316.791 | 547.709 | 3722.93 |
-| 2014 | 512.953 | 324.32 | 357.639 | 439.905 | 249.855 | 317.653 | 226.019 | 219.475 | 65.7618 | 216.286 | 293.455 | 507.597 | 3730.92 |
-| 2015 | 475.341 | 282.593 | 295.945 | 328.714 | 155.304 | 238.896 | 208.573 | 207.929 | 62.8622 | 206.47 | 274.491 | 474.508 | 3211.63 |
-| 2016 | 665.077 | 393.535 | 408.674 | 445.044 | 201.019 | 319.145 | 291.737 | 291.396 | 88.1532 | 289.51 | 384.32 | 664.339 | 4441.95 |
+| **Reference year** | **Jul** | **Aug** | **Sep** | **Oct** | **Nov** | **Dec** | **Jan** | **Feb** | **Mar** | **Apr** | **May** | **Jun** |
+|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| 2011 | 865.691 | 527.611 | 566.513 | 663.15 | 347.269 | 485.622 | 380.484 | 375.399 | 113.097 | 371.662 | 498.06 | 861.194 |
+| 2012 | 682.051 | 421.48 | 446.644 | 504.713 | 244.146 | 340.126 | 300.053 | 294.298 | 88.4854 | 290.871 | 391.582 | 677.175 |
+| 2013 | 549.799 | 331.752 | 348.095 | 386.675 | 181.598 | 270.421 | 241.482 | 239.259 | 72.1848 | 237.164 | 316.791 | 547.709 |
+| 2014 | 512.953 | 324.32 | 357.639 | 439.905 | 249.855 | 317.653 | 226.019 | 219.475 | 65.7618 | 216.286 | 293.455 | 507.597 |
+| 2015 | 475.341 | 282.593 | 295.945 | 328.714 | 155.304 | 238.896 | 208.573 | 207.929 | 62.8622 | 206.47 | 274.491 | 474.508 |
+| 2016 | 665.077 | 393.535 | 408.674 | 445.044 | 201.019 | 319.145 | 291.737 | 291.396 | 88.1532 | 289.51 | 384.32 | 664.339 |
 
 
 ```@raw html
@@ -75,14 +77,13 @@ PISPDocUtils.markdown_table(hydro_2024)
 ```
 
 ````julia
-hydro_2026 = PISPDocUtils.cells_table(
-    WORKBOOK2026,
-    "Hydro Scheme Inflows",
-    "B11:O16",
-    [
+hydro_2026 = DataFrame(
+    XLSX.readdata(WORKBOOK2026, "Hydro Scheme Inflows", "B11:O16"),
+    Symbol.([
         "Reference year", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan",
         "Feb", "Mar", "Apr", "May", "Jun", "Annual total",
-    ],
+    ]);
+    makeunique = true,
 )
 PISPDocUtils.markdown_table(hydro_2026)
 ````
@@ -112,8 +113,14 @@ The parser groups files to hydro generators through package mappings and aggrega
 ```
 
 ````julia
-natural_inflow_path = PISPDocUtils.first_matching_file(MODEL2024, r"^MonthlyNaturalInflow_Anthony_Pieman_.*\.csv$"i)
-natural_inflow = CSV.read(natural_inflow_path, DataFrame)
+natural_inflow_path = PISP.source_path(
+    MODEL2024,
+    HYDRO_NATURAL_INFLOW_2024;
+    scenario = "Step Change",
+    file_name = "MonthlyNaturalInflow_Anthony_Pieman_RefYear4006",
+    hydro_scenario = "StepChange",
+)
+natural_inflow = PISP.read_csv_source(natural_inflow_path, HYDRO_NATURAL_INFLOW_2024)
 natural_inflow_preview = first(natural_inflow, 5)
 PISPDocUtils.markdown_table(natural_inflow_preview)
 ````
@@ -124,11 +131,11 @@ PISPDocUtils.markdown_table(natural_inflow_preview)
 
 | **Year** | **Month** | **Day** | **Inflows** |
 |--:|--:|--:|--:|
-| 2024 | 7 | 1 | 143.732 |
-| 2024 | 7 | 2 | 143.732 |
-| 2024 | 7 | 3 | 143.732 |
-| 2024 | 7 | 4 | 143.732 |
-| 2024 | 7 | 5 | 143.732 |
+| 2024 | 7 | 1 | 143.765 |
+| 2024 | 7 | 2 | 143.765 |
+| 2024 | 7 | 3 | 143.765 |
+| 2024 | 7 | 4 | 143.765 |
+| 2024 | 7 | 5 | 143.765 |
 
 
 ```@raw html
@@ -150,7 +157,7 @@ PISPDocUtils.markdown_table(natural_inflow_profile)
 
 | **property** | **value** |
 |:--|:--|
-| Source file | 2024 ISP Green Energy Exports/Traces/hydro/MonthlyNaturalInflow\_Anthony\_Pieman\_RefYear4006\_HydrogenSuperpower.csv |
+| Source file | 2024 ISP Step Change/Traces/hydro/MonthlyNaturalInflow\_Anthony\_Pieman\_RefYear4006\_StepChange.csv |
 | Rows | 10592 |
 | Columns | Year, Month, Day, Inflows |
 
@@ -165,8 +172,14 @@ These limits are distinct from the daily inflow series and are joined to generat
 ```
 
 ````julia
-annual_energy_path = PISPDocUtils.first_matching_file(MODEL2024, r"^MaxEnergyYear_.*\.csv$"i)
-annual_energy = CSV.read(annual_energy_path, DataFrame)
+annual_energy_path = PISP.source_path(
+    MODEL2024,
+    HYDRO_ANNUAL_ENERGY_2024;
+    scenario = "Step Change",
+    file_name = "MaxEnergyYear_LT_RefYear4006",
+    hydro_scenario = "StepChange",
+)
+annual_energy = PISP.read_csv_source(annual_energy_path, HYDRO_ANNUAL_ENERGY_2024)
 annual_energy_preview = first(select(annual_energy, 1:6), 5)
 PISPDocUtils.markdown_table(annual_energy_preview)
 ````
@@ -177,11 +190,11 @@ PISPDocUtils.markdown_table(annual_energy_preview)
 
 | **Year** | **Barron Gorge Constraint** | **Blowering Constraint** | **Bogong - Mackay Constraint** | **Dartmouth Constraint** | **Eildon Constraint** |
 |--:|--:|--:|--:|--:|--:|
-| 2020 | 102.621 | 245.805 | 221.461 | 352.479 | 91.6749 |
-| 2021 | 88.0508 | 153.535 | 162.121 | 444.835 | 97.9216 |
-| 2022 | 54.5418 | 102.351 | 160.896 | 503.15 | 75.8569 |
-| 2023 | 63.831 | 250.791 | 255.181 | 43.3978 | 51.1363 |
-| 2024 | 76.7658 | 204.577 | 179.607 | 54.7648 | 92.4072 |
+| 2020 | 102.621 | 245.501 | 221.188 | 352.044 | 91.5616 |
+| 2021 | 88.0508 | 153.313 | 161.887 | 444.192 | 97.78 |
+| 2022 | 54.5418 | 102.181 | 160.629 | 502.316 | 75.7312 |
+| 2023 | 63.831 | 250.322 | 254.703 | 43.3167 | 51.0406 |
+| 2024 | 76.7658 | 204.15 | 179.232 | 54.6506 | 92.2145 |
 
 
 ```@raw html
@@ -203,7 +216,7 @@ PISPDocUtils.markdown_table(annual_energy_profile)
 
 | **property** | **value** |
 |:--|:--|
-| Source file | 2024 ISP Green Energy Exports/Traces/hydro/MaxEnergyYear\_LT\_RefYear4006\_HydrogenSuperpower.csv |
+| Source file | 2024 ISP Step Change/Traces/hydro/MaxEnergyYear\_LT\_RefYear4006\_StepChange.csv |
 | Rows | 39 |
 | Columns | 12 |
 

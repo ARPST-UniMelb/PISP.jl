@@ -39,10 +39,6 @@ const ISP2024_PROFILE = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
 </details>
 ```
 
-````
-Main.var"##295".PISPDocUtils.EditionProfile("2024", "ISP 2024", "/Users/myasirroni/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/data/2024/pisp-reports", "/Users/myasirroni/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/data/2024/pisp-downloads", "/Users/myasirroni/Documents/Git/arpst-unimelb-agents/projects/PISP.jl/data/2024/pisp-datasets/out-ref4006-poe10/csv", "schedule-2030")
-````
-
 ## Problem-table schema
 
 `PISP.initialise_time_structures()` returns three containers. The first, `tc::PISPtimeConfig`, owns the `problem` table.

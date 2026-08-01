@@ -36,18 +36,31 @@ all(isfile, (WORKBOOK2024, WORKBOOK2026)) || error("both selected ISP inputs wor
 
 ISP 2024 uses Green Energy Exports, Step Change, and Progressive Change.
 The source distinguishes these futures through demand drivers, energy efficiency, consumer participation, and other assumptions rather than through a single scalar ranking.
+AEMO's scenario worksheet embeds zero-width-space and soft-hyphen escape artifacts in several cells, both as literal escape text (e.g. the six characters backslash-u-2-0-0-b) and as the actual Unicode characters; `strip_scenario_marker` removes both forms so they don't leak into the rendered table.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
 ```
 
 ````julia
-scenario_2024 = PISPDocUtils.cells_table(
-    WORKBOOK2024,
-    "Scenarios",
-    "B6:E12",
-    ["Parameter", "Green Energy Exports", "Step Change", "Progressive Change"],
+strip_scenario_marker(value) = value
+strip_scenario_marker(value::AbstractString) = strip(replace(
+    value,
+    "\\u200b" => "",
+    "\\u00ad" => "",
+    "\\uad" => "",
+    Char(0x200b) => "",
+    Char(0x00ad) => "",
+))
+
+scenario_2024 = DataFrame(
+    XLSX.readdata(WORKBOOK2024, "Scenarios", "B6:E12"),
+    Symbol.(["Parameter", "Green Energy Exports", "Step Change", "Progressive Change"]);
+    makeunique = true,
 )
+for column in names(scenario_2024)
+    scenario_2024[!, column] = strip_scenario_marker.(scenario_2024[!, column])
+end
 filter!(row -> any(value -> !ismissing(value), Tuple(row)[2:end]), scenario_2024)
 PISPDocUtils.markdown_table(scenario_2024)
 ````
@@ -75,12 +88,14 @@ Step Change is the only retained scenario name; even there, the surrounding assu
 ```
 
 ````julia
-scenario_2026 = PISPDocUtils.cells_table(
-    WORKBOOK2026,
-    "Scenarios",
-    "B6:E12",
-    ["Parameter", "Slower Growth", "Step Change", "Accelerated Transition"],
+scenario_2026 = DataFrame(
+    XLSX.readdata(WORKBOOK2026, "Scenarios", "B6:E12"),
+    Symbol.(["Parameter", "Slower Growth", "Step Change", "Accelerated Transition"]);
+    makeunique = true,
 )
+for column in names(scenario_2026)
+    scenario_2026[!, column] = strip_scenario_marker.(scenario_2026[!, column])
+end
 filter!(row -> any(value -> !ismissing(value), Tuple(row)[2:end]), scenario_2026)
 PISPDocUtils.markdown_table(scenario_2026)
 ````
@@ -109,10 +124,10 @@ Each workbook is a result package with many worksheets rather than a single flat
 
 ````julia
 outlook_inventory = vcat(
-    PISPDocUtils.directory_workbook_inventory(joinpath(ISP2024.download_root, "Core"), "2024"),
-    PISPDocUtils.directory_workbook_inventory(joinpath(ISP2024.download_root, "Sensitivities"), "2024"),
-    PISPDocUtils.directory_workbook_inventory(joinpath(ISP2026.download_root, "Core scenarios"), "2026"),
-    PISPDocUtils.directory_workbook_inventory(joinpath(ISP2026.download_root, "Sensitivities"), "2026"),
+    PISPDocUtils.read_outlook_inventory(joinpath(ISP2024.download_root, "Core"), "2024"),
+    PISPDocUtils.read_outlook_inventory(joinpath(ISP2024.download_root, "Sensitivities"), "2024"),
+    PISPDocUtils.read_outlook_inventory(joinpath(ISP2026.download_root, "Core scenarios"), "2026"),
+    PISPDocUtils.read_outlook_inventory(joinpath(ISP2026.download_root, "Sensitivities"), "2026"),
 )
 outlook_counts = combine(groupby(outlook_inventory, [:edition, :group]), nrow => :workbooks)
 sort!(outlook_counts, [:edition, :group])

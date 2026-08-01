@@ -5,7 +5,6 @@
 # The [2023 IASR, pp. 97–98](../../../../../data/2024/pisp-reports/2023-inputs-assumptions-and-scenarios-report.pdf#page=97) identifies the assumptions workbook as the source of monthly, annual, and seasonal inflow information for the represented hydro schemes.
 
 using PISP
-using CSV
 using DataFrames
 using XLSX
 
@@ -16,36 +15,38 @@ import .PISPDocUtils
 
 const ISP2024 = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
 const ISP2026 = PISPDocUtils.edition_profile(REPO_ROOT, "2026")
-const WORKBOOK2024 = joinpath(ISP2024.download_root, "2024-isp-inputs-and-assumptions-workbook.xlsx")
+const HYDRO_INFLOWS_2024 = PISP.source_spec(:hydro_scheme_inflows, 2024)
+const HYDRO_NATURAL_INFLOW_2024 = PISP.source_spec(:hydro_natural_inflow_trace, 2024)
+const HYDRO_ANNUAL_ENERGY_2024 = PISP.source_spec(:hydro_annual_energy_limit_trace, 2024)
+const WORKBOOK2024 = PISP.source_path(ISP2024.download_root, HYDRO_INFLOWS_2024)
 const WORKBOOK2026 = joinpath(ISP2026.download_root, "2026-isp-inputs-and-assumptions-workbook.xlsm")
 const MODEL2024 = joinpath(ISP2024.download_root, "2024 ISP Model")
 nothing #hide
 
 # ## Workbook reference-year tables
 #
-# The 2024 sample combines public-domain interpretations for Blowering, Eucumbene, and Guthega and reports monthly values plus an annual total without restating a unit in the immediate table block.
-# The 2026 workbook separates named schemes into their own blocks; the sample below begins with Blowering and labels the values in GL.
+# The 2024 PISP source selection combines public-domain interpretations for Blowering, Eucumbene, and Guthega and reads the monthly values used by the current parser.
+# The 2026 workbook separates named schemes into their own blocks; the sample below begins with Blowering, labels the values in GL, and includes the published annual total.
 
-hydro_2024 = PISPDocUtils.cells_table(
-    WORKBOOK2024,
-    "Hydro Scheme Inflows",
-    "B35:O40",
-    [
+hydro_source_2024 = PISP.read_xlsx_rows(WORKBOOK2024, HYDRO_INFLOWS_2024)
+hydro_2024 = DataFrame(
+    hydro_source_2024[2:7, 1:13],
+    Symbol.([
         "Reference year", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan",
-        "Feb", "Mar", "Apr", "May", "Jun", "Annual total",
-    ],
+        "Feb", "Mar", "Apr", "May", "Jun",
+    ]);
+    makeunique = true,
 )
 PISPDocUtils.markdown_table(hydro_2024)
 #-
 
-hydro_2026 = PISPDocUtils.cells_table(
-    WORKBOOK2026,
-    "Hydro Scheme Inflows",
-    "B11:O16",
-    [
+hydro_2026 = DataFrame(
+    XLSX.readdata(WORKBOOK2026, "Hydro Scheme Inflows", "B11:O16"),
+    Symbol.([
         "Reference year", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan",
         "Feb", "Mar", "Apr", "May", "Jun", "Annual total",
-    ],
+    ]);
+    makeunique = true,
 )
 PISPDocUtils.markdown_table(hydro_2026)
 #-
@@ -56,8 +57,14 @@ PISPDocUtils.markdown_table(hydro_2026)
 # Although its filename begins with `MonthlyNaturalInflow`, the records shown here are daily observations.
 # The parser groups files to hydro generators through package mappings and aggregates the daily records into the required temporal representation.
 
-natural_inflow_path = PISPDocUtils.first_matching_file(MODEL2024, r"^MonthlyNaturalInflow_Anthony_Pieman_.*\.csv$"i)
-natural_inflow = CSV.read(natural_inflow_path, DataFrame)
+natural_inflow_path = PISP.source_path(
+    MODEL2024,
+    HYDRO_NATURAL_INFLOW_2024;
+    scenario = "Step Change",
+    file_name = "MonthlyNaturalInflow_Anthony_Pieman_RefYear4006",
+    hydro_scenario = "StepChange",
+)
+natural_inflow = PISP.read_csv_source(natural_inflow_path, HYDRO_NATURAL_INFLOW_2024)
 natural_inflow_preview = first(natural_inflow, 5)
 PISPDocUtils.markdown_table(natural_inflow_preview)
 #-
@@ -75,8 +82,14 @@ PISPDocUtils.markdown_table(natural_inflow_profile)
 # The annual file uses one year key followed by named hydro constraints.
 # These limits are distinct from the daily inflow series and are joined to generators through maintained hydro-constraint mappings.
 
-annual_energy_path = PISPDocUtils.first_matching_file(MODEL2024, r"^MaxEnergyYear_.*\.csv$"i)
-annual_energy = CSV.read(annual_energy_path, DataFrame)
+annual_energy_path = PISP.source_path(
+    MODEL2024,
+    HYDRO_ANNUAL_ENERGY_2024;
+    scenario = "Step Change",
+    file_name = "MaxEnergyYear_LT_RefYear4006",
+    hydro_scenario = "StepChange",
+)
+annual_energy = PISP.read_csv_source(annual_energy_path, HYDRO_ANNUAL_ENERGY_2024)
 annual_energy_preview = first(select(annual_energy, 1:6), 5)
 PISPDocUtils.markdown_table(annual_energy_preview)
 #-

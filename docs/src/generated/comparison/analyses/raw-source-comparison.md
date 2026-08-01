@@ -12,6 +12,7 @@ It is distinct from the model-archive comparison, which inventories archive pack
 ```
 
 ````julia
+using PISP
 using DataFrames
 using XLSX
 
@@ -22,9 +23,11 @@ import .PISPDocUtils
 
 const ISP2024 = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
 const ISP2026 = PISPDocUtils.edition_profile(REPO_ROOT, "2026")
-const WORKBOOK2024 = joinpath(ISP2024.download_root, "2024-isp-inputs-and-assumptions-workbook.xlsx")
+const INPUTS_2024 = PISP.source_spec(:existing_generator_summary, 2024)
+const EV_NUMBERS_2024 = PISP.source_spec(:ev_vehicle_numbers, 2024)
+const WORKBOOK2024 = PISP.source_path(ISP2024.download_root, INPUTS_2024)
 const WORKBOOK2026 = joinpath(ISP2026.download_root, "2026-isp-inputs-and-assumptions-workbook.xlsm")
-const EV2023 = joinpath(ISP2024.download_root, "2023-iasr-ev-workbook.xlsx")
+const EV2023 = PISP.source_path(ISP2024.download_root, EV_NUMBERS_2024)
 const EV2025 = joinpath(ISP2026.download_root, "aemo-2025-iasr-ev-workbook.xlsx")
 ````
 
@@ -42,7 +45,7 @@ The EV publication also gains one worksheet, while the outlook package keeps thr
 ```
 
 ````julia
-publication_inventory = PISPDocUtils.workbook_inventory([
+publication_inventory = PISPDocUtils.read_workbook_inventory([
     "ISP 2024 inputs and assumptions" => WORKBOOK2024,
     "ISP 2026 inputs and assumptions" => WORKBOOK2026,
     "2023 IASR EV" => EV2023,
@@ -69,10 +72,10 @@ PISPDocUtils.markdown_table(publication_inventory)
 
 ````julia
 outlook_inventory = vcat(
-    PISPDocUtils.directory_workbook_inventory(joinpath(ISP2024.download_root, "Core"), "2024"),
-    PISPDocUtils.directory_workbook_inventory(joinpath(ISP2024.download_root, "Sensitivities"), "2024"),
-    PISPDocUtils.directory_workbook_inventory(joinpath(ISP2026.download_root, "Core scenarios"), "2026"),
-    PISPDocUtils.directory_workbook_inventory(joinpath(ISP2026.download_root, "Sensitivities"), "2026"),
+    PISPDocUtils.read_outlook_inventory(joinpath(ISP2024.download_root, "Core"), "2024"),
+    PISPDocUtils.read_outlook_inventory(joinpath(ISP2024.download_root, "Sensitivities"), "2024"),
+    PISPDocUtils.read_outlook_inventory(joinpath(ISP2026.download_root, "Core scenarios"), "2026"),
+    PISPDocUtils.read_outlook_inventory(joinpath(ISP2026.download_root, "Sensitivities"), "2026"),
 )
 outlook_counts = combine(groupby(outlook_inventory, [:edition, :group]), nrow => :workbooks)
 sort!(outlook_counts, [:edition, :group])
@@ -101,16 +104,26 @@ Presence alone is structural evidence; it does not prove that fields, units, or 
 ```
 
 ````julia
-worksheet_comparison = PISPDocUtils.worksheet_presence(
-    ["ISP 2024" => WORKBOOK2024, "ISP 2026" => WORKBOOK2026],
-    [
-        "Existing Gen Data Summary", "Generator Reliability Settings", "Retirement",
-        "Network Capability", "Network capability", "Flow Path Augmentation options",
-        "Flow path augmentation options", "Renewable Energy Zones", "Renewable energy zones",
-        "Generation limits", "Coal Min Stable Level", "Min Up&Down Times", "DSP",
-        "Hydro Scheme Inflows", "Data Centre Forecasts", "Distribution network", "Hybrid site limits",
-    ],
-)
+comparison_sheets = [
+    "Existing Gen Data Summary", "Generator Reliability Settings", "Retirement",
+    "Network Capability", "Network capability", "Flow Path Augmentation options",
+    "Flow path augmentation options", "Renewable Energy Zones", "Renewable energy zones",
+    "Generation limits", "Coal Min Stable Level", "Min Up&Down Times", "DSP",
+    "Hydro Scheme Inflows", "Data Centre Forecasts", "Distribution network", "Hybrid site limits",
+]
+comparison_sheet_names = [
+    ("ISP 2024", XLSX.openxlsx(WORKBOOK2024) do workbook
+        Set(XLSX.sheetnames(workbook))
+    end),
+    ("ISP 2026", XLSX.openxlsx(WORKBOOK2026) do workbook
+        Set(XLSX.sheetnames(workbook))
+    end),
+]
+worksheet_comparison = DataFrame([
+    (edition = edition, worksheet = sheet, present = sheet in available)
+    for (edition, available) in comparison_sheet_names
+    for sheet in comparison_sheets
+])
 PISPDocUtils.markdown_table(worksheet_comparison)
 ````
 
@@ -166,7 +179,7 @@ They include stored cells and formatting, so they are useful for comparison but 
 ```
 
 ````julia
-dimension_2024 = PISPDocUtils.sheet_dimension_table(
+dimension_2024 = PISPDocUtils.read_sheet_dimensions(
     WORKBOOK2024,
     [
         "Scenarios", "Existing Gen Data Summary", "New Entrant Data Summary",
@@ -177,7 +190,7 @@ dimension_2024 = PISPDocUtils.sheet_dimension_table(
 )
 dimension_2024.edition = fill("2024", nrow(dimension_2024))
 
-dimension_2026 = PISPDocUtils.sheet_dimension_table(
+dimension_2026 = PISPDocUtils.read_sheet_dimensions(
     WORKBOOK2026,
     [
         "Scenarios", "Existing Gen Data Summary", "New Entrant Data Summary",
