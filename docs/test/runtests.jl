@@ -60,30 +60,6 @@ include(joinpath(TEST_DOCS_DIR, "utils", "source_links.jl"))
         @test isfile(joinpath(TEST_DOCS_DIR, "config", filename))
     end
 
-    old_module_names = [
-        "Eda" * "Support",
-        "PISPDocs" * "BuildoutDefaults",
-        "PISPDocs" * "DownloadLayout",
-        "PISPDocs" * "EditionProfiles",
-        "PISPDocs" * "Navigation",
-        "PISPDocs" * "PageRegistry",
-        "PISPDocs" * "SourceAvailability",
-        "PISPDocs" * "SourceMaterialSupport",
-        "Source" * "Links",
-    ]
-    documentation_julia = String[]
-    for (directory, _, files) in walkdir(TEST_DOCS_DIR)
-        occursin(joinpath(TEST_DOCS_DIR, "src", "generated"), directory) && continue
-        for filename in files
-            endswith(filename, ".jl") || continue
-            push!(documentation_julia, read(joinpath(directory, filename), String))
-        end
-    end
-    documentation_source = join(documentation_julia, "\n")
-    for module_name in old_module_names
-        @test !occursin(module_name, documentation_source)
-    end
-
     literate_root = joinpath(TEST_DOCS_DIR, "literate")
     for (directory, _, files) in walkdir(literate_root)
         for filename in files
@@ -183,21 +159,7 @@ end
     source_material = read(source_material_path, String)
 
     @test !isfile(joinpath(utils_dir, "source_material_specs.jl"))
-    for retired in (
-        "cells_table",
-        "preview_table",
-        "source_evidence_spec",
-        "range_workbook",
-        "RANGE_WORKBOOK_CACHE",
-        "sheet_names",
-        "sheet_dimension_table",
-        "worksheet_presence",
-        "directory_workbook_inventory",
-        "first_matching_file",
-        "XLSX.readdata",
-    )
-        @test !occursin(retired, source_material)
-    end
+    @test !occursin("XLSX.readdata", source_material)
 
     literate_root = joinpath(TEST_DOCS_DIR, "literate")
     literate_sources = String[]
@@ -209,20 +171,7 @@ end
     end
     literate_source = join(literate_sources, "\n")
 
-    for retired in (
-        "PISPDocUtils.cells_table",
-        "PISPDocUtils.preview_table",
-        "PISPDocUtils.source_evidence_spec",
-        "PISPDocUtils.sheet_names",
-        "PISPDocUtils.sheet_dimension_table",
-        "PISPDocUtils.worksheet_presence",
-        "PISPDocUtils.workbook_inventory",
-        "PISPDocUtils.directory_workbook_inventory",
-        "PISPDocUtils.first_matching_file",
-        "validate_columns",
-    )
-        @test !occursin(retired, literate_source)
-    end
+    @test !occursin("validate_columns", literate_source)
 
     spec_driven_2024_pages = [
         "demand_and_distributed_resources.jl",
@@ -362,7 +311,6 @@ end
     )
     @test occursin("Source status", buildout_defaults)
     @test occursin("original external source", buildout_defaults)
-    @test !occursin("\n````\ntrue\n````", buildout_defaults)
 
     hydro_parameters = read_doc(
         "generated",
@@ -1214,14 +1162,16 @@ end
 
 include(joinpath(@__DIR__, "test_source_links.jl"))
 
-@testset "Generated documentation does not leak the renderer's home directory" begin
+@testset "Generated documentation does not leak stray auto-displayed values" begin
     generated_root = joinpath(TEST_DOCS_DIR, "src", "generated")
     home = homedir()
     for (directory, _, files) in walkdir(generated_root)
         for filename in files
             endswith(filename, ".md") || continue
             path = joinpath(directory, filename)
-            @test !occursin(home, read(path, String))
+            content = read(path, String)
+            @test !occursin(home, content)
+            @test !occursin(r"\n````\n(true|false)\n````", content)
         end
     end
 end

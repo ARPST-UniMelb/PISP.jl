@@ -71,10 +71,6 @@ isempty(missing_files) || error("missing PISP output files: $(join(missing_files
 </details>
 ```
 
-````
-true
-````
-
 ## Load static tables
 
 `Generator.csv`, `Demand.csv`, and `Bus.csv` are static tables written once per PISP build.

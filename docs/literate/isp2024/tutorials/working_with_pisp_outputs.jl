@@ -56,6 +56,7 @@ required_files = [
 ]
 missing_files = filter(path -> !isfile(path), required_files)
 isempty(missing_files) || error("missing PISP output files: $(join(missing_files, ", "))")
+nothing #hide
 
 # ## Load static tables
 #
