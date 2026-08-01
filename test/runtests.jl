@@ -2,8 +2,8 @@ using PISP
 using Test
 using Dates
 
-include(joinpath(@__DIR__, "..", "docs", "source_availability.jl"))
-using .PISPDocsSourceAvailability
+include(joinpath(@__DIR__, "..", "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
 # The suite is partitioned into one file per topic. The source-availability checks
 # run at top level (matching the original layout); the package-behaviour tests run

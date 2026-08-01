@@ -12,9 +12,9 @@ using CSV
 
 source_specs_edition_2024 = only(filter(
     p -> p.edition == "2024",
-    source_availability_profiles(normpath(joinpath(@__DIR__, ".."))),
+    PISPDocUtils.source_availability_profiles(normpath(joinpath(@__DIR__, ".."))),
 ))
-source_specs_2024_available = inspect_edition(source_specs_edition_2024).state == :complete
+source_specs_2024_available = PISPDocUtils.inspect_edition(source_specs_edition_2024).state == :complete
 
 @testset "source specs: hardcoded 2024 workbook/CSV read contracts" begin
     if !source_specs_2024_available

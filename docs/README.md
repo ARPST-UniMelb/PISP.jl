@@ -143,7 +143,8 @@ Local data are required for complete Literate regeneration, but not for a site b
 | `docs/config/source-links.toml` | Local-to-public source-link registry used by the Documenter staging step. |
 | `docs/utils/PISPDocUtils.jl` | Module facade for documentation and tutorial support used with qualified `PISPDocUtils.*` calls. |
 | `docs/utils/` | Reusable tutorial support and documentation build helpers. |
-| `docs/src/generated/` | Markdown and figures generated from registered Literate pages. |
+| `docs/src/generated/` | Committed Markdown and embedded figures installed from registered Literate pages. |
+| `docs/src/tables/` and `docs/src/figures/` | Ignored canonical CSV and PNG diagnostics produced while executing Literate pages; selected figures are copied into `docs/src/generated/` for publication. |
 | `docs/render_literate.jl` | Literate selection, profile resolution, data preflight, execution, and generated-output installation. |
 | `docs/make.jl` | Target-specific source-link staging and Documenter site build. |
 
@@ -269,7 +270,7 @@ Run checks from the repository root.
 | --- | --- | --- | --- |
 | Package tests | `julia --project=. -e 'using Pkg; Pkg.test()'` | Reads the package and root test environment; writes normal Julia caches and temporary test artefacts. | No for fixture-based checks; local source-root checks skip when configured material is absent. |
 | Documentation infrastructure tests | `julia --project=docs docs/test/runtests.jl` | Reads registry, navigation, renderer, utility, and source-link fixtures; writes temporary test directories. | No. |
-| Literate render | `julia --project=docs docs/render_literate.jl` | Reads registered sources and their declared data requirements; writes committed generated Markdown and figures. | Yes for selected data-dependent pages. |
+| Literate render | `julia --project=docs docs/render_literate.jl` | Reads registered sources and their declared data requirements; writes committed generated Markdown and embedded figures plus ignored canonical diagnostics under `docs/src/tables/` and `docs/src/figures/`. | Yes for selected data-dependent pages. |
 | Local-link site build | `julia --project=docs docs/make.jl` | Reads maintained and committed generated Markdown; writes `docs/.documenter-source/` and `docs/build/`. | No. |
 | Public-link site build | `PISP_DOCS_LINK_TARGET=public julia --project=docs docs/make.jl` | Reads source-link mappings and documentation sources; writes staged public-link pages and `docs/build/`. | No. |
 | Render and local build | `julia --project=docs docs/build_all.jl` | Runs the registered Literate render followed by the local-link site build. | Yes for data-dependent published pages. |

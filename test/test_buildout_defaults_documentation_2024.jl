@@ -4,11 +4,10 @@ using Dates
 using Tables
 using XLSX
 
-include(joinpath(@__DIR__, "..", "docs", "eda_support.jl"))
-using .EdaSupport
-
-include(joinpath(@__DIR__, "..", "docs", "buildout_defaults_support.jl"))
-using .PISPDocsBuildoutDefaults
+if !isdefined(@__MODULE__, :PISPDocUtils)
+    include(joinpath(@__DIR__, "..", "docs", "utils", "PISPDocUtils.jl"))
+end
+import .PISPDocUtils
 
 const BUILDOUT_LABELS = [
     "bess_1h", "bess_2h", "bess_4h", "bess_8h", "phsp_24h", "phsp_48h",
@@ -51,7 +50,7 @@ end
 
 @testset "ISP 2024 build-out defaults documentation" begin
     parser_path = joinpath(@__DIR__, "..", "src", "parsers", "PISP-2024buildout.jl")
-    @test validate_buildout_defaults_contract(parser_path)
+    @test PISPDocUtils.validate_buildout_defaults_contract(parser_path)
 
     generated_path = joinpath(
         @__DIR__, "..", "docs", "src", "generated", "isp2024", "reference", "buildout-defaults.md",
@@ -59,21 +58,27 @@ end
     @test isfile(generated_path)
     generated = replace(read(generated_path, String), "\r\n" => "\n")
 
-    reference_tables = buildout_reference_tables()
+    reference_tables = PISPDocUtils.buildout_reference_tables()
     for (table_name, table) in pairs(reference_tables)
-        expected = strip(replace(markdown_table(table; allow_markdown_in_cells = true).text, "\r\n" => "\n"))
+        expected = strip(replace(
+            PISPDocUtils.markdown_table(table; allow_markdown_in_cells = true).text,
+            "\r\n" => "\n",
+        ))
         @testset "rendered $(table_name) table" begin
             @test occursin(expected, generated)
         end
     end
 
-    for field in union(Set(ESS_TEMPLATE_FIELDS), Set(GEN_TEMPLATE_FIELDS))
+    for field in union(
+        Set(PISPDocUtils.ESS_TEMPLATE_FIELDS),
+        Set(PISPDocUtils.GEN_TEMPLATE_FIELDS),
+    )
         @test occursin("`$field`", generated)
     end
-    for row in buildout_technology_rows()
+    for row in PISPDocUtils.buildout_technology_rows()
         @test occursin("`$(row.buildout_label)`", generated)
     end
-    for row in buildout_placeholder_rows()
+    for row in PISPDocUtils.buildout_placeholder_rows()
         @test occursin("`$(row.field)`", generated)
     end
     @test !occursin(r"\|\s*`[^`]+`\s*\|\s*`?nothing`?\s*\|", generated)
@@ -129,7 +134,7 @@ end
             @test row.emax == PISP._BESS_DURATION_H[label] * source_row.capacity
             @test row.latitude == 0.0
             @test row.longitude == 0.0
-            for field in ESS_TEMPLATE_FIELDS
+            for field in PISPDocUtils.ESS_TEMPLATE_FIELDS
                 @test row[Symbol(field)] == template[field]
             end
 
@@ -150,7 +155,7 @@ end
             @test row.pmax == source_row.capacity
             @test row.latitude == 0.0
             @test row.longitude == 0.0
-            for field in GEN_TEMPLATE_FIELDS
+            for field in PISPDocUtils.GEN_TEMPLATE_FIELDS
                 @test row[Symbol(field)] == template[field]
             end
 

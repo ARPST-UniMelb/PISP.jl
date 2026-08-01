@@ -1,7 +1,7 @@
 # # ISP 2024: Generated-output consistency
 #
 # This validation checks identifier coverage, schedule coverage, generator classification, and daily solar, wind, and demand alignment for one generated ISP 2024 build.
-# Supporting tables are saved under `eda/tables/julia/06_pisp_outputs/`, and the selected figures summarise the same computed evidence.
+# Supporting tables are saved under `docs/src/tables/julia/isp2024_06_pisp_outputs/`, and the selected figures summarise the same computed evidence.
 #
 # By default it reads `data/2024/pisp-datasets/out-ref4006-poe10/csv/` and `schedule-2030/`; set `PISP_DOCS_ISP2024_OUTPUT_ROOT` or `PISP_DOCS_ISP2024_SCHEDULE_TAG` to select another local generated build.
 
@@ -604,4 +604,4 @@ nothing #hide
 # - Static asset tables and 2030 schedule outputs join cleanly for this generated build, with identifier coverage and schedule time coverage recorded above and any unmatched identifiers listed in `unmatched_ids`.
 # - Solar and wind classification, annual mean available output, and capacity-factor duration follow the denominator convention documented on `capacity_factor_duration_frame`.
 # - The figures and tables use the same joined static and schedule inputs.
-# - Complete diagnostics are saved under `eda/tables/julia/06_pisp_outputs/`; no historical thresholds are applied.
+# - Complete diagnostics are saved under `docs/src/tables/julia/isp2024_06_pisp_outputs/`; no historical thresholds are applied.

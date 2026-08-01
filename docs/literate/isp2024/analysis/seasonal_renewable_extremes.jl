@@ -145,7 +145,7 @@ PISPDocUtils.markdown_table(hot_cool_summer_solar_summary)
 
 # ## Persistent low-output periods
 #
-# An event is a run of consecutive summer calendar days whose daily mean capacity factor stays below the technology's threshold for at least 3 days; a run never bridges the excluded March-November gap between a summer's December and the following January/February. The full event-by-event table is written to `eda/tables/julia/04_seasonal_extremes/low_output_events.csv`; the page instead shows a compact per-technology-per-year summary of how many candidate events were found and how long they lasted.
+# An event is a run of consecutive summer calendar days whose daily mean capacity factor stays below the technology's threshold for at least 3 days; a run never bridges the excluded March-November gap between a summer's December and the following January/February. The full event-by-event table is written to `docs/src/tables/julia/isp2024_04_seasonal_extremes/low_output_events.csv`; the page instead shows a compact per-technology-per-year summary of how many candidate events were found and how long they lasted.
 
 rows = NamedTuple[]
 for (tech, loc, hh_cols, threshold) in (
@@ -259,7 +259,7 @@ PISPDocUtils.markdown_table(monthly_cf_2019_summary)
 
 # The `RefYear2019` trace reuses the 2019 historical weather pattern across the projected planning horizon rather than representing only one 2018-19 season.
 # The historical label includes the 2019-20 Black Summer context, but this capacity-factor trace does not isolate effects from heat, smoke, cloud, or bushfire conditions.
-# The table previews 15 rows; the complete series is written to `eda/tables/julia/04_seasonal_extremes/black_summer_2019_daily_cf.csv`.
+# The table previews 15 rows; the complete series is written to `docs/src/tables/julia/isp2024_04_seasonal_extremes/black_summer_2019_daily_cf.csv`.
 # `rolling3_cf` is a trailing 3-day mean, so its first two values are `missing`.
 
 df = load_trace("solar", 2019, SOLAR_LOC)

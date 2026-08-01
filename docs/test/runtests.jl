@@ -160,6 +160,9 @@ end
 end
 
 @testset "Shared documentation transformations" begin
+    @test PISPDocUtils.TABLE_ROOT == normpath(joinpath(TEST_DOCS_DIR, "src", "tables"))
+    @test PISPDocUtils.FIGURE_ROOT == normpath(joinpath(TEST_DOCS_DIR, "src", "figures"))
+
     matrix = Any[1 missing missing; missing missing missing; 2 missing missing]
     trimmed = PISPDocUtils.trim_sheet(matrix)
     @test size(trimmed) == (3, 1)

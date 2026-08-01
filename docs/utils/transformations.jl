@@ -4,8 +4,8 @@ using Dates
 using PrettyTables
 using Statistics
 
-const TABLE_ROOT = joinpath(normpath(joinpath(@__DIR__, "..", "..")), "eda", "tables")
-const FIGURE_ROOT = joinpath(normpath(joinpath(@__DIR__, "..", "..")), "eda", "figures")
+const TABLE_ROOT = normpath(joinpath(@__DIR__, "..", "src", "tables"))
+const FIGURE_ROOT = normpath(joinpath(@__DIR__, "..", "src", "figures"))
 
 function table_dir(script_stem; producer = "julia", root = TABLE_ROOT)
     path = joinpath(root, producer, script_stem)
