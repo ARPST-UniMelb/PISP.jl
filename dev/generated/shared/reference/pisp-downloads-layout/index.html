@@ -7,45 +7,23 @@
 └── zip/                       # retained source archives</code></pre><p>The extracted <code>&lt;edition&gt; ISP Model/</code> directory is a separate model-archive source family.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">const REPO_ROOT = normpath(
     get(ENV, &quot;PISP_DOCS_REPO_ROOT&quot;, joinpath(@__DIR__, &quot;..&quot;, &quot;..&quot;, &quot;..&quot;, &quot;..&quot;, &quot;..&quot;)),
 )
-include(joinpath(REPO_ROOT, &quot;docs&quot;, &quot;edition_profiles.jl&quot;))
-include(joinpath(REPO_ROOT, &quot;docs&quot;, &quot;download_layout.jl&quot;))
-using .PISPDocsEditionProfiles: edition_profiles
-using .PISPDocsDownloadLayout: inspect_download_layout
-
-struct MarkdownTable
-    text::String
-end
-
-Base.show(io::IO, ::MIME&quot;text/markdown&quot;, table::MarkdownTable) = print(io, table.text)
-Base.show(io::IO, ::MIME&quot;text/plain&quot;, table::MarkdownTable) = print(io, table.text)
-
-markdown_cell(value) = replace(replace(string(value), &#39;\n&#39; =&gt; &quot; &quot;), &#39;|&#39; =&gt; &quot;\\|&quot;)
-markdown_items(values) = isempty(values) ? &quot;—&quot; : join((&quot;`$(markdown_cell(value))`&quot; for value in values), &quot;, &quot;)
-
-function markdown_table(headers, rows)
-    lines = String[]
-    push!(lines, &quot;| &quot; * join(markdown_cell.(headers), &quot; | &quot;) * &quot; |&quot;)
-    push!(lines, &quot;| &quot; * join(fill(&quot;:---&quot;, length(headers)), &quot; | &quot;) * &quot; |&quot;)
-    for row in rows
-        length(row) == length(headers) || error(&quot;table row does not match the headers&quot;)
-        push!(lines, &quot;| &quot; * join(markdown_cell.(row), &quot; | &quot;) * &quot; |&quot;)
-    end
-    return MarkdownTable(join(lines, &quot;\n&quot;))
-end</code></pre></details><h2 id="Observed-outlook-directories-and-source-archives"><a class="docs-heading-anchor" href="#Observed-outlook-directories-and-source-archives">Observed outlook directories and source archives</a><a id="Observed-outlook-directories-and-source-archives-1"></a><a class="docs-heading-anchor-permalink" href="#Observed-outlook-directories-and-source-archives" title="Permalink"></a></h2><p>The inventory is read from the configured edition roots. The outlook column contains the top-level extracted workbook directories after separating <code>Auxiliary</code>, <code>Traces</code>, <code>zip</code>, manifest directories, and directories ending in <code>ISP Model</code> into their own source families. The archive column lists direct ZIP files under <code>pisp-downloads/zip/</code>; trace archives stored below <code>zip/Traces/</code> remain part of the trace source family.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">download_layouts = [
-    inspect_download_layout(profile.label, profile.download_root)
-    for profile in edition_profiles(REPO_ROOT)
+include(joinpath(REPO_ROOT, &quot;docs&quot;, &quot;utils&quot;, &quot;PISPDocUtils.jl&quot;))
+import .PISPDocUtils</code></pre></details><h2 id="Observed-outlook-directories-and-source-archives"><a class="docs-heading-anchor" href="#Observed-outlook-directories-and-source-archives">Observed outlook directories and source archives</a><a id="Observed-outlook-directories-and-source-archives-1"></a><a class="docs-heading-anchor-permalink" href="#Observed-outlook-directories-and-source-archives" title="Permalink"></a></h2><p>The inventory is read from the configured edition roots. The outlook column contains the top-level extracted workbook directories after separating <code>Auxiliary</code>, <code>Traces</code>, <code>zip</code>, manifest directories, and directories ending in <code>ISP Model</code> into their own source families. The archive column lists direct ZIP files under <code>pisp-downloads/zip/</code>; trace archives stored below <code>zip/Traces/</code> remain part of the trace source family.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">download_layouts = [
+    PISPDocUtils.inspect_download_layout(profile.label, profile.download_root)
+    for profile in PISPDocUtils.edition_profiles(REPO_ROOT)
 ]
 
 layout_rows = [
     Any[
         layout.edition,
-        markdown_items(layout.outlook_directories),
-        markdown_items(layout.source_archives),
+        PISPDocUtils.markdown_items(layout.outlook_directories; nothing_text = &quot;nothing&quot;),
+        PISPDocUtils.markdown_items(layout.source_archives; nothing_text = &quot;nothing&quot;),
     ]
     for layout in download_layouts
 ]
 
-markdown_table(
+PISPDocUtils.markdown_table(
     [&quot;Edition&quot;, &quot;Extracted outlook directories&quot;, &quot;Retained source archives&quot;],
-    layout_rows,
-)</code></pre></details><table><tr><th style="text-align: left">Edition</th><th style="text-align: left">Extracted outlook directories</th><th style="text-align: left">Retained source archives</th></tr><tr><td style="text-align: left">ISP 2024</td><td style="text-align: left"><code>Core</code>, <code>Sensitivities</code></td><td style="text-align: left"><code>2024-isp-generation-and-storage-outlook.zip</code>, <code>2024-isp-model.zip</code></td></tr><tr><td style="text-align: left">ISP 2026</td><td style="text-align: left"><code>Core scenarios</code>, <code>Sensitivities</code></td><td style="text-align: left"><code>2026-isp-generation-and-storage-outlook.zip</code>, <code>2026-isp-model.zip</code></td></tr></table><p><code>Core</code> or <code>Core scenarios</code> and <code>Sensitivities</code> contain the extracted generation-and-storage-outlook workbooks. The other branches have distinct source or preprocessing roles.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../source-material/hydro-inflows-and-energy-constraints/">« Hydro inflows and energy constraints</a><a class="docs-footer-nextpage" href="../../../../editions/trace-coverage/">Trace families and source meaning »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Friday 31 July 2026 12:10">Friday 31 July 2026</span>. Using Julia version 1.12.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+    layout_rows;
+    nothing_text = &quot;nothing&quot;,
+)</code></pre></details><table><tr><th style="text-align: left">Edition</th><th style="text-align: left">Extracted outlook directories</th><th style="text-align: left">Retained source archives</th></tr><tr><td style="text-align: left">ISP 2024</td><td style="text-align: left"><code>Core</code>, <code>Sensitivities</code></td><td style="text-align: left"><code>2024-isp-generation-and-storage-outlook.zip</code>, <code>2024-isp-model.zip</code></td></tr><tr><td style="text-align: left">ISP 2026</td><td style="text-align: left"><code>Core scenarios</code>, <code>Sensitivities</code></td><td style="text-align: left"><code>2026-isp-generation-and-storage-outlook.zip</code>, <code>2026-isp-model.zip</code></td></tr></table><p><code>Core</code> or <code>Core scenarios</code> and <code>Sensitivities</code> contain the extracted generation-and-storage-outlook workbooks. The other branches have distinct source or preprocessing roles.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../source-material/hydro-inflows-and-energy-constraints/">« Hydro inflows and energy constraints</a><a class="docs-footer-nextpage" href="../../../../editions/trace-coverage/">Trace families and source meaning »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Sunday 2 August 2026 11:26">Sunday 2 August 2026</span>. Using Julia version 1.12.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

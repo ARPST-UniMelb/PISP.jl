@@ -4,11 +4,11 @@
 const REPO_ROOT = normpath(
     get(ENV, &quot;PISP_DOCS_REPO_ROOT&quot;, joinpath(@__DIR__, &quot;..&quot;, &quot;..&quot;, &quot;..&quot;, &quot;..&quot;, &quot;..&quot;)),
 )
-include(joinpath(REPO_ROOT, &quot;docs&quot;, &quot;edition_profiles.jl&quot;))
-using .PISPDocsEditionProfiles: edition_profiles
+include(joinpath(REPO_ROOT, &quot;docs&quot;, &quot;utils&quot;, &quot;PISPDocUtils.jl&quot;))
+import .PISPDocUtils
 
 const EXPECTED_YEARS = (2024, 2026)
-const PROFILES = Dict(parse(Int, profile.edition) =&gt; profile for profile in edition_profiles(REPO_ROOT))
+const PROFILES = Dict(parse(Int, profile.edition) =&gt; profile for profile in PISPDocUtils.edition_profiles(REPO_ROOT))
 const ARCHIVES = Dict(
     year =&gt; joinpath(PROFILES[year].download_root, &quot;zip&quot;, &quot;$(year)-isp-model.zip&quot;)
     for year in EXPECTED_YEARS
@@ -154,35 +154,6 @@ function inspect_archive(year, archive_path)
     return records
 end
 
-struct MarkdownTable
-    text::String
-end
-
-Base.show(io::IO, ::MIME&quot;text/markdown&quot;, table::MarkdownTable) = print(io, table.text)
-Base.show(io::IO, ::MIME&quot;text/plain&quot;, table::MarkdownTable) = print(io, table.text)
-
-function markdown_cell(value)
-    value === nothing &amp;&amp; return &quot;—&quot;
-    text = replace(string(value), &#39;\n&#39; =&gt; &quot; &quot;)
-    return replace(text, &#39;|&#39; =&gt; &quot;\\|&quot;)
-end
-
-function markdown_table(headers, rows; alignment = fill(:left, length(headers)))
-    length(alignment) == length(headers) || error(&quot;Table alignment does not match the columns&quot;)
-    separators = Dict(:left =&gt; &quot;:---&quot;, :right =&gt; &quot;---:&quot;, :centre =&gt; &quot;:---:&quot;)
-    all(item -&gt; haskey(separators, item), alignment) ||
-        error(&quot;Unsupported Markdown alignment&quot;)
-
-    lines = String[]
-    push!(lines, &quot;| &quot; * join(markdown_cell.(headers), &quot; | &quot;) * &quot; |&quot;)
-    push!(lines, &quot;| &quot; * join((separators[item] for item in alignment), &quot; | &quot;) * &quot; |&quot;)
-    for row in rows
-        length(row) == length(headers) || error(&quot;Table row does not match the columns&quot;)
-        push!(lines, &quot;| &quot; * join(markdown_cell.(row), &quot; | &quot;) * &quot; |&quot;)
-    end
-    return MarkdownTable(join(lines, &quot;\n&quot;))
-end
-
 records_for(year) = inspect_archive(year, ARCHIVES[year])
 unique_sorted(values) = sort!(unique(collect(values)))
 mib(bytes) = bytes / 1024^2
@@ -247,7 +218,7 @@ for year in EXPECTED_YEARS
     )
 end
 
-markdown_table(
+PISPDocUtils.markdown_table(
     [
         &quot;ISP year&quot;,
         &quot;Archive&quot;,
@@ -260,6 +231,7 @@ markdown_table(
     ],
     archive_summary_rows;
     alignment = [:right, :left, :left, :right, :right, :right, :right, :right],
+    nothing_text = &quot;—&quot;,
 )</code></pre></details><table><tr><th style="text-align: right">ISP year</th><th style="text-align: left">Archive</th><th style="text-align: left">Root folder</th><th style="text-align: right">Scenarios</th><th style="text-align: right">Model XML</th><th style="text-align: right">Solver XML</th><th style="text-align: right">CSV files</th><th style="text-align: right">Uncompressed MiB</th></tr><tr><td style="text-align: right">2024</td><td style="text-align: left">2024-isp-model.zip</td><td style="text-align: left">2024 ISP Model</td><td style="text-align: right">3</td><td style="text-align: right">3</td><td style="text-align: right">3</td><td style="text-align: right">84</td><td style="text-align: right">472.6</td></tr><tr><td style="text-align: right">2026</td><td style="text-align: left">2026-isp-model.zip</td><td style="text-align: left">2026 ISP Model</td><td style="text-align: right">3</td><td style="text-align: right">3</td><td style="text-align: right">0</td><td style="text-align: right">345</td><td style="text-align: right">572.0</td></tr></table><p>The 2026 archive packages 345 CSV files, compared with 84 in the 2024 archive, and introduces several trace families that are not present in the 2024 model ZIP.</p><h2 id="Scenario-continuity"><a class="docs-heading-anchor" href="#Scenario-continuity">Scenario continuity</a><a id="Scenario-continuity-1"></a><a class="docs-heading-anchor-permalink" href="#Scenario-continuity" title="Permalink"></a></h2><p>The directory names change between editions, but AEMO provides the lineage. The 2025 Inputs, Assumptions and Scenarios Report identifies Step Change as continuing Step Change (<a href="https://www.aemo.com.au/-/media/files/stakeholder_consultation/consultations/nem-consultations/2024/2025-iasr-scenarios/final-docs/2025-inputs-assumptions-and-scenarios-report.pdf?rev=63268acd3f044adb9f5f3a32b6880c27&amp;sc_lang=en#page=18">p. 18</a>), Slower Growth as the successor to Progressive Change (<a href="https://www.aemo.com.au/-/media/files/stakeholder_consultation/consultations/nem-consultations/2024/2025-iasr-scenarios/final-docs/2025-inputs-assumptions-and-scenarios-report.pdf?rev=63268acd3f044adb9f5f3a32b6880c27&amp;sc_lang=en#page=19">p. 19</a>), and Accelerated Transition as a refinement of Green Energy Exports (<a href="https://www.aemo.com.au/-/media/files/stakeholder_consultation/consultations/nem-consultations/2024/2025-iasr-scenarios/final-docs/2025-inputs-assumptions-and-scenarios-report.pdf?rev=63268acd3f044adb9f5f3a32b6880c27&amp;sc_lang=en#page=20">p. 20</a>).</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">scenario_records_2024 = records_for(2024)
 scenario_records_2026 = records_for(2026)
 scenario_mapping = [
@@ -288,12 +260,13 @@ scenarios_2026 = unique_sorted(record.scenario for record in scenario_records_20
 @assert sort([row.scenario_2024 for row in scenario_mapping]) == scenarios_2024
 @assert sort([row.scenario_2026 for row in scenario_mapping]) == scenarios_2026
 
-markdown_table(
+PISPDocUtils.markdown_table(
     [&quot;ISP 2024 scenario&quot;, &quot;ISP 2026 scenario&quot;, &quot;Relationship&quot;, &quot;Evidence&quot;],
     [
         Any[row.scenario_2024, row.scenario_2026, row.relationship, row.citation]
         for row in scenario_mapping
-    ],
+    ];
+    nothing_text = &quot;—&quot;,
 )</code></pre></details><table><tr><th style="text-align: left">ISP 2024 scenario</th><th style="text-align: left">ISP 2026 scenario</th><th style="text-align: left">Relationship</th><th style="text-align: left">Evidence</th></tr><tr><td style="text-align: left">Green Energy Exports</td><td style="text-align: left">Accelerated Transition</td><td style="text-align: left">Refined successor</td><td style="text-align: left">2025 IASR, p. 20</td></tr><tr><td style="text-align: left">Progressive Change</td><td style="text-align: left">Slower Growth</td><td style="text-align: left">Renamed successor</td><td style="text-align: left">2025 IASR, p. 19</td></tr><tr><td style="text-align: left">Step Change</td><td style="text-align: left">Step Change</td><td style="text-align: left">Same scenario name</td><td style="text-align: left">2025 IASR, p. 18</td></tr></table><p>The crosswalk describes scenario lineage. It does not imply that assumptions or model inputs are unchanged between editions.</p><h2 id="XML-packaging"><a class="docs-heading-anchor" href="#XML-packaging">XML packaging</a><a id="XML-packaging-1"></a><a class="docs-heading-anchor-permalink" href="#XML-packaging" title="Permalink"></a></h2><p>Each archive contains one model XML file per scenario. ISP 2024 also stores a separate <code>PLEXOS_Solverparam.xml</code> file in each scenario directory; the 2026 model ZIP has no separate XML file with that role.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">xml_records = vcat(records_for(2024), records_for(2026))
 xml_role_rows = Vector{Any}[]
 for role in [&quot;PLEXOS model&quot;, &quot;PLEXOS solver parameters&quot;]
@@ -307,10 +280,11 @@ for role in [&quot;PLEXOS model&quot;, &quot;PLEXOS solver parameters&quot;]
     )
 end
 
-markdown_table(
+PISPDocUtils.markdown_table(
     [&quot;XML role&quot;, &quot;ISP 2024 files&quot;, &quot;ISP 2026 files&quot;],
     xml_role_rows;
     alignment = [:left, :right, :right],
+    nothing_text = &quot;—&quot;,
 )</code></pre></details><table><tr><th style="text-align: left">XML role</th><th style="text-align: right">ISP 2024 files</th><th style="text-align: right">ISP 2026 files</th></tr><tr><td style="text-align: left">PLEXOS model</td><td style="text-align: right">3</td><td style="text-align: right">3</td></tr><tr><td style="text-align: left">PLEXOS solver parameters</td><td style="text-align: right">3</td><td style="text-align: right">0</td></tr></table><p>The missing standalone solver-parameter file is a packaging difference. The location and representation of solver settings in the 2026 model must be established from the model evidence.</p><h2 id="Trace-families-inside-the-model-ZIPs"><a class="docs-heading-anchor" href="#Trace-families-inside-the-model-ZIPs">Trace families inside the model ZIPs</a><a id="Trace-families-inside-the-model-ZIPs-1"></a><a class="docs-heading-anchor-permalink" href="#Trace-families-inside-the-model-ZIPs" title="Permalink"></a></h2><p>File counts are consistent across the three scenarios within each edition, so the table reports files per scenario. The 2026 model ZIP adds DNSP, gas, and rooftop-PV families, expands hydro material, and includes three more demand files per scenario. Load-subtractor counts remain unchanged.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">trace_records_2024 = records_for(2024)
 trace_records_2026 = records_for(2026)
 trace_records = vcat(trace_records_2024, trace_records_2026)
@@ -339,10 +313,11 @@ push!(
     ],
 )
 
-markdown_table(
+PISPDocUtils.markdown_table(
     [&quot;Trace family&quot;, &quot;ISP 2024&quot;, &quot;ISP 2026&quot;, &quot;Archive coverage&quot;],
     trace_family_rows;
     alignment = [:left, :right, :right, :left],
+    nothing_text = &quot;—&quot;,
 )</code></pre></details><table><tr><th style="text-align: left">Trace family</th><th style="text-align: right">ISP 2024</th><th style="text-align: right">ISP 2026</th><th style="text-align: left">Archive coverage</th></tr><tr><td style="text-align: left">Demand</td><td style="text-align: right">12</td><td style="text-align: right">15</td><td style="text-align: left">Both model ZIPs</td></tr><tr><td style="text-align: left">DNSP</td><td style="text-align: right">0</td><td style="text-align: right">38</td><td style="text-align: left">ISP 2026 model ZIP only</td></tr><tr><td style="text-align: left">Gas</td><td style="text-align: right">0</td><td style="text-align: right">11</td><td style="text-align: left">ISP 2026 model ZIP only</td></tr><tr><td style="text-align: left">Hydro</td><td style="text-align: right">7</td><td style="text-align: right">23</td><td style="text-align: left">Both model ZIPs</td></tr><tr><td style="text-align: left">Load subtractor</td><td style="text-align: right">9</td><td style="text-align: right">9</td><td style="text-align: left">Both model ZIPs</td></tr><tr><td style="text-align: left">Rooftop PV</td><td style="text-align: right">0</td><td style="text-align: right">19</td><td style="text-align: left">ISP 2026 model ZIP only</td></tr><tr><td style="text-align: left">Total</td><td style="text-align: right">28</td><td style="text-align: right">115</td><td style="text-align: left">—</td></tr></table><h2 id="Representative-filenames"><a class="docs-heading-anchor" href="#Representative-filenames">Representative filenames</a><a id="Representative-filenames-1"></a><a class="docs-heading-anchor-permalink" href="#Representative-filenames" title="Permalink"></a></h2><p>The filenames below are the first alphabetically within each family and edition. They expose concrete parser differences without claiming that the selected files contain equivalent data.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">filename_records = Dict(year =&gt; records_for(year) for year in EXPECTED_YEARS)
 filename_categories = unique_sorted(
     record.category for records in values(filename_records) for record in records
@@ -355,10 +330,11 @@ for category in filename_categories, year in EXPECTED_YEARS
     push!(filename_rows, Any[humanise_category(category), year, filename])
 end
 
-markdown_table(
+PISPDocUtils.markdown_table(
     [&quot;Trace family&quot;, &quot;ISP year&quot;, &quot;Example filename&quot;],
     filename_rows;
     alignment = [:left, :right, :left],
+    nothing_text = &quot;—&quot;,
 )</code></pre></details><table><tr><th style="text-align: left">Trace family</th><th style="text-align: right">ISP year</th><th style="text-align: left">Example filename</th></tr><tr><td style="text-align: left">Demand</td><td style="text-align: right">2024</td><td style="text-align: left"><code>CNSW_RefYear_4006_HYDROGEN_EXPORT_POE10_OPSO_MODELLING.csv</code></td></tr><tr><td style="text-align: left">Demand</td><td style="text-align: right">2026</td><td style="text-align: left"><code>CNSW_RefYear_5000_ACCELERATED_TRANSITION_POE10_OPSO_MODELLING_PVLITE.csv</code></td></tr><tr><td style="text-align: left">DNSP</td><td style="text-align: right">2026</td><td style="text-align: left"><code>CNSW_ESS_RefYear_5000_GREEN_ENERGY_EXPORTS_LV_C1.csv</code></td></tr><tr><td style="text-align: left">Gas</td><td style="text-align: right">2026</td><td style="text-align: left"><code>GPG_Limit_AT_S__Colongra_GPG_Limit_TJ_5000_POE10.csv</code></td></tr><tr><td style="text-align: left">Hydro</td><td style="text-align: right">2024</td><td style="text-align: left"><code>MaxEnergyYear_LT_RefYear4006_HydrogenSuperpower.csv</code></td></tr><tr><td style="text-align: left">Hydro</td><td style="text-align: right">2026</td><td style="text-align: left"><code>DailyNaturalInflow_AnthonyPieman_RefYear5000_Flat.csv</code></td></tr><tr><td style="text-align: left">Load subtractor</td><td style="text-align: right">2024</td><td style="text-align: left"><code>Solar_NSW_GREEN_ENERGY_EXPORTS_RefYear4006.csv</code></td></tr><tr><td style="text-align: left">Load subtractor</td><td style="text-align: right">2026</td><td style="text-align: left"><code>LS_NSW_Solar_ACCELERATED_TRANSITION_RefYear5000.csv</code></td></tr><tr><td style="text-align: left">Rooftop PV</td><td style="text-align: right">2026</td><td style="text-align: left"><code>CNSW_Area1_RefYear_5000_ACCELERATED_TRANSITION_POE10_PV_TOT.csv</code></td></tr></table><p>The 2026 examples show why parser logic cannot rely on one scenario token. The Accelerated Transition directory includes DNSP filenames containing <code>GREEN_ENERGY_EXPORTS</code>, while gas filenames use the shorter <code>AT</code> alias.</p><h2 id="Implications-for-PISP"><a class="docs-heading-anchor" href="#Implications-for-PISP">Implications for PISP</a><a id="Implications-for-PISP-1"></a><a class="docs-heading-anchor-permalink" href="#Implications-for-PISP" title="Permalink"></a></h2><p>The archive comparison establishes several requirements for an ISP 2026 parser:</p><ol><li>Scenario selection needs the published lineage above rather than a direct string match.</li><li>Trace discovery needs edition-specific family and filename rules. The 2026 model ZIP contains additional families and different naming conventions.</li><li>A complete trace comparison must also load the separately published wind, solar, and timeslice ZIPs identified by AEMO.</li><li>CSV schemas, units, timestamp coverage, and model-XML references must be compared before files from different editions are treated as equivalent.</li><li>Solver configuration should be located from the 2026 model evidence rather than inferred from the absence of <code>PLEXOS_Solverparam.xml</code>.</li></ol><p>The next mapping stage can use this inventory to define explicit source-file, scenario, trace-family, schema, and XML-reference crosswalks.</p><h2 id="Verification"><a class="docs-heading-anchor" href="#Verification">Verification</a><a id="Verification-1"></a><a class="docs-heading-anchor-permalink" href="#Verification" title="Permalink"></a></h2><p>These checks re-read both central directories and verify that each scenario has one model XML file and that both requested editions were inspected.</p><details class="source-code"><summary>Show source code</summary><pre><code class="language-julia hljs">verification_records = vcat(records_for(2024), records_for(2026))
 model_xml_counts = Dict{Tuple{Int, String}, Int}()
 for record in verification_records
@@ -371,4 +347,4 @@ end
 @assert all(isfile, values(ARCHIVES))
 
 println(&quot;Validated archive discovery, scenario coverage, XML roles, and trace-family counts.&quot;)</code></pre></details><pre><code class="nohighlight hljs">Validated archive discovery, scenario coverage, XML roles, and trace-family counts.
-</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../../../editions/comparison/">« Overview and comparison rules</a><a class="docs-footer-nextpage" href="../raw-source-comparison/">ISP 2024 and ISP 2026 raw-source comparison »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Friday 31 July 2026 12:10">Friday 31 July 2026</span>. Using Julia version 1.12.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../../../editions/comparison/">« Overview and comparison rules</a><a class="docs-footer-nextpage" href="../raw-source-comparison/">ISP 2024 and ISP 2026 raw-source comparison »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Sunday 2 August 2026 11:26">Sunday 2 August 2026</span>. Using Julia version 1.12.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
