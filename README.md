@@ -11,7 +11,7 @@ The data parsing functionalities are built on publicly available information fro
 
 ## Core function
 
-Dataset construction in PISP is performed through a single high-level function, `build_ISP24_datasets`. Two usage examples are shown below.
+Dataset construction in PISP is performed through a high-level function, `build_ISP24_datasets`. Usage examples are shown below.
 
 **By planning year** (original mode):
 

@@ -24,6 +24,9 @@ nothing #hide
 #
 # Each row below represents a station and combines location, technology, maximum capacity, and seasonal ratings.
 # PISP uses this source with `Summary Mapping`, maximum-capacity, emissions, reliability, and package mappings to construct unit-level generator records.
+# `Summary Mapping` supplies the identifiers, locations, technologies, and marginal-loss-factor fields that align those records.
+# Separate maximum-capacity blocks distinguish existing and new generation from battery projects, while the battery summary-mapping rows support construction of ESS records.
+# The observed 2026 workbook retains `Summary Mapping`, `Maximum capacity`, and `Existing Gen Data Summary` as separate worksheets, but PISP does not yet read them as a registered ISP 2026 source.
 
 existing_source_2024 = PISP.read_xlsx_rows(WORKBOOK2024, EXISTING_GENERATORS_2024)
 existing_2024 = DataFrame(

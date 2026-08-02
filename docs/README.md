@@ -91,19 +91,20 @@ PISP.ISPdatabuilder.extract_downloads(
     data_root = downloads_2026,
 )
 
-# Exact ISP 2024 dataset consumed by the published pages.
+# ISP 2024 dataset consumed by the published pages (currently or WIP in plan).
 # This also downloads and extracts the required 2024 source assets.
-PISP.build_ISP24_datasets(
-    downloadpath = downloads_2024,
-    download_from_AEMO = true,
-    poe = 10,
-    reftrace = 4006,
-    years = [2030],
-    output_root = datasets_2024,
-    write_csv = true,
-    write_arrow = false,
-    scenarios = [1, 2, 3],
-)
+for poe in (10, 50), reference_trace in (2017, 4006)
+    PISP.build_ISP24_datasets(
+        downloadpath = joinpath(@__DIR__, "..", "data", "2024", "pisp-downloads"),
+        poe          = poe,
+        reftrace     = reference_trace,
+        years        = target_years,
+        output_root  = joinpath(@__DIR__, "..", "data", "2024", "pisp-datasets"),
+        write_csv    = true,
+        write_arrow  = false,
+        scenarios    = [1, 2, 3],
+    )
+end
 ```
 
 The ISP 2024 build writes the schedule used by the default documentation profile under `data/2024/pisp-datasets/out-ref4006-poe10/csv/schedule-2030`.

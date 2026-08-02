@@ -37,6 +37,9 @@ const WORKBOOK2026 = joinpath(ISP2026.download_root, "2026-isp-inputs-and-assump
 
 Each row below represents a station and combines location, technology, maximum capacity, and seasonal ratings.
 PISP uses this source with `Summary Mapping`, maximum-capacity, emissions, reliability, and package mappings to construct unit-level generator records.
+`Summary Mapping` supplies the identifiers, locations, technologies, and marginal-loss-factor fields that align those records.
+Separate maximum-capacity blocks distinguish existing and new generation from battery projects, while the battery summary-mapping rows support construction of ESS records.
+The observed 2026 workbook retains `Summary Mapping`, `Maximum capacity`, and `Existing Gen Data Summary` as separate worksheets, but PISP does not yet read them as a registered ISP 2026 source.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>

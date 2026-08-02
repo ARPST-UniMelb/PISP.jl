@@ -30,6 +30,7 @@ const SENS2026 = joinpath(ISP2026.download_root, "Sensitivities")
 const CORE_WORKBOOK_2024 = "2024 ISP - Green Energy Exports - Core.xlsx"
 const CAPACITY_OUTLOOK_2024 = PISP.source_spec(:core_capacity_outlook, 2024)
 const STORAGE_CAPACITY_OUTLOOK_2024 = PISP.source_spec(:core_storage_capacity_outlook, 2024)
+const STORAGE_ENERGY_OUTLOOK_2024 = PISP.source_spec(:core_storage_energy_outlook, 2024)
 const SAMPLE2024 = PISP.source_path(
     ISP2024.download_root,
     CAPACITY_OUTLOOK_2024;
@@ -240,9 +241,68 @@ PISPDocUtils.markdown_table(storage_capacity_2026)
 | CDP1 | NSW | NNSW | Coordinated CER storage | 87.813 | 136.78 | 196.993 | 267.296 |
 
 
+## Storage-energy table structure
+
+Storage energy records use the same cost-development-path, region, subregion, and storage-category keys as storage power, with values in GWh across financial years.
+The 2024 table is read through PISP's registered source specification; the 2026 sheet is read directly from the observed 2026 core workbook, which PISP does not yet register as a source.
+
+```@raw html
+<details class="source-code"><summary>Show source code</summary>
+```
+
+````julia
+storage_energy_source_2024 = PISP.read_xlsx_rows(SAMPLE2024, STORAGE_ENERGY_OUTLOOK_2024)
+storage_energy_2024 = DataFrame(
+    storage_energy_source_2024[2:6, 1:8],
+    Symbol.(["CDP", "Region", "Subregion", "Storage category", "2024-25", "2025-26", "2026-27", "2027-28"]);
+    makeunique = true,
+)
+PISPDocUtils.markdown_table(storage_energy_2024)
+````
+
+```@raw html
+</details>
+```
+
+| **CDP** | **Region** | **Subregion** | **Storage category** | **2024-25** | **2025-26** | **2026-27** | **2027-28** |
+|:--|:--|:--|:--|--:|--:|--:|--:|
+| CDP1 | NSW | NNSW | Snowy 2.0 | 0 | 0 | 0 | 0 |
+| CDP1 | NSW | NNSW | Deep storage | 0 | 0 | 0 | 0 |
+| CDP1 | NSW | NNSW | Medium storage | 0 | 0 | 2.2 | 4.76212 |
+| CDP1 | NSW | NNSW | Shallow storage | 0 | 0.039 | 0.439 | 0.639 |
+| CDP1 | NSW | NNSW | Coordinated CER storage | 0.0371555 | 0.0797834 | 0.134994 | 0.225002 |
+
+
+```@raw html
+<details class="source-code"><summary>Show source code</summary>
+```
+
+````julia
+storage_energy_2026 = DataFrame(
+    XLSX.readdata(SAMPLE2026, "Storage Energy", "A4:H8"),
+    Symbol.(["CDP", "Region", "Subregion", "Storage category", "2026-27", "2027-28", "2028-29", "2029-30"]);
+    makeunique = true,
+)
+PISPDocUtils.markdown_table(storage_energy_2026)
+````
+
+```@raw html
+</details>
+```
+
+| **CDP** | **Region** | **Subregion** | **Storage category** | **2026-27** | **2027-28** | **2028-29** | **2029-30** |
+|:--|:--|:--|:--|--:|--:|--:|--:|
+| CDP1 | NSW | NNSW | Snowy 2.0 | 0 | 0 | 0 | 0 |
+| CDP1 | NSW | NNSW | Deep utility-scale storage | 0 | 0 | 0 | 0 |
+| CDP1 | NSW | NNSW | Medium utility-scale storage | 0 | 3.2 | 4.0 | 4.00001 |
+| CDP1 | NSW | NNSW | Shallow utility-scale storage | 0.9 | 1.5 | 1.5 | 2.7802 |
+| CDP1 | NSW | NNSW | Coordinated CER storage | 0.231276 | 0.368492 | 0.538256 | 0.736053 |
+
+
 ## PISP transformation status
 
-The current scraper reads the 2024 capacity, storage, and REZ worksheets and writes condensed `Auxiliary/` workbooks used by the ISP 2024 parser.
+The current scraper reads the 2024 capacity, storage-capacity, storage-energy, and REZ worksheets and writes separate condensed `Auxiliary/` workbooks for parser use.
+The `ess_vpps` path consumes scenario sheets from the generated storage-capacity and storage-energy workbooks for coordinated-CER/VPP storage.
 Those intermediates are PISP-generated material, not AEMO source publications.
 No corresponding integrated ISP 2026 scraper-to-dataset workflow is claimed here.
 
