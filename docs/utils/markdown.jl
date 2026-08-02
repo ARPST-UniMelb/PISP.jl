@@ -1,63 +1,3 @@
-module EdaSupport
-
-using CSV
-using DataFrames
-using PrettyTables
-
-export TABLE_ROOT,
-    FIGURE_ROOT,
-    table_dir,
-    table_path,
-    write_table,
-    figure_dir,
-    figure_path,
-    embed_figure,
-    MarkdownTable,
-    markdown_table,
-    metric_value_table
-
-const TABLE_ROOT = joinpath(normpath(joinpath(@__DIR__, "..")), "eda", "tables")
-const FIGURE_ROOT = joinpath(normpath(joinpath(@__DIR__, "..")), "eda", "figures")
-
-function table_dir(script_stem; producer = "julia", root = TABLE_ROOT)
-    path = joinpath(root, producer, script_stem)
-    mkpath(path)
-    return path
-end
-
-function table_path(script_stem, table_name; producer = "julia", root = TABLE_ROOT)
-    filename = endswith(table_name, ".csv") ? table_name : "$(table_name).csv"
-    return joinpath(table_dir(script_stem; producer = producer, root = root), filename)
-end
-
-function write_table(frame::DataFrame, script_stem, table_name; producer = "julia", root = TABLE_ROOT)
-    path = table_path(script_stem, table_name; producer = producer, root = root)
-    CSV.write(path, frame; missingstring = "")
-    println("Saved table: ", path)
-    return path
-end
-
-function figure_dir(script_stem; producer = "julia", root = FIGURE_ROOT)
-    path = joinpath(root, producer, script_stem)
-    mkpath(path)
-    return path
-end
-
-function figure_path(script_stem, figure_name; producer = "julia", root = FIGURE_ROOT)
-    filename = endswith(figure_name, ".png") ? figure_name : "$(figure_name).png"
-    return joinpath(figure_dir(script_stem; producer = producer, root = root), filename)
-end
-
-# Copies a canonical figure next to the Documenter-generated Markdown page, but only when running through docs/render_literate.jl (which sets PISP_LITERATE_OUTPUT_DIR).
-# When a Literate source is run standalone, this env var is unset and there is no generated Markdown for an embedded copy to sit next to, so this is a no-op — nothing is ever written beside the Literate source itself.
-function embed_figure(canonical_path, figure_name)
-    output_dir = get(ENV, "PISP_LITERATE_OUTPUT_DIR", nothing)
-    output_dir === nothing && return nothing
-    embedded_path = joinpath(normpath(output_dir), figure_name)
-    cp(canonical_path, embedded_path; force = true)
-    return embedded_path
-end
-
 # Renders a Tables.jl-compatible table as a Markdown pipe table.
 # Literate captures this MIME instead of DataFrames' richer HTML representation.
 struct MarkdownTable
@@ -66,6 +6,15 @@ end
 
 Base.show(io::IO, ::MIME"text/markdown", table::MarkdownTable) =
     print(io, table.text)
+Base.show(io::IO, ::MIME"text/plain", table::MarkdownTable) =
+    print(io, table.text)
+
+struct RawMarkdown
+    markdown::String
+end
+
+Base.show(io::IO, ::MIME"text/markdown", value::RawMarkdown) =
+    print(io, value.markdown)
 
 # A literal, unescaped `$` in generated Markdown starts Documenter interpolation.
 function escape_dollar_signs(text::AbstractString)
@@ -87,6 +36,48 @@ end
 
 function normalise_markdown_text(text::AbstractString)
     return escape_dollar_signs(replace(strip(text), r"\s*\n\s*" => " "))
+end
+
+function markdown_cell(value; nothing_text = "")
+    text = value === nothing ? nothing_text : string(value)
+    return replace(text, "\n" => " ", "\r" => "", "|" => "\\|")
+end
+
+function markdown_items(values; nothing_text = "")
+    isempty(values) && return "—"
+    return join(
+        ("`$(markdown_cell(value; nothing_text = nothing_text))`" for value in values),
+        ", ",
+    )
+end
+
+function markdown_table(
+    headers::AbstractVector,
+    rows;
+    alignment = fill(:left, length(headers)),
+    nothing_text = "",
+)
+    length(alignment) == length(headers) || error("Table alignment does not match the columns")
+    separators = Dict(
+        :left => ":---",
+        :right => "---:",
+        :centre => ":---:",
+        :l => ":---",
+        :r => "---:",
+        :c => ":---:",
+    )
+    all(item -> haskey(separators, item), alignment) ||
+        error("Unsupported Markdown alignment")
+    cell(value) = markdown_cell(value; nothing_text = nothing_text)
+
+    lines = String[]
+    push!(lines, "| " * join(cell.(headers), " | ") * " |")
+    push!(lines, "| " * join((separators[item] for item in alignment), " | ") * " |")
+    for row in rows
+        length(row) == length(headers) || error("Table row does not match the headers")
+        push!(lines, "| " * join(cell.(row), " | ") * " |")
+    end
+    return MarkdownTable(join(lines, "\n"))
 end
 
 function numeric_markdown_column(column)
@@ -139,5 +130,3 @@ function metric_value_table(metrics)
     )
     return markdown_table(table; alignment = [:l, :l])
 end
-
-end # module EdaSupport

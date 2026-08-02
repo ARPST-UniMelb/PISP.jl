@@ -29,14 +29,12 @@ gr();
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
 
 const SCRIPT_STEM = "isp2024_02_plot_4006_traces"
-const ISP2024_PROFILE = edition_profile(REPO_ROOT, "2024")
+const ISP2024_PROFILE = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
 const TRACES = relpath(joinpath(ISP2024_PROFILE.download_root, "Traces"), REPO_ROOT)  # kept relative: this is the path form recorded in the tables below
 abs_path(relative_path) = joinpath(REPO_ROOT, relative_path)  # resolves a TRACES-relative path to an absolute file location for reading
 
@@ -64,11 +62,6 @@ function read_trace(path)
     return CSV.read(path, DataFrame)
 end
 
-function add_datetime!(df::DataFrame)
-    df.datetime = Date.(df.Year, df.Month, df.Day)
-    return df
-end
-
 function daily_cf(df::DataFrame, half_hour_cols)
     return [mean(row[col] for col in half_hour_cols) for row in eachrow(df)]
 end
@@ -80,7 +73,7 @@ function load_traces(tech, trace_year, locations)
         file = joinpath(base, "$(loc)_RefYear$(trace_year).csv")
         if isfile(abs_path(file))
             df = read_trace(abs_path(file))
-            add_datetime!(df)
+            PISPDocUtils.add_datetime!(df)
             dfs[loc] = df
         end
     end
@@ -100,22 +93,6 @@ function validate_curated_locations(tech, trace_year, locations)
 end
 
 """
-    rolling_mean(values, window)
-
-Rolling mean with a `window`-sized minimum period: the first `window - 1`
-entries of the result are `missing` because no full window of prior values
-exists yet.
-"""
-function rolling_mean(values, window)
-    n = length(values)
-    result = Vector{Union{Missing, Float64}}(missing, n)
-    for i in window:n
-        result[i] = mean(values[(i - window + 1):i])
-    end
-    return result
-end
-
-"""
     fy_year(date, n = 6)
 
 Buckets a day into an Australian financial year (ending June), returned as the ending year. A date that already falls on the last day of its month
@@ -132,7 +109,7 @@ end
 
 function daily_cf_row(tech, state, loc, df::DataFrame, hh_cols)
     daily = daily_cf(df, hh_cols)
-    rolling7 = rolling_mean(daily, 7)
+    rolling7 = PISPDocUtils.rolling_mean(daily, 7)
     return (
         tech = tech,
         state = state,
@@ -189,8 +166,8 @@ for (state, loc) in WIND_LOCATIONS
 end
 
 loaded_locations = DataFrame(loaded_location_rows)
-write_table(loaded_locations, SCRIPT_STEM, "loaded_locations")
-markdown_table(loaded_locations)
+PISPDocUtils.write_table(loaded_locations, SCRIPT_STEM, "loaded_locations")
+PISPDocUtils.markdown_table(loaded_locations)
 
 # ## Daily capacity-factor summary
 #
@@ -209,8 +186,8 @@ for (state, loc) in WIND_LOCATIONS
 end
 
 daily_cf_summary = DataFrame(daily_cf_summary_rows)
-write_table(daily_cf_summary, SCRIPT_STEM, "daily_cf_summary")
-markdown_table(daily_cf_summary)
+PISPDocUtils.write_table(daily_cf_summary, SCRIPT_STEM, "daily_cf_summary")
+PISPDocUtils.markdown_table(daily_cf_summary)
 
 # ## Solar profile
 #
@@ -239,8 +216,8 @@ for (season, mask) in (("Summer", summer_mask), ("Winter", winter_mask))
 end
 
 solar_diurnal_profile = DataFrame(solar_diurnal_profile_rows)
-write_table(solar_diurnal_profile, SCRIPT_STEM, "solar_diurnal_profile")
-markdown_table(solar_diurnal_profile)
+PISPDocUtils.write_table(solar_diurnal_profile, SCRIPT_STEM, "solar_diurnal_profile")
+PISPDocUtils.markdown_table(solar_diurnal_profile)
 
 # ## Wind profile
 #
@@ -265,8 +242,8 @@ for m in 1:12
 end
 
 wind_monthly_diurnal_profile = DataFrame(wind_monthly_diurnal_profile_rows)
-write_table(wind_monthly_diurnal_profile, SCRIPT_STEM, "wind_monthly_diurnal_profile")
-markdown_table(first(wind_monthly_diurnal_profile, 48))
+PISPDocUtils.write_table(wind_monthly_diurnal_profile, SCRIPT_STEM, "wind_monthly_diurnal_profile")
+PISPDocUtils.markdown_table(first(wind_monthly_diurnal_profile, 48))
 
 # ## How Victorian wind varies by month
 #
@@ -285,8 +262,8 @@ wind_monthly_mean_cf_rows = [
     for row in eachrow(wind_month_summary)
 ]
 wind_monthly_mean_cf = DataFrame(wind_monthly_mean_cf_rows)
-write_table(wind_monthly_mean_cf, SCRIPT_STEM, "wind_monthly_mean_cf")
-markdown_table(first(wind_monthly_mean_cf, 24))
+PISPDocUtils.write_table(wind_monthly_mean_cf, SCRIPT_STEM, "wind_monthly_mean_cf")
+PISPDocUtils.markdown_table(first(wind_monthly_mean_cf, 24))
 
 # ## How annual capacity factor varies by financial year
 #
@@ -317,8 +294,8 @@ if df_w !== nothing
 end
 
 annual_cf_by_fy = DataFrame(annual_cf_by_fy_rows)
-write_table(annual_cf_by_fy, SCRIPT_STEM, "annual_cf_by_fy")
-markdown_table(annual_cf_by_fy)
+PISPDocUtils.write_table(annual_cf_by_fy, SCRIPT_STEM, "annual_cf_by_fy")
+PISPDocUtils.markdown_table(annual_cf_by_fy)
 
 # ## Daily solar profiles by state
 #
@@ -329,7 +306,7 @@ plots_sol = []
 for (loc, df) in sort(sol_4006)
     state = get(state_names, loc, loc)
     daily = daily_cf(df, HH_COLS_SOL)
-    rolling7 = rolling_mean(daily, 7)
+    rolling7 = PISPDocUtils.rolling_mean(daily, 7)
     p = plot(df.datetime, daily, linewidth=0.3, alpha=0.7, color=:darkorange, label="", legend=:topright, legendfontsize=8)
     plot!(p, df.datetime, rolling7, linewidth=1.5, color=:darkred, label="7-day avg")
     plot!(p, ylabel="$(state)\nCF", ylim=(0, 1), grid=true, gridalpha=0.3)
@@ -337,9 +314,9 @@ for (loc, df) in sort(sol_4006)
 end
 p_sol = plot(plots_sol..., layout=(length(plots_sol), 1), size=(1800, 300*length(plots_sol)), left_margin=6Plots.mm, right_margin=3Plots.mm, top_margin=5Plots.mm, bottom_margin=4Plots.mm)
 plot!(p_sol, plot_title="Solar 4006 — Daily Mean Capacity Factor by State")
-savefig(p_sol, figure_path(SCRIPT_STEM, "02_solar_4006_daily_cf.png"))
+savefig(p_sol, PISPDocUtils.figure_path(SCRIPT_STEM, "02_solar_4006_daily_cf.png"))
 println("Saved: 02_solar_4006_daily_cf.png")
-EdaSupport.embed_figure(figure_path(SCRIPT_STEM, "02_solar_4006_daily_cf.png"), "02_solar_4006_daily_cf.png")
+PISPDocUtils.embed_figure(PISPDocUtils.figure_path(SCRIPT_STEM, "02_solar_4006_daily_cf.png"), "02_solar_4006_daily_cf.png")
 nothing #hide
 
 # ![Daily mean capacity factor for the representative solar location in each state, with a 7-day rolling average](02_solar_4006_daily_cf.png)
@@ -353,7 +330,7 @@ plots_wind = []
 for (loc, df) in sort(wind_4006)
     state = get(state_names_w, loc, loc)
     daily = daily_cf(df, HH_COLS_WIND)
-    rolling7 = rolling_mean(daily, 7)
+    rolling7 = PISPDocUtils.rolling_mean(daily, 7)
     p = plot(df.datetime, daily, linewidth=0.3, alpha=0.7, color=:steelblue, label="", legend=:topright, legendfontsize=8)
     plot!(p, df.datetime, rolling7, linewidth=1.5, color=:darkblue, label="7-day avg")
     plot!(p, ylabel="$(state)\nCF", ylim=(0, 1), grid=true, gridalpha=0.3)
@@ -361,9 +338,9 @@ for (loc, df) in sort(wind_4006)
 end
 p_wind = plot(plots_wind..., layout=(length(plots_wind), 1), size=(1800, 300*length(plots_wind)), left_margin=6Plots.mm, right_margin=3Plots.mm, top_margin=5Plots.mm, bottom_margin=4Plots.mm)
 plot!(p_wind, plot_title="Wind 4006 — Daily Mean Capacity Factor by State")
-savefig(p_wind, figure_path(SCRIPT_STEM, "02_wind_4006_daily_cf.png"))
+savefig(p_wind, PISPDocUtils.figure_path(SCRIPT_STEM, "02_wind_4006_daily_cf.png"))
 println("Saved: 02_wind_4006_daily_cf.png")
-EdaSupport.embed_figure(figure_path(SCRIPT_STEM, "02_wind_4006_daily_cf.png"), "02_wind_4006_daily_cf.png")
+PISPDocUtils.embed_figure(PISPDocUtils.figure_path(SCRIPT_STEM, "02_wind_4006_daily_cf.png"), "02_wind_4006_daily_cf.png")
 nothing #hide
 
 # ![Daily mean capacity factor for the representative wind location in each state, with a 7-day rolling average](02_wind_4006_daily_cf.png)
@@ -399,9 +376,9 @@ for (season, mask, color) in [("Summer", summer_mask, :darkorange), ("Winter", w
 end
 p_diu = plot(plots_diurnal..., layout=(2,1), size=(1600, 1000), left_margin=6Plots.mm, right_margin=3Plots.mm, top_margin=5Plots.mm, bottom_margin=4Plots.mm)
 plot!(p_diu, plot_title="Solar 4006 — Diurnal Profiles: Summer vs Winter")
-savefig(p_diu, figure_path(SCRIPT_STEM, "02_solar_4006_diurnal.png"))
+savefig(p_diu, PISPDocUtils.figure_path(SCRIPT_STEM, "02_solar_4006_diurnal.png"))
 println("Saved: 02_solar_4006_diurnal.png")
-EdaSupport.embed_figure(figure_path(SCRIPT_STEM, "02_solar_4006_diurnal.png"), "02_solar_4006_diurnal.png")
+PISPDocUtils.embed_figure(PISPDocUtils.figure_path(SCRIPT_STEM, "02_solar_4006_diurnal.png"), "02_solar_4006_diurnal.png")
 nothing #hide
 
 # ![Solar diurnal profile at Bannerton_SAT: individual days, mean, and P10-P90 band, summer vs winter](02_solar_4006_diurnal.png)
@@ -443,9 +420,9 @@ if df_wind_prof !== nothing
     push!(plots_wind_sea, p2)
 
     p_wind_sea = plot(plots_wind_sea..., layout=(2,1), size=(1600, 900), left_margin=6Plots.mm, right_margin=3Plots.mm, top_margin=5Plots.mm, bottom_margin=4Plots.mm)
-    savefig(p_wind_sea, figure_path(SCRIPT_STEM, "02_wind_4006_seasonal.png"))
+    savefig(p_wind_sea, PISPDocUtils.figure_path(SCRIPT_STEM, "02_wind_4006_seasonal.png"))
     println("Saved: 02_wind_4006_seasonal.png")
-    EdaSupport.embed_figure(figure_path(SCRIPT_STEM, "02_wind_4006_seasonal.png"), "02_wind_4006_seasonal.png")
+    PISPDocUtils.embed_figure(PISPDocUtils.figure_path(SCRIPT_STEM, "02_wind_4006_seasonal.png"), "02_wind_4006_seasonal.png")
 end
 nothing #hide
 
@@ -480,9 +457,9 @@ end
 plot!(p5, xlabel="Financial Year (ending)", ylabel="Annual Mean Capacity Factor",
       title="Trace 4006 — Annual Mean Capacity Factor by Financial Year", ylim=(0, 0.5),
       grid=true, gridalpha=0.3, left_margin=12Plots.mm)
-savefig(p5, figure_path(SCRIPT_STEM, "02_4006_annual_cf.png"))
+savefig(p5, PISPDocUtils.figure_path(SCRIPT_STEM, "02_4006_annual_cf.png"))
 println("Saved: 02_4006_annual_cf.png")
-EdaSupport.embed_figure(figure_path(SCRIPT_STEM, "02_4006_annual_cf.png"), "02_4006_annual_cf.png")
+PISPDocUtils.embed_figure(PISPDocUtils.figure_path(SCRIPT_STEM, "02_4006_annual_cf.png"), "02_4006_annual_cf.png")
 nothing #hide
 
 # ![Annual mean capacity factor by financial year, solar and wind trace 4006](02_4006_annual_cf.png)

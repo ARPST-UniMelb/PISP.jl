@@ -1,21 +1,79 @@
 using Test
 using DataFrames
+using Dates
 
 const TEST_DOCS_DIR = normpath(joinpath(@__DIR__, ".."))
 
-include(joinpath(TEST_DOCS_DIR, "page_registry.jl"))
 include(joinpath(TEST_DOCS_DIR, "render_literate.jl"))
-include(joinpath(TEST_DOCS_DIR, "navigation.jl"))
-include(joinpath(TEST_DOCS_DIR, "eda_support.jl"))
-include(joinpath(TEST_DOCS_DIR, "download_layout.jl"))
+include(joinpath(TEST_DOCS_DIR, "utils", "navigation.jl"))
+include(joinpath(TEST_DOCS_DIR, "utils", "source_links.jl"))
 
-using .PISPDocsPageRegistry
-using .PISPDocsNavigation
-using .EdaSupport
-using .PISPDocsDownloadLayout
+@testset "Documentation utility layout" begin
+    expected_root_entries = sort([
+        ".gitignore",
+        "Project.toml",
+        "README.md",
+        "build_all.jl",
+        "config",
+        "doctests.jl",
+        "literate",
+        "make.jl",
+        "render_changed.jl",
+        "render_literate.jl",
+        "src",
+        "test",
+        "utils",
+    ])
+    root_entries = filter(readdir(TEST_DOCS_DIR)) do name
+        name in ("build", ".documenter-source", "Manifest.toml") && return false
+        startswith(name, ".literate-staging-") && return false
+        return true
+    end
+    @test sort(root_entries) == expected_root_entries
+
+    utils_dir = joinpath(TEST_DOCS_DIR, "utils")
+    facade_path = joinpath(utils_dir, "PISPDocUtils.jl")
+    facade = read(facade_path, String)
+    @test length(collect(eachmatch(r"(?m)^\s*module\s+PISPDocUtils\s*$", facade))) == 1
+
+    utility_sources = String[]
+    module_declarations = String[]
+    for (directory, _, files) in walkdir(utils_dir)
+        for filename in files
+            endswith(filename, ".jl") || continue
+            source = read(joinpath(directory, filename), String)
+            push!(utility_sources, source)
+            append!(
+                module_declarations,
+                [strip(match.match) for match in eachmatch(r"(?m)^\s*module\s+\w+\s*$", source)],
+            )
+        end
+    end
+    @test module_declarations == ["module PISPDocUtils"]
+    @test !occursin(r"(?m)^\s*(export|public)\b", join(utility_sources, "\n"))
+
+    for filename in (
+        "page-registry.toml",
+        "source-links.toml",
+        "source-material-coverage.toml",
+    )
+        @test isfile(joinpath(TEST_DOCS_DIR, "config", filename))
+    end
+
+    literate_root = joinpath(TEST_DOCS_DIR, "literate")
+    for (directory, _, files) in walkdir(literate_root)
+        for filename in files
+            endswith(filename, ".jl") || continue
+            source = read(joinpath(directory, filename), String)
+            occursin("PISPDocUtils.", source) || continue
+            @test occursin("import .PISPDocUtils", source)
+            @test !occursin("using .PISPDocUtils", source)
+        end
+    end
+end
 
 @testset "Markdown table rendering" begin
-    rendered = markdown_table(DataFrame(Label=["alpha", "beta"], Value=[1.0, 2.0]))
+    rendered = PISPDocUtils.markdown_table(DataFrame(Label=["alpha", "beta"], Value=[1.0, 2.0]))
     separator_cells = strip.(split(split(chomp(rendered.text), '\n')[2], '|'; keepempty=false))
 
     @test length(separator_cells) == 2
@@ -23,26 +81,26 @@ using .PISPDocsDownloadLayout
     @test endswith(separator_cells[2], ":")
     @test occursin("alpha", rendered.text)
 
-    currency = markdown_table(DataFrame(Label=["Cost (\$/MW)"], Value=[2.0]))
+    currency = PISPDocUtils.markdown_table(DataFrame(Label=["Cost (\$/MW)"], Value=[2.0]))
     @test occursin(raw"\$", currency.text)
 
-    missing_numeric = markdown_table(
+    missing_numeric = PISPDocUtils.markdown_table(
         DataFrame(Label=["alpha", "beta"], Value=Union{Missing,Float64}[1.0, missing]),
     )
     missing_separator = strip.(split(split(chomp(missing_numeric.text), '\n')[2], '|'; keepempty=false))
     @test endswith(missing_separator[2], ":")
 
-    empty_typed = markdown_table(DataFrame(Label=String[], Value=Float64[]))
+    empty_typed = PISPDocUtils.markdown_table(DataFrame(Label=String[], Value=Float64[]))
     empty_separator = strip.(split(split(chomp(empty_typed.text), '\n')[2], '|'; keepempty=false))
     @test !endswith(empty_separator[1], ":")
     @test endswith(empty_separator[2], ":")
 
-    mixed_any = markdown_table(DataFrame(Mixed=Any[1, "two"], Value=Any[1, 2]))
+    mixed_any = PISPDocUtils.markdown_table(DataFrame(Mixed=Any[1, "two"], Value=Any[1, 2]))
     mixed_separator = strip.(split(split(chomp(mixed_any.text), '\n')[2], '|'; keepempty=false))
     @test !endswith(mixed_separator[1], ":")
     @test endswith(mixed_separator[2], ":")
 
-    overridden = markdown_table(
+    overridden = PISPDocUtils.markdown_table(
         DataFrame(Label=["alpha"], Value=[1.0]);
         alignment=[:r, :l],
     )
@@ -50,16 +108,91 @@ using .PISPDocsDownloadLayout
     @test endswith(overridden_separator[1], ":")
     @test !endswith(overridden_separator[2], ":")
 
-    multiline = markdown_table(DataFrame(Label=["alpha\nbeta"], Value=[1]))
+    multiline = PISPDocUtils.markdown_table(DataFrame(Label=["alpha\nbeta"], Value=[1]))
     @test occursin("alpha beta", multiline.text)
     @test !occursin("alpha\nbeta", multiline.text)
 
-    metrics = metric_value_table(["Rows" => 12, "Coverage (%)" => 98.5])
+    metrics = PISPDocUtils.metric_value_table(["Rows" => 12, "Coverage (%)" => 98.5])
     @test occursin("Metric", metrics.text)
     @test occursin("Coverage (%)", metrics.text)
 
-    table_interface = markdown_table((Label=["alpha"], Value=[1.0]))
+    table_interface = PISPDocUtils.markdown_table((Label=["alpha"], Value=[1.0]))
     @test occursin("alpha", table_interface.text)
+
+    manual = PISPDocUtils.markdown_table(
+        ["Name", "Value"],
+        [Any["alpha|beta", nothing], Any["line\nbreak", 2]];
+        alignment = [:left, :right],
+        nothing_text = "—",
+    )
+    @test occursin("alpha\\|beta", manual.text)
+    @test occursin("line break", manual.text)
+    @test occursin("| — |", manual.text)
+    @test occursin("---:", manual.text)
+
+    raw = PISPDocUtils.RawMarkdown("**unescaped Markdown**")
+    @test sprint(show, MIME"text/markdown"(), raw) == "**unescaped Markdown**"
+    @test PISPDocUtils.markdown_items(["a|b", "c"]) == "`a\\|b`, `c`"
+end
+
+@testset "Shared documentation transformations" begin
+    @test PISPDocUtils.TABLE_ROOT == normpath(joinpath(TEST_DOCS_DIR, "src", "tables"))
+    @test PISPDocUtils.FIGURE_ROOT == normpath(joinpath(TEST_DOCS_DIR, "src", "figures"))
+
+    matrix = Any[1 missing missing; missing missing missing; 2 missing missing]
+    trimmed = PISPDocUtils.trim_sheet(matrix)
+    @test size(trimmed) == (3, 1)
+    @test isequal(trimmed[:, 1], Any[1, missing, 2])
+    @test size(PISPDocUtils.trim_sheet(fill(missing, 2, 2))) == (0, 0)
+
+    frame = DataFrame(Year=[2024, 2024], Month=[1, 1], Day=[1, 2], a=[1.0, 3.0], b=[3.0, 5.0])
+    @test PISPDocUtils.add_datetime!(frame) === frame
+    @test frame.datetime == [Date(2024, 1, 1), Date(2024, 1, 2)]
+    @test PISPDocUtils.row_mean(frame, [:a, :b]) == [2.0, 4.0]
+    @test isequal(PISPDocUtils.rolling_mean([1.0, 2.0, 3.0], 2), [missing, 1.5, 2.5])
+
+end
+
+@testset "Documentation source-reading boundaries" begin
+    utils_dir = joinpath(TEST_DOCS_DIR, "utils")
+    source_material_path = joinpath(utils_dir, "source_material.jl")
+    source_material = read(source_material_path, String)
+
+    @test !isfile(joinpath(utils_dir, "source_material_specs.jl"))
+    @test !occursin("XLSX.readdata", source_material)
+
+    literate_root = joinpath(TEST_DOCS_DIR, "literate")
+    literate_sources = String[]
+    for (directory, _, files) in walkdir(literate_root)
+        for filename in files
+            endswith(filename, ".jl") || continue
+            push!(literate_sources, read(joinpath(directory, filename), String))
+        end
+    end
+    literate_source = join(literate_sources, "\n")
+
+    @test !occursin("validate_columns", literate_source)
+
+    spec_driven_2024_pages = [
+        "demand_and_distributed_resources.jl",
+        "demand_side_participation.jl",
+        "electric_vehicles.jl",
+        "existing_generation_and_storage.jl",
+        "generation_and_storage_outlook.jl",
+        "generator_operation.jl",
+        "generator_reliability_and_retirement.jl",
+        "hydro_inflows_and_energy_constraints.jl",
+        "network_and_transmission.jl",
+        "renewable_energy_zones.jl",
+    ]
+    shared_source_root = joinpath(literate_root, "shared", "source_material")
+    for filename in spec_driven_2024_pages
+        source = read(joinpath(shared_source_root, filename), String)
+        @test occursin("PISP.source_spec(", source)
+        @test occursin("PISP.source_path(", source)
+        @test occursin(r"PISP\.read_(xlsx_rows|csv_source)\(", source)
+        @test occursin("XLSX.readdata(", source)
+    end
 end
 
 @testset "Human-use documentation invariants" begin
@@ -178,7 +311,6 @@ end
     )
     @test occursin("Source status", buildout_defaults)
     @test occursin("original external source", buildout_defaults)
-    @test !occursin("\n````\ntrue\n````", buildout_defaults)
 
     hydro_parameters = read_doc(
         "generated",
@@ -295,7 +427,7 @@ end
 
     @test position("download_layouts =", layout) >
         position("# ## Observed outlook directories and source archives", layout)
-    @test position("inspection = inspect_edition", availability) >
+    @test position("inspection = PISPDocUtils.inspect_edition", availability) >
         position("# ## Report and archive observations", availability)
 
     @test !occursin("const RECORDS", archive_comparison)
@@ -330,8 +462,8 @@ end
         mkpath(joinpath(root, "zip", "Traces"))
         write(joinpath(root, "zip", "Traces", "2024-isp-solar-traces.zip"), "trace")
 
-        @test outlook_directories(root) == ["Core", "Sensitivities"]
-        @test source_archives(root) == [
+        @test PISPDocUtils.outlook_directories(root) == ["Core", "Sensitivities"]
+        @test PISPDocUtils.source_archives(root) == [
             "2024-isp-generation-and-storage-outlook.zip",
             "2024-isp-model.zip",
         ]
@@ -376,7 +508,7 @@ end
 function with_registry_fixture(callback::Function, pages; generated_outputs=String[])
     mktempdir() do repo_root
         docs_dir = joinpath(repo_root, "docs")
-        registry_path = joinpath(docs_dir, "page-registry.toml")
+        registry_path = joinpath(docs_dir, "config", "page-registry.toml")
 
         for page in pages
             source_path = joinpath(docs_dir, page.source)
@@ -1016,7 +1148,7 @@ end
         # The real registry: every published page's output must appear
         # somewhere in the rendered navigation tree.
         real_pages = load_page_registry(
-            joinpath(TEST_DOCS_DIR, "page-registry.toml");
+            joinpath(TEST_DOCS_DIR, "config", "page-registry.toml");
             require_published_outputs=true,
             check_generated_outputs=true,
         )
@@ -1024,6 +1156,22 @@ end
         for page in real_pages
             is_published(page) || continue
             @test page.output in real_outputs
+        end
+    end
+end
+
+include(joinpath(@__DIR__, "test_source_links.jl"))
+
+@testset "Generated documentation does not leak stray auto-displayed values" begin
+    generated_root = joinpath(TEST_DOCS_DIR, "src", "generated")
+    home = homedir()
+    for (directory, _, files) in walkdir(generated_root)
+        for filename in files
+            endswith(filename, ".md") || continue
+            path = joinpath(directory, filename)
+            content = read(path, String)
+            @test !occursin(home, content)
+            @test !occursin(r"\n````\n(true|false)\n````", content)
         end
     end
 end

@@ -13,13 +13,11 @@ source families described by the release documentation.
 
 ````julia
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..", "..")))
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-include(joinpath(REPO_ROOT, "docs", "source_availability.jl"))
-using .PISPDocsEditionProfiles
-using .PISPDocsSourceAvailability: inspect_edition, source_availability_summary
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
-profile = edition_profile(REPO_ROOT, "2026")
-source_profile = PISPDocsSourceAvailability.EditionProfile(
+profile = PISPDocUtils.edition_profile(REPO_ROOT, "2026")
+source_profile = PISPDocUtils.SourceAvailabilityProfile(
     edition = profile.edition,
     report_root = profile.report_root,
     download_root = profile.download_root,
@@ -58,8 +56,8 @@ the roots supplied to this render.
 ```
 
 ````julia
-inspection = inspect_edition(source_profile)
-summary = source_availability_summary(source_profile)
+inspection = PISPDocUtils.inspect_edition(source_profile)
+summary = PISPDocUtils.source_availability_summary(source_profile)
 
 println("Edition: ISP 2026")
 println("Availability state in configured roots: ", inspection.state)

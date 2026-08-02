@@ -10,18 +10,14 @@ using XLSX
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
-
-include(joinpath(REPO_ROOT, "docs", "source_material_support.jl"))
-using .PISPDocsSourceMaterialSupport
-
-const ISP2024 = edition_profile(REPO_ROOT, "2024")
-const ISP2026 = edition_profile(REPO_ROOT, "2026")
-const EV2023 = joinpath(ISP2024.download_root, "2023-iasr-ev-workbook.xlsx")
+const ISP2024 = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
+const ISP2026 = PISPDocUtils.edition_profile(REPO_ROOT, "2026")
+const EV_NUMBERS_2024 = PISP.source_spec(:ev_vehicle_numbers, 2024)
+const EV_CHARGE_TYPES_2024 = PISP.source_spec(:ev_bev_phev_charge_type, 2024)
+const EV2023 = PISP.source_path(ISP2024.download_root, EV_NUMBERS_2024)
 const EV2025 = joinpath(ISP2026.download_root, "aemo-2025-iasr-ev-workbook.xlsx")
 nothing #hide
 
@@ -30,15 +26,25 @@ nothing #hide
 # Both workbooks retain BEV/PHEV consumption, charging shares, and static weekday and weekend profiles.
 # The 2025 workbook adds a hybrid-vehicle numbers worksheet and revises the charging-mode taxonomy.
 
-ev_sheet_presence = worksheet_presence(
-    ["2023 IASR" => EV2023, "2025 IASR" => EV2025],
-    [
-        "BEV_Numbers", "PHEV_Numbers", "FCEV_Numbers", "ICE_Numbers", "Hybrid_Numbers",
-        "BEV_PHEV_Consumption (GWh)", "BEV_PHEV_Charge_Type (%)",
-        "BEV_PHEV_Profile_kW (Weekday)", "BEV_PHEV_Profile_kW (Weekend)",
-    ],
-)
-markdown_table(ev_sheet_presence)
+ev_sheets = [
+    "BEV_Numbers", "PHEV_Numbers", "FCEV_Numbers", "ICE_Numbers", "Hybrid_Numbers",
+    "BEV_PHEV_Consumption (GWh)", "BEV_PHEV_Charge_Type (%)",
+    "BEV_PHEV_Profile_kW (Weekday)", "BEV_PHEV_Profile_kW (Weekend)",
+]
+ev_sheet_names = [
+    ("2023 IASR", XLSX.openxlsx(EV2023) do workbook
+        Set(XLSX.sheetnames(workbook))
+    end),
+    ("2025 IASR", XLSX.openxlsx(EV2025) do workbook
+        Set(XLSX.sheetnames(workbook))
+    end),
+]
+ev_sheet_presence = DataFrame([
+    (edition = edition, worksheet = sheet, present = sheet in available)
+    for (edition, available) in ev_sheet_names
+    for sheet in ev_sheets
+])
+PISPDocUtils.markdown_table(ev_sheet_presence)
 #-
 
 # ## Battery-electric vehicle numbers
@@ -46,22 +52,25 @@ markdown_table(ev_sheet_presence)
 # The samples use the first scenario and New South Wales block in each workbook.
 # The planning years and scenario names shift between publications, so the values are not a like-for-like revision series without additional scenario interpretation.
 
-bev_2023 = cells_table(
+bev_numbers_source_2024 = PISP.read_xlsx_rows(
     EV2023,
-    "BEV_Numbers",
-    "B8:J14",
-    ["Vehicle type", "2022-23", "2023-24", "2024-25", "2025-26", "2026-27", "2027-28", "2028-29", "2029-30"],
+    EV_NUMBERS_2024;
+    worksheet = "BEV_Numbers",
 )
-markdown_table(bev_2023)
+bev_2023 = DataFrame(
+    bev_numbers_source_2024[8:14, 1:9],
+    Symbol.(["Vehicle type", "2022-23", "2023-24", "2024-25", "2025-26", "2026-27", "2027-28", "2028-29", "2029-30"]);
+    makeunique = true,
+)
+PISPDocUtils.markdown_table(bev_2023)
 #-
 
-bev_2025 = cells_table(
-    EV2025,
-    "BEV_Numbers",
-    "B8:J14",
-    ["Vehicle type", "2025-26", "2026-27", "2027-28", "2028-29", "2029-30", "2030-31", "2031-32", "2032-33"],
+bev_2025 = DataFrame(
+    XLSX.readdata(EV2025, "BEV_Numbers", "B8:J14"),
+    Symbol.(["Vehicle type", "2025-26", "2026-27", "2027-28", "2028-29", "2029-30", "2030-31", "2031-32", "2032-33"]);
+    makeunique = true,
 )
-markdown_table(bev_2025)
+PISPDocUtils.markdown_table(bev_2025)
 #-
 
 # ## Hybrid vehicles in the later workbook
@@ -69,13 +78,12 @@ markdown_table(bev_2025)
 # The 2025 IASR publication adds projected hybrid stocks as a separate source family.
 # The current ISP 2024 EV parser has no maintained output-field mapping for this worksheet.
 
-hybrid_2025 = cells_table(
-    EV2025,
-    "Hybrid_Numbers",
-    "B8:J14",
-    ["Vehicle type", "2025-26", "2026-27", "2027-28", "2028-29", "2029-30", "2030-31", "2031-32", "2032-33"],
+hybrid_2025 = DataFrame(
+    XLSX.readdata(EV2025, "Hybrid_Numbers", "B8:J14"),
+    Symbol.(["Vehicle type", "2025-26", "2026-27", "2027-28", "2028-29", "2029-30", "2030-31", "2031-32", "2032-33"]);
+    makeunique = true,
 )
-markdown_table(hybrid_2025)
+PISPDocUtils.markdown_table(hybrid_2025)
 #-
 
 # ## Charging-mode changes
@@ -83,22 +91,21 @@ markdown_table(hybrid_2025)
 # The earlier source uses labels such as convenience, daytime, highway-fast, and nighttime charging.
 # The later source uses unscheduled, public, off-peak-and-solar, and time-of-use categories, which changes the source vocabulary even where the workbook subject remains recognisable.
 
-charge_type_2023 = cells_table(
-    EV2023,
-    "BEV_PHEV_Charge_Type (%)",
-    "B11:J14",
-    ["Charging mode", "2022-23", "2023-24", "2024-25", "2025-26", "2026-27", "2027-28", "2028-29", "2029-30"],
+charge_type_source_2024 = PISP.read_xlsx_rows(EV2023, EV_CHARGE_TYPES_2024)
+charge_type_2023 = DataFrame(
+    charge_type_source_2024[11:14, 1:9],
+    Symbol.(["Charging mode", "2022-23", "2023-24", "2024-25", "2025-26", "2026-27", "2027-28", "2028-29", "2029-30"]);
+    makeunique = true,
 )
-markdown_table(charge_type_2023)
+PISPDocUtils.markdown_table(charge_type_2023)
 #-
 
-charge_type_2025 = cells_table(
-    EV2025,
-    "BEV_PHEV_Charge_Type (%)",
-    "B9:J14",
-    ["Charging mode", "2025-26", "2026-27", "2027-28", "2028-29", "2029-30", "2030-31", "2031-32", "2032-33"],
+charge_type_2025 = DataFrame(
+    XLSX.readdata(EV2025, "BEV_PHEV_Charge_Type (%)", "B9:J14"),
+    Symbol.(["Charging mode", "2025-26", "2026-27", "2027-28", "2028-29", "2029-30", "2030-31", "2031-32", "2032-33"]);
+    makeunique = true,
 )
-markdown_table(charge_type_2025)
+PISPDocUtils.markdown_table(charge_type_2025)
 #-
 
 # ## PISP output-field ownership
@@ -111,7 +118,7 @@ ev_output_fields = DataFrame(
     source_worksheet = collect(keys(vehicle_number_mapping)),
     parsed_field = string.(collect(values(vehicle_number_mapping))),
 )
-markdown_table(ev_output_fields)
+PISPDocUtils.markdown_table(ev_output_fields)
 #-
 
 # The 2025 IASR workbook is documented here as observed source evidence.

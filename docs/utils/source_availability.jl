@@ -1,9 +1,4 @@
-module PISPDocsSourceAvailability
-
-export EditionProfile, Requirement, Observation, Inspection, AvailabilitySummary
-export source_availability_profiles, edition_requirements, inspect_edition, source_availability_summary
-
-Base.@kwdef struct EditionProfile
+Base.@kwdef struct SourceAvailabilityProfile
     edition::String
     report_root::String
     download_root::String
@@ -37,6 +32,9 @@ Base.@kwdef struct AvailabilitySummary
     demand_group_paths::Vector{String}
     demand_trace_files::Int
     poe_labels::Vector{String}
+    expected_demand_group_count::Union{Int,Nothing}
+    missing_demand_groups::Vector{String}
+    unexpected_demand_paths::Vector{String}
 end
 
 const REPORT_FILENAMES = Dict(
@@ -82,14 +80,14 @@ function configured_root(repo_root, env, variable, default)
 end
 
 function source_availability_profiles(repo_root; env = ENV)
-    profiles = EditionProfile[]
+    profiles = SourceAvailabilityProfile[]
     for (edition, report_default, download_default) in (
         ("2024", joinpath("data", "2024", "pisp-reports"), joinpath("data", "2024", "pisp-downloads")),
         ("2026", joinpath("data", "2026", "pisp-reports"), joinpath("data", "2026", "pisp-downloads")),
     )
         report_root, report_source = configured_root(repo_root, env, "PISP_ISP$(edition)_REPORT_ROOT", report_default)
         download_root, download_source = configured_root(repo_root, env, "PISP_ISP$(edition)_DOWNLOAD_ROOT", download_default)
-        push!(profiles, EditionProfile(
+        push!(profiles, SourceAvailabilityProfile(
             edition = edition,
             report_root = report_root,
             download_root = download_root,
@@ -139,7 +137,7 @@ function requirement_observed(root, requirement)
     throw(ArgumentError("unsupported requirement kind: $(requirement.kind)"))
 end
 
-function inspect_edition(profile::EditionProfile)
+function inspect_edition(profile::SourceAvailabilityProfile)
     requirements = edition_requirements(profile.edition)
     roots_present = ispath(profile.report_root) || ispath(profile.download_root)
     observations = Observation[]
@@ -155,33 +153,67 @@ function inspect_edition(profile::EditionProfile)
     Inspection(edition = profile.edition, state = state, observations = observations)
 end
 
-function source_availability_summary(profile::EditionProfile)
+# The direct ISP 2024 demand-trace groups are named `demand_{subregion}_{scenario}`
+# for every subregion in `PISP.NEMBUSNAME` and every scenario in `PISP.ID2SCE` —
+# a fixed 12 x 3 = 36 combination regardless of which files a given download
+# actually contains. Other editions have no such registered enumeration yet, so
+# they fall back to the broader substring match below rather than asserting a
+# bound PISP does not yet support.
+function known_demand_group_names(edition)
+    edition == "2024" || return nothing
+    Set(
+        "demand_$(subregion)_$(scenario)"
+        for subregion in keys(PISP.NEMBUSNAME)
+        for scenario in values(PISP.ID2SCE)
+    )
+end
+
+function source_availability_summary(profile::SourceAvailabilityProfile)
     trace_directories = String[]
     trace_archive_files = String[]
     demand_group_paths = String[]
+    unexpected_demand_paths = String[]
     demand_trace_files = 0
     poe_labels = Set{String}()
+
+    known_demand_groups = known_demand_group_names(profile.edition)
 
     for (directory, subdirectories, files) in walkdir(profile.download_root)
         filter!(name -> !startswith(name, ".") && !startswith(name, "._"), subdirectories)
         filter!(name -> !startswith(name, ".") && !startswith(name, "._"), files)
         relative_directory = replace(relpath(directory, profile.download_root), '\\' => '/')
-        basename(directory) == "Traces" && push!(trace_directories, relative_directory)
+        directory_name = basename(directory)
+        directory_name == "Traces" && push!(trace_directories, relative_directory)
         if startswith(relative_directory, "zip/Traces")
             append!(trace_archive_files, [joinpath(relative_directory, name) for name in files if endswith(lowercase(name), ".zip")])
         end
-        if basename(directory) == "demand" || startswith(basename(directory), "demand_")
+
+        is_extracted_group = directory_name == "demand"
+        is_direct_group = startswith(directory_name, "demand_")
+        if known_demand_groups === nothing
+            if is_extracted_group || is_direct_group
+                push!(demand_group_paths, relative_directory)
+            end
+            if occursin("demand", lowercase(relative_directory))
+                demand_trace_files += count(name -> endswith(lowercase(name), ".csv"), files)
+            end
+        elseif is_extracted_group || is_direct_group
             push!(demand_group_paths, relative_directory)
-        end
-        if occursin("demand", lowercase(relative_directory))
             demand_trace_files += count(name -> endswith(lowercase(name), ".csv"), files)
+            if is_direct_group && !(directory_name in known_demand_groups)
+                push!(unexpected_demand_paths, relative_directory)
+            end
         end
+
         for name in files
             for label in ("POE10", "POE50", "POE90")
                 occursin(label, name) && push!(poe_labels, label)
             end
         end
     end
+
+    missing_demand_groups = known_demand_groups === nothing ? String[] :
+        sort(collect(setdiff(known_demand_groups, basename.(demand_group_paths))))
 
     AvailabilitySummary(
         edition = profile.edition,
@@ -190,7 +222,8 @@ function source_availability_summary(profile::EditionProfile)
         demand_group_paths = sort(unique(demand_group_paths)),
         demand_trace_files = demand_trace_files,
         poe_labels = sort(collect(poe_labels)),
+        expected_demand_group_count = known_demand_groups === nothing ? nothing : length(known_demand_groups),
+        missing_demand_groups = missing_demand_groups,
+        unexpected_demand_paths = sort(unique(unexpected_demand_paths)),
     )
-end
-
 end

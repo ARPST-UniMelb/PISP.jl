@@ -1,9 +1,9 @@
 # # ISP 2024: Trace data availability and structure
 #
-# PISP uses historical demand, solar, and wind traces with different directory layouts and table schemas. AEMO's [2024 ISP PLEXOS Model Instructions, p. 5](../../../../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=5) describes traces as time series combined from 14 historical weather years in a rolling reference-year sequence. The report lists demand, hydro, load-subtracter, solar, timeslice, and wind trace groups in the model package ([p. 7](../../../../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=7)). In the configured local downloads, solar and wind are grouped by technology and reference year, while demand is grouped by state/scenario and node. The validation records source shape, date coverage, value ranges, and a demand-trace example.
+# PISP uses historical demand, solar, and wind traces with different directory layouts and table schemas. AEMO's [2024 ISP PLEXOS Model Instructions, p. 5](../../../../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=5) describes traces as time series combined from 14 historical weather years in a rolling reference-year sequence. The report lists demand, hydro, load-subtracter, solar, timeslice, and wind trace groups in the model package ([p. 7](../../../../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=7)). In the configured downloads, solar and wind are grouped by technology and reference year, while demand is grouped by state/scenario and node. The validation records source shape, date coverage, value ranges, and a demand-trace example.
 #
 # A trace here means a source time series supplied to the detailed long-term
-# model. The report-backed group descriptions do not imply that every local
+# model. The report-backed group descriptions do not imply that every
 # archive is complete or that the 2026 groups have the same contract.
 
 ENV["GKSwstype"] = "100"
@@ -11,6 +11,7 @@ ENV["GKSwstype"] = "100"
 using CSV
 using DataFrames
 using Dates
+using PISP
 using Printf
 using Statistics
 using Plots
@@ -19,26 +20,23 @@ gr();
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles
-
-include(joinpath(REPO_ROOT, "docs", "source_availability.jl"))
-using .PISPDocsSourceAvailability: source_availability_summary
-
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
 const SCRIPT_STEM = "isp2024_01_data_loading"
-const ISP2024_PROFILE = edition_profile(REPO_ROOT, "2024")
-const SOURCE_PROFILE = PISPDocsSourceAvailability.EditionProfile(
+const ISP2024_PROFILE = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
+const SOURCE_PROFILE = PISPDocUtils.SourceAvailabilityProfile(
     edition = ISP2024_PROFILE.edition,
     report_root = ISP2024_PROFILE.report_root,
     download_root = ISP2024_PROFILE.download_root,
     report_root_source = :profile,
     download_root_source = :profile,
 )
-const SOURCE_SUMMARY = source_availability_summary(SOURCE_PROFILE)
+const SOURCE_SUMMARY = PISPDocUtils.source_availability_summary(SOURCE_PROFILE)
 const TRACES = relpath(joinpath(ISP2024_PROFILE.download_root, "Traces"), REPO_ROOT)  # kept relative: this is the path form recorded in the tables below
+const TRACE_ROOT = joinpath(ISP2024_PROFILE.download_root, "Traces")
+const DISTRIBUTED_PV_SOURCE = PISP.source_spec(:distributed_pv_demand_trace, 2024)
+const OPERATIONAL_DEMAND_SOURCE = PISP.source_spec(:operational_demand_trace, 2024)
 abs_path(relative_path) = joinpath(REPO_ROOT, relative_path)  # resolves a TRACES-relative path to an absolute file location for reading
 
 function column_preview(df::DataFrame, n = 10)
@@ -122,14 +120,14 @@ println("Date range: ", first_three_text(df_wind, 1), " to ", first_three_text(d
 
 traces = [("solar", sol_file, df_sol), ("wind", wind_file, df_wind)]
 trace_shape_columns = DataFrame([trace_shape_row(t...) for t in traces])
-write_table(trace_shape_columns, SCRIPT_STEM, "trace_shape_columns")
-markdown_table(trace_shape_columns)
+PISPDocUtils.write_table(trace_shape_columns, SCRIPT_STEM, "trace_shape_columns")
+PISPDocUtils.markdown_table(trace_shape_columns)
 
 #-
 
 trace_date_ranges = DataFrame([trace_date_range_row(t...) for t in traces])
-write_table(trace_date_ranges, SCRIPT_STEM, "trace_date_ranges")
-markdown_table(trace_date_ranges)
+PISPDocUtils.write_table(trace_date_ranges, SCRIPT_STEM, "trace_date_ranges")
+PISPDocUtils.markdown_table(trace_date_ranges)
 
 # ## Coverage
 #
@@ -138,8 +136,8 @@ markdown_table(trace_date_ranges)
 # The minimum and maximum values describe the numeric range in each sampled trace. The solar low-output summary counts days at Bannerton_SAT whose midday half-hourly maximum, across columns `24:35`, falls below the fixed capacity-factor threshold `0.1`.
 
 trace_value_ranges = DataFrame([trace_value_range_row(t...) for t in traces])
-write_table(trace_value_ranges, SCRIPT_STEM, "trace_value_ranges")
-markdown_table(trace_value_ranges)
+PISPDocUtils.write_table(trace_value_ranges, SCRIPT_STEM, "trace_value_ranges")
+PISPDocUtils.markdown_table(trace_value_ranges)
 
 #-
 
@@ -160,8 +158,8 @@ solar_midday_low_days = DataFrame([
         low_percent = 100 * n_low / n_total,
     ),
 ])
-write_table(solar_midday_low_days, SCRIPT_STEM, "solar_midday_low_days")
-metric_value_table([
+PISPDocUtils.write_table(solar_midday_low_days, SCRIPT_STEM, "solar_midday_low_days")
+PISPDocUtils.metric_value_table([
     "Trace type" => solar_midday_low_days.trace_type[1],
     "File" => solar_midday_low_days.file_name[1],
     "Midday columns" => solar_midday_low_days.midday_columns[1],
@@ -174,70 +172,85 @@ metric_value_table([
 # ### Demand-trace example
 #
 # Demand traces use a different file family and schema from solar and wind traces: one file per demand node under a state/scenario directory, rather than one file per reference year.
+# The paired selections below use the same Victoria, Step Change, reference-year 4006, and POE10 inputs.
+# The operational-demand file is net of PV-lite profiles, while the PV-total file supplies the distributed-PV schedule.
 
-demand_dir = joinpath(TRACES, "demand_VIC_Step Change")
-dem_files = isdir(abs_path(demand_dir)) ? sort(filter(name -> endswith(name, "_PV_TOT.csv"), readdir(abs_path(demand_dir)))) : String[]
+paired_demand_sources = [
+    (
+        role = "Operational demand net of PV-lite",
+        spec = OPERATIONAL_DEMAND_SOURCE,
+        path = PISP.source_path(
+            TRACE_ROOT,
+            OPERATIONAL_DEMAND_SOURCE;
+            subregion = "VIC",
+            scenario = "Step Change",
+            reference_year = 4006,
+            scenario_code = "STEP_CHANGE",
+            poe = 10,
+        ),
+    ),
+    (
+        role = "Distributed PV total",
+        spec = DISTRIBUTED_PV_SOURCE,
+        path = PISP.source_path(
+            TRACE_ROOT,
+            DISTRIBUTED_PV_SOURCE;
+            subregion = "VIC",
+            scenario = "Step Change",
+            reference_year = 4006,
+            scenario_code = "STEP_CHANGE",
+            poe = 10,
+        ),
+    ),
+]
+
+paired_demand_summary = DataFrame([
+    let table = PISP.read_csv_source(source.path, source.spec)
+        source_value_columns = names(table)[4:end]
+        source_value_minimum, source_value_maximum = value_minmax(table)
+        (
+            role = source.role,
+            file = basename(source.path),
+            rows = nrow(table),
+            columns = ncol(table),
+            keys = join(names(table)[1:3], ", "),
+            source_value_columns = length(source_value_columns),
+            source_value_minimum = source_value_minimum,
+            source_value_maximum = source_value_maximum,
+        )
+    end
+    for source in paired_demand_sources
+])
+PISPDocUtils.write_table(paired_demand_summary, SCRIPT_STEM, "demand_sample_metadata")
+PISPDocUtils.markdown_table(paired_demand_summary)
+#-
 
 demand_groups = isdir(abs_path(TRACES)) ? sort(filter(name -> startswith(name, "demand_"), readdir(abs_path(TRACES)))) : String[]
-demand_trace_count = sum(
+direct_demand_csv_count = sum(
+    count(name -> endswith(lowercase(name), ".csv"), readdir(abs_path(joinpath(TRACES, group))))
+    for group in demand_groups
+    if isdir(abs_path(joinpath(TRACES, group)))
+)
+direct_pv_total_trace_count = sum(
     count(name -> endswith(name, "_PV_TOT.csv"), readdir(abs_path(joinpath(TRACES, group))))
     for group in demand_groups
     if isdir(abs_path(joinpath(TRACES, group)))
 )
-println("Locally observed demand groups: ", length(demand_groups), "; demand traces: ", demand_trace_count)
+extracted_demand_group_count = length(SOURCE_SUMMARY.demand_group_paths) - length(demand_groups)
+extracted_demand_csv_count = SOURCE_SUMMARY.demand_trace_files - direct_demand_csv_count
+println("Direct Traces demand groups: ", length(demand_groups), "; demand CSV traces: ", direct_demand_csv_count, "; distributed-PV-total traces: ", direct_pv_total_trace_count)
+println("Extracted model-scenario Traces/demand groups: ", extracted_demand_group_count, "; demand CSV traces: ", extracted_demand_csv_count)
 println("Across the configured download root: ", length(SOURCE_SUMMARY.trace_archive_files), " trace archives, ", length(SOURCE_SUMMARY.demand_group_paths), " demand groups, ", SOURCE_SUMMARY.demand_trace_files, " demand CSV traces, and PoE labels ", join(SOURCE_SUMMARY.poe_labels, ", "))
 
-demand_sample_metadata = if !isempty(dem_files)
-    df_dem = CSV.read(abs_path(joinpath(demand_dir, dem_files[1])), DataFrame)
-    println("Demand file: ", dem_files[1])
-    println("Shape: ", (nrow(df_dem), ncol(df_dem)))
-    cols = names(df_dem)
-    DataFrame([
-        (
-            demand_dir = demand_dir,
-            file_count = length(dem_files),
-            sample_file = dem_files[1],
-            sample_rows = nrow(df_dem),
-            sample_columns = ncol(df_dem),
-            metadata_columns = join(cols[1:3], ","),
-            value_columns = max(length(cols) - 3, 0),
-            first_value_column = length(cols) > 3 ? cols[4] : "",
-            last_value_column = length(cols) > 3 ? cols[end] : "",
-            columns_list = join(cols, "|"),
-        ),
-    ])
-else
-    DataFrame([
-        (
-            demand_dir = demand_dir,
-            file_count = 0,
-            sample_file = "",
-            sample_rows = missing,
-            sample_columns = missing,
-            metadata_columns = "",
-            value_columns = missing,
-            first_value_column = "",
-            last_value_column = "",
-            columns_list = "",
-        ),
-    ])
-end
-write_table(demand_sample_metadata, SCRIPT_STEM, "demand_sample_metadata")
-metric_value_table([
-    "Demand directory" => demand_sample_metadata.demand_dir[1],
-    "Files" => demand_sample_metadata.file_count[1],
-    "Sample file" => demand_sample_metadata.sample_file[1],
-    "Sample rows" => demand_sample_metadata.sample_rows[1],
-    "Sample columns" => demand_sample_metadata.sample_columns[1],
-    "Metadata columns" => demand_sample_metadata.metadata_columns[1],
-    "Value columns" => demand_sample_metadata.value_columns[1],
-    "First value column" => demand_sample_metadata.first_value_column[1],
-    "Last value column" => demand_sample_metadata.last_value_column[1],
-])
+# PISP defines one demand-trace group per ISP 2024 scenario and subregion: three
+# scenarios by twelve subregions, 36 groups in total.
+println("Known direct-demand-group bound: ", SOURCE_SUMMARY.expected_demand_group_count, " (", length(PISP.ID2SCE), " scenarios x ", length(PISP.NEMBUSNAME), " subregions)")
+println("Missing against that bound: ", isempty(SOURCE_SUMMARY.missing_demand_groups) ? "none" : join(SOURCE_SUMMARY.missing_demand_groups, ", "))
+println("Unexpected demand-like paths outside that bound: ", isempty(SOURCE_SUMMARY.unexpected_demand_paths) ? "none" : join(SOURCE_SUMMARY.unexpected_demand_paths, ", "))
 
 # ### Historical reference-year coverage
 #
-# PISP's reference-trace convention spans several historical weather years plus the composite `4006` trace; not every year is present in every local download.
+# PISP's reference-trace convention spans several historical weather years plus the composite `4006` trace; not every year is present in every download.
 
 available_year_rows = NamedTuple[]
 for yr in [2011, 2015, 2019, 2023]
@@ -256,8 +269,8 @@ for yr in [2011, 2015, 2019, 2023]
 end
 
 available_year_checks = DataFrame(available_year_rows)
-write_table(available_year_checks, SCRIPT_STEM, "available_year_checks")
-markdown_table(available_year_checks)
+PISPDocUtils.write_table(available_year_checks, SCRIPT_STEM, "available_year_checks")
+PISPDocUtils.markdown_table(available_year_checks)
 
 # ## Validation result
 #
@@ -277,10 +290,10 @@ p1 = plot(sol_datetime, sol_hourly, linewidth = 0.8, color = :orange, label = ""
 p2 = plot(wind_datetime, wind_hourly, linewidth = 0.8, color = :steelblue, label = "", title = "Wind 4006 — ARWF1 (first 30 days)", ylabel = "Mean half-hourly CF", legend = false)
 fig = plot(p1, p2, layout = (2, 1), size = (1600, 900), left_margin = 5Plots.mm, bottom_margin = 4Plots.mm, top_margin = 4Plots.mm)
 
-const CANONICAL_FIGURE_PATH = figure_path(SCRIPT_STEM, "01_sample_traces.png")
+const CANONICAL_FIGURE_PATH = PISPDocUtils.figure_path(SCRIPT_STEM, "01_sample_traces.png")
 savefig(fig, CANONICAL_FIGURE_PATH)
 
-EdaSupport.embed_figure(CANONICAL_FIGURE_PATH, "01_sample_traces.png")
+PISPDocUtils.embed_figure(CANONICAL_FIGURE_PATH, "01_sample_traces.png")
 nothing #hide
 
 # ![First 30 days of the solar and wind 4006 reference traces](01_sample_traces.png)
@@ -290,5 +303,5 @@ nothing #hide
 # - The executed 4006 samples for solar site Bannerton_SAT and wind site ARWF1 each contain 10,227 rows and 51 columns, spanning 2024-07-01 through 2052-06-30.
 # - For the solar 4006 sample at Bannerton_SAT, 67 of 10,227 days (0.655129%) have a midday maximum below the threshold `0.1` across columns `24:35`.
 # - Solar and wind traces share one schema (three metadata columns plus half-hourly value columns); demand traces use a different, per-node file family.
-# - The direct configured `Traces/` directory contains 36 state/scenario demand groups and 2,880 demand trace files; the configured download root also contains three extracted model-scenario demand groups, for 39 groups and 2,916 demand CSV traces in total. The `zip/Traces/` directory contains 62 trace archives. These are local observations, not upstream completeness.
-# - The configured local demand filenames include `POE10` and `POE50`. The 2023 Inputs, Assumptions and Scenarios Report defines POE as “probability of exceedance” ([p. 172](../../../../../data/2024/pisp-reports/2023-inputs-assumptions-and-scenarios-report.pdf#page=172)); the 2023 ISP Methodology describes 10%, 50%, and sometimes 90% POE simulations and uses 10% POE demand profiles for capacity-outlook modelling ([p. 39](../../../../../data/2024/pisp-reports/2023-isp-methodology.pdf#page=39)). The labels remain separate from that report-backed meaning, and no 2026 PoE contract is inferred.
+# - PISP defines exactly 36 direct demand groups: three registered scenarios by twelve subregions. The counts above report the demand-group, CSV-trace, and trace-archive totals against that bound, the extracted model-scenario totals, and any group that is missing or unexpected.
+# - The configured demand filenames include `POE10` and `POE50`. The 2023 Inputs, Assumptions and Scenarios Report defines POE as “probability of exceedance” ([p. 172](../../../../../data/2024/pisp-reports/2023-inputs-assumptions-and-scenarios-report.pdf#page=172)); the 2023 ISP Methodology describes 10%, 50%, and sometimes 90% POE simulations and uses 10% POE demand profiles for capacity-outlook modelling ([p. 39](../../../../../data/2024/pisp-reports/2023-isp-methodology.pdf#page=39)). The labels remain separate from that report-backed meaning, and no 2026 PoE contract is inferred.

@@ -9,18 +9,14 @@ using XLSX
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
-
-include(joinpath(REPO_ROOT, "docs", "source_material_support.jl"))
-using .PISPDocsSourceMaterialSupport
-
-const ISP2024 = edition_profile(REPO_ROOT, "2024")
-const ISP2026 = edition_profile(REPO_ROOT, "2026")
-const WORKBOOK2024 = joinpath(ISP2024.download_root, "2024-isp-inputs-and-assumptions-workbook.xlsx")
+const ISP2024 = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
+const ISP2026 = PISPDocUtils.edition_profile(REPO_ROOT, "2026")
+const EXISTING_GENERATORS_2024 = PISP.source_spec(:existing_generator_summary, 2024)
+const STORAGE_PROPERTIES_2024 = PISP.source_spec(:bess_storage_properties, 2024)
+const WORKBOOK2024 = PISP.source_path(ISP2024.download_root, EXISTING_GENERATORS_2024)
 const WORKBOOK2026 = joinpath(ISP2026.download_root, "2026-isp-inputs-and-assumptions-workbook.xlsm")
 nothing #hide
 
@@ -28,17 +24,20 @@ nothing #hide
 #
 # Each row below represents a station and combines location, technology, maximum capacity, and seasonal ratings.
 # PISP uses this source with `Summary Mapping`, maximum-capacity, emissions, reliability, and package mappings to construct unit-level generator records.
+# `Summary Mapping` supplies the identifiers, locations, technologies, and marginal-loss-factor fields that align those records.
+# Separate maximum-capacity blocks distinguish existing and new generation from battery projects, while the battery summary-mapping rows support construction of ESS records.
+# The observed 2026 workbook retains `Summary Mapping`, `Maximum capacity`, and `Existing Gen Data Summary` as separate worksheets, but PISP does not yet read them as a registered ISP 2026 source.
 
-existing_2024 = cells_table(
-    WORKBOOK2024,
-    "Existing Gen Data Summary",
-    "B13:K18",
-    [
+existing_source_2024 = PISP.read_xlsx_rows(WORKBOOK2024, EXISTING_GENERATORS_2024)
+existing_2024 = DataFrame(
+    existing_source_2024[4:9, 1:10],
+    Symbol.([
         "Station", "Generator type", "Region", "ISP sub-region", "REZ", "Fuel/technology",
         "Maximum capacity (MW)", "Summer peak (MW)", "Summer typical (MW)", "Winter (MW)",
-    ],
+    ]);
+    makeunique = true,
 )
-markdown_table(existing_2024)
+PISPDocUtils.markdown_table(existing_2024)
 #-
 
 # ## ISP 2026 unit-level summary
@@ -46,18 +45,16 @@ markdown_table(existing_2024)
 # The later workbook places IASR IDs and project status directly beside station and technology fields.
 # Bayswater therefore appears as four records rather than one station aggregate.
 
-existing_2026 = cells_table(
-    WORKBOOK2026,
-    "Existing Gen Data Summary",
-    "B13:Q18",
-    [
+existing_2026 = DataFrame(
+    XLSX.readdata(WORKBOOK2026, "Existing Gen Data Summary", "B13:Q18"),
+    Symbol.([
         "IASR ID", "Station", "Technology", "Fuel", "Region", "ISP sub-region", "REZ", "Cost zone",
         "Status", "Storage capacity", "Maximum capacity (MW)", "Minimum load", "Summer peak (MW)",
         "Summer typical (MW)", "Winter (MW)", "Minimum stable level (MW)",
-    ];
-    columns = collect(1:16),
+    ]);
+    makeunique = true,
 )
-markdown_table(existing_2026)
+PISPDocUtils.markdown_table(existing_2026)
 #-
 
 # ## Storage technology properties
@@ -66,29 +63,28 @@ markdown_table(existing_2026)
 # ISP 2026 uses one row per technology, adds compressed air and separate coordinated-CER categories, and reports energy capacity as hours for a 1 MW reference power.
 # A blank ISP 2024 source cell is shown as `Not reported` rather than as a Julia missing-value marker.
 
-storage_2024 = cells_table(
-    WORKBOOK2024,
-    "Storage properties",
-    "B5:H13",
-    ["Property", "Battery 1 h", "Battery 2 h", "Battery 4 h", "Battery 8 h", "VPP", "Units"],
+storage_source_2024 = PISP.read_xlsx_rows(WORKBOOK2024, STORAGE_PROPERTIES_2024)
+storage_2024 = DataFrame(
+    storage_source_2024[2:10, 1:7],
+    Symbol.(["Property", "Battery 1 h", "Battery 2 h", "Battery 4 h", "Battery 8 h", "VPP", "Units"]);
+    makeunique = true,
 )
 for column in names(storage_2024)
     storage_2024[!, column] = coalesce.(storage_2024[!, column], "Not reported")
 end
-markdown_table(storage_2024)
+PISPDocUtils.markdown_table(storage_2024)
 #-
 
-storage_2026 = cells_table(
-    WORKBOOK2026,
-    "Storage properties",
-    "B6:I13",
-    [
+storage_2026 = DataFrame(
+    XLSX.readdata(WORKBOOK2026, "Storage properties", "B6:I13"),
+    Symbol.([
         "Technology", "Maximum power (MW)", "Energy capacity (h)", "Charge efficiency (%)",
         "Discharge efficiency (%)", "Maximum state of charge (%)", "Minimum state of charge (%)",
         "Round-trip efficiency (%)",
-    ],
+    ]);
+    makeunique = true,
 )
-markdown_table(storage_2026)
+PISPDocUtils.markdown_table(storage_2026)
 #-
 
 # ## PISP conventions applied after source reading
@@ -101,7 +97,7 @@ package_collections = DataFrame([
     (collection = "Battery defaults", object = "PISP.databess", entries = length(PISP.databess)),
     (collection = "Pumped-hydro defaults", object = "PISP.dataps", entries = length(PISP.dataps)),
 ])
-markdown_table(package_collections)
+PISPDocUtils.markdown_table(package_collections)
 #-
 
 # PISP currently implements the ISP 2024 transformation path.

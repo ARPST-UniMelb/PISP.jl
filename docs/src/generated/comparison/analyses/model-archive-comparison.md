@@ -25,11 +25,11 @@ using Printf
 const REPO_ROOT = normpath(
     get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..", "..")),
 )
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles: edition_profiles
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
 const EXPECTED_YEARS = (2024, 2026)
-const PROFILES = Dict(parse(Int, profile.edition) => profile for profile in edition_profiles(REPO_ROOT))
+const PROFILES = Dict(parse(Int, profile.edition) => profile for profile in PISPDocUtils.edition_profiles(REPO_ROOT))
 const ARCHIVES = Dict(
     year => joinpath(PROFILES[year].download_root, "zip", "$(year)-isp-model.zip")
     for year in EXPECTED_YEARS
@@ -192,35 +192,6 @@ function inspect_archive(year, archive_path)
     return records
 end
 
-struct MarkdownTable
-    text::String
-end
-
-Base.show(io::IO, ::MIME"text/markdown", table::MarkdownTable) = print(io, table.text)
-Base.show(io::IO, ::MIME"text/plain", table::MarkdownTable) = print(io, table.text)
-
-function markdown_cell(value)
-    value === nothing && return "—"
-    text = replace(string(value), '\n' => " ")
-    return replace(text, '|' => "\\|")
-end
-
-function markdown_table(headers, rows; alignment = fill(:left, length(headers)))
-    length(alignment) == length(headers) || error("Table alignment does not match the columns")
-    separators = Dict(:left => ":---", :right => "---:", :centre => ":---:")
-    all(item -> haskey(separators, item), alignment) ||
-        error("Unsupported Markdown alignment")
-
-    lines = String[]
-    push!(lines, "| " * join(markdown_cell.(headers), " | ") * " |")
-    push!(lines, "| " * join((separators[item] for item in alignment), " | ") * " |")
-    for row in rows
-        length(row) == length(headers) || error("Table row does not match the columns")
-        push!(lines, "| " * join(markdown_cell.(row), " | ") * " |")
-    end
-    return MarkdownTable(join(lines, "\n"))
-end
-
 records_for(year) = inspect_archive(year, ARCHIVES[year])
 unique_sorted(values) = sort!(unique(collect(values)))
 mib(bytes) = bytes / 1024^2
@@ -303,7 +274,7 @@ for year in EXPECTED_YEARS
     )
 end
 
-markdown_table(
+PISPDocUtils.markdown_table(
     [
         "ISP year",
         "Archive",
@@ -316,6 +287,7 @@ markdown_table(
     ],
     archive_summary_rows;
     alignment = [:right, :left, :left, :right, :right, :right, :right, :right],
+    nothing_text = "—",
 )
 ````
 
@@ -375,12 +347,13 @@ scenarios_2026 = unique_sorted(record.scenario for record in scenario_records_20
 @assert sort([row.scenario_2024 for row in scenario_mapping]) == scenarios_2024
 @assert sort([row.scenario_2026 for row in scenario_mapping]) == scenarios_2026
 
-markdown_table(
+PISPDocUtils.markdown_table(
     ["ISP 2024 scenario", "ISP 2026 scenario", "Relationship", "Evidence"],
     [
         Any[row.scenario_2024, row.scenario_2026, row.relationship, row.citation]
         for row in scenario_mapping
-    ],
+    ];
+    nothing_text = "—",
 )
 ````
 
@@ -421,10 +394,11 @@ for role in ["PLEXOS model", "PLEXOS solver parameters"]
     )
 end
 
-markdown_table(
+PISPDocUtils.markdown_table(
     ["XML role", "ISP 2024 files", "ISP 2026 files"],
     xml_role_rows;
     alignment = [:left, :right, :right],
+    nothing_text = "—",
 )
 ````
 
@@ -481,10 +455,11 @@ push!(
     ],
 )
 
-markdown_table(
+PISPDocUtils.markdown_table(
     ["Trace family", "ISP 2024", "ISP 2026", "Archive coverage"],
     trace_family_rows;
     alignment = [:left, :right, :right, :left],
+    nothing_text = "—",
 )
 ````
 
@@ -525,10 +500,11 @@ for category in filename_categories, year in EXPECTED_YEARS
     push!(filename_rows, Any[humanise_category(category), year, filename])
 end
 
-markdown_table(
+PISPDocUtils.markdown_table(
     ["Trace family", "ISP year", "Example filename"],
     filename_rows;
     alignment = [:left, :right, :left],
+    nothing_text = "—",
 )
 ````
 

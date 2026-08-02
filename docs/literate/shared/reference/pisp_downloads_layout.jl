@@ -22,31 +22,8 @@
 const REPO_ROOT = normpath(
     get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..", "..")),
 )
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-include(joinpath(REPO_ROOT, "docs", "download_layout.jl"))
-using .PISPDocsEditionProfiles: edition_profiles
-using .PISPDocsDownloadLayout: inspect_download_layout
-
-struct MarkdownTable
-    text::String
-end
-
-Base.show(io::IO, ::MIME"text/markdown", table::MarkdownTable) = print(io, table.text)
-Base.show(io::IO, ::MIME"text/plain", table::MarkdownTable) = print(io, table.text)
-
-markdown_cell(value) = replace(replace(string(value), '\n' => " "), '|' => "\\|")
-markdown_items(values) = isempty(values) ? "—" : join(("`$(markdown_cell(value))`" for value in values), ", ")
-
-function markdown_table(headers, rows)
-    lines = String[]
-    push!(lines, "| " * join(markdown_cell.(headers), " | ") * " |")
-    push!(lines, "| " * join(fill(":---", length(headers)), " | ") * " |")
-    for row in rows
-        length(row) == length(headers) || error("table row does not match the headers")
-        push!(lines, "| " * join(markdown_cell.(row), " | ") * " |")
-    end
-    return MarkdownTable(join(lines, "\n"))
-end
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 nothing #hide
 
 # ## Observed outlook directories and source archives
@@ -59,22 +36,23 @@ nothing #hide
 # `zip/Traces/` remain part of the trace source family.
 
 download_layouts = [
-    inspect_download_layout(profile.label, profile.download_root)
-    for profile in edition_profiles(REPO_ROOT)
+    PISPDocUtils.inspect_download_layout(profile.label, profile.download_root)
+    for profile in PISPDocUtils.edition_profiles(REPO_ROOT)
 ]
 
 layout_rows = [
     Any[
         layout.edition,
-        markdown_items(layout.outlook_directories),
-        markdown_items(layout.source_archives),
+        PISPDocUtils.markdown_items(layout.outlook_directories; nothing_text = "nothing"),
+        PISPDocUtils.markdown_items(layout.source_archives; nothing_text = "nothing"),
     ]
     for layout in download_layouts
 ]
 
-markdown_table(
+PISPDocUtils.markdown_table(
     ["Edition", "Extracted outlook directories", "Retained source archives"],
-    layout_rows,
+    layout_rows;
+    nothing_text = "nothing",
 )
 
 # `Core` or `Core scenarios` and `Sensitivities` contain the extracted

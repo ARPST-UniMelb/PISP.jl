@@ -1,7 +1,3 @@
-module PISPDocsEditionProfiles
-
-export EditionProfile, edition_profile, edition_profiles
-
 Base.@kwdef struct EditionProfile
     edition::String
     label::String
@@ -79,6 +75,4 @@ function edition_profile(repo_root::AbstractString, edition::AbstractString)
         profile.edition == requested && return profile
     end
     throw(ArgumentError("unknown ISP edition \"$requested\"; supported editions are \"2024\" and \"2026\""))
-end
-
 end

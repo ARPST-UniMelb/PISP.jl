@@ -40,14 +40,11 @@ gr();
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles
-
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
 const SCRIPT_STEM = "isp2024_04_seasonal_extremes"
-const ISP2024_PROFILE = edition_profile(REPO_ROOT, "2024")
+const ISP2024_PROFILE = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
 const TRACES = relpath(joinpath(ISP2024_PROFILE.download_root, "Traces"), REPO_ROOT)
 
 abs_path(relative_path) = joinpath(REPO_ROOT, relative_path)
@@ -125,40 +122,12 @@ const COOL_SUMMERS = [2011, 2016, 2020, 2022]
 const SOLAR_LOC = "Bannerton_SAT"
 const WIND_LOC = "DUNDWF1"
 
-function add_datetime!(df::DataFrame)
-    df.datetime = Date.(df.Year, df.Month, df.Day)
-    return df
-end
-
 function load_trace(tech, yr, loc)
     file = joinpath(TRACES, "$(tech)_$(yr)", "$(loc)_RefYear$(yr).csv")
     isfile(abs_path(file)) || return nothing
     df = CSV.read(abs_path(file), DataFrame)
-    add_datetime!(df)
+    PISPDocUtils.add_datetime!(df)
     return df
-end
-
-row_mean(df::DataFrame, cols) = [mean(row[col] for col in cols) for row in eachrow(df)]
-````
-
-```@raw html
-</details>
-```
-
-A simple trailing rolling mean: the first `window - 1` entries have no full window of preceding values yet, so they are left `missing`.
-
-```@raw html
-<details class="source-code"><summary>Show source code</summary>
-```
-
-````julia
-function rolling_mean(values, window)
-    n = length(values)
-    result = Vector{Union{Missing, Float64}}(missing, n)
-    for i in window:n
-        result[i] = mean(values[(i - window + 1):i])
-    end
-    return result
 end
 ````
 
@@ -214,7 +183,7 @@ function low_output_events_for(tech, loc, hh_cols, threshold, yr)
 
     summer = df[summer_mask, :]
     dates = summer.datetime
-    daily = row_mean(summer, hh_cols)
+    daily = PISPDocUtils.row_mean(summer, hh_cols)
     below = daily .< threshold
     n = length(below)
 
@@ -255,7 +224,7 @@ for (season_type, year_list) in (("Hot Summers", HOT_SUMMERS), ("Cool Summers", 
         df === nothing && continue
         summer_mask = in.(df.Month, Ref((12, 1, 2)))
         any(summer_mask) || continue
-        vals = row_mean(df[summer_mask, :], HH_COLS_SOL)
+        vals = PISPDocUtils.row_mean(df[summer_mask, :], HH_COLS_SOL)
         push!(
             rows,
             (
@@ -272,8 +241,8 @@ for (season_type, year_list) in (("Hot Summers", HOT_SUMMERS), ("Cool Summers", 
 end
 
 hot_cool_summer_solar_summary = DataFrame(rows)
-write_table(hot_cool_summer_solar_summary, SCRIPT_STEM, "hot_cool_summer_solar_summary")
-markdown_table(hot_cool_summer_solar_summary)
+PISPDocUtils.write_table(hot_cool_summer_solar_summary, SCRIPT_STEM, "hot_cool_summer_solar_summary")
+PISPDocUtils.markdown_table(hot_cool_summer_solar_summary)
 ````
 
 ```@raw html
@@ -295,7 +264,7 @@ markdown_table(hot_cool_summer_solar_summary)
 
 ## Persistent low-output periods
 
-An event is a run of consecutive summer calendar days whose daily mean capacity factor stays below the technology's threshold for at least 3 days; a run never bridges the excluded March-November gap between a summer's December and the following January/February. The full event-by-event table is written to `eda/tables/julia/04_seasonal_extremes/low_output_events.csv`; the page instead shows a compact per-technology-per-year summary of how many candidate events were found and how long they lasted.
+An event is a run of consecutive summer calendar days whose daily mean capacity factor stays below the technology's threshold for at least 3 days; a run never bridges the excluded March-November gap between a summer's December and the following January/February. The full event-by-event table is written to `docs/src/tables/julia/isp2024_04_seasonal_extremes/low_output_events.csv`; the page instead shows a compact per-technology-per-year summary of how many candidate events were found and how long they lasted.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -313,7 +282,7 @@ for (tech, loc, hh_cols, threshold) in (
 end
 
 low_output_events = DataFrame(rows)
-write_table(low_output_events, SCRIPT_STEM, "low_output_events")
+PISPDocUtils.write_table(low_output_events, SCRIPT_STEM, "low_output_events")
 
 low_output_event_summary = if isempty(low_output_events)
     DataFrame()
@@ -329,7 +298,7 @@ else
         [:tech, :year],
     )
 end
-markdown_table(low_output_event_summary)
+PISPDocUtils.markdown_table(low_output_event_summary)
 ````
 
 ```@raw html
@@ -367,7 +336,7 @@ for yr in 2011:2023
     summer_mask = in.(df.Month, Ref((12, 1, 2)))
     any(summer_mask) || continue
     summer = df[summer_mask, :]
-    daily = row_mean(summer, HH_COLS_SOL)
+    daily = PISPDocUtils.row_mean(summer, HH_COLS_SOL)
     worst_pos = argmin(daily)  # first occurrence on ties
     push!(
         worst_rows,
@@ -381,8 +350,8 @@ for yr in 2011:2023
 end
 
 worst_solar_day_summary = DataFrame(worst_rows)
-write_table(worst_solar_day_summary, SCRIPT_STEM, "worst_solar_day_summary")
-markdown_table(worst_solar_day_summary)
+PISPDocUtils.write_table(worst_solar_day_summary, SCRIPT_STEM, "worst_solar_day_summary")
+PISPDocUtils.markdown_table(worst_solar_day_summary)
 ````
 
 ```@raw html
@@ -431,8 +400,8 @@ if !isempty(worst_rows)
 end
 
 worst_solar_day_profile = DataFrame(rows)
-write_table(worst_solar_day_profile, SCRIPT_STEM, "worst_solar_day_profile")
-markdown_table(worst_solar_day_profile)
+PISPDocUtils.write_table(worst_solar_day_profile, SCRIPT_STEM, "worst_solar_day_profile")
+PISPDocUtils.markdown_table(worst_solar_day_profile)
 ````
 
 ```@raw html
@@ -519,8 +488,8 @@ if df !== nothing
 end
 
 monthly_cf_2019_summary = DataFrame(rows)
-write_table(monthly_cf_2019_summary, SCRIPT_STEM, "monthly_cf_2019_summary")
-markdown_table(monthly_cf_2019_summary)
+PISPDocUtils.write_table(monthly_cf_2019_summary, SCRIPT_STEM, "monthly_cf_2019_summary")
+PISPDocUtils.markdown_table(monthly_cf_2019_summary)
 ````
 
 ```@raw html
@@ -545,7 +514,8 @@ markdown_table(monthly_cf_2019_summary)
 
 The `RefYear2019` trace reuses the 2019 historical weather pattern across the projected planning horizon rather than representing only one 2018-19 season.
 The historical label includes the 2019-20 Black Summer context, but this capacity-factor trace does not isolate effects from heat, smoke, cloud, or bushfire conditions.
-The table previews 15 rows; the complete series is written to `eda/tables/julia/04_seasonal_extremes/black_summer_2019_daily_cf.csv`.
+The table previews 15 rows; the complete series is written to `docs/src/tables/julia/isp2024_04_seasonal_extremes/black_summer_2019_daily_cf.csv`.
+`rolling3_cf` is a trailing 3-day mean, so its first two values are `missing`.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -557,16 +527,16 @@ rows = NamedTuple[]
 if df !== nothing
     summer_mask = in.(df.Month, Ref((12, 1, 2)))
     summer = df[summer_mask, :]
-    daily = row_mean(summer, HH_COLS_SOL)
-    rolling3 = rolling_mean(daily, 3)
+    daily = PISPDocUtils.row_mean(summer, HH_COLS_SOL)
+    rolling3 = PISPDocUtils.rolling_mean(daily, 3)
     for (i, d) in enumerate(summer.datetime)
         push!(rows, (date = Dates.format(d, "yyyy-mm-dd"), daily_mean_cf = daily[i], rolling3_cf = rolling3[i]))
     end
 end
 
 black_summer_2019_daily_cf = DataFrame(rows)
-write_table(black_summer_2019_daily_cf, SCRIPT_STEM, "black_summer_2019_daily_cf")
-markdown_table(first(black_summer_2019_daily_cf, 15))
+PISPDocUtils.write_table(black_summer_2019_daily_cf, SCRIPT_STEM, "black_summer_2019_daily_cf")
+PISPDocUtils.markdown_table(first(black_summer_2019_daily_cf, 15))
 ````
 
 ```@raw html
@@ -612,7 +582,7 @@ let
             any(summer_mask) || continue
             summer = df[summer_mask, :]
             daily = [mean(skipmissing(Vector(summer[i, HH_COLS_SOL]))) for i in 1:nrow(summer)]
-            rolling3 = rolling_mean(daily, 3)
+            rolling3 = PISPDocUtils.rolling_mean(daily, 3)
             plot!(p, summer.datetime, daily, linewidth=0.5, alpha=0.6, color=color, label="$yr")
             plot!(p, summer.datetime, rolling3, linewidth=1.5, color=:black, alpha=0.8, label="")
         end
@@ -623,8 +593,8 @@ let
 end
 p_hc = plot(plots_hot_cool..., layout=(2,1), size=(1400, 800),
             left_margin=5Plots.mm, bottom_margin=5Plots.mm)
-savefig(p_hc, figure_path(SCRIPT_STEM, "04_hot_vs_cool_summer_solar.png"))
-EdaSupport.embed_figure(figure_path(SCRIPT_STEM, "04_hot_vs_cool_summer_solar.png"), "04_hot_vs_cool_summer_solar.png")
+savefig(p_hc, PISPDocUtils.figure_path(SCRIPT_STEM, "04_hot_vs_cool_summer_solar.png"))
+PISPDocUtils.embed_figure(PISPDocUtils.figure_path(SCRIPT_STEM, "04_hot_vs_cool_summer_solar.png"), "04_hot_vs_cool_summer_solar.png")
 ````
 
 ```@raw html
@@ -726,8 +696,8 @@ end
 
 p_low_out = plot(p_sol_hist, p_wind_hist, p_worst_days, p_worst_profile, layout=(2,2), size=(1400, 1000),
                   left_margin=5Plots.mm, bottom_margin=5Plots.mm)
-savefig(p_low_out, figure_path(SCRIPT_STEM, "04_low_output_events.png"))
-EdaSupport.embed_figure(figure_path(SCRIPT_STEM, "04_low_output_events.png"), "04_low_output_events.png")
+savefig(p_low_out, PISPDocUtils.figure_path(SCRIPT_STEM, "04_low_output_events.png"))
+PISPDocUtils.embed_figure(PISPDocUtils.figure_path(SCRIPT_STEM, "04_low_output_events.png"), "04_low_output_events.png")
 ````
 
 ```@raw html
@@ -745,7 +715,7 @@ The bar chart reads back the monthly summary table reported above, so the plot u
 ```
 
 ````julia
-monthly_table_path = table_path(SCRIPT_STEM, "monthly_cf_2019_summary")
+monthly_table_path = PISPDocUtils.table_path(SCRIPT_STEM, "monthly_cf_2019_summary")
 if isfile(monthly_table_path)
     monthly_df = CSV.read(monthly_table_path, DataFrame)
     month_labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
@@ -754,8 +724,8 @@ if isfile(monthly_table_path)
                     title="Solar $(SOLAR_LOC) 2019 — Monthly Mean CF ± Std",
                     xlabel="Month", ylabel="Mean Capacity Factor", grid=true, gridalpha=0.3, size=(1200, 500),
                     left_margin=5Plots.mm, bottom_margin=5Plots.mm)
-    savefig(p_monthly, figure_path(SCRIPT_STEM, "04_monthly_cf_2019.png"))
-    EdaSupport.embed_figure(figure_path(SCRIPT_STEM, "04_monthly_cf_2019.png"), "04_monthly_cf_2019.png")
+    savefig(p_monthly, PISPDocUtils.figure_path(SCRIPT_STEM, "04_monthly_cf_2019.png"))
+    PISPDocUtils.embed_figure(PISPDocUtils.figure_path(SCRIPT_STEM, "04_monthly_cf_2019.png"), "04_monthly_cf_2019.png")
 end
 ````
 
@@ -779,14 +749,14 @@ df_2019 = load_trace("solar", 2019, SOLAR_LOC)
 if df_2019 !== nothing
     summer_2019 = df_2019[in.(df_2019.Month, Ref((12, 1, 2))), :]
     daily = [mean(skipmissing(Vector(summer_2019[i, HH_COLS_SOL]))) for i in 1:nrow(summer_2019)]
-    rolling3 = rolling_mean(daily, 3)
+    rolling3 = PISPDocUtils.rolling_mean(daily, 3)
     p_black = plot(summer_2019.datetime, daily, linewidth=0.5, color=:darkorange, alpha=0.7, legend=false)
     plot!(p_black, summer_2019.datetime, rolling3, linewidth=2, color=:darkred, label="")
     plot!(p_black, title="Solar $(SOLAR_LOC) — Summer 2019 (Black Summer)", ylabel="Daily Mean CF",
           ylim=(0, 0.5), grid=true, gridalpha=0.3, size=(1600, 500),
           left_margin=5Plots.mm, bottom_margin=5Plots.mm)
-    savefig(p_black, figure_path(SCRIPT_STEM, "04_summer_2019_black_summer.png"))
-    EdaSupport.embed_figure(figure_path(SCRIPT_STEM, "04_summer_2019_black_summer.png"), "04_summer_2019_black_summer.png")
+    savefig(p_black, PISPDocUtils.figure_path(SCRIPT_STEM, "04_summer_2019_black_summer.png"))
+    PISPDocUtils.embed_figure(PISPDocUtils.figure_path(SCRIPT_STEM, "04_summer_2019_black_summer.png"), "04_summer_2019_black_summer.png")
 end
 ````
 

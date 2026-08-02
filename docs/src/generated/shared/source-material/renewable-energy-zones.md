@@ -18,18 +18,13 @@ using XLSX
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
-
-include(joinpath(REPO_ROOT, "docs", "source_material_support.jl"))
-using .PISPDocsSourceMaterialSupport
-
-const ISP2024 = edition_profile(REPO_ROOT, "2024")
-const ISP2026 = edition_profile(REPO_ROOT, "2026")
-const WORKBOOK2024 = joinpath(ISP2024.download_root, "2024-isp-inputs-and-assumptions-workbook.xlsx")
+const ISP2024 = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
+const ISP2026 = PISPDocUtils.edition_profile(REPO_ROOT, "2026")
+const RENEWABLE_ENERGY_ZONES_2024 = PISP.source_spec(:renewable_energy_zones, 2024)
+const WORKBOOK2024 = PISP.source_path(ISP2024.download_root, RENEWABLE_ENERGY_ZONES_2024)
 const WORKBOOK2026 = joinpath(ISP2026.download_root, "2026-isp-inputs-and-assumptions-workbook.xlsm")
 ````
 
@@ -46,13 +41,13 @@ The 2024 source includes the NTNDP zone, ISP subregion, and regional cost zone b
 ```
 
 ````julia
-rez_2024 = cells_table(
-    WORKBOOK2024,
-    "Renewable Energy Zones",
-    "B8:G15",
-    ["ID", "Name", "NEM region", "NTNDP zone", "ISP subregion", "Regional cost zone"],
+rez_source_2024 = PISP.read_xlsx_rows(WORKBOOK2024, RENEWABLE_ENERGY_ZONES_2024)
+rez_2024 = DataFrame(
+    rez_source_2024[2:9, 1:6],
+    Symbol.(["ID", "Name", "NEM region", "NTNDP zone", "ISP subregion", "Regional cost zone"]);
+    makeunique = true,
 )
-markdown_table(rez_2024)
+PISPDocUtils.markdown_table(rez_2024)
 ````
 
 ```@raw html
@@ -80,13 +75,12 @@ The corresponding 2026 table is narrower in its leading columns and no longer pl
 ```
 
 ````julia
-rez_2026 = cells_table(
-    WORKBOOK2026,
-    "Renewable energy zones",
-    "B7:E15",
-    ["ID", "Name", "NEM region", "ISP subregion"],
+rez_2026 = DataFrame(
+    XLSX.readdata(WORKBOOK2026, "Renewable energy zones", "B7:E15"),
+    Symbol.(["ID", "Name", "NEM region", "ISP subregion"]);
+    makeunique = true,
 )
-markdown_table(rez_2026)
+PISPDocUtils.markdown_table(rez_2026)
 ````
 
 ```@raw html
@@ -122,7 +116,7 @@ rez_names = innerjoin(
     on = :ID,
 )
 renamed_rez = filter(row -> row.name_2024 != row.name_2026, rez_names)
-markdown_table(renamed_rez)
+PISPDocUtils.markdown_table(renamed_rez)
 ````
 
 ```@raw html
@@ -149,7 +143,7 @@ rez_conventions = DataFrame([
     (subject = "Wind outlook cost-development path", convention = "CDP14 for each current PISP scenario"),
     (subject = "Subregion geography", convention = "PISP.NEMBUSNAME and PISP.BUS2AREA"),
 ])
-markdown_table(rez_conventions)
+PISPDocUtils.markdown_table(rez_conventions)
 ````
 
 ```@raw html

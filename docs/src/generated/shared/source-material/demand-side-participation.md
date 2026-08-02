@@ -18,18 +18,13 @@ using XLSX
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
-
-include(joinpath(REPO_ROOT, "docs", "source_material_support.jl"))
-using .PISPDocsSourceMaterialSupport
-
-const ISP2024 = edition_profile(REPO_ROOT, "2024")
-const ISP2026 = edition_profile(REPO_ROOT, "2026")
-const WORKBOOK2024 = joinpath(ISP2024.download_root, "2024-isp-inputs-and-assumptions-workbook.xlsx")
+const ISP2024 = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
+const ISP2026 = PISPDocUtils.edition_profile(REPO_ROOT, "2026")
+const DSP_2024 = PISP.source_spec(:dsp_green_energy_exports_nsw_summer, 2024)
+const WORKBOOK2024 = PISP.source_path(ISP2024.download_root, DSP_2024)
 const WORKBOOK2026 = joinpath(ISP2026.download_root, "2026-isp-inputs-and-assumptions-workbook.xlsm")
 ````
 
@@ -47,16 +42,16 @@ The sampled block shows the New South Wales summer assumptions for the opening s
 ```
 
 ````julia
-dsp_2024 = cells_table(
-    WORKBOOK2024,
-    "DSP",
-    "B11:J15",
-    [
+dsp_source_2024 = PISP.read_xlsx_rows(WORKBOOK2024, DSP_2024)
+dsp_2024 = DataFrame(
+    dsp_source_2024[2:6, 1:9],
+    Symbol.([
         "Price band or response", "2023-24", "2024-25", "2025-26", "2026-27",
         "2027-28", "2028-29", "2029-30", "2030-31",
-    ],
+    ]);
+    makeunique = true,
 )
-markdown_table(dsp_2024)
+PISPDocUtils.markdown_table(dsp_2024)
 ````
 
 ```@raw html
@@ -82,16 +77,15 @@ This removes the need to infer those dimensions from a matrix block's location, 
 ```
 
 ````julia
-dsp_2026 = cells_table(
-    WORKBOOK2026,
-    "DSP",
-    "B10:L18",
-    [
+dsp_2026 = DataFrame(
+    XLSX.readdata(WORKBOOK2026, "DSP", "B10:L18"),
+    Symbol.([
         "Region", "Price band or response", "Scenario", "Season", "2025-26", "2026-27",
         "2027-28", "2028-29", "2029-30", "2030-31", "2031-32",
-    ],
+    ]);
+    makeunique = true,
 )
-markdown_table(dsp_2026)
+PISPDocUtils.markdown_table(dsp_2026)
 ````
 
 ```@raw html
@@ -121,8 +115,8 @@ The coverage ledger expands those selections into 30 active ranges so that no wo
 ```
 
 ````julia
-coverage = coverage_document(REPO_ROOT)
-source_reads = coverage_table(coverage, "source_read")
+coverage = PISPDocUtils.coverage_document(REPO_ROOT)
+source_reads = PISPDocUtils.coverage_table(coverage, "source_read")
 dsp_ranges = filter(:owner => ==("shared-source-demand-side-participation"), source_reads)
 
 dsp_coverage = DataFrame([
@@ -131,7 +125,7 @@ dsp_coverage = DataFrame([
     (dimension = "Season", values = 2, interpretation = "Summer and Winter"),
     (dimension = "Explicit source ranges", values = nrow(dsp_ranges), interpretation = "3 × 5 × 2 active blocks"),
 ])
-markdown_table(dsp_coverage)
+PISPDocUtils.markdown_table(dsp_coverage)
 ````
 
 ```@raw html
@@ -160,7 +154,7 @@ scenario_mapping = DataFrame(
     scenario_id = collect(keys(PISP.ID2SCE)),
     scenario_name = collect(values(PISP.ID2SCE)),
 )
-markdown_table(scenario_mapping)
+PISPDocUtils.markdown_table(scenario_mapping)
 ````
 
 ```@raw html

@@ -1,7 +1,3 @@
-module PISPDocsDownloadLayout
-
-export DownloadLayout, inspect_download_layout, outlook_directories, source_archives
-
 Base.@kwdef struct DownloadLayout
     edition::String
     download_root::String
@@ -59,6 +55,4 @@ function inspect_download_layout(edition::AbstractString, download_root::Abstrac
         outlook_directories = outlook_directories(download_root),
         source_archives = source_archives(download_root),
     )
-end
-
 end

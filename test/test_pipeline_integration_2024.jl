@@ -17,9 +17,9 @@ using Dates
 
 pipeline_integration_2024_edition = only(filter(
     p -> p.edition == "2024",
-    source_availability_profiles(normpath(joinpath(@__DIR__, ".."))),
+    PISPDocUtils.source_availability_profiles(normpath(joinpath(@__DIR__, ".."))),
 ))
-pipeline_integration_2024_available = inspect_edition(pipeline_integration_2024_edition).state == :complete
+pipeline_integration_2024_available = PISPDocUtils.inspect_edition(pipeline_integration_2024_edition).state == :complete
 pipeline_integration_2024_skip_slow = get(ENV, "PISP_SKIP_SLOW_TESTS", "") == "1"
 
 @testset "pipeline integration: populate_time_static!/populate_time_varying! (2024, Step Change, one day)" begin

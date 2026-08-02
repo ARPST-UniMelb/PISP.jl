@@ -40,14 +40,12 @@ gr();
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
 
 const SCRIPT_STEM = "isp2024_03_year_comparison"
-const ISP2024_PROFILE = edition_profile(REPO_ROOT, "2024")
+const ISP2024_PROFILE = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
 const TRACES = relpath(joinpath(ISP2024_PROFILE.download_root, "Traces"), REPO_ROOT)  # kept relative: this is the path form recorded in the output tables
 const YEARS = 2011:2023
 const HH_COLS_SOL = string.(1:48)
@@ -57,25 +55,19 @@ const SOLAR_LOC = "Bannerton_SAT"  # VIC solar
 const WIND_LOC = "DUNDWF1"         # VIC wind
 abs_path(relative_path) = joinpath(REPO_ROOT, relative_path)  # resolves a TRACES-relative path to an absolute file location for reading
 
-function add_datetime!(df::DataFrame)
-    df.datetime = Date.(df.Year, df.Month, df.Day)
-    return df
-end
-
 function load_location_all_years(tech, location, years)
     dfs = Dict{Int, DataFrame}()
     for yr in years
         file = joinpath(TRACES, "$(tech)_$(yr)", "$(location)_RefYear$(yr).csv")
         if isfile(abs_path(file))
             df = CSV.read(abs_path(file), DataFrame)
-            add_datetime!(df)
+            PISPDocUtils.add_datetime!(df)
             dfs[yr] = df
         end
     end
     return dfs
 end
 
-row_mean(df::DataFrame, cols) = [mean(row[col] for col in cols) for row in eachrow(df)]
 row_max(df::DataFrame, cols) = [maximum(row[col] for col in cols) for row in eachrow(df)]
 ````
 
@@ -128,7 +120,7 @@ for (tech, loc, hh_cols, data) in (
         df = data[yr]
         summer_mask = in.(df.Month, Ref((12, 1, 2)))
         if any(summer_mask)
-            vals = row_mean(df[summer_mask, :], hh_cols)
+            vals = PISPDocUtils.row_mean(df[summer_mask, :], hh_cols)
             push!(
                 seasonal_cf_rows,
                 (
@@ -146,7 +138,7 @@ for (tech, loc, hh_cols, data) in (
         end
         winter_mask = in.(df.Month, Ref((6, 7, 8)))
         if any(winter_mask)
-            vals = row_mean(df[winter_mask, :], hh_cols)
+            vals = PISPDocUtils.row_mean(df[winter_mask, :], hh_cols)
             push!(
                 seasonal_cf_rows,
                 (
@@ -165,8 +157,8 @@ for (tech, loc, hh_cols, data) in (
     end
 end
 seasonal_cf_by_year = DataFrame(seasonal_cf_rows)
-write_table(seasonal_cf_by_year, SCRIPT_STEM, "seasonal_cf_by_year")
-markdown_table(seasonal_cf_by_year)
+PISPDocUtils.write_table(seasonal_cf_by_year, SCRIPT_STEM, "seasonal_cf_by_year")
+PISPDocUtils.markdown_table(seasonal_cf_by_year)
 ````
 
 ```@raw html
@@ -244,13 +236,13 @@ for (tech, loc, hh_cols, data) in (
     ("wind", WIND_LOC, HH_COLS_WIND, wind_years),
 )
     for yr in sort(collect(keys(data)))
-        vals = row_mean(data[yr], hh_cols)
+        vals = PISPDocUtils.row_mean(data[yr], hh_cols)
         push!(annual_cf_rows, (tech = tech, location = loc, year = yr, mean_cf = mean(vals)))
     end
 end
 annual_cf_by_year = DataFrame(annual_cf_rows)
-write_table(annual_cf_by_year, SCRIPT_STEM, "annual_cf_by_year")
-markdown_table(annual_cf_by_year)
+PISPDocUtils.write_table(annual_cf_by_year, SCRIPT_STEM, "annual_cf_by_year")
+PISPDocUtils.markdown_table(annual_cf_by_year)
 ````
 
 ```@raw html
@@ -309,8 +301,8 @@ for yr in sort(collect(keys(sol_years)))
     push!(worst_summer_day_rows, (year = yr, date = Dates.format(worst_date, "yyyy-mm-dd"), midday_max_cf = worst_cf))
 end
 worst_summer_day_by_year = DataFrame(worst_summer_day_rows)
-write_table(worst_summer_day_by_year, SCRIPT_STEM, "worst_summer_day_by_year")
-markdown_table(worst_summer_day_by_year)
+PISPDocUtils.write_table(worst_summer_day_by_year, SCRIPT_STEM, "worst_summer_day_by_year")
+PISPDocUtils.markdown_table(worst_summer_day_by_year)
 ````
 
 ```@raw html
@@ -371,7 +363,7 @@ for yr in sort(collect(keys(wind_years)))
     summer_mask = in.(df.Month, Ref((12, 1, 2)))
     any(summer_mask) || continue
     summer = df[summer_mask, :]
-    daily = row_mean(summer, HH_COLS_WIND)
+    daily = PISPDocUtils.row_mean(summer, HH_COLS_WIND)
     n_low = count(<(0.05), daily)
     n_total = length(daily)
     push!(
@@ -389,8 +381,8 @@ for yr in sort(collect(keys(wind_years)))
     )
 end
 low_output_days_by_year = DataFrame(low_output_days_rows)
-write_table(low_output_days_by_year, SCRIPT_STEM, "low_output_days_by_year")
-markdown_table(low_output_days_by_year)
+PISPDocUtils.write_table(low_output_days_by_year, SCRIPT_STEM, "low_output_days_by_year")
+PISPDocUtils.markdown_table(low_output_days_by_year)
 ````
 
 ```@raw html
@@ -442,7 +434,7 @@ for (tech, loc, hh_cols, data) in (
     ("solar", SOLAR_LOC, HH_COLS_SOL, sol_years),
     ("wind", WIND_LOC, HH_COLS_WIND, wind_years),
 )
-    vals = [mean(row_mean(data[yr], hh_cols)) for yr in sort(collect(keys(data)))]
+    vals = [mean(PISPDocUtils.row_mean(data[yr], hh_cols)) for yr in sort(collect(keys(data)))]
     push!(
         variability_rows,
         (
@@ -456,8 +448,8 @@ for (tech, loc, hh_cols, data) in (
     )
 end
 annual_cf_variability_summary = DataFrame(variability_rows)
-write_table(annual_cf_variability_summary, SCRIPT_STEM, "annual_cf_variability_summary")
-markdown_table(annual_cf_variability_summary)
+PISPDocUtils.write_table(annual_cf_variability_summary, SCRIPT_STEM, "annual_cf_variability_summary")
+PISPDocUtils.markdown_table(annual_cf_variability_summary)
 ````
 
 ```@raw html
@@ -534,8 +526,8 @@ p3 = @df long_form(winter_cfs_sol, yrs_sol_winter) boxplot(:labels, :values, leg
 p4 = @df long_form(winter_cfs_wind, yrs_wind_winter) boxplot(:labels, :values, legend = false, fillalpha = 0.3, color = :steelblue, title = "Wind $(WIND_LOC) — Winter Daily Mean CF by Year", ylabel = "Daily Mean Capacity Factor", ylim = (0, 1))
 
 p_bp = plot(p1, p2, p3, p4, layout = (2, 2), size = (1400, 1000), left_margin = 8Plots.mm, bottom_margin = 8Plots.mm)
-savefig(p_bp, figure_path(SCRIPT_STEM, "03_year_comparison_boxplot.png"))
-EdaSupport.embed_figure(figure_path(SCRIPT_STEM, "03_year_comparison_boxplot.png"), "03_year_comparison_boxplot.png")
+savefig(p_bp, PISPDocUtils.figure_path(SCRIPT_STEM, "03_year_comparison_boxplot.png"))
+PISPDocUtils.embed_figure(PISPDocUtils.figure_path(SCRIPT_STEM, "03_year_comparison_boxplot.png"), "03_year_comparison_boxplot.png")
 ````
 
 ```@raw html
@@ -576,8 +568,8 @@ end
 plot!(p_trend, yrs_list_wind, annual_means_wind, marker = :square, color = :steelblue, linewidth = 2, markersize = 8, label = "Wind $(WIND_LOC)")
 
 plot!(p_trend, xlabel = "Reference Year", ylabel = "Annual Mean Capacity Factor", title = "Annual Mean CF: Solar ($(SOLAR_LOC)) vs Wind ($(WIND_LOC))", grid = true, gridalpha = 0.3)
-savefig(p_trend, figure_path(SCRIPT_STEM, "03_annual_cf_trend.png"))
-EdaSupport.embed_figure(figure_path(SCRIPT_STEM, "03_annual_cf_trend.png"), "03_annual_cf_trend.png")
+savefig(p_trend, PISPDocUtils.figure_path(SCRIPT_STEM, "03_annual_cf_trend.png"))
+PISPDocUtils.embed_figure(PISPDocUtils.figure_path(SCRIPT_STEM, "03_annual_cf_trend.png"), "03_annual_cf_trend.png")
 ````
 
 ```@raw html
@@ -619,8 +611,8 @@ p_worst = bar(
 for (i, (yr, cf)) in enumerate(zip(yrs_worst, cfs_worst))
     annotate!(p_worst, i, cf + 0.02, text(string(round(cf, digits = 2)), 8, :center))
 end
-savefig(p_worst, figure_path(SCRIPT_STEM, "03_worst_summer_day.png"))
-EdaSupport.embed_figure(figure_path(SCRIPT_STEM, "03_worst_summer_day.png"), "03_worst_summer_day.png")
+savefig(p_worst, PISPDocUtils.figure_path(SCRIPT_STEM, "03_worst_summer_day.png"))
+PISPDocUtils.embed_figure(PISPDocUtils.figure_path(SCRIPT_STEM, "03_worst_summer_day.png"), "03_worst_summer_day.png")
 ````
 
 ```@raw html
@@ -695,8 +687,8 @@ for (idx, yr) in enumerate(yrs_wind_low)
 end
 
 p_zero = plot(p_low1, p_low2, layout = (1, 2), size = (1800, 600), left_margin = 10Plots.mm, bottom_margin = 10Plots.mm, top_margin = 20Plots.mm)
-savefig(p_zero, figure_path(SCRIPT_STEM, "03_zero_output_days.png"))
-EdaSupport.embed_figure(figure_path(SCRIPT_STEM, "03_zero_output_days.png"), "03_zero_output_days.png")
+savefig(p_zero, PISPDocUtils.figure_path(SCRIPT_STEM, "03_zero_output_days.png"))
+PISPDocUtils.embed_figure(PISPDocUtils.figure_path(SCRIPT_STEM, "03_zero_output_days.png"), "03_zero_output_days.png")
 ````
 
 ```@raw html

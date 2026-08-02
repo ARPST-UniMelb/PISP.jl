@@ -1,8 +1,5 @@
-module SourceLinks
-
 using TOML
 
-export SourceLinkError, SourceEntry, load_registry, stage_documentation!
 
 struct SourceLinkError <: Exception
     message::String
@@ -246,6 +243,4 @@ function stage_documentation!(maintained_root::AbstractString, staging_root::Abs
         rm(temporary_parent; recursive=true, force=true)
     end
     return abspath(staging_root)
-end
-
 end

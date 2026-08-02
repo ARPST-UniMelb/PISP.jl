@@ -1,7 +1,5 @@
 using Test
 
-include(joinpath(@__DIR__, "source_links.jl"))
-using .SourceLinks
 
 function fixture_repo()
     root = mktempdir()
@@ -18,13 +16,14 @@ function fixture_repo()
     public_url = "https://www.aemo.com.au/report.pdf?la=en"
     public_origin = "official"
     """
-    write(joinpath(root, "docs", "source-links.toml"), registry)
+    mkpath(joinpath(root, "docs", "config"))
+    write(joinpath(root, "docs", "config", "source-links.toml"), registry)
     write(joinpath(root, "docs", "src", "nested", "page.md"),
         "[report-p3]: ../../../sources/report.pdf#page=3\n")
     return root
 end
 
-registry_path(root) = joinpath(root, "docs", "source-links.toml")
+registry_path(root) = joinpath(root, "docs", "config", "source-links.toml")
 source_root(root) = joinpath(root, "docs", "src")
 staging_root(root) = joinpath(root, "docs", ".documenter-source")
 
@@ -34,9 +33,9 @@ staging_root(root) = joinpath(root, "docs", ".documenter-source")
         entries = load_registry(registry_path(root))
         @test entries[1].local_path == "sources/report.pdf"
         @test entries[1].public_url == "https://www.aemo.com.au/report.pdf?la=en"
-        @test_throws SourceLinkError SourceLinks.validate_public_url("http://example.test/report.pdf")
-        @test_throws SourceLinkError SourceLinks.validate_public_url("https://example.test/report.pdf#page=2")
-        @test_throws SourceLinkError SourceLinks.normalise_local_path("../report.pdf")
+        @test_throws SourceLinkError validate_public_url("http://example.test/report.pdf")
+        @test_throws SourceLinkError validate_public_url("https://example.test/report.pdf#page=2")
+        @test_throws SourceLinkError normalise_local_path("../report.pdf")
         bad_schema = joinpath(root, "bad-schema.toml")
         write(bad_schema, "schema_version = 1\n")
         @test_throws SourceLinkError load_registry(bad_schema)

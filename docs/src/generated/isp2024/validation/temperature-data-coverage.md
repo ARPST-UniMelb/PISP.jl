@@ -18,15 +18,12 @@ using DataFrames
 using PISP
 using XLSX
 
-repo_root = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
+const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(repo_root, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
-include(joinpath(repo_root, "docs", "eda_support.jl"))
-using .EdaSupport
-
-isp2024_profile = edition_profile(repo_root, "2024")
+isp2024_profile = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
 workbook_path = joinpath(isp2024_profile.download_root, "2024-isp-inputs-and-assumptions-workbook.xlsx")
 isfile(workbook_path) || error("ISP 2024 inputs workbook not found: $workbook_path")
 ````
@@ -64,7 +61,7 @@ scenario_temperature = XLSX.openxlsx(workbook_path) do workbook
     )
 end
 
-markdown_table(scenario_temperature)
+PISPDocUtils.markdown_table(scenario_temperature)
 ````
 
 ```@raw html
@@ -105,7 +102,7 @@ regional_reference_temperature = XLSX.openxlsx(workbook_path) do workbook
     )
 end
 
-markdown_table(regional_reference_temperature)
+PISPDocUtils.markdown_table(regional_reference_temperature)
 ````
 
 ```@raw html
@@ -143,7 +140,7 @@ murraylink_temperature_capability = XLSX.openxlsx(workbook_path) do workbook
     )
 end
 
-markdown_table(murraylink_temperature_capability)
+PISPDocUtils.markdown_table(murraylink_temperature_capability)
 ````
 
 ```@raw html
@@ -183,14 +180,14 @@ The package source also contains no field or parser identifier named `temperatur
 network_capability_ranges = [PISP.source_spec(:network_capability, 2024).cell_range]
 
 source_files = String[]
-for (directory, _, files) in walkdir(joinpath(repo_root, "src"))
+for (directory, _, files) in walkdir(joinpath(REPO_ROOT, "src"))
     for file in files
         endswith(file, ".jl") && push!(source_files, joinpath(directory, file))
     end
 end
 
 temperature_source_hits = [
-    relpath(path, repo_root)
+    relpath(path, REPO_ROOT)
     for path in source_files
     if occursin(r"\btemperature\b"i, read(path, String))
 ]
@@ -215,7 +212,7 @@ package_coverage = DataFrame(
         "Cannot be used as a substitute for meteorological temperature data",
     ],
 )
-markdown_table(package_coverage; alignment = [:l, :l, :l])
+PISPDocUtils.markdown_table(package_coverage; alignment = [:l, :l, :l])
 ````
 
 ```@raw html

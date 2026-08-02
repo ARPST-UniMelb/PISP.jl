@@ -36,7 +36,7 @@ output = "generated/shared/source-material/coverage-and-ownership.md"
 status = "published"
 nav_order = 10
 snapshot = false
-data_requirements = [{ root = "repo", path = "docs/source-material-coverage.toml", type = "file" }]
+data_requirements = [{ root = "repo", path = "docs/config/source-material-coverage.toml", type = "file" }]
 related_reference_pages = [
     "editions/source-material.md",
     "editions/source-inventory.md",
@@ -209,7 +209,7 @@ snapshot = true
 data_requirements = [
     { root = "download", edition = "2024", path = "2024-isp-inputs-and-assumptions-workbook.xlsx", type = "file" },
     { root = "download", edition = "2026", path = "2026-isp-inputs-and-assumptions-workbook.xlsm", type = "file" },
-    { root = "repo", path = "docs/source-material-coverage.toml", type = "file" },
+    { root = "repo", path = "docs/config/source-material-coverage.toml", type = "file" },
 ]
 related_reference_pages = ["editions/source-material.md", "editions/parameters-and-mappings.md"]
 

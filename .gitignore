@@ -39,6 +39,3 @@ build/
 CLAUDE*
 AGENTS*
 .claude/
-
-eda/figures/
-eda/tables/

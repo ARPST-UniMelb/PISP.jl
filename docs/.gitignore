@@ -6,3 +6,8 @@ build/
 .documenter-source/
 .literate-staging-*/
 src/.generated-backup-*/
+
+# Canonical CSV and PNG diagnostics produced while executing Literate pages.
+# Selected figures copied into src/generated/ remain committed with the pages.
+src/tables/
+src/figures/

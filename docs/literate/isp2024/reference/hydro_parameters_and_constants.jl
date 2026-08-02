@@ -9,8 +9,8 @@ using DataFrames
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
 # ## Hydro trace assignments
 #
@@ -20,7 +20,7 @@ hydro_trace_assignments = DataFrame([
     (pisp_generator_id=id_gen, trace_family=trace_family)
     for (id_gen, trace_family) in sort(collect(PISP.HYDRO2FILE); by=first)
 ])
-markdown_table(hydro_trace_assignments)
+PISPDocUtils.markdown_table(hydro_trace_assignments)
 
 # ## Annual energy limits
 #
@@ -30,7 +30,7 @@ annual_energy_limits = DataFrame([
     (pisp_generator_id=id_gen, limit_name=limit_name)
     for (id_gen, limit_name) in sort(collect(PISP.HYDRO2CNS); by=first)
 ])
-markdown_table(annual_energy_limits)
+PISPDocUtils.markdown_table(annual_energy_limits)
 
 # ## Hydrological reference years
 #
@@ -48,7 +48,7 @@ hydrological_years = sort!(DataFrame([
     )
     for ((start_date, end_date), label) in PISP.WEATHER_YEARS
 ]), :planning_interval_start)
-markdown_table(hydrological_years)
+PISPDocUtils.markdown_table(hydrological_years)
 
 # ## Snowy scheme allocations
 #
@@ -64,7 +64,7 @@ snowy_generator_allocations = DataFrame([
     for (group, ids) in sort(collect(PISP.SNOWY_HYDRO_GROUPS); by=first)
     for id_gen in ids
 ])
-markdown_table(snowy_generator_allocations)
+PISPDocUtils.markdown_table(snowy_generator_allocations)
 
 # Tumut 3 uses the same Snowy inflow series through the storage mappings. `PISP.HYDRO_DAMS_STORAGE` identifies its contributing dams, and `PISP.HYDRO_STORAGE_GEN` links the storage unit to the Upper Tumut generator used in the allocation calculation.
 
@@ -77,7 +77,7 @@ snowy_storage_allocations = DataFrame([
     )
     for (id_ess, dams) in sort(collect(PISP.HYDRO_DAMS_STORAGE); by=first)
 ])
-markdown_table(snowy_storage_allocations)
+PISPDocUtils.markdown_table(snowy_storage_allocations)
 
 # ## Where the values are used
 #

@@ -1,14 +1,5 @@
-module PISPDocsPageRegistry
-
 using TOML
 
-export DataRequirement,
-    PageSpec,
-    is_draft,
-    is_published,
-    is_renderable,
-    load_page_registry,
-    validate_data_requirements
 
 const VALID_KINDS = Set(["reference", "tutorial", "validation", "analysis"])
 const VALID_DATA_LAYERS = Set(["package-workflow", "source-data", "pisp-dataset", "cross-layer"])
@@ -250,7 +241,7 @@ function validate_files(
     require_published_outputs,
     check_generated_outputs,
 )
-    docs_dir = dirname(registry_path)
+    docs_dir = normpath(joinpath(dirname(registry_path), ".."))
     src_root = joinpath(docs_dir, "src")
     registered_outputs = Set(page.output for page in pages)
 
@@ -374,6 +365,4 @@ function load_page_registry(
         check_generated_outputs = check_generated_outputs,
     )
     return pages
-end
-
 end

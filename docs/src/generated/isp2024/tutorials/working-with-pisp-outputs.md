@@ -41,10 +41,10 @@ gr();
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
-const ISP2024_PROFILE = edition_profile(REPO_ROOT, "2024")
+const ISP2024_PROFILE = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
 const OUTPUT_ROOT = ISP2024_PROFILE.output_root
 OUTPUT_ROOT === nothing && error(
     "ISP 2024 profile does not define output_root; set PISP_DOCS_ISP2024_OUTPUT_ROOT to select a local output build.",
@@ -55,9 +55,6 @@ SCHEDULE_TAG === nothing && error(
     "ISP 2024 profile does not define schedule_tag; set PISP_DOCS_ISP2024_SCHEDULE_TAG to select a local schedule.",
 )
 const SCHEDULE_DIR = joinpath(DATA_ROOT, SCHEDULE_TAG)
-
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
 
 required_files = [
     joinpath(DATA_ROOT, "Generator.csv"),
@@ -73,10 +70,6 @@ isempty(missing_files) || error("missing PISP output files: $(join(missing_files
 ```@raw html
 </details>
 ```
-
-````
-true
-````
 
 ## Load static tables
 
@@ -115,7 +108,7 @@ Fuel and technology counts show the asset mix represented in the generated outpu
 
 ````julia
 fuel_counts = sort(combine(groupby(gen_df, :fuel), nrow => :count), :count; rev = true)
-markdown_table(fuel_counts)
+PISPDocUtils.markdown_table(fuel_counts)
 ````
 
 ```@raw html
@@ -139,7 +132,7 @@ markdown_table(fuel_counts)
 
 ````julia
 tech_counts = sort(combine(groupby(gen_df, :tech), nrow => :count), :count; rev = true)
-markdown_table(tech_counts)
+PISPDocUtils.markdown_table(tech_counts)
 ````
 
 ```@raw html
@@ -200,7 +193,7 @@ The first rows make the schedule schema concrete.
 ```
 
 ````julia
-markdown_table(first(gen_pmax, 5))
+PISPDocUtils.markdown_table(first(gen_pmax, 5))
 ````
 
 ```@raw html
@@ -241,7 +234,7 @@ Shape: (315360, 5)
 ```
 
 ````julia
-markdown_table(first(dem_load, 5))
+PISPDocUtils.markdown_table(first(dem_load, 5))
 ````
 
 ```@raw html
@@ -300,7 +293,7 @@ Wind generators: 11
 solar_tech_counts = sort(
     combine(groupby(solar_gens, :tech), nrow => :count), :count; rev = true,
 )
-markdown_table(solar_tech_counts)
+PISPDocUtils.markdown_table(solar_tech_counts)
 ````
 
 ```@raw html
@@ -321,7 +314,7 @@ markdown_table(solar_tech_counts)
 wind_tech_counts = sort(
     combine(groupby(wind_gens, :tech), nrow => :count), :count; rev = true,
 )
-markdown_table(wind_tech_counts)
+PISPDocUtils.markdown_table(wind_tech_counts)
 ````
 
 ```@raw html
@@ -413,9 +406,9 @@ ylabel!(fig, "GW")
 title!(fig, "$(SCHEDULE_TAG) — Daily Aggregate: Solar PMax, Wind PMax, Total Demand")
 
 const SCRIPT_STEM = "isp2024_working_with_pisp_outputs"
-const FIGURE_PATH = figure_path(SCRIPT_STEM, "isp2024_working_with_pisp_outputs-timeseries.png")
+const FIGURE_PATH = PISPDocUtils.figure_path(SCRIPT_STEM, "isp2024_working_with_pisp_outputs-timeseries.png")
 savefig(fig, FIGURE_PATH)
-embed_figure(FIGURE_PATH, "isp2024_working_with_pisp_outputs-timeseries.png")
+PISPDocUtils.embed_figure(FIGURE_PATH, "isp2024_working_with_pisp_outputs-timeseries.png")
 ````
 
 ```@raw html

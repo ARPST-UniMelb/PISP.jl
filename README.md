@@ -11,7 +11,7 @@ The data parsing functionalities are built on publicly available information fro
 
 ## Core function
 
-Dataset construction in PISP is performed through a single high-level function, `build_ISP24_datasets`. Two usage examples are shown below.
+Dataset construction in PISP is performed through a high-level function, `build_ISP24_datasets`. Usage examples are shown below.
 
 **By planning year** (original mode):
 
@@ -109,6 +109,24 @@ There are multiple parameters that can be adjusted when generating the dataset f
 | `write_csv`          | true                  | Whether to write CSV (.csv) files                                                                                                                                                                                                                                                                  |
 | `write_arrow`        | true                  | Whether to write Arrow (.arrow) files                                                                                                                                                                                                                                                              |
 | `scenarios`          | [1,2,3]               | Scenarios to include in the output: 1 for `Progressive Change`, 2 for `Step Change`, 3 for `Green Energy Exports`, from the 2024 ISP                                                                                                                                                               |
+| `buildout_filepath`  | nothing                | Path to an optional, user-supplied Excel workbook of new-entrant generation and storage assets (see [User-supplied buildout schedules](#user-supplied-buildout-schedules)). When `nothing` (default), no buildouts are applied.                                                                  |
+| `sc_buildouts`       | Dict{Int,String}()     | Optional per-scenario worksheet mapping for `buildout_filepath` (see below). When empty (default) and `buildout_filepath` is set, all scenarios share the single worksheet `buildout_1`.                                                                                                          |
+
+### User-supplied buildout schedules
+
+`buildout_filepath` and `sc_buildouts` are unrelated to AEMO's published ISP data: PISP does not ship a buildout workbook and does not download one. They exist so you can inject your own planned new-entrant generation and storage assets into a dataset build, on top of the ISP's existing fleet.
+
+To use this feature, provide your own Excel workbook (a common convention is to keep it at `data/PISP-buildouts/buildouts.xlsx`, alongside the other `data/` folders, but any path works) with one row per (technology, subregion, year) and these columns:
+
+| Column      | Type    | Description                                                    |
+| ----------- | ------- | ---------------------------------------------------------------- |
+| `tech`      | String  | Technology label (matched against PISP's own technology set)     |
+| `subregion` | String  | NEM subregion                                                    |
+| `year`      | Integer | Year the entrant becomes available                              |
+| `capacity`  | Real    | Capacity, in MW                                                  |
+| `n`         | Integer | Number of units                                                  |
+
+By default, PISP reads a single worksheet named `buildout_1` for every scenario. To give each scenario its own worksheet instead, pass `sc_buildouts`, mapping each scenario ID (`1`, `2`, `3`) to its worksheet name, e.g. `Dict(1 => "buildout_1", 2 => "buildout_2", 3 => "buildout_3")`.
 
 ## Description of dataset formatting
 

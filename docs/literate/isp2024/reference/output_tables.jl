@@ -7,13 +7,11 @@ using DataFrames
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "edition_profiles.jl"))
-using .PISPDocsEditionProfiles
+include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
+import .PISPDocUtils
 
-const ISP2024_PROFILE = edition_profile(REPO_ROOT, "2024")
+const ISP2024_PROFILE = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
 
-include(joinpath(REPO_ROOT, "docs", "eda_support.jl"))
-using .EdaSupport
 
 function container_inventory(container)
     rows = NamedTuple[]
@@ -38,11 +36,6 @@ function container_inventory(container)
     return DataFrame(rows)
 end
 
-struct RawMarkdown
-    markdown::String
-end
-Base.show(io::IO, ::MIME"text/markdown", table::RawMarkdown) = print(io, table.markdown)
-
 _tc, static_container, schedule_container = PISP.initialise_time_structures();
 
 # ## Static asset tables
@@ -50,11 +43,11 @@ _tc, static_container, schedule_container = PISP.initialise_time_structures();
 # Static tables define asset identity and time-invariant attributes. Schedule rows should be joined back to these tables through the relationship identifier shown above.
 
 static_tables = container_inventory(static_container)
-markdown_table(static_tables)
+PISPDocUtils.markdown_table(static_tables)
 
 # The `Bus` table fixes the spatial resolution of the dataset.
 
-RawMarkdown(
+PISPDocUtils.RawMarkdown(
     "The static tables represent the NEM as $(length(PISP.NEMBUSES)) sub-regional network " *
     "nodes spanning the $(length(unique(values(PISP.BUS2AREA)))) NEM regions - Queensland, " *
     "New South Wales, Victoria, Tasmania, and South Australia - interconnected by the `Line` records.",
@@ -65,7 +58,7 @@ RawMarkdown(
 # Schedule tables carry scenario- and time-dependent values. The output filename is taken from the same `alt_names` mapping used by the CSV and Arrow writers.
 
 schedule_tables = container_inventory(schedule_container)
-markdown_table(schedule_tables)
+PISPDocUtils.markdown_table(schedule_tables)
 
 # ## Schedule value semantics
 #
@@ -98,7 +91,7 @@ let live = schedule_tables.output_table
         meaning, unit, relationship = SCHEDULE_SEMANTICS[name]
         push!(rows, "| `$name` | $meaning | $unit | $relationship |")
     end
-    RawMarkdown(join(rows, "\n"))
+    PISPDocUtils.RawMarkdown(join(rows, "\n"))
 end
 #
 # Inflow schedules are approximate energy allocations for one unit of the relevant asset. The applicable unit-count field or schedule determines the aggregate quantity represented by multiple units.
@@ -133,7 +126,7 @@ let asset_columns = Dict(row.output_table => Set(split(row.columns, ", ")) for r
         expression = "`" * join(factors, " × ") * "`"
         push!(rows, "| $asset | $quantity | $expression | $unit |")
     end
-    RawMarkdown(join(rows, "\n"))
+    PISPDocUtils.RawMarkdown(join(rows, "\n"))
 end
 #
 # `emin` and `eini` are interpreted as fractions of `emax` under the package's stored-value convention.
@@ -253,7 +246,7 @@ function field_glossary(table)
         field in live || error("`$table.$field` is documented but is not a current column")
         push!(rows, "| `$field` | $meaning |")
     end
-    RawMarkdown(join(rows, "\n"))
+    PISPDocUtils.RawMarkdown(join(rows, "\n"))
 end
 nothing #hide
 
