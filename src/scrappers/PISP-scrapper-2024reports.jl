@@ -112,6 +112,10 @@ module ISP2024ReportDownloader
                         "Electricity Workforce Projections for the 2024 ISP: Victoria",
                         "2024-isp-workforce-projections-vic.pdf",
                         "https://www.aemo.com.au/-/media/files/major-publications/isp/2024/electricity-sector-workforce-projections/focus-on-vic-2024_final.pdf?rev=7f4f554dc25c4dff91e05d896bc76288&sc_lang=en"),
+        ISPReportTarget(:aurecon_2022_cost_and_technical_parameter_review,
+                        "Aurecon 2022 Costs and Technical Parameters Review",
+                        "aurecon-2022-cost-and-technical-parameter-review.pdf",
+                        "https://www.aemo.com.au/-/media/files/stakeholder_consultation/consultations/nem-consultations/2022/2023-inputs-assumptions-and-scenarios-consultation/supporting-materials-for-2023/aurecon-2022-cost-and-technical-parameter-review.pdf"),
     )
 
     report_targets() = ISP_REPORT_TARGETS
