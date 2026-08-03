@@ -1336,19 +1336,19 @@ owner = "shared-source-existing-generation-storage"
 notes = "Package convention used in generated generator records."
 
 [[mapping_family]]
-id = "renewable-cost-development-path-solar"
+id = "renewable-candidate-development-path-solar"
 source_path = "src/parsers/PISP-2024parser.jl"
 line = 1228
-family = "scenario to cost-development path for solar"
+family = "scenario to candidate development path for solar"
 classification = "package_convention"
 owner = "shared-source-renewable-energy-zones"
 notes = "All current scenario identifiers select CDP14."
 
 [[mapping_family]]
-id = "renewable-cost-development-path-wind"
+id = "renewable-candidate-development-path-wind"
 source_path = "src/parsers/PISP-2024parser.jl"
 line = 1411
-family = "scenario to cost-development path for wind"
+family = "scenario to candidate development path for wind"
 classification = "package_convention"
 owner = "shared-source-renewable-energy-zones"
 notes = "All current scenario identifiers select CDP14."

@@ -127,7 +127,7 @@ PISPDocUtils.markdown_table(outlook_sheet_presence)
 
 ## Capacity table structure
 
-The capacity worksheet is a long table keyed by cost-development path, region, subregion, and technology, followed by financial-year values.
+The capacity worksheet is a long table keyed by candidate development path, region, subregion, and technology, followed by financial-year values.
 The later sample starts in 2025-26 and retains the same leading keys before its financial-year values.
 
 ```@raw html
@@ -243,7 +243,7 @@ PISPDocUtils.markdown_table(storage_capacity_2026)
 
 ## Storage-energy table structure
 
-Storage energy records use the same cost-development-path, region, subregion, and storage-category keys as storage power, with values in GWh across financial years.
+Storage energy records use the same candidate-development-path, region, subregion, and storage-category keys as storage power, with values in GWh across financial years.
 The 2024 table is read through PISP's registered source specification; the 2026 sheet is read directly from the observed 2026 core workbook, which PISP does not yet register as a source.
 
 ```@raw html

@@ -1,6 +1,8 @@
 using Test
 using DataFrames
 using Dates
+using TOML
+import PISP
 
 const TEST_DOCS_DIR = normpath(joinpath(@__DIR__, ".."))
 
@@ -195,6 +197,99 @@ end
     end
 end
 
+@testset "ISP 2026 raw-source reader inventory" begin
+    inventory_path = joinpath(TEST_DOCS_DIR, "config", "isp2026-source-specs.toml")
+    inventory = TOML.parsefile(inventory_path)
+    @test inventory["schema_version"] == 1
+    @test inventory["edition"] == "2026"
+
+    lineage_ids = reduce(vcat, values(inventory["lineage"]))
+    @test length(lineage_ids) == 80
+    @test length(unique(lineage_ids)) == 80
+
+    sources = inventory["source"]
+    @test length(sources) == 39
+    @test length(unique(source["id"] for source in sources)) == 39
+    registered_2024_ids = Set(string(spec.id) for spec in PISP.source_specs(2024))
+    @test isempty(intersect(Set(source["id"] for source in sources), registered_2024_ids))
+    @test isempty(PISP.source_specs(2026))
+    source_lineage_ids = reduce(vcat, [source["lineage_2024"] for source in sources])
+    @test length(source_lineage_ids) == length(unique(source_lineage_ids))
+    @test Set(source_lineage_ids) == Set(lineage_ids)
+    required_fields = Set([
+        "id",
+        "group",
+        "status",
+        "format",
+        "path",
+        "selection",
+        "keys",
+        "fields_units",
+        "lineage_2024",
+        "possible_reader",
+    ])
+    @test all(source -> required_fields ⊆ Set(keys(source)), sources)
+    @test all(sources) do source
+        !isempty(source["lineage_2024"]) || get(source, "basis", "") == "2026-only"
+    end
+    @test Set(source["status"] for source in sources) == Set([
+        "observed",
+        "changed",
+        "relocated",
+        "unresolved",
+        "not-observed",
+        "generated-by-pisp",
+        "user-supplied",
+        "legacy-supplement",
+    ])
+
+    registry = TOML.parsefile(joinpath(TEST_DOCS_DIR, "config", "page-registry.toml"))
+    reader_pages = filter(page -> page["id"] == "isp2026-raw-source-reader-map", registry["page"])
+    @test length(reader_pages) == 1
+    if length(reader_pages) == 1
+        @test reader_pages[1]["track"] == "isp2026"
+        @test reader_pages[1]["kind"] == "reference"
+    end
+
+    source_path = joinpath(TEST_DOCS_DIR, "literate", "isp2026", "reference", "raw_source_reader_map.jl")
+    generated_path = joinpath(TEST_DOCS_DIR, "src", "generated", "isp2026", "reference", "raw-source-reader-map.md")
+    @test isfile(source_path)
+    @test isfile(generated_path)
+
+    generated = isfile(generated_path) ? read(generated_path, String) : ""
+    for required in (
+        "# ISP 2026: Raw-source reader map",
+        "every registered ISP 2024 source specification",
+        "CDP4 (ODP)",
+        "Storage Energy",
+        "Observed trace files by scenario",
+        "timeslice_RefYear5000.csv",
+        "2026-isp-plexos-model-instructions.pdf#page=5",
+        "2026-isp-plexos-model-instructions.pdf#page=7",
+        "a6-cost-benefit-analysis.pdf#page=162",
+    )
+        @test occursin(required, generated)
+    end
+
+    source = read(source_path, String)
+    @test occursin("#src # NOTE:", source)
+    @test occursin("A future implementation must verify each selection", source)
+    for source_only_or_maintenance_text in (
+        "A future implementation must verify each selection",
+        "The inventory reconciles",
+        "Reconciliation preserves",
+        "Required ISP 2026 source locations present",
+        "rather than copied into the source inventory",
+        "prevent a future reader",
+    )
+        @test !occursin(source_only_or_maintenance_text, generated)
+    end
+
+    isp2026 = read(joinpath(TEST_DOCS_DIR, "src", "editions", "isp2026.md"), String)
+    @test occursin("raw-source reader map", lowercase(isp2026))
+    @test occursin("generated/isp2026/reference/raw-source-reader-map.md", isp2026)
+end
+
 @testset "Human-use documentation invariants" begin
     read_doc(path...) = read(joinpath(TEST_DOCS_DIR, "src", path...), String)
 
@@ -210,6 +305,16 @@ end
         "schedule-<year>",
         "1 July",
         "4006",
+        "candidate development path (CDP)",
+        "optimal development path (ODP)",
+        "`CDP14`",
+        "`CDP 4`",
+        "PISP currently filters relevant ISP 2024 generation and storage outlook reads",
+        "a6-cost-benefit-analysis.pdf#page=16",
+        "a6-cost-benefit-analysis.pdf#page=124",
+        "a6-cost-benefit-analysis.pdf#page=162",
+        "a6-cost-benefit-analysis.pdf#page=165",
+        "a6-cost-benefit-analysis.pdf#page=166",
     )
         @test occursin(required, concepts)
     end
@@ -260,6 +365,8 @@ end
     )
         @test occursin(required, source_coverage)
     end
+    @test occursin("docs/config/source-material-coverage.toml", source_coverage)
+    @test !occursin("docs/source-material-coverage.toml", source_coverage)
 
     mappings = read_doc("editions", "parameters-and-mappings.md")
     for required in (
@@ -289,10 +396,19 @@ end
     @test occursin("2024-isp-plexos-model-instructions.pdf#page=5", generated_mappings)
     @test occursin("2024-isp-plexos-model-instructions.pdf#page=6", generated_mappings)
     @test occursin("4006 demand builder", generated_mappings)
-    @test occursin("Each file has one canonical documentation owner", generated_mappings)
+    @test occursin("`PISPparameters.jl` includes six parameter files", generated_mappings)
+    @test !occursin("second handwritten copy", generated_mappings)
     @test occursin("Reference Year and VRE Reference Year", generated_mappings)
     @test occursin("PISP.ISPdatabuilder.DATE_RANGES_REFYEARS", generated_mappings)
     @test !occursin("PISP.WEATHER_YEARS_ISP", generated_mappings)
+
+    renewable_energy_zones = read_doc(
+        "generated",
+        "shared",
+        "source-material",
+        "renewable-energy-zones.md",
+    )
+    @test !occursin("require semantic review before reuse in a future transformation", renewable_energy_zones)
 
     generated_4006_mapping = read_doc(
         "generated",

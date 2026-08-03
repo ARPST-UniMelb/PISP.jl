@@ -4,6 +4,9 @@
 *.pyc
 __pycache__/
 config/
+!docs/config/
+docs/config/*
+!docs/config/isp2026-source-specs.toml
 usr/usr-params.jl
 Manifest.toml
 data/*

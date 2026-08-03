@@ -38,7 +38,7 @@ all(.!isempty.(source_reads.owner)) || error("every source read requires a canon
 ## Source-read classifications
 
 The active implementation reads AEMO workbooks and model CSVs, user-supplied build-out sheets, and PISP-generated `Auxiliary/` workbooks.
-The trace rows are retained in the ledger to make the non-trace boundary explicit, but their payload is documented separately under trace coverage.
+Trace payloads are documented under trace coverage; this ledger records their source-read ownership.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -140,7 +140,7 @@ PISPDocUtils.markdown_table(auxiliary_reads)
 ## Parameter-file ownership
 
 `PISPparameters.jl` includes six files.
-Every included file has one canonical documentation owner, while other pages may link to that owner rather than copying constants into Markdown.
+The table pairs each file with the subject page that explains its values and effects.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -196,8 +196,8 @@ PISPDocUtils.markdown_table(mapping_owners)
 | technology emissions fallbacks | PISP package convention | shared-source-existing-generation-storage | src/parsers/PISP-2024parser.jl |
 | technology cost-curve slopes | PISP package convention | shared-source-existing-generation-storage | src/parsers/PISP-2024parser.jl |
 | technology inertia constants | PISP package convention | shared-source-existing-generation-storage | src/parsers/PISP-2024parser.jl |
-| scenario to cost-development path for solar | PISP package convention | shared-source-renewable-energy-zones | src/parsers/PISP-2024parser.jl |
-| scenario to cost-development path for wind | PISP package convention | shared-source-renewable-energy-zones | src/parsers/PISP-2024parser.jl |
+| scenario to candidate development path for solar | PISP package convention | shared-source-renewable-energy-zones | src/parsers/PISP-2024parser.jl |
+| scenario to candidate development path for wind | PISP package convention | shared-source-renewable-energy-zones | src/parsers/PISP-2024parser.jl |
 | DSP price-band identifiers | PISP package convention | shared-source-demand-side-participation | src/parsers/PISP-2024parser.jl |
 | scenario/region/season DSP ranges | PISP package convention | shared-source-demand-side-participation | src/parsers/PISP-2024parser.jl |
 | inflow files to generator groups | Parsed representation | shared-source-hydro-inflows | src/parsers/PISP-2024parser.jl |
@@ -227,5 +227,5 @@ PISPDocUtils.markdown_table(mapping_owners)
 
 ISP 2024 rows describe implementation evidence in the current package.
 ISP 2026 has no integrated PISP preprocessing or dataset workflow, so its pages report observed source structure and mark semantic correspondences for review instead of presenting them as implemented mappings.
-The machine-readable authority is `docs/source-material-coverage.toml` in the repository.
+The machine-readable authority is `docs/config/source-material-coverage.toml` in the repository.
 

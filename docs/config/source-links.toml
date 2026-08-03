@@ -8,6 +8,13 @@ public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2024/
 public_origin = "official"
 
 [[source]]
+title = "2024 ISP Appendix A6: Cost-Benefit Analysis"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2024/pisp-reports/a6-cost-benefit-analysis.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2024/appendices/a6-cost-benefit-analysis.pdf?la=en"
+public_origin = "official"
+
+[[source]]
 title = "2024 ISP PLEXOS Model Instructions"
 publisher = "Australian Energy Market Operator"
 local_path = "data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf"
@@ -33,6 +40,13 @@ title = "2026 ISP PLEXOS Model Instructions"
 publisher = "Australian Energy Market Operator"
 local_path = "data/2026/pisp-reports/2026-isp-plexos-model-instructions.pdf"
 public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2026/isp-model/2026-isp-plexos-model-instructions.pdf?la=en"
+public_origin = "official"
+
+[[source]]
+title = "2026 ISP Appendix A6: Cost Benefit Analysis"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2026/pisp-reports/a6-cost-benefit-analysis.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2026/appendices/a6-cost-benefit-analysis.pdf?la=en"
 public_origin = "official"
 
 [[source]]

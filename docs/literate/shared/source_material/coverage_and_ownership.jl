@@ -25,7 +25,7 @@ nothing #hide
 # ## Source-read classifications
 #
 # The active implementation reads AEMO workbooks and model CSVs, user-supplied build-out sheets, and PISP-generated `Auxiliary/` workbooks.
-# The trace rows are retained in the ledger to make the non-trace boundary explicit, but their payload is documented separately under trace coverage.
+# Trace payloads are documented under trace coverage; this ledger records their source-read ownership.
 
 source_classifications = combine(groupby(source_reads, :classification), nrow => :active_items)
 sort!(source_classifications, :classification)
@@ -62,7 +62,7 @@ PISPDocUtils.markdown_table(auxiliary_reads)
 # ## Parameter-file ownership
 #
 # `PISPparameters.jl` includes six files.
-# Every included file has one canonical documentation owner, while other pages may link to that owner rather than copying constants into Markdown.
+# The table pairs each file with the subject page that explains its values and effects.
 
 parameter_owners = select(parameter_families, :source_path, :family, :owner, :notes)
 PISPDocUtils.markdown_table(parameter_owners)
@@ -82,4 +82,4 @@ PISPDocUtils.markdown_table(mapping_owners)
 #
 # ISP 2024 rows describe implementation evidence in the current package.
 # ISP 2026 has no integrated PISP preprocessing or dataset workflow, so its pages report observed source structure and mark semantic correspondences for review instead of presenting them as implemented mappings.
-# The machine-readable authority is `docs/source-material-coverage.toml` in the repository.
+# The machine-readable authority is `docs/config/source-material-coverage.toml` in the repository.

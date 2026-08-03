@@ -103,6 +103,12 @@ The `scenarios` keyword to `build_ISP24_datasets` selects the package-defined IS
 
 [ISP 2024 parameters and mappings](generated/isp2024/reference/parameters-and-mappings.md) lists the public scenario names and source-specific labels.
 
+## Candidate and optimal development paths
+
+A **candidate development path (CDP)** groups development paths that share a set of potential actionable projects. AEMO evaluates a shortlist of CDPs across scenarios and sensitivities before selecting an **optimal development path (ODP)**. The ODP is therefore a selected development path for one ISP edition, not an identifier that can be carried unchanged into another edition. The [2024 ISP Cost-Benefit Analysis, p. 16](../../data/2024/pisp-reports/a6-cost-benefit-analysis.pdf#page=16) introduces this relationship. The 2026 glossary defines CDP on [p. 165](../../data/2026/pisp-reports/a6-cost-benefit-analysis.pdf#page=165) and ODP on [p. 166](../../data/2026/pisp-reports/a6-cost-benefit-analysis.pdf#page=166).
+
+For ISP 2024, AEMO selected `CDP14` as the ODP after ranking and sensitivity analysis ([2024 ISP Cost-Benefit Analysis, p. 124](../../data/2024/pisp-reports/a6-cost-benefit-analysis.pdf#page=124)). PISP currently filters relevant ISP 2024 generation and storage outlook reads to the literal `CDP14`. For ISP 2026, AEMO identifies `CDP 4` as the ODP ([2026 ISP Cost-Benefit Analysis, p. 162](../../data/2026/pisp-reports/a6-cost-benefit-analysis.pdf#page=162)).
+
 ## ISP 2024 planning years, date ranges, and the 1 July split
 
 The ISP 2024 builder can write output by planning year or by explicit date range:
