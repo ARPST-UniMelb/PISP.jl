@@ -120,15 +120,28 @@ The ISP 2024 builder can write output by planning year or by explicit date range
 
 The split aligns problem blocks with source inputs organised by Australian financial year.
 Static tables are still written once per build folder; the split affects the scenario/time blocks used to populate schedules.
+The planning year chooses the generated `schedule-<year>` period; it does not choose a reference-weather trace or demand probability-of-exceedance series.
+[Working with PISP-generated outputs](generated/isp2024/tutorials/working-with-pisp-outputs.md) demonstrates how `reftrace`, `poe`, and planning year identify one existing processed dataset.
 
-## ISP 2024 trace year and probability of exceedance
+## ISP 2024 reference-weather traces
 
-Two build arguments determine important time-varying inputs: `reftrace` selects the reference weather trace, and `poe` selects the demand probability-of-exceedance series.
+`reftrace` selects the reference-weather trace used by the ISP 2024 builder.
+`reftrace = 2017` selects the historical 2017 demand, solar, and wind traces directly.
+`reftrace = 4006` selects a composite reference-weather trace that assigns selected historical weather years to financial-year windows across the planning horizon.
+The composite can reuse historical year 2017 for particular windows, but `2017` and `4006` remain different trace identifiers.
+A `reftrace` value does not select a candidate or optimal development path.
 
-For `reftrace = 4006`, the ISP 2024 workflow maps each financial year to a selected historical weather year.
-The mapping is part of the scenario/time definition, not merely a filename convention.
 Comparisons that ignore the paired weather year can mix planning-year effects with weather-year effects.
-See [ISP 2024 parameters and mappings](generated/isp2024/reference/parameters-and-mappings.md) for the full map.
+[ISP 2024 parameters and mappings](generated/isp2024/reference/parameters-and-mappings.md) gives the complete `4006` map, while [selecting raw ISP material](generated/shared/tutorials/selecting-raw-isp-material.md) demonstrates direct historical and composite trace selection through PISP's source interface.
+
+## ISP 2024 demand probability of exceedance
+
+`poe` independently selects the demand probability-of-exceedance series used in ISP 2024 demand filenames.
+The available source families include `POE10` and `POE50` series.
+For annual peak demand, 10% POE means there is a 10% chance that the year's peak demand exceeds the stated level ([2024 ISP Consultation Summary Report, p. 60](../../data/2024/pisp-reports/2024-isp-consultation-summary-report.pdf#page=60)).
+The [2023 ISP Methodology, p. 39](../../data/2024/pisp-reports/2023-isp-methodology.pdf#page=39) describes the use of 10%, 50%, and sometimes 90% POE simulations and the use of 10% POE demand profiles in capacity-outlook modelling.
+A `poe` value does not select weather conditions, a planning year, or a development path.
+[Trace coverage](editions/trace-coverage.md) keeps report-backed POE meaning separate from the filename labels observed in each edition.
 
 ## ISP 2024 NEM bus and area model
 

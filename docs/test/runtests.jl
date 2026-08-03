@@ -197,6 +197,65 @@ end
     end
 end
 
+@testset "Raw and processed data-selection tutorials" begin
+    registry = TOML.parsefile(joinpath(TEST_DOCS_DIR, "config", "page-registry.toml"))
+    raw_pages = filter(page -> page["id"] == "shared-selecting-raw-isp-material", registry["page"])
+    @test length(raw_pages) == 1
+    if length(raw_pages) == 1
+        raw_page = only(raw_pages)
+        @test raw_page["kind"] == "tutorial"
+        @test raw_page["track"] == "shared"
+        @test raw_page["editions"] == ["2024", "2026"]
+        @test raw_page["data_layer"] == "source-data"
+        @test raw_page["source"] == "literate/shared/tutorials/selecting_raw_isp_material.jl"
+        @test raw_page["output"] == "generated/shared/tutorials/selecting-raw-isp-material.md"
+        @test raw_page["nav_order"] == 140
+    end
+
+    raw_source_path = joinpath(
+        TEST_DOCS_DIR,
+        "literate",
+        "shared",
+        "tutorials",
+        "selecting_raw_isp_material.jl",
+    )
+    @test isfile(raw_source_path)
+    raw_source = isfile(raw_source_path) ? read(raw_source_path, String) : ""
+    for required in (
+        "PISP.source_spec(:operational_demand_trace, 2024)",
+        "PISP.source_path(",
+        "isempty(PISP.source_specs(2026))",
+        "PISPDocUtils.edition_profile(REPO_ROOT, \"2026\")",
+        "PISP_DOCS_RAW_REFTRACE",
+        "PISP_DOCS_RAW_POE",
+        "RefYear5000",
+    )
+        @test occursin(required, raw_source)
+    end
+
+    processed_source = read(
+        joinpath(
+            TEST_DOCS_DIR,
+            "literate",
+            "isp2024",
+            "tutorials",
+            "working_with_pisp_outputs.jl",
+        ),
+        String,
+    )
+    for required in (
+        "PISP_DOCS_ISP2024_REFTRACE",
+        "PISP_DOCS_ISP2024_POE",
+        "PISP_DOCS_ISP2024_YEAR",
+        "out-ref\$(REFTRACE)-poe\$(POE)",
+        "schedule-\$(PLANNING_YEAR)",
+        "available_builds",
+        "available_schedule_years",
+    )
+        @test occursin(required, processed_source)
+    end
+end
+
 @testset "ISP 2026 raw-source reader inventory" begin
     inventory_path = joinpath(TEST_DOCS_DIR, "config", "isp2026-source-specs.toml")
     inventory = TOML.parsefile(inventory_path)
@@ -315,6 +374,13 @@ end
         "a6-cost-benefit-analysis.pdf#page=162",
         "a6-cost-benefit-analysis.pdf#page=165",
         "a6-cost-benefit-analysis.pdf#page=166",
+        "## ISP 2024 reference-weather traces",
+        "## ISP 2024 demand probability of exceedance",
+        "`reftrace = 2017`",
+        "does not select a candidate or optimal development path",
+        "10% chance that the year's peak demand exceeds",
+        "generated/shared/tutorials/selecting-raw-isp-material.md",
+        "generated/isp2024/tutorials/working-with-pisp-outputs.md",
     )
         @test occursin(required, concepts)
     end

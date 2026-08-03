@@ -36,6 +36,13 @@ public_url = "https://www.aemo.com.au/-/media/files/stakeholder_consultation/con
 public_origin = "official"
 
 [[source]]
+title = "2024 ISP Consultation Summary Report"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2024/pisp-reports/2024-isp-consultation-summary-report.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2024/supporting-materials/2024-isp-consultation-summary-report.pdf?rev=9e901f2b861843ccbd8673ebb6e7819b&sc_lang=en"
+public_origin = "official"
+
+[[source]]
 title = "2026 ISP PLEXOS Model Instructions"
 publisher = "Australian Energy Market Operator"
 local_path = "data/2026/pisp-reports/2026-isp-plexos-model-instructions.pdf"

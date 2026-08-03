@@ -25,6 +25,30 @@ related_reference_pages = [
 ]
 
 [[page]]
+id = "shared-selecting-raw-isp-material"
+title = "ISP 2024 and ISP 2026: Selecting raw source material"
+kind = "tutorial"
+track = "shared"
+editions = ["2024", "2026"]
+data_layer = "source-data"
+source = "literate/shared/tutorials/selecting_raw_isp_material.jl"
+output = "generated/shared/tutorials/selecting-raw-isp-material.md"
+status = "published"
+nav_order = 140
+snapshot = true
+data_requirements = [
+    { root = "download", edition = "2024", path = "Traces", type = "directory" },
+    { root = "download", edition = "2026", path = "Traces/2026 ISP Solar traces/solar", type = "directory" },
+    { root = "download", edition = "2026", path = "Traces/2026 ISP Wind traces/wind", type = "directory" },
+]
+related_reference_pages = [
+    "concepts.md",
+    "editions/trace-coverage.md",
+    "generated/isp2024/validation/trace-coverage-and-schema.md",
+    "generated/isp2026/reference/raw-source-reader-map.md",
+]
+
+[[page]]
 id = "shared-source-coverage-ledger"
 title = "AEMO ISP source coverage and ownership"
 kind = "reference"

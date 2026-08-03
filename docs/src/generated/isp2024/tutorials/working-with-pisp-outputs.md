@@ -4,12 +4,14 @@ EditURL = "../../../../literate/isp2024/tutorials/working_with_pisp_outputs.jl"
 
 # ISP 2024: Working with PISP-generated outputs
 
-This tutorial loads one local PISP output build and shows how the static tables relate to the time-varying schedules.
-By default it reads `data/2024/pisp-datasets/out-ref4006-poe10/csv/` and `schedule-2030/`; set `PISP_DOCS_ISP2024_OUTPUT_ROOT` or `PISP_DOCS_ISP2024_SCHEDULE_TAG` to select another local generated build.
+This tutorial selects one existing PISP output by reference-weather trace, demand probability of exceedance, and planning year, then shows how static tables relate to time-varying schedules.
+The default selection is `reftrace = 4006`, `poe = 10`, and `year = 2030`.
+Set `PISP_DOCS_ISP2024_REFTRACE`, `PISP_DOCS_ISP2024_POE`, or `PISP_DOCS_ISP2024_YEAR` to select another available combination.
 
 ## Prerequisites and selected build
 
-The selected ISP 2024 documentation profile must provide an output root and schedule tag containing the five files checked below.
+The ISP 2024 documentation profile identifies the dataset parent and default selection.
+The code first lists available `out-ref<reftrace>-poe<poe>` builds and `schedule-<year>` directories, then checks the five files used below.
 Missing inputs fail before any aggregation or plotting begins.
 
 | Evidence | Role in this tutorial |
@@ -47,15 +49,125 @@ import .PISPDocUtils
 const ISP2024_PROFILE = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
 const OUTPUT_ROOT = ISP2024_PROFILE.output_root
 OUTPUT_ROOT === nothing && error(
-    "ISP 2024 profile does not define output_root; set PISP_DOCS_ISP2024_OUTPUT_ROOT to select a local output build.",
+    "ISP 2024 profile does not define output_root; set PISP_DOCS_ISP2024_OUTPUT_ROOT to an existing output CSV directory.",
 )
-const DATA_ROOT = normpath(OUTPUT_ROOT)
-const SCHEDULE_TAG = ISP2024_PROFILE.schedule_tag
-SCHEDULE_TAG === nothing && error(
-    "ISP 2024 profile does not define schedule_tag; set PISP_DOCS_ISP2024_SCHEDULE_TAG to select a local schedule.",
+const DEFAULT_BUILD_MATCH = match(r"^out-ref(\d+)-poe(\d+)$", basename(dirname(OUTPUT_ROOT)))
+DEFAULT_BUILD_MATCH === nothing && error(
+    "ISP 2024 output_root must end in out-ref<reftrace>-poe<poe>/csv: $(OUTPUT_ROOT)",
 )
+const DEFAULT_SCHEDULE_MATCH = match(r"^schedule-(\d+)$", something(ISP2024_PROFILE.schedule_tag, ""))
+DEFAULT_SCHEDULE_MATCH === nothing && error(
+    "ISP 2024 schedule_tag must use schedule-<year>: $(ISP2024_PROFILE.schedule_tag)",
+)
+
+function integer_selection(variable, default)
+    value = get(ENV, variable, string(default))
+    parsed = tryparse(Int, value)
+    parsed === nothing && error("$variable must be an integer, received $(repr(value))")
+    return parsed
+end
+
+const REFTRACE = integer_selection("PISP_DOCS_ISP2024_REFTRACE", parse(Int, DEFAULT_BUILD_MATCH.captures[1]))
+const POE = integer_selection("PISP_DOCS_ISP2024_POE", parse(Int, DEFAULT_BUILD_MATCH.captures[2]))
+const PLANNING_YEAR = integer_selection("PISP_DOCS_ISP2024_YEAR", parse(Int, DEFAULT_SCHEDULE_MATCH.captures[1]))
+const DATASET_ROOT = dirname(dirname(normpath(OUTPUT_ROOT)))
+const BUILD_NAME = "out-ref$(REFTRACE)-poe$(POE)"
+const DATA_ROOT = joinpath(DATASET_ROOT, BUILD_NAME, "csv")
+const SCHEDULE_TAG = "schedule-$(PLANNING_YEAR)"
 const SCHEDULE_DIR = joinpath(DATA_ROOT, SCHEDULE_TAG)
 
+available_builds = DataFrame(reftrace = Int[], poe = Int[], folder = String[])
+for folder in sort(readdir(DATASET_ROOT))
+    matched = match(r"^out-ref(\d+)-poe(\d+)$", folder)
+    matched === nothing && continue
+    isdir(joinpath(DATASET_ROOT, folder, "csv")) || continue
+    push!(available_builds, (parse(Int, matched.captures[1]), parse(Int, matched.captures[2]), folder))
+end
+nrow(available_builds) > 0 || error("no out-ref<reftrace>-poe<poe> builds found under $(DATASET_ROOT)")
+isdir(DATA_ROOT) || error(
+    "requested reftrace=$REFTRACE and poe=$POE is unavailable; available builds are $(join(available_builds.folder, ", "))",
+)
+````
+
+```@raw html
+</details>
+```
+
+The discovered build folders show which reference-trace and demand-POE combinations are actually available.
+
+```@raw html
+<details class="source-code"><summary>Show source code</summary>
+```
+
+````julia
+PISPDocUtils.markdown_table(available_builds)
+````
+
+```@raw html
+</details>
+```
+
+| **reftrace** | **poe** | **folder** |
+|--:|--:|:--|
+| 2017 | 10 | out-ref2017-poe10 |
+| 2017 | 50 | out-ref2017-poe50 |
+| 4006 | 10 | out-ref4006-poe10 |
+| 4006 | 50 | out-ref4006-poe50 |
+
+
+```@raw html
+<details class="source-code"><summary>Show source code</summary>
+```
+
+````julia
+available_schedule_years = Int[]
+for folder in readdir(DATA_ROOT)
+    matched = match(r"^schedule-(\d+)$", folder)
+    matched === nothing && continue
+    isdir(joinpath(DATA_ROOT, folder)) || continue
+    push!(available_schedule_years, parse(Int, matched.captures[1]))
+end
+sort!(available_schedule_years)
+PLANNING_YEAR in available_schedule_years || error(
+    "requested year=$PLANNING_YEAR is unavailable for $BUILD_NAME; available years are $(join(available_schedule_years, ", "))",
+)
+selection_table = DataFrame(
+    Dimension = ["Reference-weather trace", "Demand POE", "Planning year"],
+    Value = [REFTRACE, POE, PLANNING_YEAR],
+    Folder = [BUILD_NAME, BUILD_NAME, SCHEDULE_TAG],
+)
+````
+
+```@raw html
+</details>
+```
+
+The selected tuple resolves to one build folder for static tables and one year-specific schedule folder.
+
+```@raw html
+<details class="source-code"><summary>Show source code</summary>
+```
+
+````julia
+PISPDocUtils.markdown_table(selection_table)
+````
+
+```@raw html
+</details>
+```
+
+| **Dimension** | **Value** | **Folder** |
+|:--|--:|:--|
+| Reference-weather trace | 4006 | out-ref4006-poe10 |
+| Demand POE | 10 | out-ref4006-poe10 |
+| Planning year | 2030 | schedule-2030 |
+
+
+```@raw html
+<details class="source-code"><summary>Show source code</summary>
+```
+
+````julia
 required_files = [
     joinpath(DATA_ROOT, "Generator.csv"),
     joinpath(DATA_ROOT, "Demand.csv"),
