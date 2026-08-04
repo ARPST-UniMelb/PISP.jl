@@ -933,4 +933,3 @@ Site selection, season, and financial-year mapping all affect the availability p
 
 Report the selected location and financial-year mapping whenever trace `4006` is used.
 Studies that depend on spatial diversity or adverse renewable conditions should use additional sites and historical-year sensitivity rather than relying on one representative profile.
-

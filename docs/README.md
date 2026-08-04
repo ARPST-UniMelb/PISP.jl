@@ -81,7 +81,7 @@ PISP.download_ISP26_reports(
     overwrite = false,
 )
 
-# ISP 2026 source-availability and comparison pages.
+# ISP 2026 shared source and comparison pages.
 PISP.download_isp2026_assets(
     outdir = downloads_2026,
     overwrite = false,
@@ -91,7 +91,7 @@ PISP.ISPdatabuilder.extract_downloads(
     data_root = downloads_2026,
 )
 
-# ISP 2024 dataset consumed by the published pages (currently or WIP in plan).
+# ISP 2024 datasets consumed by the published executable pages.
 # This also downloads and extracts the required 2024 source assets.
 for poe in (10, 50), reference_trace in (2017, 4006)
     PISP.build_ISP24_datasets(
@@ -151,7 +151,9 @@ Local data are required for complete Literate regeneration, but not for a site b
 
 The public site separates shared source explanations from ISP 2024, ISP 2026, and comparison tracks.
 Shared source-data pages describe AEMO material by subject and are placed automatically in the lifecycle navigation.
-The ISP 2026 track publishes source-availability evidence, while the comparison track analyses release-level source structures needed for explicit crosswalks.
+The ISP 2026 landing page directs readers to shared report, source, and trace
+evidence, while the comparison track analyses release-level source structures
+needed for explicit crosswalks.
 Processed-data compatibility still requires edition-specific parser and schema validation.
 
 ### Source-material page ownership
@@ -227,6 +229,25 @@ Render one known page by its registry ID with:
 PISP_LITERATE_PAGES=isp2024-historical-trace-years julia --project=docs docs/render_literate.jl
 ```
 
+### Edition-parallel raw-source documentation
+
+Each edition uses the same two executable page contracts:
+
+- `isp<edition>-source-data` records files, selections, keys, fields, and units;
+- `isp<edition>-workbook-and-trace-structure` records workbook selections,
+  scenario models, trace folders, and trace schemas.
+
+Render the affected edition pair explicitly after changing source definitions
+or source comparisons. For ISP 2026:
+
+```sh
+PISP_LITERATE_PAGES=isp2026-source-data,isp2026-workbook-and-trace-structure \
+    julia --project=docs docs/render_literate.jl
+```
+
+Inspect both generated Markdown pages together with the
+cross-edition raw-source comparison.
+
 ### Navigation placement by track
 
 `isp2024` and `isp2026` pages are placed automatically, grouped by `kind` under their track's section.
@@ -257,12 +278,19 @@ The allowed roots are `repo`, `report`, `download`, and `output`, while the allo
 data_requirements = [{ root = "download", edition = "2024", path = "2024-isp-inputs-and-assumptions-workbook.xlsx", type = "file" }]
 ```
 
-The source-only ISP 2026 and comparison pages declare edition-qualified report
+Data-dependent shared and comparison pages declare edition-qualified report
 and download requirements. Their preflight is mandatory for a selected
-Literate render: provide both roots, render the selected page, and inspect the
-generated Markdown and local-observation tables. An absent root is not skipped
-by selected-page rendering. The optional skip-versus-fail behavior belongs only
-to the package-root fixture checks in `test/runtests.jl`.
+Literate render: provide the declared roots, render the selected page, and
+inspect the generated Markdown. An absent root is not skipped by selected-page
+rendering.
+
+Local source-tree completeness is a maintainer test rather than a published
+documentation page. `test/test_source_availability.jl` exercises the helper in
+`docs/utils/source_availability.jl`; it skips an edition only when both local
+roots are absent and fails when a configured edition is incomplete. Run it as
+part of the package test command below, using the `PISP_ISP<edition>_REPORT_ROOT`
+and `PISP_ISP<edition>_DOWNLOAD_ROOT` overrides documented in the repository
+README when the data live outside `data/<edition>/`.
 
 Before any Literate page runs, the renderer resolves each selected requirement through the relevant edition profile and checks its type.
 The render plan prints selected page IDs, track and edition scope, resolved profiles, and resolved requirements.

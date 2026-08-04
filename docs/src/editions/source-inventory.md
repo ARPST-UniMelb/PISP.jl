@@ -1,39 +1,50 @@
 # Source-to-dataset processing
 
-The PISP transformation layer progresses from acquired source material through parsed and reconciled data to generated datasets.
-
-PISP keeps source material, parsed structures, and generated datasets as distinct layers.
-Keeping those layers separate makes it possible to distinguish an acquired file from a dataset that has been parsed, reconciled, and written by the package.
-
-The workflow proceeds through separate stages:
+PISP keeps reports, workbooks, model archives, parsed tables, and generated
+datasets as separate layers.
+This separation makes each parser decision traceable to a named source
+selection and makes cross-edition differences visible before the data is
+combined.
 
 | Stage | Description |
 | --- | --- |
-| Source acquisition | Downloads or locates the published reports, workbooks, and archives. |
-| Archive extraction | Makes packaged source files available for inspection and parsing. |
-| Parser development | Defines how edition-specific source fields and structures are read. |
-| Parsed and reconciled PISP data | Aligns source names, identifiers, and fields before dataset construction. |
-| PISP.jl integration | Exposes the verified parser and mappings through the package workflow. |
-| Dataset build | Writes the static and schedule tables consumed downstream. |
-| Output contract | Defines filenames, schemas, identifiers, units, and join relationships. |
-| Published validation | Checks selected sources and outputs against explicit evidence. |
-| Published EDA | Interprets supported data without expanding the package capability boundary. |
+| Source acquisition | Obtain the reports, workbooks, model archives, outlooks, and trace archives for the selected edition. |
+| Archive extraction | Expand packaged workbooks, scenario models, and trace folders. |
+| Source map | Record the file, worksheet or folder selection, keys, fields, units, and edition-specific differences. |
+| Parsing and reconciliation | Read the source structures and align identifiers, categories, and fields. |
+| Dataset build | Write the static and schedule tables used downstream. |
+| Output contract | Define filenames, schemas, identifiers, units, and join relationships. |
+| Validation and analysis | Check the source and output structures and interpret the resulting data. |
+
+The ISP 2024 track follows these stages through
+[`PISP.build_ISP24_datasets`](../generated/isp2024/tutorials/building-problem-table.md)
+and the documented static and schedule outputs.
+The edition-specific [ISP 2024 source-data reference](../generated/isp2024/reference/source-data.md)
+and [ISP 2026 source-data reference](../generated/isp2026/reference/source-data.md)
+use the same structure for files, selections, keys, fields, and units.
+Their paired workbook-and-trace pages describe the corresponding workbook,
+model-archive, and trace structures.
 
 For ISP 2024, the documented PISP.jl workflow integrates these stages through dataset construction and published evidence.
-For ISP 2026, PISP.jl provides source download and archive extraction, while parser work remains under review in ParseISP.jl and the parsed-data, dataset-build, and output-contract stages are not yet integrated into the documented public workflow.
+For ISP 2026, PISP.jl provides source download and archive extraction, while parser work remains under review in ParseISP.jl and the parsing, dataset-build, and output-contract stages are not yet integrated into the documented public workflow.
 [Supported ISP editions](supported-editions.md) is the detailed capability-status authority.
 
-## Observed local availability
+## Source and comparison pages
 
-The shared [source-material guide](source-material.md) organises non-trace evidence by data meaning across the two editions.
-Its [coverage and ownership ledger](../generated/shared/source-material/coverage-and-ownership.md) separates original AEMO sources, parsed representations, PISP-generated intermediates, package conventions, user inputs, outputs, and excluded trace material.
+The [source-material guide](source-material.md) groups the non-trace workbooks
+by subject across both editions.
+The [ISP report catalogue](../generated/comparison/references/report-catalogue.md)
+provides the complete report collections and explicit counterparts.
+The [trace coverage](trace-coverage.md) page compares trace folders,
+reference-year labels, schemas, and POE material.
 
-The [ISP 2026 source-availability page](../generated/isp2026/validation/source-availability.md) reports selected report, archive, and extracted-path observations from the configured ISP 2026 roots.
+The [model archive comparison](../generated/comparison/analyses/model-archive-comparison.md)
+compares scenario directories, XML packaging, trace families, file counts,
+sizes, and representative filenames.
+The [raw-source comparison](../generated/comparison/analyses/raw-source-comparison.md)
+compares workbook and outlook additions, removals, moves, dimensions, and
+schema changes.
 
-The [model archive comparison](../generated/comparison/analyses/model-archive-comparison.md) reads the ISP 2024 and ISP 2026 model ZIPs directly.
-It compares scenario directories, XML packaging, trace families, file counts, sizes, and representative filenames as the first concrete input to a 2024-to-2026 parser crosswalk.
-
-The [raw-source comparison](../generated/comparison/analyses/raw-source-comparison.md) separately compares non-trace workbooks and outlook packages, including source-family additions, removals, relocations, and schema changes.
-
-For the implemented 2024 workflow, consult [data sources](../generated/isp2024/reference/data-sources.md) and [output tables](../generated/isp2024/reference/output-tables.md).
-For 2026 source material, consult the [ISP 2026 overview](isp2026.md).
+For the ISP 2024 workflow, consult [source data](../generated/isp2024/reference/source-data.md)
+and [output tables](../generated/isp2024/reference/output-tables.md).
+For ISP 2026, consult the [ISP 2026 overview](isp2026.md).

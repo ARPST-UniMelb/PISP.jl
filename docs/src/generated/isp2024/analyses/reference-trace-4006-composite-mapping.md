@@ -645,4 +645,3 @@ It should not be interpreted as a monotonic climate trend or as evidence that we
 
 Report both the planning year and its mapped historical year when interpreting a trace-`4006` result.
 Where conclusions are sensitive to renewable availability, test the constituent historical labels directly instead of treating planning year as an independent weather dimension.
-

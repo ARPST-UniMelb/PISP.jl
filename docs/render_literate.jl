@@ -252,7 +252,9 @@ function render_page(page; src_dir = SRC_DIR)
     )
     generated_markdown = read(generated_path, String)
     generated_markdown = set_edit_url(generated_markdown, source_path, final_output_path)
-    write(generated_path, collapse_julia_source(generated_markdown))
+    generated_markdown = collapse_julia_source(generated_markdown)
+    generated_markdown = rstrip(generated_markdown) * "\n"
+    write(generated_path, generated_markdown)
 
     if normpath(generated_path) != normpath(output_path)
         mv(generated_path, output_path; force = true)

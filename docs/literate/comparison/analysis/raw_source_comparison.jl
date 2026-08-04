@@ -113,84 +113,74 @@ PISPDocUtils.markdown_table(source_dimensions)
 
 # ## Semantic source-family changes
 #
-# The comparison below separates observed additions, removals, relocations, and schema changes.
-# Any proposed parser correspondence remains a manual semantic-review item until units, keys, and downstream meaning have been checked.
+# The comparison below separates additions, removals, relocations, and schema
+# changes. Parser work must follow the edition-specific keys, units, and table
+# meanings rather than reuse a 2024 reader from the worksheet name alone.
 
 source_family_changes = DataFrame([
     (
         family = "Scenarios and sensitivities",
         isp_2024 = "Green Energy Exports, Step Change, Progressive Change; 9 sensitivities",
         isp_2026 = "Accelerated Transition, Step Change, Slower Growth; 6 sensitivities",
-        observed_change = "Scenario set and sensitivity set changed",
-        review_status = "Manual semantic review",
+        change = "Scenario set and sensitivity set changed",
     ),
     (
         family = "Existing generation",
         isp_2024 = "Station-level leading summary",
         isp_2026 = "Unit-level IASR IDs and status fields",
-        observed_change = "Keys and record granularity changed",
-        review_status = "Manual semantic review",
+        change = "Keys and record granularity changed",
     ),
     (
         family = "Generator operation",
         isp_2024 = "Generation limits and Min Up&Down Times worksheets",
         isp_2026 = "Coal Min Stable Level; no directly named Min Up&Down Times sheet",
-        observed_change = "Source split and removal/relocation",
-        review_status = "Manual semantic review",
+        change = "Source split or moved",
     ),
     (
         family = "Generator reliability",
         isp_2024 = "Technology rows with full and partial outage fields",
         isp_2026 = "Property-by-year rows with long-duration separation",
-        observed_change = "Schema and time dimension changed",
-        review_status = "Manual semantic review",
+        change = "Schema and time dimension changed",
     ),
     (
         family = "Network and transmission",
         isp_2024 = "Seasonal limits, reliability columns, and 2023-dollar augmentation costs",
         isp_2026 = "Revised limits, reliability event rows, and 2025-dollar augmentation costs",
-        observed_change = "Fields, values, and cost basis changed",
-        review_status = "Manual semantic review",
+        change = "Fields, values, and cost basis changed",
     ),
     (
         family = "Renewable energy zones",
         isp_2024 = "REZ, NTNDP, subregion, and cost-zone fields",
         isp_2026 = "Narrower leading REZ table; some retained IDs have new names",
-        observed_change = "Fields removed or relocated; names changed",
-        review_status = "Manual semantic review",
+        change = "Fields moved or removed; names changed",
     ),
     (
         family = "Demand and distributed resources",
         isp_2024 = "Demand, DER, and subregional allocation material",
         isp_2026 = "Adds data-centre, distribution-network, and hybrid-site worksheets",
-        observed_change = "New source families added",
-        review_status = "Observed source only",
+        change = "New source families added",
     ),
     (
         family = "Demand-side participation",
         isp_2024 = "Scenario-region-season matrix blocks",
         isp_2026 = "Normalised region-price-scenario-season rows",
-        observed_change = "Table shape and keys changed",
-        review_status = "Manual semantic review",
+        change = "Table shape and keys changed",
     ),
     (
         family = "Electric vehicles",
         isp_2024 = "2023 IASR numbers, consumption, charging shares, and profiles",
         isp_2026 = "2025 IASR revises charging categories and adds hybrids",
-        observed_change = "Scenario years, vocabulary, and vehicle family changed",
-        review_status = "Observed source only",
+        change = "Scenario years, vocabulary, and vehicle families changed",
     ),
     (
         family = "Hydro",
         isp_2024 = "Workbook reference years plus model inflow and energy-limit CSVs",
         isp_2026 = "Reorganised workbook scheme blocks",
-        observed_change = "Workbook organisation changed; model integration not established",
-        review_status = "Manual semantic review",
+        change = "Workbook organisation changed",
     ),
 ])
-PISPDocUtils.markdown_table(source_family_changes; alignment = [:l, :l, :l, :l, :l])
+PISPDocUtils.markdown_table(source_family_changes; alignment = [:l, :l, :l, :l])
 #-
 
 # Detailed evidence is organised by subject under [AEMO ISP source material](../../shared/source-material/coverage-and-ownership.md).
 # The [model archive comparison](model-archive-comparison.md) remains the authority for archive packaging, and the existing PISP dataset pages remain the authority for generated output schemas.
-# No table on this page claims that ISP 2026 has an integrated PISP preprocessing or dataset workflow.

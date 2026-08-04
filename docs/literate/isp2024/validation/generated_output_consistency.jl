@@ -1,9 +1,10 @@
 # # ISP 2024: Generated-output consistency
 #
 # This validation checks identifier coverage, schedule coverage, generator classification, and daily solar, wind, and demand alignment for one generated ISP 2024 build.
-# Supporting tables are saved under `docs/src/tables/julia/isp2024_06_pisp_outputs/`, and the selected figures summarise the same computed evidence.
 #
-# By default it reads `data/2024/pisp-datasets/out-ref4006-poe10/csv/` and `schedule-2030/`; set `PISP_DOCS_ISP2024_OUTPUT_ROOT` or `PISP_DOCS_ISP2024_SCHEDULE_TAG` to select another local generated build.
+# The edition profile selects the generated build and schedule period. The
+# evidence below records that build identity without exposing machine-specific
+# paths.
 
 ENV["GKSwstype"] = "100"
 
@@ -25,12 +26,12 @@ const SCRIPT_STEM = "isp2024_06_pisp_outputs"
 const ISP2024_PROFILE = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
 const OUTPUT_ROOT = ISP2024_PROFILE.output_root
 OUTPUT_ROOT === nothing && error(
-    "ISP 2024 profile does not define output_root; set PISP_DOCS_ISP2024_OUTPUT_ROOT to select a local output build.",
+    "ISP 2024 profile does not define output_root; set PISP_DOCS_ISP2024_OUTPUT_ROOT to select an output build.",
 )
 const OUT = normpath(OUTPUT_ROOT)
 const SCHEDULE_TAG = ISP2024_PROFILE.schedule_tag
 SCHEDULE_TAG === nothing && error(
-    "ISP 2024 profile does not define schedule_tag; set PISP_DOCS_ISP2024_SCHEDULE_TAG to select a local schedule.",
+    "ISP 2024 profile does not define schedule_tag; set PISP_DOCS_ISP2024_SCHEDULE_TAG to select a schedule.",
 )
 const SCHEDULE_DIR = joinpath(OUT, SCHEDULE_TAG)
 
@@ -122,7 +123,7 @@ function daily_tech_sum(gen_pmax_ts::DataFrame, tech_predicate)
 end
 nothing #hide
 
-# ## Selected build and inputs
+# ## Selected dataset and inputs
 #
 # `Generator.csv`, `Demand.csv`, and `Bus.csv` describe the static network; `Generator_pmax_sched.csv` and `Demand_load_sched.csv` under the `schedule-2030` tag describe the time-varying build for this generated dataset.
 
@@ -134,15 +135,15 @@ gen_pmax = CSV.read(abs_path(joinpath(SCHEDULE_DIR, "Generator_pmax_sched.csv"))
 dem_load = CSV.read(abs_path(joinpath(SCHEDULE_DIR, "Demand_load_sched.csv")), DataFrame)
 nothing #hide
 
-# ## Build identity
+# ## Dataset identity
 #
-# The recorded paths are relative to the repository root so this evidence table stays comparable across machines and reproducible from any checkout.
+# The build-folder name identifies the `reftrace` and `poe` combination, while
+# the schedule tag identifies the planning period checked below.
 
 build_metadata = DataFrame([
     (
-        pisp_output_root = replace(relpath(OUT, REPO_ROOT), '\\' => '/'),
+        build = basename(dirname(OUT)),
         schedule_tag = SCHEDULE_TAG,
-        schedule_directory = replace(relpath(SCHEDULE_DIR, REPO_ROOT), '\\' => '/'),
     ),
 ])
 PISPDocUtils.write_table(build_metadata, SCRIPT_STEM, "build_metadata")
@@ -151,9 +152,6 @@ PISPDocUtils.markdown_table(build_metadata)
 # ## Generator coverage
 #
 # `Generator.csv` classifies each generator by `fuel` and by `tech`; these counts show which classifications are available for later technology-specific filtering.
-
-println("=== Generator Table ===")
-println("Shape: ", (nrow(gen_df), ncol(gen_df)))
 
 generator_fuel_counts = combine(groupby(gen_df, :fuel), nrow => :count)
 PISPDocUtils.write_table(generator_fuel_counts, SCRIPT_STEM, "generator_fuel_counts")
@@ -168,11 +166,6 @@ PISPDocUtils.markdown_table(generator_tech_counts)
 # ## Schedule coverage
 #
 # The two schedule tables share the same long-format layout (one row per identifier per timestamp); their row/column shapes and represented time interval describe the extent of this generated build.
-
-println("\n=== Generator_pmax_sched ===")
-println("Shape: ", (nrow(gen_pmax), ncol(gen_pmax)))
-println("\n=== Demand_load_sched ===")
-println("Shape: ", (nrow(dem_load), ncol(dem_load)))
 
 schedule_shapes = DataFrame([
     (schedule = "Generator_pmax_sched", n_rows = nrow(gen_pmax), n_cols = ncol(gen_pmax)),
@@ -287,8 +280,6 @@ end
 
 solar_gens = gen_df[is_solar_tech.(gen_df.tech), :]
 wind_gens = gen_df[is_wind_tech.(gen_df.tech), :]
-println("\nSolar generators: ", nrow(solar_gens))
-println("Wind generators: ", nrow(wind_gens))
 
 solar_wind_generator_counts = DataFrame([
     (category = "solar", n_generators = nrow(solar_gens)),
@@ -604,4 +595,3 @@ nothing #hide
 # - Static asset tables and 2030 schedule outputs join cleanly for this generated build, with identifier coverage and schedule time coverage recorded above and any unmatched identifiers listed in `unmatched_ids`.
 # - Solar and wind classification, annual mean available output, and capacity-factor duration follow the denominator convention documented on `capacity_factor_duration_frame`.
 # - The figures and tables use the same joined static and schedule inputs.
-# - Complete diagnostics are saved under `docs/src/tables/julia/isp2024_06_pisp_outputs/`; no historical thresholds are applied.

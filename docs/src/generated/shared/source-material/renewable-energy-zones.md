@@ -159,4 +159,3 @@ PISPDocUtils.markdown_table(rez_conventions)
 
 The candidate-development-path choices are package conventions, not values read from the REZ worksheet.
 The current solar and wind builders continue to use the ISP 2024 zone records.
-

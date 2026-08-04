@@ -1251,7 +1251,7 @@ source_path = "src/scrappers/PISP-scrapper-2024files.jl"
 line = 80
 family = "fixed source-download keys and metadata"
 classification = "package_convention"
-owner = "isp2024-data-sources"
+owner = "isp2024-source-data"
 notes = "Maps downloader keys to published AEMO artefacts."
 
 [[mapping_family]]

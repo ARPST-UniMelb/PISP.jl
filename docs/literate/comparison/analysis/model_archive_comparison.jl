@@ -263,9 +263,12 @@ PISPDocUtils.markdown_table(
     nothing_text = "—",
 )
 
-# The 2026 archive packages 345 CSV files, compared with 84 in the 2024
-# archive, and introduces several trace families that are not present in the
-# 2024 model ZIP.
+#-
+
+csv_file_counts = Dict(row[1] => row[7] for row in archive_summary_rows)
+println(
+    "The $(EXPECTED_YEARS[2]) archive packages $(csv_file_counts[EXPECTED_YEARS[2]]) CSV files, compared with $(csv_file_counts[EXPECTED_YEARS[1]]) in the $(EXPECTED_YEARS[1]) archive, and introduces several trace families that are not present in the $(EXPECTED_YEARS[1]) model ZIP.",
+)
 
 # ## Scenario continuity
 #

@@ -37,32 +37,36 @@ Base.@kwdef struct AvailabilitySummary
     unexpected_demand_paths::Vector{String}
 end
 
-const REPORT_FILENAMES = Dict(
-    "2024" => [
-        "2024-isp-plexos-model-instructions.pdf",
-        "2024-integrated-system-plan.pdf",
-        "2023-inputs-assumptions-and-scenarios-report.pdf",
-        "addendum-to-2023-inputs-assumptions-and-scenarios-report.pdf",
-        "2023-isp-methodology.pdf",
-        "a2-generation-and-storage-development-opportunities.pdf",
-        "a3-renewable-energy-zones.pdf",
-        "a4-system-operability.pdf",
-        "a6-cost-benefit-analysis.pdf",
-        "a7-system-security.pdf",
-    ],
-    "2026" => [
-        "2026-integrated-system-plan.pdf",
-        "2026-isp-plexos-model-instructions.pdf",
-        "2025-inputs-assumptions-and-scenarios-report.pdf",
-        "addendum-to-2025-inputs-assumptions-and-scenarios-report.pdf",
-        "2025-isp-methodology.pdf",
-        "a2-isp-development-opportunities.pdf",
-        "a3-renewable-energy-zones.pdf",
-        "a4-system-operability.pdf",
-        "a6-cost-benefit-analysis.pdf",
-        "a7-system-security.pdf",
-    ],
+const REPORT_COUNTERPART_KEY_MAP = (
+    :plexos_model_instructions => :plexos_model_instructions,
+    :integrated_system_plan => :integrated_system_plan,
+    :iasr_2023 => :iasr_2025,
+    :iasr_2023_addendum => :iasr_2025_addendum,
+    :isp_methodology_2023 => :isp_methodology_2025,
+    :appendix_a2_generation_storage => :appendix_a2_generation_storage,
+    :appendix_a3_rez => :appendix_a3_rez,
+    :appendix_a4_operability => :appendix_a4_operability,
+    :appendix_a6_cost_benefit => :appendix_a6_cost_benefit,
+    :appendix_a7_security => :appendix_a7_security,
+    :publication_webinar_presentation => :publication_webinar_presentation,
+    :appendix_a1_stakeholder_engagement => :appendix_a1_stakeholder_engagement,
+    :appendix_a5_network_investments => :appendix_a5_network_investments,
+    :appendix_a8_social_licence => :appendix_a8_social_licence,
+    :consultation_summary => :consultation_summary,
 )
+
+report_counterpart_key_map() = collect(REPORT_COUNTERPART_KEY_MAP)
+
+function report_filenames(edition)
+    targets = if edition == "2024"
+        PISP.ISP2024ReportDownloader.report_targets()
+    elseif edition == "2026"
+        PISP.ISP2026ReportDownloader.report_targets()
+    else
+        throw(ArgumentError("unsupported ISP edition: $edition"))
+    end
+    return [target.filename for target in targets]
+end
 
 nonempty_environment_value(env, name) = begin
     value = strip(get(env, name, ""))
@@ -99,10 +103,9 @@ function source_availability_profiles(repo_root; env = ENV)
 end
 
 function edition_requirements(edition)
-    edition in keys(REPORT_FILENAMES) || throw(ArgumentError("unsupported ISP edition: $edition"))
     requirements = Requirement[
         Requirement(class = :report, relative_path = filename, kind = :file, label = "configured report target $filename")
-        for filename in REPORT_FILENAMES[edition]
+        for filename in report_filenames(edition)
     ]
     if edition == "2024"
         append!(requirements, [

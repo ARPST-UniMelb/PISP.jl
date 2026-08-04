@@ -790,4 +790,3 @@ The event counts are conditional on the chosen location, threshold, summer filte
 
 Treat low-output events as sensitivity cases defined by explicit thresholds and locations.
 System studies should test alternative thresholds, multiple sites, historical labels, and operational constraints before drawing adequacy conclusions.
-

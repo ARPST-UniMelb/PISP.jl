@@ -244,7 +244,8 @@ PISPDocUtils.markdown_table(storage_capacity_2026)
 ## Storage-energy table structure
 
 Storage energy records use the same candidate-development-path, region, subregion, and storage-category keys as storage power, with values in GWh across financial years.
-The 2024 table is read through PISP's registered source specification; the 2026 sheet is read directly from the observed 2026 core workbook, which PISP does not yet register as a source.
+The 2024 table is read through PISP's registered source specification; the
+2026 table is read from the corresponding core workbook.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -299,10 +300,10 @@ PISPDocUtils.markdown_table(storage_energy_2026)
 | CDP1 | NSW | NNSW | Coordinated CER storage | 0.231276 | 0.368492 | 0.538256 | 0.736053 |
 
 
-## PISP transformation status
+## How PISP uses the outlooks
 
 The current scraper reads the 2024 capacity, storage-capacity, storage-energy, and REZ worksheets and writes separate condensed `Auxiliary/` workbooks for parser use.
 The `ess_vpps` path consumes scenario sheets from the generated storage-capacity and storage-energy workbooks for coordinated-CER/VPP storage.
 Those intermediates are PISP-generated material, not AEMO source publications.
-No corresponding integrated ISP 2026 scraper-to-dataset workflow is claimed here.
-
+The ISP 2026 tables above define the revised worksheet names, keys, and units
+that parser work must follow.

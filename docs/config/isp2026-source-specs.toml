@@ -1,6 +1,6 @@
-schema_version = 1
+schema_version = 2
 edition = "2026"
-support_boundary = "Observed source selections and candidate PISP consumers; package integration is not defined."
+scope = "Verified ISP 2026 raw-source selections, structures, fields, units, and ISP 2024 lineage."
 
 [lineage]
 observed_inputs_workbook = [
@@ -108,7 +108,6 @@ selection = "Existing Gen Data Summary!B10:AZ738"
 keys = "IASR ID, station, region, subregion, REZ, technology, fuel, status"
 fields_units = "Capacity and rating fields in MW; reliability, heat-rate, storage, and status fields"
 lineage_2024 = ["additional_generator_summary", "existing_generator_summary", "existing_generators"]
-possible_reader = "generator_table and renewable_generation_schedules"
 
 [[source]]
 id = "isp2026-generator-emissions-intensity"
@@ -120,7 +119,6 @@ selection = "Emissions intensity!B8:E744 and G8:H29"
 keys = "IASR ID or technology"
 fields_units = "Scope 1 emissions intensity in kg/MWh as-generated"
 lineage_2024 = ["generator_emissions_intensity"]
-possible_reader = "generator_table"
 
 [[source]]
 id = "isp2026-maximum-capacity"
@@ -132,7 +130,6 @@ selection = "Maximum capacity, generator and new-technology tables from row 10"
 keys = "IASR ID or technology, region, status, commissioning year"
 fields_units = "Maximum generation or storage power in MW and storage energy in MWh"
 lineage_2024 = ["anticipated_generator_maximum_capacity", "bess_maximum_capacity", "committed_generator_maximum_capacity", "existing_generator_maximum_capacity"]
-possible_reader = "generator_table and ess_tables"
 
 [[source]]
 id = "isp2026-summary-mapping"
@@ -144,7 +141,6 @@ selection = "Summary Mapping, header row 4 and records from row 7"
 keys = "RowID, IASR ID, location, status"
 fields_units = "Fuel-cost, outage, MTTR, minimum-load, capacity-factor, heat-rate, and efficiency mappings"
 lineage_2024 = ["bess_summary_mapping", "generator_summary_mapping", "generator_summary_mapping_mlf", "generator_summary_mapping_names"]
-possible_reader = "generator_table and ess_tables"
 
 [[source]]
 id = "isp2026-generator-reliability-retirement"
@@ -156,7 +152,6 @@ selection = "Generator Reliability Settings; Retirement!B12:F738"
 keys = "Technology or IASR ID, fuel, status, financial year"
 fields_units = "Outage percentages, MTTR, and expected closure year"
 lineage_2024 = ["existing_generator_reliability", "generator_retirements", "new_generator_reliability", "transmission_reliability"]
-possible_reader = "generator_table and line_table"
 
 [[source]]
 id = "isp2026-generator-operation"
@@ -168,7 +163,6 @@ selection = "Coal Min Stable Level; GPG Min Stable Level; Max Ramp Rates"
 keys = "Technology, fuel, unit or station"
 fields_units = "Minimum stable generation and ramp-rate values in the workbook's stated units"
 lineage_2024 = ["coal_minimum_stable_generation", "generator_maximum_ramp_rates", "gpg_minimum_stable_generation"]
-possible_reader = "generator_table"
 
 [[source]]
 id = "isp2026-storage-properties"
@@ -180,7 +174,6 @@ selection = "Storage properties"
 keys = "Storage technology"
 fields_units = "Power in MW, duration in hours, efficiencies, state of charge, and degradation"
 lineage_2024 = ["bess_storage_properties", "pumped_storage_properties"]
-possible_reader = "ess_tables"
 
 [[source]]
 id = "isp2026-hydro-scheme-inflows"
@@ -192,7 +185,6 @@ selection = "Hydro Scheme Inflows"
 keys = "Hydro scheme, month, reference year"
 fields_units = "Monthly inflow energy in GL"
 lineage_2024 = ["hydro_scheme_inflows"]
-possible_reader = "build_hourly_snowy and gen_inflow_sched"
 
 [[source]]
 id = "isp2026-dsp"
@@ -204,7 +196,6 @@ selection = "DSP, normalized row table"
 keys = "Region, price band, scenario, season"
 fields_units = "Financial-year demand-side-participation values"
 lineage_2024 = ["dsp_green_energy_exports_nsw_summer", "dsp_green_energy_exports_nsw_winter", "dsp_green_energy_exports_qld_summer", "dsp_green_energy_exports_qld_winter", "dsp_green_energy_exports_sa_summer", "dsp_green_energy_exports_sa_winter", "dsp_green_energy_exports_tas_summer", "dsp_green_energy_exports_tas_winter", "dsp_green_energy_exports_vic_summer", "dsp_green_energy_exports_vic_winter", "dsp_progressive_change_nsw_summer", "dsp_progressive_change_nsw_winter", "dsp_progressive_change_qld_summer", "dsp_progressive_change_qld_winter", "dsp_progressive_change_sa_summer", "dsp_progressive_change_sa_winter", "dsp_progressive_change_tas_summer", "dsp_progressive_change_tas_winter", "dsp_progressive_change_vic_summer", "dsp_progressive_change_vic_winter", "dsp_step_change_nsw_summer", "dsp_step_change_nsw_winter", "dsp_step_change_qld_summer", "dsp_step_change_qld_winter", "dsp_step_change_sa_summer", "dsp_step_change_sa_winter", "dsp_step_change_tas_summer", "dsp_step_change_tas_winter", "dsp_step_change_vic_summer", "dsp_step_change_vic_winter"]
-possible_reader = "der_pred_sched"
 
 [[source]]
 id = "isp2026-rooftop-pv"
@@ -217,7 +208,6 @@ keys = "Scenario, region, financial year"
 fields_units = "Degraded capacity in MW and annual energy in GWh"
 lineage_2024 = []
 basis = "2026-only"
-possible_reader = "No current PISP reader; candidate input to distributed-PV capacity and energy mapping"
 
 [[source]]
 id = "isp2026-data-centre-forecasts"
@@ -230,7 +220,6 @@ keys = "Scenario, region, financial year"
 fields_units = "Annual electricity consumption in TWh"
 lineage_2024 = []
 basis = "2026-only"
-possible_reader = "No current PISP reader; candidate input to demand construction"
 
 [[source]]
 id = "isp2026-distribution-network"
@@ -243,7 +232,6 @@ keys = "DNSP, region, tranche or time-profile identifier"
 fields_units = "Pipeline/hosting capacity, augmentation cost, and CER generation limits in MW"
 lineage_2024 = []
 basis = "2026-only"
-possible_reader = "No current PISP reader; candidate input to distribution-project and CER-limit modelling"
 
 [[source]]
 id = "isp2026-hybrid-site-limits"
@@ -256,7 +244,6 @@ keys = "IASR ID, site name, region, technology, status"
 fields_units = "Connection capacity in MW"
 lineage_2024 = []
 basis = "2026-only"
-possible_reader = "No current PISP reader; candidate constraint for co-located technologies"
 
 [[source]]
 id = "isp2026-fuel-and-gas"
@@ -269,7 +256,6 @@ keys = "Fuel or gas-system item, region, scenario, financial year"
 fields_units = "Fuel-price and gas-system fields in the workbook's stated units"
 lineage_2024 = []
 basis = "2026-only"
-possible_reader = "No current PISP reader; candidate input to fuel-cost and gas-limit modelling"
 
 [[source]]
 id = "isp2026-network-and-rez"
@@ -281,7 +267,6 @@ selection = "Network Capability; Flow Path Augmentation options; Renewable Energ
 keys = "Flow path or REZ identifier, region, subregion"
 fields_units = "Transfer capability, augmentation cost, and REZ attributes in stated workbook units"
 lineage_2024 = ["flow_path_augmentation_options", "network_capability", "renewable_energy_zones"]
-possible_reader = "line_table, line_invoptions, and renewable_generation_schedules"
 
 [[source]]
 id = "isp2026-ev-numbers"
@@ -293,7 +278,6 @@ selection = "BEV_Numbers, PHEV_Numbers, FCEV_Numbers, Hybrid_Numbers, and ICE_Nu
 keys = "Scenario, region, vehicle type, financial year"
 fields_units = "Vehicle counts"
 lineage_2024 = ["ev_vehicle_numbers"]
-possible_reader = "ev_der_sched"
 
 [[source]]
 id = "isp2026-ev-consumption"
@@ -306,7 +290,6 @@ keys = "Scenario, region, vehicle type, financial year"
 fields_units = "Annual consumption in GWh"
 lineage_2024 = []
 basis = "2026-only"
-possible_reader = "No current PISP reader; candidate input to EV demand construction"
 
 [[source]]
 id = "isp2026-ev-charge-type"
@@ -318,7 +301,6 @@ selection = "BEV_PHEV_Charge_Type (%)!A1:AG400"
 keys = "Scenario, region, vehicle type, charge type, financial year"
 fields_units = "Share in percent"
 lineage_2024 = ["ev_bev_phev_charge_type"]
-possible_reader = "ev_der_sched"
 
 [[source]]
 id = "isp2026-ev-profiles"
@@ -330,7 +312,6 @@ selection = "BEV_PHEV_Profile_kW (Weekday) and (Weekend)!A1:AY296"
 keys = "Scenario, region, vehicle type, charge type, interval"
 fields_units = "Charging profile in kW"
 lineage_2024 = ["ev_bev_phev_profile_weekday", "ev_bev_phev_profile_weekend"]
-possible_reader = "ev_der_sched"
 
 [[source]]
 id = "isp2026-outlook-capacity"
@@ -342,7 +323,6 @@ selection = "Capacity!A1:AZ7738"
 keys = "CDP, region, subregion, technology, financial year"
 fields_units = "Installed capacity in MW"
 lineage_2024 = ["core_capacity_outlook"]
-possible_reader = "build_capacity_outlook_aux and renewable_generation_schedules"
 
 [[source]]
 id = "isp2026-outlook-storage-capacity"
@@ -354,7 +334,6 @@ selection = "Storage Capacity!A1:AB3432"
 keys = "CDP, region, subregion, storage category, financial year"
 fields_units = "Storage power in MW"
 lineage_2024 = ["core_storage_capacity_outlook"]
-possible_reader = "build_storage_outlook_aux and ess_vpps"
 
 [[source]]
 id = "isp2026-outlook-storage-energy"
@@ -366,7 +345,6 @@ selection = "Storage Energy!A1:AB3420"
 keys = "CDP, region, subregion, Technology, financial year"
 fields_units = "Storage energy in GWh; the literal fourth header is Technology"
 lineage_2024 = ["core_storage_energy_outlook"]
-possible_reader = "build_storage_outlook_aux and ess_vpps"
 
 [[source]]
 id = "isp2026-outlook-rez-capacity"
@@ -378,7 +356,6 @@ selection = "REZ Generation Capacity!A1:AE8787"
 keys = "CDP, region, REZ, REZ name, technology, financial year"
 fields_units = "Installed capacity in MW"
 lineage_2024 = ["core_rez_generation_capacity"]
-possible_reader = "build_rez_capacity_aux and renewable_generation_schedules"
 
 [[source]]
 id = "isp2026-outlook-cdp-catalogue"
@@ -391,7 +368,6 @@ keys = "CDP identifier and development-path description"
 fields_units = "Identifiers and descriptions; available values include CDP4 (ODP)"
 lineage_2024 = []
 basis = "2026-only"
-possible_reader = "No current PISP reader; candidate authority for validating development-path selections"
 
 [[source]]
 id = "isp2026-outlook-sensitivities"
@@ -404,7 +380,6 @@ keys = "Sensitivity, CDP, geography, technology or storage category, financial y
 fields_units = "MW or GWh according to worksheet"
 lineage_2024 = []
 basis = "2026-only"
-possible_reader = "No current PISP reader; candidate extension of outlook readers with sensitivity selection"
 
 [[source]]
 id = "isp2026-model-demand"
@@ -416,7 +391,6 @@ selection = "All CSV files in each scenario directory"
 keys = "Filename series, Year, Month, Day, half-hour columns 01 to 48"
 fields_units = "Demand time series in the file's stated units"
 lineage_2024 = ["operational_demand_trace"]
-possible_reader = "dem_load_sched"
 
 [[source]]
 id = "isp2026-model-dnsp"
@@ -429,7 +403,6 @@ keys = "Filename series, Year, Month, Day, half-hour columns 01 to 48"
 fields_units = "DNSP-level CER time series"
 lineage_2024 = []
 basis = "2026-only"
-possible_reader = "No current PISP reader"
 
 [[source]]
 id = "isp2026-model-gas"
@@ -442,7 +415,6 @@ keys = "Filename series, Year, Month, Day"
 fields_units = "Value column; filenames describe gas limits in TJ"
 lineage_2024 = []
 basis = "2026-only"
-possible_reader = "No current PISP reader"
 
 [[source]]
 id = "isp2026-model-hydro"
@@ -454,7 +426,6 @@ selection = "All CSV files in each scenario directory"
 keys = "Filename series, Year, Month, Day"
 fields_units = "Inflows column for daily files; file-specific hydro energy series"
 lineage_2024 = ["hydro_annual_energy_limit_trace", "hydro_natural_inflow_trace"]
-possible_reader = "gen_inflow_sched"
 
 [[source]]
 id = "isp2026-model-load-subtractor"
@@ -467,7 +438,6 @@ keys = "Filename series, Year, Month, Day, half-hour columns 01 to 48"
 fields_units = "Load-subtractor time series"
 lineage_2024 = []
 basis = "2026-only"
-possible_reader = "No current PISP reader"
 
 [[source]]
 id = "isp2026-model-rooftop-pv"
@@ -479,7 +449,6 @@ selection = "All CSV files in each scenario directory"
 keys = "Filename series, Year, Month, Day, half-hour columns 01 to 48"
 fields_units = "Rooftop-PV time series"
 lineage_2024 = ["distributed_pv_demand_trace"]
-possible_reader = "gen_pmax_distpv"
 
 [[source]]
 id = "isp2026-model-timeslice"
@@ -487,11 +456,10 @@ group = "Model trace folders"
 status = "unresolved"
 format = "csv-pattern"
 path = "2026 ISP Model/2026 ISP {scenario}/Traces/timeslice/timeslice_RefYear5000.csv"
-selection = "Referenced by each scenario XML; file not observed in the extracted folders"
-keys = "Unresolved"
+selection = "Referenced by each scenario XML; file is not included in the extracted trace folders"
+keys = "Reference-year identifier from the XML file reference"
 fields_units = "Seasonal-timeslice classification described by the model instructions"
 lineage_2024 = ["reference_year_trace"]
-possible_reader = "No current PISP reader; the referenced source file is unavailable"
 
 [[source]]
 id = "isp2026-solar-traces"
@@ -503,7 +471,6 @@ selection = "All project CSV files"
 keys = "Project filename, Year, Month, Day, half-hour columns 01 to 48"
 fields_units = "Solar availability time series"
 lineage_2024 = ["existing_solar_trace", "rez_solar_trace"]
-possible_reader = "gen_pmax_solar"
 
 [[source]]
 id = "isp2026-wind-traces"
@@ -515,7 +482,6 @@ selection = "All project CSV files"
 keys = "Project filename, Year, Month, Day, half-hour columns 01 to 48"
 fields_units = "Wind availability time series"
 lineage_2024 = ["existing_wind_trace", "rez_wind_trace"]
-possible_reader = "gen_pmax_wind"
 
 [[source]]
 id = "isp2026-ev-subregional-allocation"
@@ -523,11 +489,10 @@ group = "Known source boundaries"
 status = "not-observed"
 format = "xlsx"
 path = "2026-isp-inputs-and-assumptions-workbook.xlsm"
-selection = "No Sub-regional demand allocation worksheet observed"
+selection = "No worksheet named Sub-regional demand allocation"
 keys = "Not applicable"
 fields_units = "Not applicable"
 lineage_2024 = ["ev_subregional_demand_allocation"]
-possible_reader = "No replacement allocation source or method is defined"
 
 [[source]]
 id = "isp2026-generator-minimum-up-down"
@@ -535,11 +500,10 @@ group = "Known source boundaries"
 status = "not-observed"
 format = "xlsx"
 path = "2026-isp-inputs-and-assumptions-workbook.xlsm"
-selection = "No Min Up&Down Times worksheet observed"
+selection = "No worksheet named Min Up&Down Times"
 keys = "Not applicable"
 fields_units = "Not applicable"
 lineage_2024 = ["generator_minimum_up_down_times"]
-possible_reader = "No replacement source or maintained package assumption is defined"
 
 [[source]]
 id = "isp2026-generated-auxiliary"
@@ -551,7 +515,6 @@ selection = "No published 2026 counterpart; 2024 files are PISP preprocessing ou
 keys = "No 2026 preprocessing contract"
 fields_units = "Capacity or storage quantities derived from outlook workbooks"
 lineage_2024 = ["auxiliary_rez_generation_capacity", "condensed_capacity_outlook", "vpp_capacity_outlook", "vpp_energy_outlook"]
-possible_reader = "No current 2026 generator"
 
 [[source]]
 id = "isp2026-user-buildout"
@@ -563,7 +526,6 @@ selection = "User-provided buildout worksheet"
 keys = "Technology, subregion, capacity, year, count"
 fields_units = "User-supplied build schedule"
 lineage_2024 = ["buildout_schedule"]
-possible_reader = "read_buildout_table for user schedules, independent of AEMO 2026 source files"
 
 [[source]]
 id = "isp2026-legacy-minimum-up-time"
@@ -575,4 +537,3 @@ selection = "Generation limits!O9:Q69"
 keys = "Generator or technology"
 fields_units = "Minimum-up-time values"
 lineage_2024 = ["legacy_generator_minimum_up_time"]
-possible_reader = "No 2026 source counterpart or package assumption is defined"

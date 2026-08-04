@@ -239,4 +239,3 @@ A temperature-aware PISP study needs three additions outside the current ISP 202
 3. component response models that convert temperature into capacity, availability, demand, or network-limit changes.
 
 The ISP workbook can inform assumptions and validation, but it cannot supply the meteorological time series or the missing response models by itself.
-

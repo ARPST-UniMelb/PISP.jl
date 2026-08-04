@@ -244,8 +244,9 @@ PISPDocUtils.markdown_table(source_dimensions)
 
 ## Semantic source-family changes
 
-The comparison below separates observed additions, removals, relocations, and schema changes.
-Any proposed parser correspondence remains a manual semantic-review item until units, keys, and downstream meaning have been checked.
+The comparison below separates additions, removals, relocations, and schema
+changes. Parser work must follow the edition-specific keys, units, and table
+meanings rather than reuse a 2024 reader from the worksheet name alone.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -257,95 +258,83 @@ source_family_changes = DataFrame([
         family = "Scenarios and sensitivities",
         isp_2024 = "Green Energy Exports, Step Change, Progressive Change; 9 sensitivities",
         isp_2026 = "Accelerated Transition, Step Change, Slower Growth; 6 sensitivities",
-        observed_change = "Scenario set and sensitivity set changed",
-        review_status = "Manual semantic review",
+        change = "Scenario set and sensitivity set changed",
     ),
     (
         family = "Existing generation",
         isp_2024 = "Station-level leading summary",
         isp_2026 = "Unit-level IASR IDs and status fields",
-        observed_change = "Keys and record granularity changed",
-        review_status = "Manual semantic review",
+        change = "Keys and record granularity changed",
     ),
     (
         family = "Generator operation",
         isp_2024 = "Generation limits and Min Up&Down Times worksheets",
         isp_2026 = "Coal Min Stable Level; no directly named Min Up&Down Times sheet",
-        observed_change = "Source split and removal/relocation",
-        review_status = "Manual semantic review",
+        change = "Source split or moved",
     ),
     (
         family = "Generator reliability",
         isp_2024 = "Technology rows with full and partial outage fields",
         isp_2026 = "Property-by-year rows with long-duration separation",
-        observed_change = "Schema and time dimension changed",
-        review_status = "Manual semantic review",
+        change = "Schema and time dimension changed",
     ),
     (
         family = "Network and transmission",
         isp_2024 = "Seasonal limits, reliability columns, and 2023-dollar augmentation costs",
         isp_2026 = "Revised limits, reliability event rows, and 2025-dollar augmentation costs",
-        observed_change = "Fields, values, and cost basis changed",
-        review_status = "Manual semantic review",
+        change = "Fields, values, and cost basis changed",
     ),
     (
         family = "Renewable energy zones",
         isp_2024 = "REZ, NTNDP, subregion, and cost-zone fields",
         isp_2026 = "Narrower leading REZ table; some retained IDs have new names",
-        observed_change = "Fields removed or relocated; names changed",
-        review_status = "Manual semantic review",
+        change = "Fields moved or removed; names changed",
     ),
     (
         family = "Demand and distributed resources",
         isp_2024 = "Demand, DER, and subregional allocation material",
         isp_2026 = "Adds data-centre, distribution-network, and hybrid-site worksheets",
-        observed_change = "New source families added",
-        review_status = "Observed source only",
+        change = "New source families added",
     ),
     (
         family = "Demand-side participation",
         isp_2024 = "Scenario-region-season matrix blocks",
         isp_2026 = "Normalised region-price-scenario-season rows",
-        observed_change = "Table shape and keys changed",
-        review_status = "Manual semantic review",
+        change = "Table shape and keys changed",
     ),
     (
         family = "Electric vehicles",
         isp_2024 = "2023 IASR numbers, consumption, charging shares, and profiles",
         isp_2026 = "2025 IASR revises charging categories and adds hybrids",
-        observed_change = "Scenario years, vocabulary, and vehicle family changed",
-        review_status = "Observed source only",
+        change = "Scenario years, vocabulary, and vehicle families changed",
     ),
     (
         family = "Hydro",
         isp_2024 = "Workbook reference years plus model inflow and energy-limit CSVs",
         isp_2026 = "Reorganised workbook scheme blocks",
-        observed_change = "Workbook organisation changed; model integration not established",
-        review_status = "Manual semantic review",
+        change = "Workbook organisation changed",
     ),
 ])
-PISPDocUtils.markdown_table(source_family_changes; alignment = [:l, :l, :l, :l, :l])
+PISPDocUtils.markdown_table(source_family_changes; alignment = [:l, :l, :l, :l])
 ````
 
 ```@raw html
 </details>
 ```
 
-| **family** | **isp\_2024** | **isp\_2026** | **observed\_change** | **review\_status** |
-|:--|:--|:--|:--|:--|
-| Scenarios and sensitivities | Green Energy Exports, Step Change, Progressive Change; 9 sensitivities | Accelerated Transition, Step Change, Slower Growth; 6 sensitivities | Scenario set and sensitivity set changed | Manual semantic review |
-| Existing generation | Station-level leading summary | Unit-level IASR IDs and status fields | Keys and record granularity changed | Manual semantic review |
-| Generator operation | Generation limits and Min Up&Down Times worksheets | Coal Min Stable Level; no directly named Min Up&Down Times sheet | Source split and removal/relocation | Manual semantic review |
-| Generator reliability | Technology rows with full and partial outage fields | Property-by-year rows with long-duration separation | Schema and time dimension changed | Manual semantic review |
-| Network and transmission | Seasonal limits, reliability columns, and 2023-dollar augmentation costs | Revised limits, reliability event rows, and 2025-dollar augmentation costs | Fields, values, and cost basis changed | Manual semantic review |
-| Renewable energy zones | REZ, NTNDP, subregion, and cost-zone fields | Narrower leading REZ table; some retained IDs have new names | Fields removed or relocated; names changed | Manual semantic review |
-| Demand and distributed resources | Demand, DER, and subregional allocation material | Adds data-centre, distribution-network, and hybrid-site worksheets | New source families added | Observed source only |
-| Demand-side participation | Scenario-region-season matrix blocks | Normalised region-price-scenario-season rows | Table shape and keys changed | Manual semantic review |
-| Electric vehicles | 2023 IASR numbers, consumption, charging shares, and profiles | 2025 IASR revises charging categories and adds hybrids | Scenario years, vocabulary, and vehicle family changed | Observed source only |
-| Hydro | Workbook reference years plus model inflow and energy-limit CSVs | Reorganised workbook scheme blocks | Workbook organisation changed; model integration not established | Manual semantic review |
+| **family** | **isp\_2024** | **isp\_2026** | **change** |
+|:--|:--|:--|:--|
+| Scenarios and sensitivities | Green Energy Exports, Step Change, Progressive Change; 9 sensitivities | Accelerated Transition, Step Change, Slower Growth; 6 sensitivities | Scenario set and sensitivity set changed |
+| Existing generation | Station-level leading summary | Unit-level IASR IDs and status fields | Keys and record granularity changed |
+| Generator operation | Generation limits and Min Up&Down Times worksheets | Coal Min Stable Level; no directly named Min Up&Down Times sheet | Source split or moved |
+| Generator reliability | Technology rows with full and partial outage fields | Property-by-year rows with long-duration separation | Schema and time dimension changed |
+| Network and transmission | Seasonal limits, reliability columns, and 2023-dollar augmentation costs | Revised limits, reliability event rows, and 2025-dollar augmentation costs | Fields, values, and cost basis changed |
+| Renewable energy zones | REZ, NTNDP, subregion, and cost-zone fields | Narrower leading REZ table; some retained IDs have new names | Fields moved or removed; names changed |
+| Demand and distributed resources | Demand, DER, and subregional allocation material | Adds data-centre, distribution-network, and hybrid-site worksheets | New source families added |
+| Demand-side participation | Scenario-region-season matrix blocks | Normalised region-price-scenario-season rows | Table shape and keys changed |
+| Electric vehicles | 2023 IASR numbers, consumption, charging shares, and profiles | 2025 IASR revises charging categories and adds hybrids | Scenario years, vocabulary, and vehicle families changed |
+| Hydro | Workbook reference years plus model inflow and energy-limit CSVs | Reorganised workbook scheme blocks | Workbook organisation changed |
 
 
 Detailed evidence is organised by subject under [AEMO ISP source material](../../shared/source-material/coverage-and-ownership.md).
 The [model archive comparison](model-archive-comparison.md) remains the authority for archive packaging, and the existing PISP dataset pages remain the authority for generated output schemas.
-No table on this page claims that ISP 2026 has an integrated PISP preprocessing or dataset workflow.
-

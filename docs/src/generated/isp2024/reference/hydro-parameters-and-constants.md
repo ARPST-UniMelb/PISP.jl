@@ -245,4 +245,3 @@ PISPDocUtils.markdown_table(snowy_storage_allocations)
 `gen_inflow_sched` reads `HYDRO2FILE`, `HYDRO2CNS`, `SNOWY_HYDRO_GROUPS`, `HYDRO_DAMS_GENS`, and `DAM_SHARES` when constructing generator inflow schedules. `build_hourly_snowy` uses `WEATHER_YEARS` to align monthly Snowy values with planning intervals. `ess_inflow_sched` uses `HYDRO_DAMS_STORAGE`, `HYDRO_STORAGE_GEN`, and `DAM_SHARES` when constructing the Tumut 3 storage inflow schedule.
 
 These constants are active modelling inputs. Changing a trace assignment, limit name, hydrological year, dam share, or generator-storage link can change generated schedules even when the downloaded source data is unchanged.
-

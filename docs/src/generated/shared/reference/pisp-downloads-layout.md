@@ -86,4 +86,3 @@ PISPDocUtils.markdown_table(
 `Core` or `Core scenarios` and `Sensitivities` contain the extracted
 generation-and-storage-outlook workbooks. The other branches have distinct
 source or preprocessing roles.
-

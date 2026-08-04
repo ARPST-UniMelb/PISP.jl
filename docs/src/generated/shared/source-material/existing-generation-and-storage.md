@@ -39,7 +39,9 @@ Each row below represents a station and combines location, technology, maximum c
 PISP uses this source with `Summary Mapping`, maximum-capacity, emissions, reliability, and package mappings to construct unit-level generator records.
 `Summary Mapping` supplies the identifiers, locations, technologies, and marginal-loss-factor fields that align those records.
 Separate maximum-capacity blocks distinguish existing and new generation from battery projects, while the battery summary-mapping rows support construction of ESS records.
-The observed 2026 workbook retains `Summary Mapping`, `Maximum capacity`, and `Existing Gen Data Summary` as separate worksheets, but PISP does not yet read them as a registered ISP 2026 source.
+The 2026 workbook retains `Summary Mapping`, `Maximum capacity`, and
+`Existing Gen Data Summary` as separate worksheets with revised fields and
+row structure.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -210,6 +212,5 @@ PISPDocUtils.markdown_table(package_collections)
 | Pumped-hydro defaults | PISP.dataps | 7 |
 
 
-PISP currently implements the ISP 2024 transformation path.
-The ISP 2026 tables above are observed source evidence and do not imply an integrated 2026 PISP dataset builder.
-
+The ISP 2026 tables above show the unit-level identifiers and workbook
+relationships that the new reader must preserve.

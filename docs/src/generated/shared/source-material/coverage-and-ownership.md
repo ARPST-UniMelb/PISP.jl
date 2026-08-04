@@ -4,8 +4,12 @@ EditURL = "../../../../literate/shared/source_material/coverage_and_ownership.jl
 
 # AEMO ISP source coverage and ownership
 
-This ledger defines the documentation owner for every active source selection used by the current PISP workflow, together with the package parameter and mapping families that shape the resulting datasets.
-It distinguishes original AEMO material from parsed representations, PISP-generated intermediates, package conventions, user inputs, PISP outputs, and bulk trace material outside this documentation family.
+PISP reads AEMO workbooks and model files, user-supplied build-out sheets,
+and preprocessing workbooks created from AEMO outlook data.
+The tables connect each source selection to the subject it defines, the
+package parameters that supplement it, and the mappings applied before
+outputs are written. Bulk time-series traces are described separately in
+[Trace coverage](../../../editions/trace-coverage.md).
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -13,6 +17,7 @@ It distinguishes original AEMO material from parsed representations, PISP-genera
 
 ````julia
 using DataFrames
+using TOML
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
@@ -23,12 +28,15 @@ coverage = PISPDocUtils.coverage_document(REPO_ROOT)
 source_reads = PISPDocUtils.coverage_table(coverage, "source_read")
 parameter_families = PISPDocUtils.coverage_table(coverage, "parameter_family")
 mapping_families = PISPDocUtils.coverage_table(coverage, "mapping_family")
+registry = TOML.parsefile(joinpath(REPO_ROOT, "docs", "config", "page-registry.toml"))
+page_titles = Dict(page["id"] => page["title"] for page in registry["page"])
+page_titles["editions/trace-coverage.md"] = "Trace coverage"
 
 length(unique(source_reads.id)) == nrow(source_reads) || error("source-read IDs must be unique")
 length(unique(parameter_families.id)) == nrow(parameter_families) || error("parameter-family IDs must be unique")
 length(unique(mapping_families.id)) == nrow(mapping_families) || error("mapping-family IDs must be unique")
-all(source_reads.status .== "active") || error("the published source-read ledger contains a non-active entry")
-all(.!isempty.(source_reads.owner)) || error("every source read requires a canonical documentation owner")
+all(source_reads.status .== "active") || error("the source map contains an inactive entry")
+all(.!isempty.(source_reads.owner)) || error("every source selection requires a subject page")
 ````
 
 ```@raw html
@@ -37,25 +45,28 @@ all(.!isempty.(source_reads.owner)) || error("every source read requires a canon
 
 ## Source-read classifications
 
-The active implementation reads AEMO workbooks and model CSVs, user-supplied build-out sheets, and PISP-generated `Auxiliary/` workbooks.
-Trace payloads are documented under trace coverage; this ledger records their source-read ownership.
+The source map distinguishes AEMO files, preprocessing workbooks, user
+inputs, parsed structures, and trace material.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
 ```
 
 ````julia
-source_classifications = combine(groupby(source_reads, :classification), nrow => :active_items)
+source_classifications = combine(groupby(source_reads, :classification), nrow => :items)
 sort!(source_classifications, :classification)
 source_classifications.classification = PISPDocUtils.friendly_classification.(source_classifications.classification)
-PISPDocUtils.markdown_table(source_classifications)
+PISPDocUtils.markdown_table(
+    source_classifications;
+    column_labels = ["Source type", "Selections"],
+)
 ````
 
 ```@raw html
 </details>
 ```
 
-| **classification** | **active\_items** |
+| **Source type** | **Selections** |
 |:--|--:|
 | AEMO raw source | 75 |
 | Excluded trace material | 7 |
@@ -64,10 +75,12 @@ PISPDocUtils.markdown_table(source_classifications)
 | User input | 1 |
 
 
-## Canonical owners
+## Source subjects
 
-A subject page owns each source selection.
-Repeated reads remain separate ledger entries when the current implementation executes them separately, and dynamic DSP selections are expanded by scenario, region, and season.
+Each source selection belongs to the subject page that explains its fields
+and role. Repeated reads remain separate when PISP uses them in separate
+transformations, and DSP selections are expanded by scenario, region, and
+season.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -77,28 +90,33 @@ Repeated reads remain separate ledger entries when the current implementation ex
 source_owner_summary = combine(groupby(source_reads, [:owner, :classification]), nrow => :items)
 sort!(source_owner_summary, [:owner, :classification])
 source_owner_summary.classification = PISPDocUtils.friendly_classification.(source_owner_summary.classification)
-PISPDocUtils.markdown_table(source_owner_summary)
+source_owner_summary.owner = [get(page_titles, owner, owner) for owner in source_owner_summary.owner]
+rename!(source_owner_summary, :owner => :subject_page, :classification => :source_type)
+PISPDocUtils.markdown_table(
+    source_owner_summary;
+    column_labels = ["Subject page", "Source type", "Selections"],
+)
 ````
 
 ```@raw html
 </details>
 ```
 
-| **owner** | **classification** | **items** |
+| **Subject page** | **Source type** | **Selections** |
 |:--|:--|--:|
-| editions/trace-coverage.md | Excluded trace material | 7 |
-| isp2024-buildout-defaults | User input | 1 |
-| shared-source-coverage-ledger | Parsed representation | 1 |
-| shared-source-demand-side-participation | AEMO raw source | 30 |
-| shared-source-electric-vehicles | AEMO raw source | 9 |
-| shared-source-existing-generation-storage | AEMO raw source | 15 |
-| shared-source-generation-storage-outlook | AEMO raw source | 4 |
-| shared-source-generation-storage-outlook | PISP-generated intermediate | 8 |
-| shared-source-generator-operation | AEMO raw source | 5 |
-| shared-source-generator-reliability-retirement | AEMO raw source | 4 |
-| shared-source-hydro-inflows | AEMO raw source | 3 |
-| shared-source-network-transmission | AEMO raw source | 3 |
-| shared-source-renewable-energy-zones | AEMO raw source | 2 |
+| Trace coverage | Excluded trace material | 7 |
+| ISP 2024: Build-out defaults | User input | 1 |
+| AEMO ISP source coverage and ownership | Parsed representation | 1 |
+| Demand-side participation | AEMO raw source | 30 |
+| Electric vehicles | AEMO raw source | 9 |
+| Existing generation and storage | AEMO raw source | 15 |
+| Generation and storage outlook | AEMO raw source | 4 |
+| Generation and storage outlook | PISP-generated intermediate | 8 |
+| Generator operating assumptions | AEMO raw source | 5 |
+| Generator reliability and retirement | AEMO raw source | 4 |
+| Hydro inflows and energy constraints | AEMO raw source | 3 |
+| Network and transmission assumptions | AEMO raw source | 3 |
+| Renewable energy zones | AEMO raw source | 2 |
 
 
 ## PISP-generated intermediates
@@ -118,23 +136,28 @@ auxiliary_reads = select(
     :owner,
     :notes,
 )
-PISPDocUtils.markdown_table(auxiliary_reads)
+auxiliary_reads.owner = [get(page_titles, owner, owner) for owner in auxiliary_reads.owner]
+rename!(auxiliary_reads, :artefact => :file, :owner => :subject_page)
+PISPDocUtils.markdown_table(
+    auxiliary_reads;
+    column_labels = ["File", "Worksheet", "Subject page", "Use"],
+)
 ````
 
 ```@raw html
 </details>
 ```
 
-| **artefact** | **worksheet** | **owner** | **notes** |
+| **File** | **Worksheet** | **Subject page** | **Use** |
 |:--|:--|:--|:--|
-| Auxiliary/CapacityOutlook2024\_Condensed.xlsx | CapacityOutlook | shared-source-generation-storage-outlook | Condensed capacity outlook used for solar schedule construction. |
-| Auxiliary/<scenario>\_REZCAP.xlsx | REZ Generation Capacity | shared-source-generation-storage-outlook | Scenario-specific REZ capacity intermediate used for solar. |
-| Auxiliary/CapacityOutlook2024\_Condensed.xlsx | CapacityOutlook | shared-source-generation-storage-outlook | Condensed capacity outlook used for wind schedule construction. |
-| Auxiliary/<scenario>\_REZCAP.xlsx | REZ Generation Capacity | shared-source-generation-storage-outlook | Scenario-specific REZ capacity intermediate used for wind. |
-| Auxiliary/StorageCapacityOutlook\_2024\_ISP.xlsx | <scenario> | shared-source-generation-storage-outlook | PISP-generated scenario storage-capacity intermediate. |
-| Auxiliary/StorageEnergyOutlook\_2024\_ISP.xlsx | <scenario> | shared-source-generation-storage-outlook | PISP-generated scenario storage-energy intermediate. |
-| Auxiliary/StorageCapacityOutlook\_2024\_ISP.xlsx | <scenario> | shared-source-generation-storage-outlook | Repeated active read during VPP schedule construction. |
-| Auxiliary/StorageEnergyOutlook\_2024\_ISP.xlsx | <scenario> | shared-source-generation-storage-outlook | Repeated active read during VPP schedule construction. |
+| Auxiliary/CapacityOutlook2024\_Condensed.xlsx | CapacityOutlook | Generation and storage outlook | Condensed capacity outlook used for solar schedule construction. |
+| Auxiliary/<scenario>\_REZCAP.xlsx | REZ Generation Capacity | Generation and storage outlook | Scenario-specific REZ capacity intermediate used for solar. |
+| Auxiliary/CapacityOutlook2024\_Condensed.xlsx | CapacityOutlook | Generation and storage outlook | Condensed capacity outlook used for wind schedule construction. |
+| Auxiliary/<scenario>\_REZCAP.xlsx | REZ Generation Capacity | Generation and storage outlook | Scenario-specific REZ capacity intermediate used for wind. |
+| Auxiliary/StorageCapacityOutlook\_2024\_ISP.xlsx | <scenario> | Generation and storage outlook | PISP-generated scenario storage-capacity intermediate. |
+| Auxiliary/StorageEnergyOutlook\_2024\_ISP.xlsx | <scenario> | Generation and storage outlook | PISP-generated scenario storage-energy intermediate. |
+| Auxiliary/StorageCapacityOutlook\_2024\_ISP.xlsx | <scenario> | Generation and storage outlook | Repeated active read during VPP schedule construction. |
+| Auxiliary/StorageEnergyOutlook\_2024\_ISP.xlsx | <scenario> | Generation and storage outlook | Repeated active read during VPP schedule construction. |
 
 
 ## Parameter-file ownership
@@ -148,26 +171,31 @@ The table pairs each file with the subject page that explains its values and eff
 
 ````julia
 parameter_owners = select(parameter_families, :source_path, :family, :owner, :notes)
-PISPDocUtils.markdown_table(parameter_owners)
+parameter_owners.owner = [get(page_titles, owner, owner) for owner in parameter_owners.owner]
+rename!(parameter_owners, :owner => :subject_page)
+PISPDocUtils.markdown_table(
+    parameter_owners;
+    column_labels = ["Package file", "Parameter family", "Subject page", "Use"],
+)
 ````
 
 ```@raw html
 </details>
 ```
 
-| **source\_path** | **family** | **owner** | **notes** |
+| **Package file** | **Parameter family** | **Subject page** | **Use** |
 |:--|:--|:--|:--|
-| src/parameters/general2024ISP.jl | scenario, geography, bus, area, source labels, and weather-year identifiers | isp2024-parameters-and-mappings | Canonical package identifiers used across the 2024 pipeline. |
-| src/parameters/retirements2024ISP.jl | retirement reductions and reviewed retirement overrides | shared-source-generator-reliability-retirement | Package-defined retirement adjustments applied after source parsing. |
-| src/parameters/ess2024ISP.jl | battery and pumped-hydro defaults | shared-source-existing-generation-storage | Static storage records that supplement or normalise source data. |
-| src/parameters/gens2024ISP.jl | generator unit, fuel-type, and trace-file mappings | shared-source-existing-generation-storage | Generation identifiers and source-file naming conventions. |
-| src/parameters/hydro2024ISP.jl | hydro files, constraints, weather years, dam shares, and groupings | shared-source-hydro-inflows | Hydro source-file and allocation conventions. |
-| src/parameters/buildout2024ISP.jl | generator and storage build-out templates | isp2024-buildout-defaults | Complete default records used when a user requests optional build-outs. |
+| src/parameters/general2024ISP.jl | scenario, geography, bus, area, source labels, and weather-year identifiers | ISP 2024: Parameters and mappings | Canonical package identifiers used across the 2024 pipeline. |
+| src/parameters/retirements2024ISP.jl | retirement reductions and reviewed retirement overrides | Generator reliability and retirement | Package-defined retirement adjustments applied after source parsing. |
+| src/parameters/ess2024ISP.jl | battery and pumped-hydro defaults | Existing generation and storage | Static storage records that supplement or normalise source data. |
+| src/parameters/gens2024ISP.jl | generator unit, fuel-type, and trace-file mappings | Existing generation and storage | Generation identifiers and source-file naming conventions. |
+| src/parameters/hydro2024ISP.jl | hydro files, constraints, weather years, dam shares, and groupings | Hydro inflows and energy constraints | Hydro source-file and allocation conventions. |
+| src/parameters/buildout2024ISP.jl | generator and storage build-out templates | ISP 2024: Build-out defaults | Complete default records used when a user requests optional build-outs. |
 
 
 ## Mapping-family ownership
 
-The mapping ledger covers maintained constants and parser-local lookup families, including generation, storage, retirement, hydro, geography, scenario, reliability, DSP, EV, source-file, build-out, and output-schema mappings.
+The mapping table covers maintained constants and parser lookup families, including generation, storage, retirement, hydro, geography, scenario, reliability, DSP, EV, source-file, build-out, and output-schema mappings.
 Runtime dictionaries are classified as parsed representations rather than independent maintained constants.
 
 ```@raw html
@@ -177,55 +205,60 @@ Runtime dictionaries are classified as parsed representations rather than indepe
 ````julia
 mapping_owners = select(mapping_families, :family, :classification, :owner, :source_path)
 mapping_owners.classification = PISPDocUtils.friendly_classification.(mapping_owners.classification)
-PISPDocUtils.markdown_table(mapping_owners)
+mapping_owners.owner = [get(page_titles, owner, owner) for owner in mapping_owners.owner]
+rename!(mapping_owners, :classification => :source_type, :owner => :subject_page)
+PISPDocUtils.markdown_table(
+    mapping_owners;
+    column_labels = ["Mapping", "Source type", "Subject page", "Package file"],
+)
 ````
 
 ```@raw html
 </details>
 ```
 
-| **family** | **classification** | **owner** | **source\_path** |
+| **Mapping** | **Source type** | **Subject page** | **Package file** |
 |:--|:--|:--|:--|
-| fixed source-download keys and metadata | PISP package convention | isp2024-data-sources | src/scrappers/PISP-scrapper-2024files.jl |
-| user build-out technology labels | PISP package convention | isp2024-buildout-defaults | src/parsers/PISP-2024buildout.jl |
-| battery duration labels | PISP package convention | isp2024-buildout-defaults | src/parsers/PISP-2024buildout.jl |
-| month labels to calendar months | Parsed representation | shared-source-hydro-inflows | src/utils/dataframes/PISPutils-df-hydro.jl |
-| named interconnector reliability rows | Parsed representation | shared-source-network-transmission | src/parsers/PISP-2024parser.jl |
-| month labels to calendar months | Parsed representation | shared-source-existing-generation-storage | src/parsers/PISP-2024parser.jl |
-| generator-unit aliases | PISP package convention | shared-source-existing-generation-storage | src/parsers/PISP-2024parser.jl |
-| technology emissions fallbacks | PISP package convention | shared-source-existing-generation-storage | src/parsers/PISP-2024parser.jl |
-| technology cost-curve slopes | PISP package convention | shared-source-existing-generation-storage | src/parsers/PISP-2024parser.jl |
-| technology inertia constants | PISP package convention | shared-source-existing-generation-storage | src/parsers/PISP-2024parser.jl |
-| scenario to candidate development path for solar | PISP package convention | shared-source-renewable-energy-zones | src/parsers/PISP-2024parser.jl |
-| scenario to candidate development path for wind | PISP package convention | shared-source-renewable-energy-zones | src/parsers/PISP-2024parser.jl |
-| DSP price-band identifiers | PISP package convention | shared-source-demand-side-participation | src/parsers/PISP-2024parser.jl |
-| scenario/region/season DSP ranges | PISP package convention | shared-source-demand-side-participation | src/parsers/PISP-2024parser.jl |
-| inflow files to generator groups | Parsed representation | shared-source-hydro-inflows | src/parsers/PISP-2024parser.jl |
-| hydro scheme groups | PISP package convention | shared-source-hydro-inflows | src/parsers/PISP-2024parser.jl |
-| EV number worksheet to output field | PISP package convention | shared-source-electric-vehicles | src/utils/dataframes/PISPutils-df-evs-2024.jl |
-| EV state name to NEM code | PISP package convention | shared-source-electric-vehicles | src/utils/dataframes/PISPutils-df-evs-2024.jl |
-| EV scenario name to package ID | PISP package convention | shared-source-electric-vehicles | src/utils/dataframes/PISPutils-df-evs-2024.jl |
-| EV vehicle types to demand categories | PISP package convention | shared-source-electric-vehicles | src/utils/dataframes/PISPutils-df-evs-2024.jl |
-| output table aliases | PISP package convention | isp2024-output-tables | src/utils/writing/PISPutils-writing.jl |
-| schema declarations to Julia types | PISP package convention | isp2024-output-tables | src/utils/mappers/PISPutils-mappers.jl |
-| scenario IDs to optional build-out names | User input | isp2024-buildout-defaults | src/main/pipeline-add-buildouts.jl |
-| solar source rows to generated IDs | Parsed representation | shared-source-existing-generation-storage | src/parsers/PISP-2024parser.jl |
-| solar source names to trace names | Parsed representation | shared-source-existing-generation-storage | src/parsers/PISP-2024parser.jl |
-| wind source rows to generated IDs | Parsed representation | shared-source-existing-generation-storage | src/parsers/PISP-2024parser.jl |
-| storage source rows to generated IDs | Parsed representation | shared-source-existing-generation-storage | src/parsers/PISP-2024parser.jl |
-| hydro generator IDs to row numbers | Parsed representation | shared-source-hydro-inflows | src/parsers/PISP-2024parser.jl |
-| bus IDs to demand records | Parsed representation | shared-source-demand-distributed-resources | src/parsers/PISP-2024parser.jl |
-| EV worksheet tables by source name | Parsed representation | shared-source-electric-vehicles | src/parsers/PISP-2024parser.jl |
-| EV output tables by vehicle number field | Parsed representation | shared-source-electric-vehicles | src/parsers/PISP-2024parser.jl |
-| bus names to bus IDs | Parsed representation | shared-source-electric-vehicles | src/utils/dataframes/PISPutils-df-evs-2024.jl |
-| bus IDs to demand records | Parsed representation | shared-source-electric-vehicles | src/utils/dataframes/PISPutils-df-evs-2024.jl |
-| demand and DER relationship lookups | Parsed representation | shared-source-electric-vehicles | src/utils/dataframes/PISPutils-df-evs-2024.jl |
-| trace years to processed trace tables | Excluded trace material | editions/trace-coverage.md | src/scrappers/PISP-scrapper-build.jl |
+| fixed source-download keys and metadata | PISP package convention | ISP 2024: Source data | src/scrappers/PISP-scrapper-2024files.jl |
+| user build-out technology labels | PISP package convention | ISP 2024: Build-out defaults | src/parsers/PISP-2024buildout.jl |
+| battery duration labels | PISP package convention | ISP 2024: Build-out defaults | src/parsers/PISP-2024buildout.jl |
+| month labels to calendar months | Parsed representation | Hydro inflows and energy constraints | src/utils/dataframes/PISPutils-df-hydro.jl |
+| named interconnector reliability rows | Parsed representation | Network and transmission assumptions | src/parsers/PISP-2024parser.jl |
+| month labels to calendar months | Parsed representation | Existing generation and storage | src/parsers/PISP-2024parser.jl |
+| generator-unit aliases | PISP package convention | Existing generation and storage | src/parsers/PISP-2024parser.jl |
+| technology emissions fallbacks | PISP package convention | Existing generation and storage | src/parsers/PISP-2024parser.jl |
+| technology cost-curve slopes | PISP package convention | Existing generation and storage | src/parsers/PISP-2024parser.jl |
+| technology inertia constants | PISP package convention | Existing generation and storage | src/parsers/PISP-2024parser.jl |
+| scenario to candidate development path for solar | PISP package convention | Renewable energy zones | src/parsers/PISP-2024parser.jl |
+| scenario to candidate development path for wind | PISP package convention | Renewable energy zones | src/parsers/PISP-2024parser.jl |
+| DSP price-band identifiers | PISP package convention | Demand-side participation | src/parsers/PISP-2024parser.jl |
+| scenario/region/season DSP ranges | PISP package convention | Demand-side participation | src/parsers/PISP-2024parser.jl |
+| inflow files to generator groups | Parsed representation | Hydro inflows and energy constraints | src/parsers/PISP-2024parser.jl |
+| hydro scheme groups | PISP package convention | Hydro inflows and energy constraints | src/parsers/PISP-2024parser.jl |
+| EV number worksheet to output field | PISP package convention | Electric vehicles | src/utils/dataframes/PISPutils-df-evs-2024.jl |
+| EV state name to NEM code | PISP package convention | Electric vehicles | src/utils/dataframes/PISPutils-df-evs-2024.jl |
+| EV scenario name to package ID | PISP package convention | Electric vehicles | src/utils/dataframes/PISPutils-df-evs-2024.jl |
+| EV vehicle types to demand categories | PISP package convention | Electric vehicles | src/utils/dataframes/PISPutils-df-evs-2024.jl |
+| output table aliases | PISP package convention | ISP 2024: Output tables | src/utils/writing/PISPutils-writing.jl |
+| schema declarations to Julia types | PISP package convention | ISP 2024: Output tables | src/utils/mappers/PISPutils-mappers.jl |
+| scenario IDs to optional build-out names | User input | ISP 2024: Build-out defaults | src/main/pipeline-add-buildouts.jl |
+| solar source rows to generated IDs | Parsed representation | Existing generation and storage | src/parsers/PISP-2024parser.jl |
+| solar source names to trace names | Parsed representation | Existing generation and storage | src/parsers/PISP-2024parser.jl |
+| wind source rows to generated IDs | Parsed representation | Existing generation and storage | src/parsers/PISP-2024parser.jl |
+| storage source rows to generated IDs | Parsed representation | Existing generation and storage | src/parsers/PISP-2024parser.jl |
+| hydro generator IDs to row numbers | Parsed representation | Hydro inflows and energy constraints | src/parsers/PISP-2024parser.jl |
+| bus IDs to demand records | Parsed representation | Demand and distributed resources | src/parsers/PISP-2024parser.jl |
+| EV worksheet tables by source name | Parsed representation | Electric vehicles | src/parsers/PISP-2024parser.jl |
+| EV output tables by vehicle number field | Parsed representation | Electric vehicles | src/parsers/PISP-2024parser.jl |
+| bus names to bus IDs | Parsed representation | Electric vehicles | src/utils/dataframes/PISPutils-df-evs-2024.jl |
+| bus IDs to demand records | Parsed representation | Electric vehicles | src/utils/dataframes/PISPutils-df-evs-2024.jl |
+| demand and DER relationship lookups | Parsed representation | Electric vehicles | src/utils/dataframes/PISPutils-df-evs-2024.jl |
+| trace years to processed trace tables | Excluded trace material | Trace coverage | src/scrappers/PISP-scrapper-build.jl |
 
 
-## How to read the ledger
+## Edition coverage
 
-ISP 2024 rows describe implementation evidence in the current package.
-ISP 2026 has no integrated PISP preprocessing or dataset workflow, so its pages report observed source structure and mark semantic correspondences for review instead of presenting them as implemented mappings.
+ISP 2024 rows identify the package readers and mappings used by the dataset
+workflow. ISP 2026 rows identify the files, selections, and source subjects
+used by the source and comparison pages.
 The machine-readable authority is `docs/config/source-material-coverage.toml` in the repository.
-

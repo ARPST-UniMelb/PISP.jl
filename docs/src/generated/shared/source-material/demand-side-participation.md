@@ -170,4 +170,3 @@ PISPDocUtils.markdown_table(scenario_mapping)
 
 A future ISP 2026 implementation needs a reviewed mapping for the new row schema and scenario set.
 The visible similarity of price-band labels does not establish complete semantic equivalence.
-

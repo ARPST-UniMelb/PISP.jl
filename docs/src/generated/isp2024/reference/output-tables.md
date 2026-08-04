@@ -484,6 +484,12 @@ field_glossary("ESS")
 | `mttrfull` | Mean time to repair after a full outage, in hours. |
 | `mttrpart` | Mean time to repair after a partial outage, in hours. |
 | `n` | Maximum number of storage units available or online. |
+| `ffr` | Fast-frequency-response provision flag. |
+| `pfr` | Primary-frequency-response provision flag. |
+| `res2` | Secondary-reserve provision flag. |
+| `res3` | Tertiary or regulation-reserve provision flag. |
+| `powerfactor` | Power factor. |
+| `contingency` | Contingency. |
 
 ### `Generator`
 
@@ -536,6 +542,8 @@ field_glossary("Generator")
 | `shut_down_cost` | Shutdown cost in dollars. |
 | `start_up_time` | Time required to start a unit, in hours. |
 | `shut_down_time` | Time required to shut down a unit, in hours. |
+| `powerfactor` | Power factor. |
+| `contingency` | Contingency. |
 
 ### `Line`
 
@@ -580,4 +588,3 @@ A schedule is an overlay, not an independent asset inventory. Reconstruct a syst
 - `scenario` and `date` are part of the schedule key even when an analysis displays only one scenario or period.
 - Units follow the represented quantity: power and transfer limits are in MW, storage energy and inflow quantities are in MWh, and unit-count schedules are counts.
 - Solar and wind schedule values should not be normalised by static `Generator.pmax` without applying the modelling convention described in [Assumptions and scope](@ref).
-

@@ -4,18 +4,20 @@ EditURL = "../../../../literate/shared/tutorials/selecting_raw_isp_material.jl"
 
 # ISP 2024 and ISP 2026: Selecting raw source material
 
-PISP resolves registered ISP 2024 sources through `SourceSpec` objects.
-ISP 2026 currently has download and extraction support but no registered source specifications, parser, dataset builder, or generated-output contract.
-This tutorial keeps those interfaces separate while showing one trace selection from each edition.
+This tutorial selects one demand trace from ISP 2024 and one renewable trace
+from ISP 2026. The 2024 example uses a registered `SourceSpec`; the 2026
+example uses the edition profile and the released trace filename.
 
 ## Selection inputs
 
-The ISP 2024 example selects an operational-demand trace by subregion, scenario, reference-weather trace, and demand probability of exceedance.
+The ISP 2024 example selects an operational-demand trace by subregion,
+scenario, reference-weather trace, and demand probability of exceedance.
 It defaults to VIC, Step Change, `reftrace = 2017`, and `poe = 10`.
-Set `PISP_DOCS_RAW_REFTRACE` or `PISP_DOCS_RAW_POE` to choose another available ISP 2024 trace, including composite trace `4006` where that combination exists.
+Set `PISP_DOCS_RAW_REFTRACE` or `PISP_DOCS_RAW_POE` to choose another ISP
+2024 trace, including composite trace `4006` where that combination exists.
 
-Planning year is not a `SourceSpec` replacement token.
-It determines the generated `schedule-<year>` output after preprocessing; composite trace `4006` applies its package-defined historical-weather mapping across planning-year windows.
+[Domain concepts](../../../concepts.md) explains why planning year is separate
+from the raw-source selectors used here.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -59,7 +61,7 @@ const ISP2024_DEMAND_PATH = PISP.source_path(
     poe = RAW_POE,
 )
 isfile(ISP2024_DEMAND_PATH) || error(
-    "the requested ISP 2024 demand trace is unavailable: " * relpath(ISP2024_DEMAND_PATH, REPO_ROOT),
+    "the requested ISP 2024 demand trace was not found: " * relpath(ISP2024_DEMAND_PATH, REPO_ROOT),
 )
 ````
 
@@ -69,8 +71,9 @@ isfile(ISP2024_DEMAND_PATH) || error(
 
 ## Resolve an ISP 2024 `SourceSpec`
 
-`PISP.source_spec` owns the filename template, while `PISP.source_path` substitutes the selected dimensions.
-The resulting repository-relative path can be passed to the source's package reader without copying the filename contract into downstream code.
+`PISP.source_spec` owns the filename template, while `PISP.source_path`
+substitutes the selected dimensions. The resulting path can be passed to the
+package reader without copying the filename pattern into downstream code.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -79,7 +82,7 @@ The resulting repository-relative path can be passed to the source's package rea
 ````julia
 isp2024_demand = PISP.read_csv_source(ISP2024_DEMAND_PATH, DEMAND_SOURCE)
 isp2024_selection = DataFrame(
-    Dimension = ["Subregion", "Scenario", "Reference-weather trace", "Demand POE", "Resolved source"],
+    Dimension = ["Subregion", "Scenario", "Reference-weather trace", "Demand POE", "Source file"],
     Selection = [
         RAW_SUBREGION,
         RAW_SCENARIO,
@@ -102,7 +105,7 @@ PISPDocUtils.markdown_table(isp2024_selection)
 | Scenario | Step Change |
 | Reference-weather trace | 2017 |
 | Demand POE | 10 |
-| Resolved source | data/2024/pisp-downloads/Traces/demand\_VIC\_Step Change/VIC\_RefYear\_2017\_STEP\_CHANGE\_POE10\_OPSO\_MODELLING\_PVLITE.csv |
+| Source file | data/2024/pisp-downloads/Traces/demand\_VIC\_Step Change/VIC\_RefYear\_2017\_STEP\_CHANGE\_POE10\_OPSO\_MODELLING\_PVLITE.csv |
 
 
 ```@raw html
@@ -111,7 +114,7 @@ PISPDocUtils.markdown_table(isp2024_selection)
 
 ````julia
 isp2024_shape = DataFrame(
-    Measure = ["Rows", "Columns", "First date column", "Last hourly column"],
+    Measure = ["Rows", "Columns", "First date column", "Last half-hourly column"],
     Value = [nrow(isp2024_demand), ncol(isp2024_demand), first(names(isp2024_demand)), last(names(isp2024_demand))],
 )
 PISPDocUtils.markdown_table(isp2024_shape)
@@ -126,21 +129,20 @@ PISPDocUtils.markdown_table(isp2024_shape)
 | Rows | 11323 |
 | Columns | 51 |
 | First date column | Year |
-| Last hourly column | 48 |
+| Last half-hourly column | 48 |
 
 
-## Select an observed ISP 2026 trace
+## Select an ISP 2026 renewable trace
 
-PISP currently registers no ISP 2026 `SourceSpec` objects.
-The documentation profile therefore identifies the edition root, and the selected source remains an observed file rather than a package parser contract.
-The released solar and wind filenames use `RefYear5000`; this label is not treated as equivalent to ISP 2024 trace `2017` or composite trace `4006`.
+The ISP 2026 solar and wind archives use project-level CSV files.
+Their filenames use `RefYear5000`; this label is not assumed to have the same
+meaning as ISP 2024 trace `2017` or composite trace `4006`.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
 ```
 
 ````julia
-isempty(PISP.source_specs(2026)) || error("this tutorial assumes no registered ISP 2026 SourceSpecs")
 const ISP2026 = PISPDocUtils.edition_profile(REPO_ROOT, "2026")
 const ISP2026_TRACE_FAMILY = lowercase(get(ENV, "PISP_DOCS_ISP2026_TRACE_FAMILY", "solar"))
 ISP2026_TRACE_FAMILY in ("solar", "wind") || error(
@@ -152,24 +154,24 @@ else
     joinpath(ISP2026.download_root, "Traces", "2026 ISP Wind traces", "wind")
 end
 isdir(ISP2026_TRACE_ROOT) || error(
-    "the selected ISP 2026 trace family is unavailable: " * relpath(ISP2026_TRACE_ROOT, REPO_ROOT),
+    "the selected ISP 2026 trace folder was not found: " * relpath(ISP2026_TRACE_ROOT, REPO_ROOT),
 )
 available_2026_traces = sort(filter(name -> endswith(lowercase(name), ".csv"), readdir(ISP2026_TRACE_ROOT)))
-isempty(available_2026_traces) && error("the selected ISP 2026 trace family contains no CSV files")
+isempty(available_2026_traces) && error("the selected ISP 2026 trace folder contains no CSV files")
 const ISP2026_TRACE_FILE = get(ENV, "PISP_DOCS_ISP2026_TRACE_FILE", first(available_2026_traces))
 ISP2026_TRACE_FILE in available_2026_traces || error(
-    "the requested ISP 2026 trace file is unavailable; choose one of the observed CSV filenames",
+    "the requested ISP 2026 trace file was not found; choose one of the CSV filenames in the selected folder",
 )
 const ISP2026_TRACE_PATH = joinpath(ISP2026_TRACE_ROOT, ISP2026_TRACE_FILE)
 
 isp2026_trace = CSV.read(ISP2026_TRACE_PATH, DataFrame)
 isp2026_selection = DataFrame(
-    Dimension = ["Edition", "Access interface", "Trace family", "Observed reference label", "Resolved source"],
+    Dimension = ["Edition", "Selection method", "Trace family", "Reference label in filename", "Source file"],
     Selection = [
         "2026",
-        "documentation profile and observed path",
+        "Edition profile and filename",
         ISP2026_TRACE_FAMILY,
-        occursin("RefYear5000", ISP2026_TRACE_FILE) ? "RefYear5000" : "not encoded as RefYear5000",
+        occursin("RefYear5000", ISP2026_TRACE_FILE) ? "RefYear5000" : "No RefYear5000 token",
         replace(relpath(ISP2026_TRACE_PATH, REPO_ROOT), '\\' => '/'),
     ],
 )
@@ -184,10 +186,10 @@ PISPDocUtils.markdown_table(isp2026_selection)
 | **Dimension** | **Selection** |
 |:--|:--|
 | Edition | 2026 |
-| Access interface | documentation profile and observed path |
+| Selection method | Edition profile and filename |
 | Trace family | solar |
-| Observed reference label | RefYear5000 |
-| Resolved source | data/2026/pisp-downloads/Traces/2026 ISP Solar traces/solar/Adelaide\_Desal\_FFP\_RefYear5000.csv |
+| Reference label in filename | RefYear5000 |
+| Source file | data/2026/pisp-downloads/Traces/2026 ISP Solar traces/solar/Adelaide\_Desal\_FFP\_RefYear5000.csv |
 
 
 ```@raw html
@@ -196,7 +198,7 @@ PISPDocUtils.markdown_table(isp2026_selection)
 
 ````julia
 isp2026_shape = DataFrame(
-    Measure = ["Observed CSV files in family", "Rows in selected file", "Columns in selected file"],
+    Measure = ["CSV files in family", "Rows in selected file", "Columns in selected file"],
     Value = [length(available_2026_traces), nrow(isp2026_trace), ncol(isp2026_trace)],
 )
 PISPDocUtils.markdown_table(isp2026_shape)
@@ -208,14 +210,14 @@ PISPDocUtils.markdown_table(isp2026_shape)
 
 | **Measure** | **Value** |
 |:--|--:|
-| Observed CSV files in family | 248 |
+| CSV files in family | 248 |
 | Rows in selected file | 9131 |
 | Columns in selected file | 51 |
 
 
 ## Interpretation
 
-ISP 2024 selection is a package contract: the registered source specification owns the path template and the package reader consumes the selected file.
-ISP 2026 selection is currently a source-inspection workflow: the profile identifies the downloaded edition root, but the observed path has no integrated PISP parser or output contract.
-A matching filename token across editions is not evidence that its modelling meaning is equivalent.
-
+The ISP 2024 example resolves a package source specification with scenario,
+weather-trace, and POE selectors. The ISP 2026 example selects a project CSV
+from the released solar or wind archive. A matching filename token across
+editions is not enough to establish the same modelling meaning.

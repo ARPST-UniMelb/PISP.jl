@@ -81,6 +81,15 @@ end
     for row in PISPDocUtils.buildout_placeholder_rows()
         @test occursin("`$(row.field)`", generated)
     end
+    for source in Iterators.flatten((
+        values(PISPDocUtils.ESS_FIELD_SOURCES),
+        values(PISPDocUtils.GEN_FIELD_SOURCES),
+    ))
+        @test any(
+            startswith(source, prefix)
+            for prefix in PISPDocUtils.BUILDOUT_SOURCE_PREFIXES
+        )
+    end
     @test !occursin(r"\|\s*`[^`]+`\s*\|\s*`?nothing`?\s*\|", generated)
 end
 

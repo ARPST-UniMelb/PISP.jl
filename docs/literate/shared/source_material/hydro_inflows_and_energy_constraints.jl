@@ -116,5 +116,7 @@ hydro_conventions = DataFrame([
 PISPDocUtils.markdown_table(hydro_conventions)
 #-
 
-# This page covers bounded hydro inputs required by the parser, not the bulk renewable or demand trace payloads.
-# ISP 2026 workbook inflows are observed source evidence and are not presented as an integrated PISP 2026 hydro workflow.
+# These selections cover the bounded hydro inputs used by the parser; bulk
+# renewable and demand traces are described under trace coverage.
+# The ISP 2026 workbook reorganises scheme inflows and must be read with its
+# edition-specific row groups and reference-year columns.

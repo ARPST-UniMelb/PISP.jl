@@ -852,4 +852,3 @@ The negative correlation indicates that higher-demand days tend to have lower Ba
 
 Use the aligned demand and renewable traces as a screening workflow rather than an adequacy result.
 A heatwave study should add meteorological criteria, while an adequacy study should test multiple renewable locations, trace years, and operational constraints in an appropriate system model.
-

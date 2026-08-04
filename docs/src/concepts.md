@@ -4,7 +4,7 @@ The PISP dataset layer connects asset identities, relationships, and schedule ov
 
 PISP represents its implemented ISP 2024 workflow as a connected data model rather than as a collection of independent CSV files.
 The central distinction is between **assets**, which retain stable identities and mostly static parameters, and **schedules**, which describe how selected asset quantities change with scenario and time.
-[Supported ISP editions](editions/supported-editions.md) and [Trace coverage](editions/trace-coverage.md) define the separate ISP 2026 source-acquisition, parser-review, and integration boundary.
+[Supported ISP editions](editions/supported-editions.md) and [Trace coverage](editions/trace-coverage.md) link the ISP 2026 source and trace documentation.
 
 ## ISP 2024 dataset relationships
 
@@ -118,10 +118,9 @@ The ISP 2024 builder can write output by planning year or by explicit date range
 | Planning year | `years = [year]` | `schedule-<year>` | Creates January-June and July-December problem blocks for each scenario. |
 | Date range | `drange = [(start, end)]` | `schedule-DDMMYYYY-DDMMYYYY` | Splits only when the requested range crosses 1 July. |
 
-The split aligns problem blocks with source inputs organised by Australian financial year.
-Static tables are still written once per build folder; the split affects the scenario/time blocks used to populate schedules.
-The planning year chooses the generated `schedule-<year>` period; it does not choose a reference-weather trace or demand probability-of-exceedance series.
-[Working with PISP-generated outputs](generated/isp2024/tutorials/working-with-pisp-outputs.md) demonstrates how `reftrace`, `poe`, and planning year identify one existing processed dataset.
+The split groups each problem block with the source inputs for the corresponding Australian financial year. Each build folder contains one set of static tables. The scenario and time-series data used to create schedules are organised by year.
+The planning year determines which `schedule-<year>` period is generated. It does not select the reference-weather trace (`reftrace`), the demand probability-of-exceedance series (`poe`), or the ISP edition. The same planning year can be built using the ISP 2024 edition while work is in progress for the ISP 2026 edition builder. See [Supported ISP editions](editions/supported-editions.md).
+[Working with PISP-generated outputs](generated/isp2024/tutorials/working-with-pisp-outputs.md) shows how `reftrace`, `poe`, and the planning year together identify an existing processed dataset.
 
 ## ISP 2024 reference-weather traces
 
@@ -141,7 +140,7 @@ The available source families include `POE10` and `POE50` series.
 For annual peak demand, 10% POE means there is a 10% chance that the year's peak demand exceeds the stated level ([2024 ISP Consultation Summary Report, p. 60](../../data/2024/pisp-reports/2024-isp-consultation-summary-report.pdf#page=60)).
 The [2023 ISP Methodology, p. 39](../../data/2024/pisp-reports/2023-isp-methodology.pdf#page=39) describes the use of 10%, 50%, and sometimes 90% POE simulations and the use of 10% POE demand profiles in capacity-outlook modelling.
 A `poe` value does not select weather conditions, a planning year, or a development path.
-[Trace coverage](editions/trace-coverage.md) keeps report-backed POE meaning separate from the filename labels observed in each edition.
+[Trace coverage](editions/trace-coverage.md) keeps the report definition of POE separate from the filename labels used in each edition.
 
 ## ISP 2024 NEM bus and area model
 

@@ -546,4 +546,3 @@ Their co-plotting is useful for coverage and shape checks, but it does not estab
 
 The same joins can be extended by filtering a scenario, NEM area, technology, or date window before aggregation.
 Analyses that require realised operation must use an appropriate dispatch or power-system model rather than treating PMax as generation.
-

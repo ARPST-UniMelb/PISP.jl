@@ -157,8 +157,8 @@ PISPDocUtils.markdown_table(mapping_owner_summary)
 |:--|:--|--:|
 | Excluded trace material | editions/trace-coverage.md | 1 |
 | PISP package convention | isp2024-buildout-defaults | 2 |
-| PISP package convention | isp2024-data-sources | 1 |
 | PISP package convention | isp2024-output-tables | 2 |
+| PISP package convention | isp2024-source-data | 1 |
 | PISP package convention | shared-source-demand-side-participation | 2 |
 | PISP package convention | shared-source-electric-vehicles | 4 |
 | PISP package convention | shared-source-existing-generation-storage | 4 |
@@ -198,9 +198,9 @@ PISPDocUtils.markdown_table(mapping_inventory)
 | trace years to processed trace tables | Excluded trace material | editions/trace-coverage.md | src/scrappers/PISP-scrapper-build.jl |
 | battery duration labels | PISP package convention | isp2024-buildout-defaults | src/parsers/PISP-2024buildout.jl |
 | user build-out technology labels | PISP package convention | isp2024-buildout-defaults | src/parsers/PISP-2024buildout.jl |
-| fixed source-download keys and metadata | PISP package convention | isp2024-data-sources | src/scrappers/PISP-scrapper-2024files.jl |
 | output table aliases | PISP package convention | isp2024-output-tables | src/utils/writing/PISPutils-writing.jl |
 | schema declarations to Julia types | PISP package convention | isp2024-output-tables | src/utils/mappers/PISPutils-mappers.jl |
+| fixed source-download keys and metadata | PISP package convention | isp2024-source-data | src/scrappers/PISP-scrapper-2024files.jl |
 | DSP price-band identifiers | PISP package convention | shared-source-demand-side-participation | src/parsers/PISP-2024parser.jl |
 | scenario/region/season DSP ranges | PISP package convention | shared-source-demand-side-participation | src/parsers/PISP-2024parser.jl |
 | EV number worksheet to output field | PISP package convention | shared-source-electric-vehicles | src/utils/dataframes/PISPutils-df-evs-2024.jl |
@@ -428,4 +428,3 @@ See [Assumptions and scope](@ref).
 
 Shared [AEMO ISP source coverage and ownership](../../shared/source-material/coverage-and-ownership.md) pages describe the workbook selections for operating capacity, storage, renewable energy zones, and other source subjects.
 This page covers package-defined parameters and mappings.
-
