@@ -1,9 +1,14 @@
 # # AEMO ISP source coverage and ownership
 #
-# This ledger defines the documentation owner for every active source selection used by the current PISP workflow, together with the package parameter and mapping families that shape the resulting datasets.
-# It distinguishes original AEMO material from parsed representations, PISP-generated intermediates, package conventions, user inputs, PISP outputs, and bulk trace material outside this documentation family.
+# PISP reads AEMO workbooks and model files, user-supplied build-out sheets,
+# and preprocessing workbooks created from AEMO outlook data.
+# The tables connect each source selection to the subject it defines, the
+# package parameters that supplement it, and the mappings applied before
+# outputs are written. Bulk time-series traces are described separately in
+# [Trace coverage](../../../editions/trace-coverage.md).
 
 using DataFrames
+using TOML
 
 const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
@@ -14,34 +19,47 @@ coverage = PISPDocUtils.coverage_document(REPO_ROOT)
 source_reads = PISPDocUtils.coverage_table(coverage, "source_read")
 parameter_families = PISPDocUtils.coverage_table(coverage, "parameter_family")
 mapping_families = PISPDocUtils.coverage_table(coverage, "mapping_family")
+registry = TOML.parsefile(joinpath(REPO_ROOT, "docs", "config", "page-registry.toml"))
+page_titles = Dict(page["id"] => page["title"] for page in registry["page"])
+page_titles["editions/trace-coverage.md"] = "Trace coverage"
 
 length(unique(source_reads.id)) == nrow(source_reads) || error("source-read IDs must be unique")
 length(unique(parameter_families.id)) == nrow(parameter_families) || error("parameter-family IDs must be unique")
 length(unique(mapping_families.id)) == nrow(mapping_families) || error("mapping-family IDs must be unique")
-all(source_reads.status .== "active") || error("the published source-read ledger contains a non-active entry")
-all(.!isempty.(source_reads.owner)) || error("every source read requires a canonical documentation owner")
+all(source_reads.status .== "active") || error("the source map contains an inactive entry")
+all(.!isempty.(source_reads.owner)) || error("every source selection requires a subject page")
 nothing #hide
 
 # ## Source-read classifications
 #
-# The active implementation reads AEMO workbooks and model CSVs, user-supplied build-out sheets, and PISP-generated `Auxiliary/` workbooks.
-# The trace rows are retained in the ledger to make the non-trace boundary explicit, but their payload is documented separately under trace coverage.
+# The source map distinguishes AEMO files, preprocessing workbooks, user
+# inputs, parsed structures, and trace material.
 
-source_classifications = combine(groupby(source_reads, :classification), nrow => :active_items)
+source_classifications = combine(groupby(source_reads, :classification), nrow => :items)
 sort!(source_classifications, :classification)
 source_classifications.classification = PISPDocUtils.friendly_classification.(source_classifications.classification)
-PISPDocUtils.markdown_table(source_classifications)
+PISPDocUtils.markdown_table(
+    source_classifications;
+    column_labels = ["Source type", "Selections"],
+)
 #-
 
-# ## Canonical owners
+# ## Source subjects
 #
-# A subject page owns each source selection.
-# Repeated reads remain separate ledger entries when the current implementation executes them separately, and dynamic DSP selections are expanded by scenario, region, and season.
+# Each source selection belongs to the subject page that explains its fields
+# and role. Repeated reads remain separate when PISP uses them in separate
+# transformations, and DSP selections are expanded by scenario, region, and
+# season.
 
 source_owner_summary = combine(groupby(source_reads, [:owner, :classification]), nrow => :items)
 sort!(source_owner_summary, [:owner, :classification])
 source_owner_summary.classification = PISPDocUtils.friendly_classification.(source_owner_summary.classification)
-PISPDocUtils.markdown_table(source_owner_summary)
+source_owner_summary.owner = [get(page_titles, owner, owner) for owner in source_owner_summary.owner]
+rename!(source_owner_summary, :owner => :subject_page, :classification => :source_type)
+PISPDocUtils.markdown_table(
+    source_owner_summary;
+    column_labels = ["Subject page", "Source type", "Selections"],
+)
 #-
 
 # ## PISP-generated intermediates
@@ -56,30 +74,46 @@ auxiliary_reads = select(
     :owner,
     :notes,
 )
-PISPDocUtils.markdown_table(auxiliary_reads)
+auxiliary_reads.owner = [get(page_titles, owner, owner) for owner in auxiliary_reads.owner]
+rename!(auxiliary_reads, :artefact => :file, :owner => :subject_page)
+PISPDocUtils.markdown_table(
+    auxiliary_reads;
+    column_labels = ["File", "Worksheet", "Subject page", "Use"],
+)
 #-
 
 # ## Parameter-file ownership
 #
 # `PISPparameters.jl` includes six files.
-# Every included file has one canonical documentation owner, while other pages may link to that owner rather than copying constants into Markdown.
+# The table pairs each file with the subject page that explains its values and effects.
 
 parameter_owners = select(parameter_families, :source_path, :family, :owner, :notes)
-PISPDocUtils.markdown_table(parameter_owners)
+parameter_owners.owner = [get(page_titles, owner, owner) for owner in parameter_owners.owner]
+rename!(parameter_owners, :owner => :subject_page)
+PISPDocUtils.markdown_table(
+    parameter_owners;
+    column_labels = ["Package file", "Parameter family", "Subject page", "Use"],
+)
 #-
 
 # ## Mapping-family ownership
 #
-# The mapping ledger covers maintained constants and parser-local lookup families, including generation, storage, retirement, hydro, geography, scenario, reliability, DSP, EV, source-file, build-out, and output-schema mappings.
+# The mapping table covers maintained constants and parser lookup families, including generation, storage, retirement, hydro, geography, scenario, reliability, DSP, EV, source-file, build-out, and output-schema mappings.
 # Runtime dictionaries are classified as parsed representations rather than independent maintained constants.
 
 mapping_owners = select(mapping_families, :family, :classification, :owner, :source_path)
 mapping_owners.classification = PISPDocUtils.friendly_classification.(mapping_owners.classification)
-PISPDocUtils.markdown_table(mapping_owners)
+mapping_owners.owner = [get(page_titles, owner, owner) for owner in mapping_owners.owner]
+rename!(mapping_owners, :classification => :source_type, :owner => :subject_page)
+PISPDocUtils.markdown_table(
+    mapping_owners;
+    column_labels = ["Mapping", "Source type", "Subject page", "Package file"],
+)
 #-
 
-# ## How to read the ledger
+# ## Edition coverage
 #
-# ISP 2024 rows describe implementation evidence in the current package.
-# ISP 2026 has no integrated PISP preprocessing or dataset workflow, so its pages report observed source structure and mark semantic correspondences for review instead of presenting them as implemented mappings.
-# The machine-readable authority is `docs/source-material-coverage.toml` in the repository.
+# ISP 2024 rows identify the package readers and mappings used by the dataset
+# workflow. ISP 2026 rows identify the files, selections, and source subjects
+# used by the source and comparison pages.
+# The machine-readable authority is `docs/config/source-material-coverage.toml` in the repository.

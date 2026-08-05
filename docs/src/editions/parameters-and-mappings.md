@@ -1,44 +1,45 @@
 # Parameters and mappings
 
-The PISP transformation layer applies package mappings, constants, classifications, and source-field dependencies.
+PISP uses edition-specific mappings, constants, classifications, and
+source-field relationships to turn AEMO source data into package identifiers
+and output tables.
 
-PISP's implemented mapping layer is specific to the ISP 2024 workflow.
-It combines source-derived workbook fields with package-defined identifiers, aliases, classifications, and constants that make those fields usable in the PISP data model.
-PISP.jl can download and extract the ISP 2026 workbooks and archives, but no ISP 2026 source-sheet dependency or field interpretation is yet integrated into its documented workflow.
-The [supported editions](supported-editions.md) page records that acquisition and integration boundary.
-
-## How to read parameter provenance
+## Where values come from
 
 - **Report-defined mappings** encode a relationship stated in an AEMO report. The detailed mapping page identifies the report and shows the current PISP representation.
 - **Workbook-derived values** are read from named workbook sheets, ranges, or build-out columns by the parser.
 - **Package-defined defaults** come from PISP parameter dictionaries and are applied when the workbook does not provide a complete output row.
-- **Unverified provenance** means that the current code supplies a value, but its original external source is not established in the package documentation. Such a value remains usable as a PISP default without being attributed to an unsupported source.
 
-| Mapping or parameter layer | ISP 2024 PISP evidence |
-| --- | --- |
-| Scenario identifiers and source labels | Scenario IDs `1`, `2`, and `3` identify Progressive Change, Step Change, and Green Energy Exports. The problem-table and build-out paths use those IDs, while package mappings connect the names to hydro-inflow and demand-trace source labels. |
-| Areas and bus aliases | Twelve package bus aliases (`NQ`, `CQ`, `GG`, `SQ`, `NNSW`, `CNSW`, `SNW`, `SNSW`, `VIC`, `TAS`, `CSA`, and `SESA`) map to the five model areas QLD, NSW, VIC, TAS, and SA. The reference records each display name, area ID, and representative coordinates. |
-| REZ mapping | The 2024 parser links Renewable Energy Zone IDs and names to ISP sub-regions and uses those relationships when deriving renewable capacity and schedule inputs. |
-| Weather years and trace conventions | `PISP.ISPdatabuilder.DATE_RANGES_REFYEARS` maps each 2024 planning financial-year interval to a historical weather year and is consumed when the composite solar, wind, and demand trace `4006` files are built; repeated weather years are part of that release-specific convention. |
-| Technology and asset classifications | Package parameter files classify generation, hydro, storage, and build-out inputs. Generated generator data exposes `fuel` and `tech` classifications; the mapping layer also supplies technology-specific source and trace conventions. |
-| Source-sheet dependencies | The solar and wind routines consume existing-generation, renewable-energy-zone, and outlook records. The [source coverage and ownership](../generated/shared/source-material/coverage-and-ownership.md) ledger identifies each active selection and its canonical subject page. |
-| Aliases and hard-coded values | Scenario, hydro, demand, bus, area, generator, storage, trace-file, retirement, and build-out mappings are package-defined modelling inputs. They include aliases and constants that reconcile source names with PISP identifiers. |
+| Mapping or parameter layer | ISP 2024 | ISP 2026 comparison work |
+| --- | --- | --- |
+| Scenario identifiers | IDs `1`, `2`, and `3` identify Progressive Change, Step Change, and Green Energy Exports, and the problem-table and build-out paths use those IDs. | Align Accelerated Transition, Slower Growth, and Step Change with the 2024 scenario lineage before reusing scenario IDs. |
+| Areas and bus aliases | 12 package bus aliases map to the five model areas QLD, NSW, VIC, TAS, and SA. | Compare the 2026 model regions, subregions, DNSPs, and REZ identifiers with the 2024 geography. |
+| REZ mapping | The parser links REZ IDs and names to ISP subregions and renewable capacity records. | Compare renamed REZs, retained identifiers, and changed worksheet fields. |
+| Weather years and traces | `PISP.ISPdatabuilder.DATE_RANGES_REFYEARS` maps planning-year intervals to historical weather years and supports composite trace `4006`. | Align `RefYear5000`, scenario trace folders, and the 2026 report definition of historical reference years. |
+| Technology and asset classifications | Parameter files classify generation, hydro, storage, and build-out inputs. | Compare technology names, storage categories, fuel fields, hybrid-site limits, and new source subjects. |
+| Source-sheet dependencies | Package readers consume named 2024 workbook sheets and trace patterns. | Use the [ISP 2026 source-data reference](../generated/isp2026/reference/source-data.md) to define the corresponding files, selections, keys, fields, and units. |
+| Defaults and aliases | Package constants reconcile source names with output identifiers and fill required fields. | Review each default against the 2026 source structure before carrying it into the new parser. |
 
-## Provenance and interpretation
+## Detailed references
 
-The [ISP 2024 parameters and mappings](../generated/isp2024/reference/parameters-and-mappings.md) page provides the detailed, code-derived scenario, bus, area, weather-year, and reliability-field tables.
-Its weather-year table is tied to the 2024 ISP PLEXOS model instructions, while the sheet dependencies identify the 2024 workbook fields consumed by the parser.
+The [ISP 2024 parameters and mappings](../generated/isp2024/reference/parameters-and-mappings.md)
+page provides the scenario, bus, area, weather-year, reliability-field, and
+source-sheet tables used by the package.
+The [ISP 2024 build-out defaults](../generated/isp2024/reference/buildout-defaults.md)
+page describes workbook fields, generated identities, calculations, and
+package template values for optional generator and storage additions.
+The [ISP 2024 hydro parameters and constants](../generated/isp2024/reference/hydro-parameters-and-constants.md)
+page lists the values used to assign hydro traces, annual energy limits,
+hydrological years, and Snowy inflows.
 
-The [ISP 2024 build-out defaults](../generated/isp2024/reference/buildout-defaults.md) page separates workbook fields, generated identities, calculations, placeholders, and package template values for optional generator and storage additions.
+The [source coverage and ownership](../generated/shared/source-material/coverage-and-ownership.md)
+page links the maintained source selections and mapping families to their
+subject pages.
+The [raw-source comparison](../generated/comparison/analyses/raw-source-comparison.md)
+shows the workbook and schema differences that require new or revised mappings
+for ISP 2026.
 
-The [ISP 2024 hydro parameters and constants](../generated/isp2024/reference/hydro-parameters-and-constants.md) page lists the package values used to assign hydro traces, annual energy limits, hydrological years, and Snowy inflows.
-
-The [source coverage and ownership](../generated/shared/source-material/coverage-and-ownership.md) page accounts for every maintained parameter-file and mapping-family owner alongside the active non-trace source reads.
-Subject pages keep the workbook evidence beside its data meaning, while the generated ISP 2024 parameters page remains the canonical index for package-defined conventions.
-
-These package-defined values are modelling inputs rather than incidental filenames.
-A change to a mapping can change generated datasets even when the downloaded source files are unchanged.
-See [Assumptions and scope](../assumptions.md) for technology-specific capacity caveats and [Trace coverage](trace-coverage.md) for the release-specific trace boundary.
-
-PISP.jl does not document an integrated mapping layer that establishes how ISP 2026 labels, scenarios, geography, REZs, technologies, source sheets, or trace conventions relate to the ISP 2024 model.
-A comparison therefore requires release-specific source evidence and an explicit crosswalk; the [comparison guide](comparison.md) lists the required categories.
+```@meta
+# A cross-edition mapping should be introduced only after the correspondingsource keys, units, categories, and modelling meaning have been aligned.
+# No integrated mapping layer yet establishes how ISP 2026 labels, scenarios, geography, REZs, technologies, source sheets, or trace conventions relate to the ISP 2024 model. The [comparison guide](comparison.md) lists the required categories for that future crosswalk.
+```

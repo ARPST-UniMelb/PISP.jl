@@ -111,7 +111,7 @@ PISPDocUtils.markdown_table(charge_type_2025)
 # ## PISP output-field ownership
 #
 # The maintained mapping assigns four 2023 number worksheets to parsed output fields.
-# Charging profiles, vehicle categories, state names, scenario names, bus IDs, and demand relationships are handled by additional package mappings recorded in the coverage ledger.
+# Charging profiles, vehicle categories, state names, scenario names, bus IDs, and demand relationships use the additional package mappings listed in [AEMO ISP source coverage and ownership](coverage-and-ownership.md).
 
 vehicle_number_mapping = getfield(PISP, :EV_2024_VEHICLE_NUMBER_VALUE_COLUMN_BY_SHEET)
 ev_output_fields = DataFrame(
@@ -121,5 +121,5 @@ ev_output_fields = DataFrame(
 PISPDocUtils.markdown_table(ev_output_fields)
 #-
 
-# The 2025 IASR workbook is documented here as observed source evidence.
-# PISP does not currently claim an integrated ISP 2026 EV preprocessing or dataset workflow.
+# The 2025 IASR workbook adds FCEV and hybrid vehicle families, annual
+# consumption, and revised charging categories to the EV source structure.

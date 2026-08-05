@@ -719,4 +719,3 @@ The annual range, seasonal distributions, and adverse-day metrics should therefo
 
 Studies sensitive to renewable droughts or extreme availability should test multiple historical labels and report the selected location and metric.
 Reference trace `4006` should not be treated as a substitute for this trace-year sensitivity analysis.
-

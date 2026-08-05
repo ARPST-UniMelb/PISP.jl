@@ -2,7 +2,7 @@
 #
 # PISP combines values published by AEMO with package-defined identifiers, defaults, aliases, and source-to-output mappings.
 # The distinction matters because a downloaded workbook can remain unchanged while a package convention changes the generated dataset.
-# This page identifies the authority for each parameter and mapping family, then presents the general mappings shared across the ISP 2024 workflow.
+# The tables separate these authorities and present the general mappings shared across the ISP 2024 workflow.
 
 using PISP
 using DataFrames
@@ -65,8 +65,7 @@ PISPDocUtils.markdown_table(classification_roles)
 # ## Parameter-file ownership
 #
 # `PISPparameters.jl` includes six parameter files.
-# Each file has one canonical documentation owner so that the package does not maintain a second handwritten copy of its constants.
-# Subject pages describe how the relevant source data and conventions interact; the tables displayed there are generated from the imported PISP objects wherever practical.
+# The table pairs each file with the subject page that explains how its values and conventions affect the package workflow.
 
 parameter_owners = select(
     parameter_families,
@@ -202,5 +201,5 @@ PISPDocUtils.markdown_table(reliability_schema)
 # The time-varying schedule is the relevant maximum-output series for solar and wind; the static `pmax` field is not a universal capacity-factor denominator.
 # See [Assumptions and scope](@ref).
 #
-# The source selections for operating capacity, storage, renewable energy zones, and other workbook subjects are documented in the shared [AEMO ISP source coverage and ownership](../../shared/source-material/coverage-and-ownership.md) family.
-# That family keeps workbook evidence beside its data meaning while this page remains the canonical index for package-defined parameters and mappings.
+# Shared [AEMO ISP source coverage and ownership](../../shared/source-material/coverage-and-ownership.md) pages describe the workbook selections for operating capacity, storage, renewable energy zones, and other source subjects.
+# This page covers package-defined parameters and mappings.

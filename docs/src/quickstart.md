@@ -117,7 +117,7 @@ The [ISP 2024 output tables](generated/isp2024/reference/output-tables.md) page 
 
 - [Working with PISP-generated outputs](generated/isp2024/tutorials/working-with-pisp-outputs.md) demonstrates static/schedule joins, aggregation, and plotting.
 - [ISP 2024](editions/isp2024.md) provides the release-specific documentation route.
-- [Data sources](generated/isp2024/reference/data-sources.md) identifies the source families used by the build.
+- [Source data](generated/isp2024/reference/source-data.md) identifies the files and selections used by the build.
 - [Parameters and mappings](generated/isp2024/reference/parameters-and-mappings.md) records package-defined values and source-label reconciliation.
 - [Domain concepts](concepts.md) explains assets, schedules, scenarios, traces, and the aggregated network model.
 - [Assumptions and scope](assumptions.md) identifies study-relevant caveats and validation responsibilities.

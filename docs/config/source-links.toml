@@ -1,17 +1,17 @@
 schema_version = 2
 
 [[source]]
-title = "2024 Integrated System Plan"
-publisher = "Australian Energy Market Operator"
-local_path = "data/2024/pisp-reports/2024-integrated-system-plan.pdf"
-public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2024/2024-integrated-system-plan-isp.pdf?la=en"
-public_origin = "official"
-
-[[source]]
 title = "2024 ISP PLEXOS Model Instructions"
 publisher = "Australian Energy Market Operator"
 local_path = "data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf"
 public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2024/supporting-materials/2024-isp-plexos-model-instructions.pdf?la=en"
+public_origin = "official"
+
+[[source]]
+title = "2024 Integrated System Plan"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2024/pisp-reports/2024-integrated-system-plan.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2024/2024-integrated-system-plan-isp.pdf?la=en"
 public_origin = "official"
 
 [[source]]
@@ -22,10 +22,178 @@ public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2023/
 public_origin = "official"
 
 [[source]]
+title = "Addendum to the 2023 Inputs Assumptions and Scenarios Report"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2024/pisp-reports/addendum-to-2023-inputs-assumptions-and-scenarios-report.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2023/addendum-to-2023-inputs-assumptions-and-scenarios-report.pdf?la=en"
+public_origin = "official"
+
+[[source]]
 title = "ISP Methodology (30 June 2023)"
 publisher = "Australian Energy Market Operator"
 local_path = "data/2024/pisp-reports/2023-isp-methodology.pdf"
 public_url = "https://www.aemo.com.au/-/media/files/stakeholder_consultation/consultations/nem-consultations/2023/isp-methodology-2023/isp-methodology_june-2023.pdf?la=en"
+public_origin = "official"
+
+[[source]]
+title = "A2 Generation and Storage Development Opportunities"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2024/pisp-reports/a2-generation-and-storage-development-opportunities.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2024/appendices/a2-generation-and-storage-development-opportunities.pdf?la=en"
+public_origin = "official"
+
+[[source]]
+title = "A3 Renewable Energy Zones"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2024/pisp-reports/a3-renewable-energy-zones.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2024/appendices/a3-renewable-energy-zones.pdf?rev=12a046694eac41dc99031c43bbce35e0&sc_lang=en"
+public_origin = "official"
+
+[[source]]
+title = "A4 System Operability"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2024/pisp-reports/a4-system-operability.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2024/appendices/a4-system-operability.pdf?la=en"
+public_origin = "official"
+
+[[source]]
+title = "A6 Cost Benefit Analysis"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2024/pisp-reports/a6-cost-benefit-analysis.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2024/appendices/a6-cost-benefit-analysis.pdf?la=en"
+public_origin = "official"
+
+[[source]]
+title = "A7 System Security"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2024/pisp-reports/a7-system-security.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2024/appendices/a7-system-security.pdf?la=en"
+public_origin = "official"
+
+[[source]]
+title = "2024 Integrated System Plan - Overview"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2024/pisp-reports/2024-integrated-system-plan-overview.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2024/2024-integrated-system-plan-overview.pdf?rev=ac883f3706bc449ca4cd64da6cb25175&sc_lang=en"
+public_origin = "official"
+
+[[source]]
+title = "2024 ISP Publication Webinar Presentation"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2024/pisp-reports/2024-isp-publication-webinar-presentation.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2024/2024-isp-publication-webinar-presentation.pdf?rev=392d12bc130f48fab67051f86977e939&sc_lang=en"
+public_origin = "official"
+
+[[source]]
+title = "A1 Stakeholder Engagement"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2024/pisp-reports/a1-stakeholder-engagement.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2024/appendices/a1-stakeholder-engagement.pdf?rev=21f03a266f854bccb1faa82485de094f&sc_lang=en"
+public_origin = "official"
+
+[[source]]
+title = "A5 Network Investments"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2024/pisp-reports/a5-network-investments.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2024/appendices/a5-network-investments.pdf?rev=330abdf826cd4310a05f16fdeafd98d3&sc_lang=en"
+public_origin = "official"
+
+[[source]]
+title = "A8 Social Licence"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2024/pisp-reports/a8-social-licence.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2024/appendices/a8-social-licence.pdf?rev=ab35f15c9fcf4303a43a3ec4acbb3dca&sc_lang=en"
+public_origin = "official"
+
+[[source]]
+title = "2024 ISP Consultation Summary Report"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2024/pisp-reports/2024-isp-consultation-summary-report.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2024/supporting-materials/2024-isp-consultation-summary-report.pdf?rev=9e901f2b861843ccbd8673ebb6e7819b&sc_lang=en"
+public_origin = "official"
+
+[[source]]
+title = "Summary of Consumer Risk Preferences Project"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2024/pisp-reports/summary-of-consumer-risk-preferences-project.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/stakeholder_consultation/consultations/nem-consultations/2023/draft-2024-isp-consultation/supporting-materials/summary-of-consumer-risk-preferences-project.pdf?rev=573eb60f837c4c58bdef452f425da215&sc_lang=en"
+public_origin = "official"
+
+[[source]]
+title = "Attachment 1 Deloitte Report - Consumer Risk Preferences"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2024/pisp-reports/attachment-1-deloitte-report-consumer-risk-preferences.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/stakeholder_consultation/consultations/nem-consultations/2023/draft-2024-isp-consultation/supporting-materials/attachment-1-deloitte-report-consumer-risk-preferences.pdf?rev=ac0acb36290d439cbf3d6c4690ac39f2&sc_lang=en"
+public_origin = "official"
+
+[[source]]
+title = "Attachment 2 Antenna Report - Consumer Risk Preferences"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2024/pisp-reports/attachment-2-antenna-report-consumer-risk-preferences.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/stakeholder_consultation/consultations/nem-consultations/2023/draft-2024-isp-consultation/supporting-materials/attachment-2-antenna-report-consumer-risk-preferences.pdf?rev=67c875994d514ff295a22188b07ec078&sc_lang=en"
+public_origin = "official"
+
+[[source]]
+title = "2024 ISP Delphi Panel - Overview"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2024/pisp-reports/2024-isp-delphi-panel-overview.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2023/2024-isp-delphi-panel---overview.pdf?rev=299bd33e7faf43f1b1e5654aadbbe423&sc_lang=en"
+public_origin = "official"
+
+[[source]]
+title = "The Australian Electricity Workforce for the 2024 ISP: Projections to 2050"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2024/pisp-reports/2024-isp-workforce-projections-nem.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2024/electricity-sector-workforce-projections/nem-2024-workforce_final.pdf?rev=5640af2eadd448cba44f1fb3a61bc9e3&sc_lang=en"
+public_origin = "official"
+
+[[source]]
+title = "Electricity Workforce Projections for the 2024 ISP: New South Wales"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2024/pisp-reports/2024-isp-workforce-projections-nsw.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2024/electricity-sector-workforce-projections/focus-on-nsw_2024.pdf?rev=de6545e01db84720b6645356b4dd0053&sc_lang=en"
+public_origin = "official"
+
+[[source]]
+title = "Electricity Workforce Projections for the 2024 ISP: Queensland"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2024/pisp-reports/2024-isp-workforce-projections-qld.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2024/electricity-sector-workforce-projections/focus-on-qld-2024_final.pdf?rev=7414890c9a684c5db75f64790ff76afb&sc_lang=en"
+public_origin = "official"
+
+[[source]]
+title = "Electricity Workforce Projections for the 2024 ISP: South Australia"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2024/pisp-reports/2024-isp-workforce-projections-sa.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2024/electricity-sector-workforce-projections/focus-on-sa-2024_final.pdf?rev=4db5b7bfc983460b9c658680693ccb56&sc_lang=en"
+public_origin = "official"
+
+[[source]]
+title = "Electricity Workforce Projections for the 2024 ISP: Tasmania"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2024/pisp-reports/2024-isp-workforce-projections-tas.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2024/electricity-sector-workforce-projections/focus-on-tas-2024_final.pdf?rev=252f6df93f6a43a79c3df0dff145874d&sc_lang=en"
+public_origin = "official"
+
+[[source]]
+title = "Electricity Workforce Projections for the 2024 ISP: Victoria"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2024/pisp-reports/2024-isp-workforce-projections-vic.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2024/electricity-sector-workforce-projections/focus-on-vic-2024_final.pdf?rev=7f4f554dc25c4dff91e05d896bc76288&sc_lang=en"
+public_origin = "official"
+
+[[source]]
+title = "Aurecon 2022 Costs and Technical Parameters Review"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2024/pisp-reports/aurecon-2022-cost-and-technical-parameter-review.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/stakeholder_consultation/consultations/nem-consultations/2022/2023-inputs-assumptions-and-scenarios-consultation/supporting-materials-for-2023/aurecon-2022-cost-and-technical-parameter-review.pdf"
+public_origin = "official"
+
+[[source]]
+title = "2026 Integrated System Plan"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2026/pisp-reports/2026-integrated-system-plan.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2026/2026-integrated-system-plan-isp.pdf?rev=7f5dfd18aa1b4a3aab704c424f75afd3&sc_lang=en"
 public_origin = "official"
 
 [[source]]
@@ -40,4 +208,116 @@ title = "2025 Inputs, Assumptions and Scenarios Report"
 publisher = "Australian Energy Market Operator"
 local_path = "data/2026/pisp-reports/2025-inputs-assumptions-and-scenarios-report.pdf"
 public_url = "https://www.aemo.com.au/-/media/files/stakeholder_consultation/consultations/nem-consultations/2024/2025-iasr-scenarios/final-docs/2025-inputs-assumptions-and-scenarios-report.pdf?rev=63268acd3f044adb9f5f3a32b6880c27&sc_lang=en"
+public_origin = "official"
+
+[[source]]
+title = "Addendum to the 2025 Inputs, Assumptions and Scenarios Report"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2026/pisp-reports/addendum-to-2025-inputs-assumptions-and-scenarios-report.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/draft-2026/addendum-to-the-2025-inputs-assumptions-and-scenarios-report.pdf"
+public_origin = "official"
+
+[[source]]
+title = "ISP Methodology (June 2025)"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2026/pisp-reports/2025-isp-methodology.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/stakeholder_consultation/consultations/nem-consultations/2024/2026-isp-methodology/isp-methodology-june-2025.pdf"
+public_origin = "official"
+
+[[source]]
+title = "A2 ISP Development Opportunities"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2026/pisp-reports/a2-isp-development-opportunities.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2026/appendices/a2-isp-development-opportunities.pdf?rev=d81062e7cdcf4af8a04fbccdfc3c9fb4&sc_lang=en"
+public_origin = "official"
+
+[[source]]
+title = "A3 Renewable Energy Zones"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2026/pisp-reports/a3-renewable-energy-zones.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2026/appendices/a3-renewable-energy-zones.pdf?la=en"
+public_origin = "official"
+
+[[source]]
+title = "A4 System Operability"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2026/pisp-reports/a4-system-operability.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2026/appendices/a4-system-operability.pdf?la=en"
+public_origin = "official"
+
+[[source]]
+title = "A6 Cost Benefit Analysis"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2026/pisp-reports/a6-cost-benefit-analysis.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2026/appendices/a6-cost-benefit-analysis.pdf?la=en"
+public_origin = "official"
+
+[[source]]
+title = "A7 System Security"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2026/pisp-reports/a7-system-security.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2026/appendices/a7-system-security.pdf?la=en"
+public_origin = "official"
+
+[[source]]
+title = "2026 Integrated System Plan - Explainer"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2026/pisp-reports/2026-isp-explainer.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2026/aemo-2026-isp-explainer.pdf?rev=a1aa113a81194508a1aced90d26b1dd9&sc_lang=en"
+public_origin = "official"
+
+[[source]]
+title = "2026 Integrated System Plan - Infographic"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2026/pisp-reports/2026-isp-infographic.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2026/2026-integrated-system-plan-infographic.pdf?rev=6568e9e8a4f34f5cb5f28a702d7fb453&sc_lang=en"
+public_origin = "official"
+
+[[source]]
+title = "2026 ISP Publication Webinar Presentation"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2026/pisp-reports/2026-isp-publication-webinar-presentation.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2026/2026-isp-publication-webinar-presentation.pdf?rev=5d4743f20aff47699588354c1bfd76cc&sc_lang=en"
+public_origin = "official"
+
+[[source]]
+title = "A1 Stakeholder Engagement"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2026/pisp-reports/a1-stakeholder-engagement.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2026/appendices/a1-stakeholder-engagement.pdf?rev=fb67d2dee69042f3885d5f8a649267d6&sc_lang=en"
+public_origin = "official"
+
+[[source]]
+title = "A5 Network Investments"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2026/pisp-reports/a5-network-investments.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2026/appendices/a5-network-investments.pdf?rev=a351f6c817484d79bc34f9a8e817f077&sc_lang=en"
+public_origin = "official"
+
+[[source]]
+title = "A8 Social Licence"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2026/pisp-reports/a8-social-licence.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2026/appendices/a8-social-licence.pdf?rev=035a91c449f44bfc82a888a6770d9f90&sc_lang=en"
+public_origin = "official"
+
+[[source]]
+title = "A9 Demand Side Factors Statement"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2026/pisp-reports/a9-demand-side-factors-statement.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2026/appendices/a9-demand-side-factors-statement.pdf?rev=cfadf873c9934b46aecd670fdcd8995f&sc_lang=en"
+public_origin = "official"
+
+[[source]]
+title = "A10 Gas Development Projections"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2026/pisp-reports/a10-gas-development-projections.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2026/appendices/a10-gas-development-projections.pdf?rev=e204886dac1c4f01a471e239723fb054&sc_lang=en"
+public_origin = "official"
+
+[[source]]
+title = "2026 ISP Consultation Summary Report"
+publisher = "Australian Energy Market Operator"
+local_path = "data/2026/pisp-reports/2026-isp-consultation-summary-report.pdf"
+public_url = "https://www.aemo.com.au/-/media/files/major-publications/isp/2026/supporting-materials/2026-isp-consultation-summary-report.pdf?rev=7982dc7041d4477d988d9f75485846d3&sc_lang=en"
 public_origin = "official"

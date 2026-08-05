@@ -300,9 +300,25 @@ PISPDocUtils.markdown_table(
 | 2024 | 2024-isp-model.zip | 2024 ISP Model | 3 | 3 | 3 | 84 | 472.6 |
 | 2026 | 2026-isp-model.zip | 2026 ISP Model | 3 | 3 | 0 | 345 | 572.0 |
 
-The 2026 archive packages 345 CSV files, compared with 84 in the 2024
-archive, and introduces several trace families that are not present in the
-2024 model ZIP.
+```@raw html
+<details class="source-code"><summary>Show source code</summary>
+```
+
+````julia
+csv_file_counts = Dict(row[1] => row[7] for row in archive_summary_rows)
+println(
+    "The $(EXPECTED_YEARS[2]) archive packages $(csv_file_counts[EXPECTED_YEARS[2]]) CSV files, compared with $(csv_file_counts[EXPECTED_YEARS[1]]) in the $(EXPECTED_YEARS[1]) archive, and introduces several trace families that are not present in the $(EXPECTED_YEARS[1]) model ZIP.",
+)
+````
+
+```@raw html
+</details>
+```
+
+````
+The 2026 archive packages 345 CSV files, compared with 84 in the 2024 archive, and introduces several trace families that are not present in the 2024 model ZIP.
+
+````
 
 ## Scenario continuity
 
@@ -579,4 +595,3 @@ println("Validated archive discovery, scenario coverage, XML roles, and trace-fa
 Validated archive discovery, scenario coverage, XML roles, and trace-family counts.
 
 ````
-

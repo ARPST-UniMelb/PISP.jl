@@ -173,7 +173,7 @@ function rewrite_markdown(text::String, rel_path::String, by_path::Dict{String,S
             print(output, line); continue
         end
         if is_markdown_table_row(stripped)
-            print(output, line); continue
+            print(output, rewrite_inline_links(line, rel_path, line_no, by_path, repo_root, tree_rel, target)); continue
         end
         definition = match(DEFINITION_RE, stripped)
         if definition === nothing

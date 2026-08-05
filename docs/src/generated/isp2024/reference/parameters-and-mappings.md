@@ -6,7 +6,7 @@ EditURL = "../../../../literate/isp2024/reference/parameters_and_mappings.jl"
 
 PISP combines values published by AEMO with package-defined identifiers, defaults, aliases, and source-to-output mappings.
 The distinction matters because a downloaded workbook can remain unchanged while a package convention changes the generated dataset.
-This page identifies the authority for each parameter and mapping family, then presents the general mappings shared across the ISP 2024 workflow.
+The tables separate these authorities and present the general mappings shared across the ISP 2024 workflow.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -97,8 +97,7 @@ PISPDocUtils.markdown_table(classification_roles)
 ## Parameter-file ownership
 
 `PISPparameters.jl` includes six parameter files.
-Each file has one canonical documentation owner so that the package does not maintain a second handwritten copy of its constants.
-Subject pages describe how the relevant source data and conventions interact; the tables displayed there are generated from the imported PISP objects wherever practical.
+The table pairs each file with the subject page that explains how its values and conventions affect the package workflow.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -158,8 +157,8 @@ PISPDocUtils.markdown_table(mapping_owner_summary)
 |:--|:--|--:|
 | Excluded trace material | editions/trace-coverage.md | 1 |
 | PISP package convention | isp2024-buildout-defaults | 2 |
-| PISP package convention | isp2024-data-sources | 1 |
 | PISP package convention | isp2024-output-tables | 2 |
+| PISP package convention | isp2024-source-data | 1 |
 | PISP package convention | shared-source-demand-side-participation | 2 |
 | PISP package convention | shared-source-electric-vehicles | 4 |
 | PISP package convention | shared-source-existing-generation-storage | 4 |
@@ -199,9 +198,9 @@ PISPDocUtils.markdown_table(mapping_inventory)
 | trace years to processed trace tables | Excluded trace material | editions/trace-coverage.md | src/scrappers/PISP-scrapper-build.jl |
 | battery duration labels | PISP package convention | isp2024-buildout-defaults | src/parsers/PISP-2024buildout.jl |
 | user build-out technology labels | PISP package convention | isp2024-buildout-defaults | src/parsers/PISP-2024buildout.jl |
-| fixed source-download keys and metadata | PISP package convention | isp2024-data-sources | src/scrappers/PISP-scrapper-2024files.jl |
 | output table aliases | PISP package convention | isp2024-output-tables | src/utils/writing/PISPutils-writing.jl |
 | schema declarations to Julia types | PISP package convention | isp2024-output-tables | src/utils/mappers/PISPutils-mappers.jl |
+| fixed source-download keys and metadata | PISP package convention | isp2024-source-data | src/scrappers/PISP-scrapper-2024files.jl |
 | DSP price-band identifiers | PISP package convention | shared-source-demand-side-participation | src/parsers/PISP-2024parser.jl |
 | scenario/region/season DSP ranges | PISP package convention | shared-source-demand-side-participation | src/parsers/PISP-2024parser.jl |
 | EV number worksheet to output field | PISP package convention | shared-source-electric-vehicles | src/utils/dataframes/PISPutils-df-evs-2024.jl |
@@ -213,8 +212,8 @@ PISPDocUtils.markdown_table(mapping_inventory)
 | technology emissions fallbacks | PISP package convention | shared-source-existing-generation-storage | src/parsers/PISP-2024parser.jl |
 | technology inertia constants | PISP package convention | shared-source-existing-generation-storage | src/parsers/PISP-2024parser.jl |
 | hydro scheme groups | PISP package convention | shared-source-hydro-inflows | src/parsers/PISP-2024parser.jl |
-| scenario to cost-development path for solar | PISP package convention | shared-source-renewable-energy-zones | src/parsers/PISP-2024parser.jl |
-| scenario to cost-development path for wind | PISP package convention | shared-source-renewable-energy-zones | src/parsers/PISP-2024parser.jl |
+| scenario to candidate development path for solar | PISP package convention | shared-source-renewable-energy-zones | src/parsers/PISP-2024parser.jl |
+| scenario to candidate development path for wind | PISP package convention | shared-source-renewable-energy-zones | src/parsers/PISP-2024parser.jl |
 | bus IDs to demand records | Parsed representation | shared-source-demand-distributed-resources | src/parsers/PISP-2024parser.jl |
 | EV output tables by vehicle number field | Parsed representation | shared-source-electric-vehicles | src/parsers/PISP-2024parser.jl |
 | EV worksheet tables by source name | Parsed representation | shared-source-electric-vehicles | src/parsers/PISP-2024parser.jl |
@@ -427,6 +426,5 @@ Rooftop PV and utility-scale renewable capacity fields require special care.
 The time-varying schedule is the relevant maximum-output series for solar and wind; the static `pmax` field is not a universal capacity-factor denominator.
 See [Assumptions and scope](@ref).
 
-The source selections for operating capacity, storage, renewable energy zones, and other workbook subjects are documented in the shared [AEMO ISP source coverage and ownership](../../shared/source-material/coverage-and-ownership.md) family.
-That family keeps workbook evidence beside its data meaning while this page remains the canonical index for package-defined parameters and mappings.
-
+Shared [AEMO ISP source coverage and ownership](../../shared/source-material/coverage-and-ownership.md) pages describe the workbook selections for operating capacity, storage, renewable energy zones, and other source subjects.
+This page covers package-defined parameters and mappings.

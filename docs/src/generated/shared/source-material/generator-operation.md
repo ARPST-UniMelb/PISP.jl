@@ -327,5 +327,3 @@ PISPDocUtils.markdown_table(ramp_2026)
 | BARCALDN | Barcaldine Power Station | OCGT (small GT) | 3.3 | 3.3 |
 | BIPS1\_01 | Barker Inlet Power Station | Reciprocating engine | 5.0 | 4.25 |
 | BIPS1\_02 | Barker Inlet Power Station | Reciprocating engine | 5.0 | 4.25 |
-
-

@@ -61,15 +61,16 @@ PISPDocUtils.markdown_table(renamed_rez)
 # ## Transformation boundary
 #
 # The current solar and wind builders read the ISP 2024 REZ table, select the relevant zone IDs for each PISP subregion, and combine them with scenario outlook capacity.
-# Both builders currently apply the package-defined cost-development path `CDP14` across the maintained scenario IDs.
+# Both builders currently apply the package-defined candidate development path `CDP14` across the maintained scenario IDs.
 
 rez_conventions = DataFrame([
-    (subject = "Solar outlook cost-development path", convention = "CDP14 for each current PISP scenario"),
-    (subject = "Wind outlook cost-development path", convention = "CDP14 for each current PISP scenario"),
+    (subject = "Solar outlook candidate development path", convention = "CDP14 for each current PISP scenario"),
+    (subject = "Wind outlook candidate development path", convention = "CDP14 for each current PISP scenario"),
     (subject = "Subregion geography", convention = "PISP.NEMBUSNAME and PISP.BUS2AREA"),
 ])
 PISPDocUtils.markdown_table(rez_conventions)
 #-
 
-# The cost-development-path choices are package conventions, not values read from the REZ worksheet.
-# ISP 2026 zone names and fields require semantic review before reuse in a future transformation.
+# The candidate-development-path choices are package conventions, not values read from the REZ worksheet.
+# The current solar and wind builders continue to use the ISP 2024 zone records.
+#src # NOTE: Verify ISP 2026 zone semantics before any transformation reuses its names or fields.

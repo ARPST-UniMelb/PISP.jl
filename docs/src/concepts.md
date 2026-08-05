@@ -4,7 +4,7 @@ The PISP dataset layer connects asset identities, relationships, and schedule ov
 
 PISP represents its implemented ISP 2024 workflow as a connected data model rather than as a collection of independent CSV files.
 The central distinction is between **assets**, which retain stable identities and mostly static parameters, and **schedules**, which describe how selected asset quantities change with scenario and time.
-[Supported ISP editions](editions/supported-editions.md) and [Trace coverage](editions/trace-coverage.md) define the separate ISP 2026 source-acquisition, parser-review, and integration boundary.
+[Supported ISP editions](editions/supported-editions.md) and [Trace coverage](editions/trace-coverage.md) link the ISP 2026 source and trace documentation.
 
 ## ISP 2024 dataset relationships
 
@@ -103,6 +103,12 @@ The `scenarios` keyword to `build_ISP24_datasets` selects the package-defined IS
 
 [ISP 2024 parameters and mappings](generated/isp2024/reference/parameters-and-mappings.md) lists the public scenario names and source-specific labels.
 
+## Candidate and optimal development paths
+
+A **candidate development path (CDP)** groups development paths that share a set of potential actionable projects. AEMO evaluates a shortlist of CDPs across scenarios and sensitivities before selecting an **optimal development path (ODP)**. The ODP is therefore a selected development path for one ISP edition, not an identifier that can be carried unchanged into another edition. The [2024 ISP Cost-Benefit Analysis, p. 16](../../data/2024/pisp-reports/a6-cost-benefit-analysis.pdf#page=16) introduces this relationship. The 2026 glossary defines CDP on [p. 165](../../data/2026/pisp-reports/a6-cost-benefit-analysis.pdf#page=165) and ODP on [p. 166](../../data/2026/pisp-reports/a6-cost-benefit-analysis.pdf#page=166).
+
+For ISP 2024, AEMO selected `CDP14` as the ODP after ranking and sensitivity analysis ([2024 ISP Cost-Benefit Analysis, p. 124](../../data/2024/pisp-reports/a6-cost-benefit-analysis.pdf#page=124)). PISP currently filters relevant ISP 2024 generation and storage outlook reads to the literal `CDP14`. For ISP 2026, AEMO identifies `CDP 4` as the ODP ([2026 ISP Cost-Benefit Analysis, p. 162](../../data/2026/pisp-reports/a6-cost-benefit-analysis.pdf#page=162)).
+
 ## ISP 2024 planning years, date ranges, and the 1 July split
 
 The ISP 2024 builder can write output by planning year or by explicit date range:
@@ -112,17 +118,29 @@ The ISP 2024 builder can write output by planning year or by explicit date range
 | Planning year | `years = [year]` | `schedule-<year>` | Creates January-June and July-December problem blocks for each scenario. |
 | Date range | `drange = [(start, end)]` | `schedule-DDMMYYYY-DDMMYYYY` | Splits only when the requested range crosses 1 July. |
 
-The split aligns problem blocks with source inputs organised by Australian financial year.
-Static tables are still written once per build folder; the split affects the scenario/time blocks used to populate schedules.
+The split groups each problem block with the source inputs for the corresponding Australian financial year. Each build folder contains one set of static tables. The scenario and time-series data used to create schedules are organised by year.
+The planning year determines which `schedule-<year>` period is generated. It does not select the reference-weather trace (`reftrace`), the demand probability-of-exceedance series (`poe`), or the ISP edition. The same planning year can be built using the ISP 2024 edition while work is in progress for the ISP 2026 edition builder. See [Supported ISP editions](editions/supported-editions.md).
+[Working with PISP-generated outputs](generated/isp2024/tutorials/working-with-pisp-outputs.md) shows how `reftrace`, `poe`, and the planning year together identify an existing processed dataset.
 
-## ISP 2024 trace year and probability of exceedance
+## ISP 2024 reference-weather traces
 
-Two build arguments determine important time-varying inputs: `reftrace` selects the reference weather trace, and `poe` selects the demand probability-of-exceedance series.
+`reftrace` selects the reference-weather trace used by the ISP 2024 builder.
+`reftrace = 2017` selects the historical 2017 demand, solar, and wind traces directly.
+`reftrace = 4006` selects a composite reference-weather trace that assigns selected historical weather years to financial-year windows across the planning horizon.
+The composite can reuse historical year 2017 for particular windows, but `2017` and `4006` remain different trace identifiers.
+A `reftrace` value does not select a candidate or optimal development path.
 
-For `reftrace = 4006`, the ISP 2024 workflow maps each financial year to a selected historical weather year.
-The mapping is part of the scenario/time definition, not merely a filename convention.
 Comparisons that ignore the paired weather year can mix planning-year effects with weather-year effects.
-See [ISP 2024 parameters and mappings](generated/isp2024/reference/parameters-and-mappings.md) for the full map.
+[ISP 2024 parameters and mappings](generated/isp2024/reference/parameters-and-mappings.md) gives the complete `4006` map, while [selecting raw ISP material](generated/shared/tutorials/selecting-raw-isp-material.md) demonstrates direct historical and composite trace selection through PISP's source interface.
+
+## ISP 2024 demand probability of exceedance
+
+`poe` independently selects the demand probability-of-exceedance series used in ISP 2024 demand filenames.
+The available source families include `POE10` and `POE50` series.
+For annual peak demand, 10% POE means there is a 10% chance that the year's peak demand exceeds the stated level ([2024 ISP Consultation Summary Report, p. 60](../../data/2024/pisp-reports/2024-isp-consultation-summary-report.pdf#page=60)).
+The [2023 ISP Methodology, p. 39](../../data/2024/pisp-reports/2023-isp-methodology.pdf#page=39) describes the use of 10%, 50%, and sometimes 90% POE simulations and the use of 10% POE demand profiles in capacity-outlook modelling.
+A `poe` value does not select weather conditions, a planning year, or a development path.
+[Trace coverage](editions/trace-coverage.md) keeps the report definition of POE separate from the filename labels used in each edition.
 
 ## ISP 2024 NEM bus and area model
 

@@ -382,4 +382,3 @@ The workbook therefore supplies scenario-conditioned cost assumptions rather tha
 
 Preserve the workbook scenario when selecting build costs and avoid applying one decline rate across technologies.
 Studies comparing technology economics should retain the original `$/kW` basis and add other cost components explicitly rather than attributing them to this table.
-

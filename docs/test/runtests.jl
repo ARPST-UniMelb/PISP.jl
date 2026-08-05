@@ -1,18 +1,22 @@
 using Test
 using DataFrames
 using Dates
+using TOML
+import PISP
 
 const TEST_DOCS_DIR = normpath(joinpath(@__DIR__, ".."))
 
 include(joinpath(TEST_DOCS_DIR, "render_literate.jl"))
 include(joinpath(TEST_DOCS_DIR, "utils", "navigation.jl"))
 include(joinpath(TEST_DOCS_DIR, "utils", "source_links.jl"))
+include(joinpath(@__DIR__, "doc_invariants.jl"))
 
 @testset "Documentation utility layout" begin
     expected_root_entries = sort([
         ".gitignore",
         "Project.toml",
         "README.md",
+        "audits",
         "build_all.jl",
         "config",
         "doctests.jl",
@@ -25,7 +29,7 @@ include(joinpath(TEST_DOCS_DIR, "utils", "source_links.jl"))
         "utils",
     ])
     root_entries = filter(readdir(TEST_DOCS_DIR)) do name
-        name in ("build", ".documenter-source", "Manifest.toml") && return false
+        name in ("build", ".documenter-source", "Manifest.toml", ".DS_Store") && return false
         startswith(name, ".literate-staging-") && return false
         return true
     end
@@ -153,6 +157,161 @@ end
 
 end
 
+@testset "Report availability catalogue parity" begin
+    catalogue_cases = (
+        ("2024", PISP.ISP2024ReportDownloader.report_targets(), 27),
+        ("2026", PISP.ISP2026ReportDownloader.report_targets(), 19),
+    )
+
+    for (edition, targets, expected_count) in catalogue_cases
+        report_requirements = filter(
+            requirement -> requirement.class == :report,
+            PISPDocUtils.edition_requirements(edition),
+        )
+        @test [requirement.relative_path for requirement in report_requirements] ==
+            [target.filename for target in targets]
+        @test length(report_requirements) == expected_count
+    end
+end
+
+@testset "Report catalogue registry parity" begin
+    registry = load_registry(joinpath(TEST_DOCS_DIR, "config", "source-links.toml"))
+    targets = vcat(
+        [(edition = "2024", target = target) for target in PISP.ISP2024ReportDownloader.report_targets()],
+        [(edition = "2026", target = target) for target in PISP.ISP2026ReportDownloader.report_targets()],
+    )
+    expected = Dict(
+        "data/$(item.edition)/pisp-reports/$(item.target.filename)" =>
+            (item.target.title, item.target.url)
+        for item in targets
+    )
+
+    @test length(registry) == 46
+    @test Dict(entry.local_path => (entry.title, entry.public_url) for entry in registry) == expected
+    @test all(entry -> entry.publisher == "Australian Energy Market Operator", registry)
+    @test all(entry -> entry.public_origin == "official", registry)
+end
+
+@testset "Report counterpart map" begin
+    expected_pairs = [
+        :plexos_model_instructions => :plexos_model_instructions,
+        :integrated_system_plan => :integrated_system_plan,
+        :iasr_2023 => :iasr_2025,
+        :iasr_2023_addendum => :iasr_2025_addendum,
+        :isp_methodology_2023 => :isp_methodology_2025,
+        :appendix_a2_generation_storage => :appendix_a2_generation_storage,
+        :appendix_a3_rez => :appendix_a3_rez,
+        :appendix_a4_operability => :appendix_a4_operability,
+        :appendix_a6_cost_benefit => :appendix_a6_cost_benefit,
+        :appendix_a7_security => :appendix_a7_security,
+        :publication_webinar_presentation => :publication_webinar_presentation,
+        :appendix_a1_stakeholder_engagement => :appendix_a1_stakeholder_engagement,
+        :appendix_a5_network_investments => :appendix_a5_network_investments,
+        :appendix_a8_social_licence => :appendix_a8_social_licence,
+        :consultation_summary => :consultation_summary,
+    ]
+
+    @test isdefined(PISPDocUtils, :report_counterpart_key_map)
+    if isdefined(PISPDocUtils, :report_counterpart_key_map)
+        pairs = PISPDocUtils.report_counterpart_key_map()
+        keys_2024 = Set(target.key for target in PISP.ISP2024ReportDownloader.report_targets())
+        keys_2026 = Set(target.key for target in PISP.ISP2026ReportDownloader.report_targets())
+        mapped_2024 = first.(pairs)
+        mapped_2026 = last.(pairs)
+
+        @test pairs == expected_pairs
+        @test length(pairs) == 15
+        @test length(unique(mapped_2024)) == length(pairs)
+        @test length(unique(mapped_2026)) == length(pairs)
+        @test Set(mapped_2024) ⊆ keys_2024
+        @test Set(mapped_2026) ⊆ keys_2026
+        @test length(setdiff(keys_2024, Set(mapped_2024))) == 12
+        @test length(setdiff(keys_2026, Set(mapped_2026))) == 4
+    end
+end
+
+function generated_table_rows(markdown, heading)
+    lines = split(markdown, '\n'; keepempty = true)
+    heading_index = findfirst(==(heading), lines)
+    heading_index === nothing && return Vector{Vector{String}}()
+    table_start = findfirst(index -> startswith(lines[index], "| "), (heading_index + 1):length(lines))
+    table_start === nothing && return Vector{Vector{String}}()
+    absolute_start = heading_index + table_start
+    rows = Vector{Vector{String}}()
+    for line in lines[(absolute_start + 2):end]
+        startswith(line, "| ") || break
+        match_result = match(r"^\| (.*?) \| (.*?) \|$", line)
+        match_result === nothing || push!(rows, String[match_result.captures...])
+    end
+    return rows
+end
+
+@testset "Report catalogue generated inventories" begin
+    page_registry = TOML.parsefile(joinpath(TEST_DOCS_DIR, "config", "page-registry.toml"))
+    catalogue_pages = filter(page -> page["id"] == "comparison-report-catalogue", page_registry["page"])
+    @test length(catalogue_pages) == 1
+    if length(catalogue_pages) == 1
+        catalogue_page = only(catalogue_pages)
+        @test catalogue_page["source"] == "literate/comparison/reference/report_catalogue.jl"
+        @test catalogue_page["output"] == "generated/comparison/references/report-catalogue.md"
+        @test catalogue_page["track"] == "comparison"
+        @test catalogue_page["editions"] == ["2024", "2026"]
+    end
+
+    generated_path = joinpath(
+        TEST_DOCS_DIR,
+        "src",
+        "generated",
+        "comparison",
+        "references",
+        "report-catalogue.md",
+    )
+    @test isfile(generated_path)
+
+    if isfile(generated_path)
+        generated = read(generated_path, String)
+        targets_by_edition = Dict(
+            "2024" => collect(PISP.ISP2024ReportDownloader.report_targets()),
+            "2026" => collect(PISP.ISP2026ReportDownloader.report_targets()),
+        )
+        for (edition, heading) in (
+            "2024" => "## ISP 2024 report inventory",
+            "2026" => "## ISP 2026 report inventory",
+        )
+            rows = generated_table_rows(generated, heading)
+            targets = targets_by_edition[edition]
+            @test length(rows) == length(targets)
+            if length(rows) == length(targets)
+                @test [row[1] for row in rows] == [target.title for target in targets]
+                for (row, target) in zip(rows, targets)
+                    local_link = "[$(target.filename)](../../../../../data/$(edition)/pisp-reports/$(target.filename)#page=1)"
+                    official_link = "[AEMO]($(target.url))"
+                    @test row[2] == "$(local_link) · $(official_link)"
+                end
+            end
+        end
+
+        counterpart_rows = generated_table_rows(generated, "## Explicit counterparts")
+        @test length(counterpart_rows) == 15
+        if length(counterpart_rows) == 15
+            targets_2024 = Dict(target.key => target for target in PISP.ISP2024ReportDownloader.report_targets())
+            targets_2026 = Dict(target.key => target for target in PISP.ISP2026ReportDownloader.report_targets())
+            for (row, (key_2024, key_2026)) in zip(counterpart_rows, PISPDocUtils.report_counterpart_key_map())
+                for (cell, edition, target) in (
+                    (row[1], "2024", targets_2024[key_2024]),
+                    (row[2], "2026", targets_2026[key_2026]),
+                )
+                    local_link = "[$(target.filename)](../../../../../data/$(edition)/pisp-reports/$(target.filename)#page=1)"
+                    official_link = "[AEMO]($(target.url))"
+                    @test cell == "$(target.title) — $(local_link) · $(official_link)"
+                end
+            end
+        end
+        @test occursin("Report title", generated)
+        @test occursin("Filename", generated)
+    end
+end
+
 @testset "Documentation source-reading boundaries" begin
     utils_dir = joinpath(TEST_DOCS_DIR, "utils")
     source_material_path = joinpath(utils_dir, "source_material.jl")
@@ -195,8 +354,325 @@ end
     end
 end
 
+@testset "Raw and processed data-selection tutorials" begin
+    registry = TOML.parsefile(joinpath(TEST_DOCS_DIR, "config", "page-registry.toml"))
+    raw_pages = filter(page -> page["id"] == "shared-selecting-raw-isp-material", registry["page"])
+    @test length(raw_pages) == 1
+    if length(raw_pages) == 1
+        raw_page = only(raw_pages)
+        @test raw_page["kind"] == "tutorial"
+        @test raw_page["track"] == "shared"
+        @test raw_page["editions"] == ["2024", "2026"]
+        @test raw_page["data_layer"] == "source-data"
+        @test raw_page["source"] == "literate/shared/tutorials/selecting_raw_isp_material.jl"
+        @test raw_page["output"] == "generated/shared/tutorials/selecting-raw-isp-material.md"
+        @test raw_page["nav_order"] == 140
+    end
+
+    raw_source_path = joinpath(
+        TEST_DOCS_DIR,
+        "literate",
+        "shared",
+        "tutorials",
+        "selecting_raw_isp_material.jl",
+    )
+    @test isfile(raw_source_path)
+    raw_source = isfile(raw_source_path) ? read(raw_source_path, String) : ""
+    for required in (
+        "PISP.source_spec(:operational_demand_trace, 2024)",
+        "PISP.source_path(",
+        "PISPDocUtils.edition_profile(REPO_ROOT, \"2026\")",
+        "PISP_DOCS_RAW_REFTRACE",
+        "PISP_DOCS_RAW_POE",
+        "RefYear5000",
+    )
+        @test occursin(required, raw_source)
+    end
+
+    processed_source = read(
+        joinpath(
+            TEST_DOCS_DIR,
+            "literate",
+            "isp2024",
+            "tutorials",
+            "working_with_pisp_outputs.jl",
+        ),
+        String,
+    )
+    for required in (
+        "PISP_DOCS_ISP2024_REFTRACE",
+        "PISP_DOCS_ISP2024_POE",
+        "PISP_DOCS_ISP2024_YEAR",
+        "out-ref\$(REFTRACE)-poe\$(POE)",
+        "schedule-\$(PLANNING_YEAR)",
+        "available_builds",
+        "available_schedule_years",
+    )
+        @test occursin(required, processed_source)
+    end
+end
+
+@testset "ISP 2026 docs-first source specification" begin
+    inventory_path = joinpath(TEST_DOCS_DIR, "config", "isp2026-source-specs.toml")
+    inventory = TOML.parsefile(inventory_path)
+    @test inventory["schema_version"] == 2
+    @test inventory["edition"] == "2026"
+
+    lineage_ids = reduce(vcat, values(inventory["lineage"]))
+    @test length(lineage_ids) == 80
+    @test length(unique(lineage_ids)) == 80
+
+    sources = inventory["source"]
+    @test length(sources) == 39
+    @test length(unique(source["id"] for source in sources)) == 39
+    registered_2024_ids = Set(string(spec.id) for spec in PISP.source_specs(2024))
+    @test isempty(intersect(Set(source["id"] for source in sources), registered_2024_ids))
+    source_lineage_ids = reduce(vcat, [source["lineage_2024"] for source in sources])
+    @test length(source_lineage_ids) == length(unique(source_lineage_ids))
+    @test Set(source_lineage_ids) == Set(lineage_ids)
+    required_fields = Set([
+        "id",
+        "group",
+        "status",
+        "format",
+        "path",
+        "selection",
+        "keys",
+        "fields_units",
+        "lineage_2024",
+    ])
+    @test all(source -> required_fields ⊆ Set(keys(source)), sources)
+    @test all(sources) do source
+        !isempty(source["lineage_2024"]) || get(source, "basis", "") == "2026-only"
+    end
+    @test Set(source["status"] for source in sources) == Set([
+        "observed",
+        "changed",
+        "relocated",
+        "unresolved",
+        "not-observed",
+        "generated-by-pisp",
+        "user-supplied",
+        "legacy-supplement",
+    ])
+
+    registry = TOML.parsefile(joinpath(TEST_DOCS_DIR, "config", "page-registry.toml"))
+    pages = registry["page"]
+    isp2026_reference_or_validation = filter(
+        page -> page["track"] == "isp2026" && page["kind"] in ("reference", "validation"),
+        pages,
+    )
+    @test Set(page["id"] for page in isp2026_reference_or_validation) == Set([
+        "isp2026-source-data",
+        "isp2026-workbook-and-trace-structure",
+    ])
+    @test all(page -> page["status"] == "published", isp2026_reference_or_validation)
+
+    raw_page_pairs = [
+        ("isp2024-source-data", "isp2026-source-data"),
+        ("isp2024-workbook-and-trace-structure", "isp2026-workbook-and-trace-structure"),
+    ]
+    pages_by_id = Dict(page["id"] => page for page in pages)
+    for (isp2024_id, isp2026_id) in raw_page_pairs
+        isp2024_page = pages_by_id[isp2024_id]
+        isp2026_page = pages_by_id[isp2026_id]
+        @test basename(isp2024_page["source"]) == basename(isp2026_page["source"])
+        @test basename(isp2024_page["output"]) == basename(isp2026_page["output"])
+        @test replace(isp2024_page["title"], "2024" => "<edition>") ==
+            replace(isp2026_page["title"], "2026" => "<edition>")
+        @test isp2024_page["kind"] == isp2026_page["kind"]
+        @test isp2024_page["data_layer"] == "source-data"
+        @test isp2026_page["data_layer"] == "source-data"
+        @test isp2024_page["nav_order"] == 10
+        @test isp2026_page["nav_order"] == 10
+    end
+
+    source_spec_path = joinpath(
+        TEST_DOCS_DIR,
+        "literate",
+        "isp2026",
+        "reference",
+        "source_data.jl",
+    )
+    validation_path = joinpath(
+        TEST_DOCS_DIR,
+        "literate",
+        "isp2026",
+        "validation",
+        "workbook_and_trace_structure.jl",
+    )
+    source_spec_output = joinpath(
+        TEST_DOCS_DIR,
+        "src",
+        "generated",
+        "isp2026",
+        "reference",
+        "source-data.md",
+    )
+    validation_output = joinpath(
+        TEST_DOCS_DIR,
+        "src",
+        "generated",
+        "isp2026",
+        "validation",
+        "workbook-and-trace-structure.md",
+    )
+    @test all(isfile, (source_spec_path, validation_path, source_spec_output, validation_output))
+
+    source_spec = read(source_spec_path, String)
+    @test occursin("# # ISP 2026: Source data", source_spec)
+    @test occursin("# ## Inputs and assumptions workbook", source_spec)
+    @test occursin("# ## Electric-vehicle workbook", source_spec)
+    @test occursin("# ## Generation and storage outlook", source_spec)
+    @test occursin("# ## Model and trace files", source_spec)
+    @test occursin("Fields and units", source_spec)
+    @test !occursin("pipeline_role", source_spec)
+    @test !occursin("Candidate PISP consumer", source_spec)
+    @test !occursin("Observed trace files by scenario", source_spec)
+
+    source_validation = read(validation_path, String)
+    @test occursin("# # ISP 2026: Workbook and trace structure", source_validation)
+    @test occursin("required_source_fields", source_validation)
+    @test occursin("# ## Workbook structure", source_validation)
+    @test occursin("# ## Model archive structure", source_validation)
+    @test occursin("# ## Trace schema", source_validation)
+    @test occursin("# ## Compare editions", source_validation)
+    for diagnostic_text in (
+        "Availability state in configured roots",
+        "Demand CSV traces observed",
+        "PoE labels observed in local filenames",
+        "Snapshot scope",
+        "does not claim",
+        "before package integration",
+        "under review",
+        "not yet integrated",
+        "readiness",
+        "provenance",
+    )
+        @test !occursin(diagnostic_text, source_validation)
+    end
+
+    for generated_path in (source_spec_output, validation_output)
+        generated = lowercase(read(generated_path, String))
+        for reader_term in ("local checkout", "locally available", "provenance", "readiness", "under review", "not yet integrated")
+            @test !occursin(reader_term, generated)
+        end
+    end
+
+    @test Set(
+        page["id"] for page in pages
+        if page["track"] == "isp2024" && page["kind"] == "reference"
+    ) == Set([
+        "isp2024-source-data",
+        "isp2024-output-tables",
+        "isp2024-parameters-and-mappings",
+        "isp2024-buildout-defaults",
+        "isp2024-hydro-parameters-and-constants",
+    ])
+    @test Set(
+        page["id"] for page in pages
+        if page["track"] == "isp2024" && page["kind"] == "validation"
+    ) == Set([
+        "isp2024-workbook-and-trace-structure",
+        "isp2024-temperature-data-coverage",
+        "isp2024-generated-output-consistency",
+    ])
+
+    source_data_2024 = read(
+        joinpath(TEST_DOCS_DIR, "literate", "isp2024", "reference", "source_data.jl"),
+        String,
+    )
+    source_data_2026 = source_spec
+    for heading in (
+        "# ## How to read the tables",
+        "# ## Inputs and assumptions workbook",
+        "# ## Electric-vehicle workbook",
+        "# ## Generation and storage outlook",
+        "# ## Model and trace files",
+        "# ## Compare editions",
+    )
+        @test occursin(heading, source_data_2024)
+        @test occursin(heading, source_data_2026)
+    end
+    @test occursin("column_labels = [\"Source\", \"File and selection\", \"Keys\", \"Fields and units\"]", source_data_2024)
+    @test occursin("column_labels = [\"Source\", \"File and selection\", \"Keys\", \"Fields and units\"]", source_data_2026)
+    @test !occursin("Build input contract", source_data_2024)
+    @test !occursin("Source contribution by output table", source_data_2024)
+
+    structure_2024 = read(
+        joinpath(TEST_DOCS_DIR, "literate", "isp2024", "validation", "workbook_and_trace_structure.jl"),
+        String,
+    )
+    structure_2026 = source_validation
+    for heading in (
+        "# ## Workbook structure",
+        "# ## Model archive structure",
+        "# ## Trace schema",
+        "# ## Compare editions",
+    )
+        @test occursin(heading, structure_2024)
+        @test occursin(heading, structure_2026)
+    end
+    for labels in (
+        "column_labels = [\"Source collection\", \"Files\", \"Selections\"]",
+        "column_labels = [\"Trace family\", \"File or pattern\", \"Keys\", \"Fields and units\"]",
+    )
+        @test occursin(labels, structure_2024)
+        @test occursin(labels, structure_2026)
+    end
+
+    isp2024 = reader_text(read(joinpath(TEST_DOCS_DIR, "src", "editions", "isp2024.md"), String))
+    isp2026 = reader_text(read(joinpath(TEST_DOCS_DIR, "src", "editions", "isp2026.md"), String))
+    for heading in ("## Raw source data", "## Compare editions")
+        @test occursin(heading, isp2024)
+        @test occursin(heading, isp2026)
+    end
+    @test occursin("generated/isp2024/reference/source-data.md", isp2024)
+    @test occursin("generated/isp2024/validation/workbook-and-trace-structure.md", isp2024)
+
+    for required in (
+        "generated/comparison/references/report-catalogue.md",
+        "generated/isp2026/reference/source-data.md",
+        "generated/isp2026/validation/workbook-and-trace-structure.md",
+        "generated/comparison/analyses/raw-source-comparison.md",
+        "generated/comparison/analyses/model-archive-comparison.md",
+        "source-material.md",
+        "trace-coverage.md",
+    )
+        @test occursin(required, isp2026)
+    end
+
+    trace_coverage = reader_text(read(joinpath(TEST_DOCS_DIR, "src", "editions", "trace-coverage.md"), String))
+    @test occursin("2025-inputs-assumptions-and-scenarios-report.pdf#page=234", trace_coverage)
+    @test occursin("2025-isp-methodology.pdf#page=40", trace_coverage)
+
+    page_purpose_audit = reader_text(read(
+        joinpath(TEST_DOCS_DIR, "audits", "reference-validation-page-purpose.md"),
+        String,
+    ))
+    for page_id in (
+        "isp2024-source-data",
+        "isp2024-output-tables",
+        "isp2024-parameters-and-mappings",
+        "isp2024-buildout-defaults",
+        "isp2024-hydro-parameters-and-constants",
+        "isp2024-source-data-inventory",
+        "isp2024-workbook-and-trace-structure",
+        "isp2024-temperature-data-coverage",
+        "isp2024-generated-output-consistency",
+        "isp2026-source-data",
+        "isp2026-workbook-and-trace-structure",
+    )
+        @test occursin("| `$(page_id)` |", page_purpose_audit)
+    end
+end
+
 @testset "Human-use documentation invariants" begin
-    read_doc(path...) = read(joinpath(TEST_DOCS_DIR, "src", path...), String)
+    function read_doc(path...)
+        text = reader_text(read(joinpath(TEST_DOCS_DIR, "src", path...), String))
+        warn_on_prose_candidates(joinpath(path...), text)
+        return text
+    end
 
     concepts = read_doc("concepts.md")
     for required in (
@@ -210,6 +686,23 @@ end
         "schedule-<year>",
         "1 July",
         "4006",
+        "candidate development path (CDP)",
+        "optimal development path (ODP)",
+        "`CDP14`",
+        "`CDP 4`",
+        "PISP currently filters relevant ISP 2024 generation and storage outlook reads",
+        "a6-cost-benefit-analysis.pdf#page=16",
+        "a6-cost-benefit-analysis.pdf#page=124",
+        "a6-cost-benefit-analysis.pdf#page=162",
+        "a6-cost-benefit-analysis.pdf#page=165",
+        "a6-cost-benefit-analysis.pdf#page=166",
+        "## ISP 2024 reference-weather traces",
+        "## ISP 2024 demand probability of exceedance",
+        "`reftrace = 2017`",
+        "does not select a candidate or optimal development path",
+        "10% chance that the year's peak demand exceeds",
+        "generated/shared/tutorials/selecting-raw-isp-material.md",
+        "generated/isp2024/tutorials/working-with-pisp-outputs.md",
     )
         @test occursin(required, concepts)
     end
@@ -260,18 +753,19 @@ end
     )
         @test occursin(required, source_coverage)
     end
+    @test occursin("docs/config/source-material-coverage.toml", source_coverage)
+    @test !occursin("docs/source-material-coverage.toml", source_coverage)
 
     mappings = read_doc("editions", "parameters-and-mappings.md")
+    @test occursin("$(length(PISP.NEMBUSNAME)) package bus aliases", mappings)
     for required in (
         "`1`, `2`, and `3`",
-        "Twelve package bus aliases",
         "PISP.ISPdatabuilder.DATE_RANGES_REFYEARS",
         "problem-table and build-out paths",
         "source coverage and ownership",
         "Report-defined mappings",
         "Workbook-derived values",
         "Package-defined defaults",
-        "Unverified provenance",
         "ISP 2024 build-out defaults",
         "ISP 2024 hydro parameters and constants",
     )
@@ -289,10 +783,18 @@ end
     @test occursin("2024-isp-plexos-model-instructions.pdf#page=5", generated_mappings)
     @test occursin("2024-isp-plexos-model-instructions.pdf#page=6", generated_mappings)
     @test occursin("4006 demand builder", generated_mappings)
-    @test occursin("Each file has one canonical documentation owner", generated_mappings)
+    @test occursin("`PISPparameters.jl` includes six parameter files", generated_mappings)
+    @test !occursin("second handwritten copy", generated_mappings)
     @test occursin("Reference Year and VRE Reference Year", generated_mappings)
     @test occursin("PISP.ISPdatabuilder.DATE_RANGES_REFYEARS", generated_mappings)
     @test !occursin("PISP.WEATHER_YEARS_ISP", generated_mappings)
+
+    renewable_energy_zones = read_doc(
+        "generated",
+        "shared",
+        "source-material",
+        "renewable-energy-zones.md",
+    )
 
     generated_4006_mapping = read_doc(
         "generated",
@@ -302,15 +804,6 @@ end
     )
     @test occursin("PISP.ISPdatabuilder.DATE_RANGES_REFYEARS", generated_4006_mapping)
     @test !occursin("PISP.WEATHER_YEARS_ISP", generated_4006_mapping)
-
-    buildout_defaults = read_doc(
-        "generated",
-        "isp2024",
-        "reference",
-        "buildout-defaults.md",
-    )
-    @test occursin("Source status", buildout_defaults)
-    @test occursin("original external source", buildout_defaults)
 
     hydro_parameters = read_doc(
         "generated",
@@ -336,9 +829,6 @@ end
     )
         @test occursin(required, hydro_parameters)
     end
-    @test !occursin("TraceCite", hydro_parameters)
-    @test !occursin("workspace", lowercase(hydro_parameters))
-    @test !occursin("task 0224", lowercase(hydro_parameters))
 
     comparison = read_doc("editions", "comparison.md")
     for required in (
@@ -346,12 +836,11 @@ end
         "non-trace inputs and assumptions workbooks",
         "model archive comparison",
         "scenario directories",
-        "Wind, solar, and timeslice",
-        "CSV schemas",
-        "model-XML references",
     )
         @test occursin(required, comparison)
     end
+    @test occursin("trace-coverage.md", comparison)
+    @test occursin("parameters-and-mappings.md", comparison)
 
 
     raw_source_comparison = read_doc(
@@ -386,6 +875,9 @@ end
         "DNSP",
         "Rooftop PV",
         "2025-inputs-assumptions-and-scenarios-report.pdf#page=20",
+        "wind, solar, and timeslice",
+        "CSV schemas",
+        "model-XML references",
     )
         @test occursin(required, model_archive_comparison)
     end
@@ -405,6 +897,28 @@ end
     )
         @test occursin(required, download_layout)
     end
+
+    supported_editions = read_doc("editions", "supported-editions.md")
+    for required in (
+        "PISP.download_ISP26_reports",
+        "PISP.download_isp2026_assets",
+        "PISP.ISPdatabuilder.extract_downloads",
+        "ParseISP.jl",
+        "PISP.build_ISP24_datasets",
+        "| Report and source download |",
+        "| Archive extraction |",
+        "| Parser development |",
+        "| PISP.jl parser integration |",
+        "| Build a PISP dataset |",
+        "| Generated-output contract |",
+        "| Published validation evidence |",
+        "| Published analysis or EDA evidence |",
+        "Not yet integrated",
+        "Not yet established",
+        "Under review",
+    )
+        @test occursin(required, supported_editions)
+    end
 end
 
 @testset "Literate executable narrative structure" begin
@@ -416,10 +930,14 @@ end
     end
 
     layout = read_literate("shared", "reference", "pisp_downloads_layout.jl")
-    availability = read_literate("isp2026", "validation", "source_availability.jl")
+    source_contract_validation = read_literate(
+        "isp2026",
+        "validation",
+        "workbook_and_trace_structure.jl",
+    )
     archive_comparison = read_literate("comparison", "analysis", "model_archive_comparison.jl")
 
-    for source in (layout, availability, archive_comparison)
+    for source in (layout, source_contract_validation, archive_comparison)
         hidden_lines = filter(line -> occursin("#hide", line), split(source, '\n'))
         @test !isempty(hidden_lines)
         @test all(line -> strip(line) == "nothing #hide", hidden_lines)
@@ -427,8 +945,10 @@ end
 
     @test position("download_layouts =", layout) >
         position("# ## Observed outlook directories and source archives", layout)
-    @test position("inspection = PISPDocUtils.inspect_edition", availability) >
-        position("# ## Report and archive observations", availability)
+    @test position("workbook_structure = DataFrame", source_contract_validation) >
+        position("# ## Workbook structure", source_contract_validation)
+    @test position("model_structure = DataFrame", source_contract_validation) >
+        position("# ## Model archive structure", source_contract_validation)
 
     @test !occursin("const RECORDS", archive_comparison)
     for (selection, heading) in (

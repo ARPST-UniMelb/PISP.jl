@@ -14,78 +14,80 @@ const GEN_TEMPLATE_FIELDS = [
     "start_up_time", "shut_down_time",
 ]
 
-const ESS_FIELD_METADATA = Dict(
-    "tech" => (meaning = "Storage technology written to `ESS.tech`.", unit = "category"),
-    "type" => (meaning = "Storage-duration classification written to `ESS.type`.", unit = "category"),
-    "investment" => (meaning = "Investment flag.", unit = "0/1 flag"),
-    "active" => (meaning = "Active-status flag.", unit = "0/1 flag"),
-    "ch_eff" => (meaning = "Charging efficiency under PISP's stored-fraction convention.", unit = "fraction"),
-    "dch_eff" => (meaning = "Discharging efficiency under PISP's stored-fraction convention.", unit = "fraction"),
-    "eini" => (meaning = "Initial stored-energy level relative to `emax`.", unit = "fraction"),
-    "emin" => (meaning = "Minimum stored-energy level relative to `emax`.", unit = "fraction"),
-    "pmin" => (meaning = "Minimum discharging power per unit.", unit = "MW"),
-    "lmin" => (meaning = "Minimum charging input per unit.", unit = "MW"),
-    "fullout" => (meaning = "Full forced-outage rate.", unit = "fraction of time"),
-    "partialout" => (meaning = "Partial forced-outage rate.", unit = "fraction of time"),
-    "mttrfull" => (meaning = "Mean time to repair after a full outage.", unit = "h"),
-    "mttrpart" => (meaning = "Mean time to repair after a partial outage.", unit = "h"),
-    "inertia" => (meaning = "Meaning not defined in PISP.", unit = "Not defined in PISP."),
-    "powerfactor" => (meaning = "Power-factor parameter.", unit = "ratio"),
-    "ffr" => (meaning = "Fast-frequency-response provision flag.", unit = "0/1 flag"),
-    "pfr" => (meaning = "Primary-frequency-response provision flag.", unit = "0/1 flag"),
-    "res2" => (meaning = "Secondary-reserve provision flag.", unit = "0/1 flag"),
-    "res3" => (meaning = "Tertiary or regulation-reserve provision flag.", unit = "0/1 flag"),
-    "fr_db" => (meaning = "Meaning not defined in PISP.", unit = "Not defined in PISP."),
-    "fr_ad" => (meaning = "Meaning not defined in PISP.", unit = "Not defined in PISP."),
-    "fr_dt" => (meaning = "Meaning not defined in PISP.", unit = "Not defined in PISP."),
-    "fr_frt" => (meaning = "Meaning not defined in PISP.", unit = "Not defined in PISP."),
-    "fr_fr" => (meaning = "Meaning not defined in PISP.", unit = "Not defined in PISP."),
-    "n" => (meaning = "Static maximum unit-count field; the build-out schedule supplies the time-varying count.", unit = "units"),
-    "contingency" => (meaning = "Contingency-classification flag.", unit = "0/1 flag"),
+const ESS_FIELD_SOURCES = Dict(
+    "tech" => "PISP default",
+    "type" => "PISP default",
+    "investment" => "PISP default",
+    "active" => "PISP default",
+    "ch_eff" => "ISP workbook — Storage properties",
+    "dch_eff" => "ISP workbook — Storage properties",
+    "eini" => "PISP default",
+    "emin" => "PISP default",
+    "pmin" => "PISP default",
+    "lmin" => "PISP default",
+    "fullout" => "ISP workbook — Generator Reliability Settings",
+    "partialout" => "PISP default",
+    "mttrfull" => "ISP workbook — Generator Reliability Settings",
+    "mttrpart" => "PISP default",
+    "inertia" => "PISP default",
+    "powerfactor" => "PISP default",
+    "ffr" => "PISP default",
+    "pfr" => "PISP default",
+    "res2" => "PISP default",
+    "res3" => "PISP default",
+    "fr_db" => "PISP default",
+    "fr_ad" => "PISP default",
+    "fr_dt" => "PISP default",
+    "fr_frt" => "PISP default",
+    "fr_fr" => "PISP default",
+    "n" => "PISP default",
+    "contingency" => "PISP default",
 )
 
-const GEN_FIELD_METADATA = Dict(
-    "fuel" => (meaning = "Generator fuel category.", unit = "category"),
-    "tech" => (meaning = "Generator technology.", unit = "category"),
-    "type" => (meaning = "Generator type or planning classification.", unit = "category"),
-    "forate" => (meaning = "Aggregate availability factor after full- and partial-outage effects.", unit = "fraction"),
-    "fullout" => (meaning = "Full forced-outage rate.", unit = "fraction of time"),
-    "partialout" => (meaning = "Partial forced-outage rate.", unit = "fraction of time"),
-    "derate" => (meaning = "Capacity derating during a partial outage.", unit = "fraction"),
-    "mttrfull" => (meaning = "Mean time to repair after a full outage.", unit = "h"),
-    "mttrpart" => (meaning = "Mean time to repair after a partial outage.", unit = "h"),
-    "pmin" => (meaning = "Minimum power output per unit.", unit = "MW"),
-    "rup" => (meaning = "Ramp-up capability.", unit = "MW/min"),
-    "rdw" => (meaning = "Ramp-down capability.", unit = "MW/min"),
-    "investment" => (meaning = "Investment flag.", unit = "0/1 flag"),
-    "active" => (meaning = "Active-status flag.", unit = "0/1 flag"),
-    "cvar" => (meaning = "Variable generation cost.", unit = raw"$/MWh"),
-    "cfuel" => (meaning = "Fuel cost.", unit = raw"$/GJ"),
-    "cvom" => (meaning = "Variable operation and maintenance cost.", unit = raw"$/MWh"),
-    "cfom" => (meaning = "Fixed operation and maintenance cost parameter.", unit = raw"$/MW/yr"),
-    "co2" => (meaning = "Carbon-dioxide emissions intensity.", unit = "kgCO2/MWh"),
-    "slope" => (meaning = "Meaning not defined in PISP.", unit = "Not defined in PISP."),
-    "hrate" => (meaning = "Generator heat rate.", unit = "GJ/MWh"),
-    "pfrmax" => (meaning = "Maximum headroom available for frequency response.", unit = "MW"),
-    "g" => (meaning = "Meaning not defined in PISP.", unit = "Not defined in PISP."),
-    "inertia" => (meaning = "Meaning not defined in PISP.", unit = "Not defined in PISP."),
-    "ffr" => (meaning = "Fast-frequency-response provision flag.", unit = "0/1 flag"),
-    "pfr" => (meaning = "Primary-frequency-response provision flag.", unit = "0/1 flag"),
-    "res2" => (meaning = "Secondary-reserve provision flag.", unit = "0/1 flag"),
-    "res3" => (meaning = "Tertiary or regulation-reserve provision flag.", unit = "0/1 flag"),
-    "powerfactor" => (meaning = "Power-factor parameter.", unit = "ratio"),
-    "n" => (meaning = "Static maximum unit-count field; the build-out schedule supplies the time-varying count.", unit = "units"),
-    "contingency" => (meaning = "Contingency-classification flag.", unit = "0/1 flag"),
-    "down_time" => (meaning = "Minimum down time after shutdown.", unit = "h"),
-    "up_time" => (meaning = "Minimum up time after startup.", unit = "h"),
-    "last_state" => (meaning = "Meaning not defined in PISP.", unit = "Not defined in PISP."),
-    "last_state_period" => (meaning = "Meaning not defined in PISP.", unit = "Not defined in PISP."),
-    "last_state_output" => (meaning = "Meaning not defined in PISP.", unit = "Not defined in PISP."),
-    "start_up_cost" => (meaning = "Startup cost.", unit = raw"$"),
-    "shut_down_cost" => (meaning = "Shutdown cost.", unit = raw"$"),
-    "start_up_time" => (meaning = "Time required to start a unit.", unit = "h"),
-    "shut_down_time" => (meaning = "Time required to shut down a unit.", unit = "h"),
+const GEN_FIELD_SOURCES = Dict(
+    "fuel" => "PISP default",
+    "tech" => "PISP default",
+    "type" => "PISP default",
+    "forate" => "ISP workbook — Generator Reliability Settings (derived)",
+    "fullout" => "ISP workbook — Generator Reliability Settings",
+    "partialout" => "PISP default",
+    "derate" => "PISP default",
+    "mttrfull" => "ISP workbook — Generator Reliability Settings",
+    "mttrpart" => "PISP default",
+    "pmin" => "PISP default",
+    "rup" => "ISP workbook — Max Ramp Rates",
+    "rdw" => "ISP workbook — Max Ramp Rates",
+    "investment" => "PISP default",
+    "active" => "PISP default",
+    "cvar" => "ISP workbook — New Entrant Data Summary",
+    "cfuel" => "ISP workbook — New Entrant Data Summary",
+    "cvom" => "ISP workbook — New Entrant Data Summary",
+    "cfom" => "ISP workbook — New Entrant Data Summary",
+    "co2" => "ISP workbook — New Entrant Data Summary",
+    "slope" => "PISP default",
+    "hrate" => "ISP workbook — New Entrant Data Summary",
+    "pfrmax" => "PISP default",
+    "g" => "PISP default",
+    "inertia" => "PISP default",
+    "ffr" => "PISP default",
+    "pfr" => "PISP default",
+    "res2" => "PISP default",
+    "res3" => "PISP default",
+    "powerfactor" => "PISP default",
+    "n" => "PISP default",
+    "contingency" => "PISP default",
+    "down_time" => "PISP default",
+    "up_time" => "PISP default",
+    "last_state" => "PISP default",
+    "last_state_period" => "PISP default",
+    "last_state_output" => "PISP default",
+    "start_up_cost" => "PISP default",
+    "shut_down_cost" => "PISP default",
+    "start_up_time" => "PISP default",
+    "shut_down_time" => "PISP default",
 )
+
+const BUILDOUT_SOURCE_PREFIXES = ("ISP workbook", "Published report", "PISP default")
 
 const ESS_PLACEHOLDER_ORIGINS = Dict(
     "id_ess" => "Sequential identifier generated by PISP.",
@@ -139,26 +141,26 @@ end
 
 function buildout_origin_rows()
     return [
-        (output = "ESS static row", field_group = "Workbook", rule = "`tech`, `subregion`, and `capacity` select, locate, and size the asset."),
+        (output = "ESS static row", field_group = "Build-out workbook", rule = "`tech`, `subregion`, and `capacity` select, locate, and size the asset."),
         (output = "ESS static row", field_group = "Generated or looked up", rule = "PISP generates `id_ess`, `name`, and `alias`, and resolves `id_bus` from the subregion."),
-        (output = "ESS static row", field_group = "Computed or explicit", rule = "`emax = duration_h × capacity`; `pmax = capacity`; `lmax = capacity`; coordinates are `0.0`."),
-        (output = "ESS static row", field_group = "Template", rule = "The 27 non-placeholder fields listed below come from `PISP.params_buildout_bess`."),
-        (output = "ESS unit-count schedule", field_group = "Workbook and generated", rule = "The workbook supplies `year` and `n`; PISP adds scenario IDs, row IDs, and `DateTime(year, 1, 1)`."),
-        (output = "Generator static row", field_group = "Workbook", rule = "`tech`, `subregion`, and `capacity` select, locate, and size the asset."),
+        (output = "ESS static row", field_group = "Calculated or explicit", rule = "`emax = duration_h × capacity`; `pmax = capacity`; `lmax = capacity`; coordinates are `0.0`."),
+        (output = "ESS static row", field_group = "Stored default", rule = "The 27 non-placeholder fields listed below come from `PISP.params_buildout_bess`."),
+        (output = "ESS unit-count schedule", field_group = "Build-out workbook and generated", rule = "The workbook supplies `year` and `n`; PISP adds scenario IDs, row IDs, and `DateTime(year, 1, 1)`."),
+        (output = "Generator static row", field_group = "Build-out workbook", rule = "`tech`, `subregion`, and `capacity` select, locate, and size the asset."),
         (output = "Generator static row", field_group = "Generated or looked up", rule = "PISP generates `id_gen`, `name`, and `alias`, and resolves `id_bus` from the subregion."),
-        (output = "Generator static row", field_group = "Computed or explicit", rule = "`pmax = capacity`; coordinates are `0.0`."),
-        (output = "Generator static row", field_group = "Template", rule = "The 40 non-placeholder fields listed below come from `PISP.params_buildout_gen`."),
-        (output = "Generator unit-count schedule", field_group = "Workbook and generated", rule = "The workbook supplies `year` and `n`; PISP adds scenario IDs, row IDs, and `DateTime(year, 1, 1)`."),
+        (output = "Generator static row", field_group = "Calculated or explicit", rule = "`pmax = capacity`; coordinates are `0.0`."),
+        (output = "Generator static row", field_group = "Stored default", rule = "The 40 non-placeholder fields listed below come from `PISP.params_buildout_gen`."),
+        (output = "Generator unit-count schedule", field_group = "Build-out workbook and generated", rule = "The workbook supplies `year` and `n`; PISP adds scenario IDs, row IDs, and `DateTime(year, 1, 1)`."),
     ]
 end
 
 function buildout_placeholder_rows()
     rows = NamedTuple[]
     for field in sort(collect(keys(ESS_PLACEHOLDER_ORIGINS)))
-        push!(rows, (output_table = "ESS", field = field, applied_source = ESS_PLACEHOLDER_ORIGINS[field]))
+        push!(rows, (output_table = "ESS", field = field, applied_rule = ESS_PLACEHOLDER_ORIGINS[field]))
     end
     for field in sort(collect(keys(GEN_PLACEHOLDER_ORIGINS)))
-        push!(rows, (output_table = "Generator", field = field, applied_source = GEN_PLACEHOLDER_ORIGINS[field]))
+        push!(rows, (output_table = "Generator", field = field, applied_rule = GEN_PLACEHOLDER_ORIGINS[field]))
     end
     return rows
 end
@@ -167,12 +169,12 @@ function template_comparison_rows(kind::Symbol)
     if kind == :ess
         labels = sort(collect(PISP._BUILDOUT_ESS_TECHS))
         fields = ESS_TEMPLATE_FIELDS
-        metadata = ESS_FIELD_METADATA
+        sources = ESS_FIELD_SOURCES
         templates = Dict(label => PISP.params_buildout_bess[Symbol(label)] for label in labels)
     elseif kind == :gen
         labels = sort(collect(PISP._BUILDOUT_GEN_TECHS))
         fields = GEN_TEMPLATE_FIELDS
-        metadata = GEN_FIELD_METADATA
+        sources = GEN_FIELD_SOURCES
         templates = Dict(label => PISP.params_buildout_gen[PISP._BUILDOUT_GEN_TECH_KEY[label]] for label in labels)
     else
         error("kind must be :ess or :gen")
@@ -180,8 +182,7 @@ function template_comparison_rows(kind::Symbol)
 
     return [(
         field = field,
-        meaning = metadata[field].meaning,
-        unit = metadata[field].unit,
+        source = sources[field],
         values = Dict(label => templates[label][field] for label in labels),
     ) for field in fields]
 end
@@ -192,7 +193,7 @@ function split_common_rows(rows, labels)
     for row in rows
         values = [row.values[label] for label in labels]
         if all(==(first(values)), values)
-            push!(common, (field = code_span(row.field), value = first(values), meaning = row.meaning, unit = row.unit))
+            push!(common, (field = code_span(row.field), value = first(values), source = row.source))
         else
             push!(varying, row)
         end
@@ -203,8 +204,7 @@ end
 function comparison_frame(rows, labels)
     table = DataFrame(
         field = [code_span(row.field) for row in rows],
-        meaning = [row.meaning for row in rows],
-        unit = [row.unit for row in rows],
+        source = [row.source for row in rows],
     )
     for label in labels
         table[!, Symbol(label)] = [row.values[label] for row in rows]
@@ -215,8 +215,7 @@ end
 function field_metadata_frame(rows)
     return DataFrame(
         field = [code_span(row.field) for row in rows],
-        meaning = [row.meaning for row in rows],
-        unit = [row.unit for row in rows],
+        source = [row.source for row in rows],
     )
 end
 
@@ -243,7 +242,7 @@ function buildout_reference_tables()
         for row in buildout_technology_rows()
     ]
     placeholder_rows = [
-        (output_table = row.output_table, field = code_span(row.field), applied_source = row.applied_source)
+        (output_table = row.output_table, field = code_span(row.field), applied_rule = row.applied_rule)
         for row in buildout_placeholder_rows()
     ]
 
@@ -290,8 +289,13 @@ function validate_buildout_defaults_contract(parser_path)
     parser_fields.ess == Set(ESS_TEMPLATE_FIELDS) || error("ESS documentation fields differ from parser-consumed keys")
     parser_fields.gen == Set(GEN_TEMPLATE_FIELDS) || error("Generator documentation fields differ from parser-consumed keys")
 
-    Set(keys(ESS_FIELD_METADATA)) == Set(ESS_TEMPLATE_FIELDS) || error("ESS field metadata is incomplete")
-    Set(keys(GEN_FIELD_METADATA)) == Set(GEN_TEMPLATE_FIELDS) || error("Generator field metadata is incomplete")
+    Set(keys(ESS_FIELD_SOURCES)) == Set(ESS_TEMPLATE_FIELDS) || error("ESS field sources are incomplete")
+    Set(keys(GEN_FIELD_SOURCES)) == Set(GEN_TEMPLATE_FIELDS) || error("Generator field sources are incomplete")
+
+    for source in Iterators.flatten((values(ESS_FIELD_SOURCES), values(GEN_FIELD_SOURCES)))
+        any(startswith(source, prefix) for prefix in BUILDOUT_SOURCE_PREFIXES) ||
+            error("unsupported build-out source classification: $source")
+    end
 
     for (label, template) in PISP.params_buildout_bess
         for field in ESS_TEMPLATE_FIELDS

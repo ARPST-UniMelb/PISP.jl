@@ -139,12 +139,18 @@ staging_root(root) = joinpath(root, "docs", ".documenter-source")
         @test read(joinpath(staging_root(root), "nested", "protected.md"), String) == original
     end
 
-    @testset "Markdown table rows remain byte-identical" begin
+    @testset "registered inline PDF links in Markdown table cells route" begin
         root = fixture_repo()
         table = "| Source | Reference |\n| --- | --- |\n| report | [report](../../../sources/report.pdf#page=15) |\n"
         write(joinpath(source_root(root), "nested", "table.md"), table)
-        stage_documentation!(source_root(root), staging_root(root), registry_path(root), :public; repo_root=root)
+        stage_documentation!(source_root(root), staging_root(root), registry_path(root), :local; repo_root=root)
         @test read(joinpath(staging_root(root), "nested", "table.md"), String) == table
+        stage_documentation!(source_root(root), staging_root(root), registry_path(root), :public; repo_root=root)
+        public = read(joinpath(staging_root(root), "nested", "table.md"), String)
+        @test public ==
+            "| Source | Reference |\n| --- | --- |\n| report | [report](https://www.aemo.com.au/report.pdf?la=en#page=15) |\n"
+        stage_documentation!(source_root(root), staging_root(root), registry_path(root), :public; repo_root=root)
+        @test read(joinpath(staging_root(root), "nested", "table.md"), String) == public
     end
 
     @testset "inline invalid candidates fail" begin

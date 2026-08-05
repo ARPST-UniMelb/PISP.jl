@@ -1,11 +1,8 @@
 # # ISP 2024: Build-out defaults
 #
-# Optional build-out rows combine a small workbook contract with package-defined generator and storage defaults.
-# The workbook identifies the technology, subregion, capacity, build year, and unit count.
-# PISP supplies the remaining static-row values, generates identifiers and schedule keys, and computes capacity-dependent fields.
-#
-# The tables below read the current PISP dictionaries and build-out mappings directly.
-# "Not defined in PISP" means that the active package supplies a value but does not define the field's meaning or unit.
+# Optional build-out rows combine a user-supplied workbook with the generator and storage defaults used by PISP.
+# The workbook supplies the technology, subregion, capacity, build year, and unit count.
+# PISP uses the selected template to complete the static asset row and create the corresponding unit-count schedule.
 
 using PISP
 using DataFrames
@@ -19,13 +16,15 @@ const BUILDOUT_PARSER = joinpath(REPO_ROOT, "src", "parsers", "PISP-2024buildout
 PISPDocUtils.validate_buildout_defaults_contract(BUILDOUT_PARSER)
 nothing #hide
 
-# ## Source status
+# ## Parameter sources
 #
-# The build-out workbook supplies `tech`, `subregion`, `capacity`, `year`, and `n`. The parser generates or looks up identifiers and locations, calculates capacity-dependent fields, and obtains the remaining values from `PISP.params_buildout_bess` or `PISP.params_buildout_gen`.
+# The build-out workbook is user-supplied and is separate from AEMO's ISP workbooks.
+# Stored template values are classified as `ISP workbook`, `Published report`, or `PISP default`.
+# `PISP default` denotes a value currently maintained in PISP whose upstream workbook or report source has not yet been identified.
 #
-# Those template dictionaries are the current code authority for the displayed defaults. PISP does not encode an original external source for every numeric template value, so this page reports them as package-defined defaults rather than assigning an unsupported report or workbook citation. Fields labelled "Not defined in PISP" retain unverified meaning or units until a source or package contract establishes them.
+# Field meanings and units are defined in the [output tables](output-tables.md).
 
-# ## Supported workbook technology labels
+# ## Supported build-out technology labels
 #
 # A workbook label selects one PISP template. Storage labels also select the duration used to calculate `ESS.emax`.
 
@@ -34,13 +33,13 @@ PISPDocUtils.markdown_table(reference_tables.technology; allow_markdown_in_cells
 
 # ## How a build-out row is assembled
 #
-# PISP does not copy a complete static row from the workbook. Each output field has one of four origins: workbook input, generated or looked-up identity, an explicit calculation, or a package template.
+# PISP does not copy a complete static row from the workbook. Each output field is supplied by the build-out workbook, generated or looked up, calculated explicitly, or read from the selected stored defaults.
 
 PISPDocUtils.markdown_table(reference_tables.origins; allow_markdown_in_cells = true)
 
-# ## Template placeholders and their applied sources
+# ## Template placeholders and applied rules
 #
-# `nothing` values in the raw template dictionaries are placeholders. The parser replaces or bypasses them using workbook values, generated identifiers, bus lookup, capacity calculations, or explicit coordinates.
+# `nothing` values in the raw template dictionaries are placeholders. The parser replaces them using workbook values, generated identifiers, bus lookup, capacity calculations, or explicit coordinates.
 
 PISPDocUtils.markdown_table(reference_tables.placeholders; allow_markdown_in_cells = true)
 
@@ -55,7 +54,7 @@ PISPDocUtils.markdown_table(reference_tables.ess_common; allow_markdown_in_cells
 
 # ### Defaults that vary by storage technology
 #
-# Meaning and unit of each varying field:
+# Source of each varying field:
 
 PISPDocUtils.markdown_table(reference_tables.ess_varying_fields; allow_markdown_in_cells = true)
 
@@ -78,7 +77,7 @@ PISPDocUtils.markdown_table(reference_tables.gen_varying; allow_markdown_in_cell
 
 # ## Override and derivation rules
 #
-# The workbook cannot override template fields directly. Changing a template field requires changing PISP's build-out parameter dictionaries.
+# The workbook cannot override stored defaults directly. Changing one requires changing PISP's build-out parameter dictionaries.
 # Capacity affects `capacity`, `pmax`, and, for storage, `lmax` and `emax`; subregion affects `id_bus`; year and `n` affect only the unit-count schedule.
 # Uniform mode applies one workbook sheet to every ISP scenario. Scenario-specific mode reads one sheet per scenario, unions static assets by generated name, and keeps each scenario's unit-count schedule separate.
 #

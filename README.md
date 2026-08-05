@@ -386,6 +386,6 @@ The `jldoctest` examples embedded in the package's docstrings are verified with 
 - [Download ISP source material](docs/src/editions/source-material.md)
 - [Supported ISP editions](docs/src/editions/supported-editions.md)
 - [ISP 2024 output tables and field dictionary](docs/src/generated/isp2024/reference/output-tables.md)
-- [ISP 2024 source-to-output provenance](docs/src/generated/isp2024/reference/data-sources.md)
+- [ISP 2024 source data](docs/src/generated/isp2024/reference/source-data.md)
 - [Assumptions and scope](docs/src/assumptions.md)
 - [API reference](docs/src/api.md)

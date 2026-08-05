@@ -205,8 +205,8 @@ PISPDocUtils.markdown_table(distribution_network_2026)
 | CNSW | Essential Energy | 1872 | 13675 | 0 | 0 |
 
 
-## Current PISP boundary
+## How the source material differs
 
 The ISP 2024 dataset builder derives demand-by-bus relationships from its generated demand table and separately applies the EV allocation workflow.
-The additional ISP 2026 worksheets are observed source material; they are not evidence of an integrated 2026 PISP demand or distributed-resource builder.
-
+ISP 2026 adds data-centre forecasts, distribution-network limits, rooftop-PV
+tables, and hybrid-site limits that require new source selections and mappings.

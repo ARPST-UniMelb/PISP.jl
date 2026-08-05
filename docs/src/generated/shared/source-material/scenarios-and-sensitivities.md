@@ -187,4 +187,3 @@ PISPDocUtils.markdown_table(outlook_cases)
 The 2024 set contains three core workbooks and nine sensitivities.
 The 2026 set contains three core workbooks and six sensitivities.
 Additions, removals, and renamed cases should be interpreted from their published assumptions, not inferred mechanically from similar filenames.
-

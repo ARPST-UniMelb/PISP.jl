@@ -33,7 +33,7 @@ module ISPReportDownloader
 
     const PDF_SIGNATURE = UInt8[0x25, 0x50, 0x44, 0x46, 0x2d] # %PDF-
 
-    function download_report_targets(targets::AbstractVector{ISPReportTarget};
+    function download_report_targets(targets::Union{AbstractVector{ISPReportTarget},Tuple{Vararg{ISPReportTarget}}};
                                      outdir::AbstractString,
                                      overwrite::Bool = false,
                                      throttle_seconds::Union{Nothing,Real} = nothing,

@@ -588,4 +588,3 @@ The cost-per-MW ratio is a screening measure: it identifies how the selected sou
 
 Keep resource potential and augmentation cost as separate modelling inputs unless an explicit economic model combines them.
 Preserve zero-resource and unmatched rows in evidence so that filtering decisions remain auditable.
-

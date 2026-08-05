@@ -25,6 +25,29 @@ related_reference_pages = [
 ]
 
 [[page]]
+id = "shared-selecting-raw-isp-material"
+title = "ISP 2024 and ISP 2026: Selecting raw source material"
+kind = "tutorial"
+track = "shared"
+editions = ["2024", "2026"]
+data_layer = "source-data"
+source = "literate/shared/tutorials/selecting_raw_isp_material.jl"
+output = "generated/shared/tutorials/selecting-raw-isp-material.md"
+status = "published"
+nav_order = 140
+snapshot = true
+data_requirements = [
+    { root = "download", edition = "2024", path = "Traces", type = "directory" },
+    { root = "download", edition = "2026", path = "Traces/2026 ISP Solar traces/solar", type = "directory" },
+    { root = "download", edition = "2026", path = "Traces/2026 ISP Wind traces/wind", type = "directory" },
+]
+related_reference_pages = [
+    "concepts.md",
+    "editions/trace-coverage.md",
+    "generated/isp2024/validation/workbook-and-trace-structure.md",
+]
+
+[[page]]
 id = "shared-source-coverage-ledger"
 title = "AEMO ISP source coverage and ownership"
 kind = "reference"
@@ -254,14 +277,14 @@ related_reference_pages = [
 ]
 
 [[page]]
-id = "isp2024-data-sources"
-title = "ISP 2024: Data sources"
+id = "isp2024-source-data"
+title = "ISP 2024: Source data"
 kind = "reference"
 track = "isp2024"
 editions = ["2024"]
 data_layer = "source-data"
-source = "literate/isp2024/reference/data_sources.jl"
-output = "generated/isp2024/reference/data-sources.md"
+source = "literate/isp2024/reference/source_data.jl"
+output = "generated/isp2024/reference/source-data.md"
 status = "published"
 nav_order = 10
 snapshot = false
@@ -360,32 +383,25 @@ snapshot = true
 related_reference_pages = ["concepts.md", "generated/isp2024/reference/output-tables.md", "assumptions.md"]
 
 [[page]]
-id = "isp2024-source-data-inventory"
-title = "ISP 2024: Source-data inventory"
+id = "isp2024-workbook-and-trace-structure"
+title = "ISP 2024: Workbook and trace structure"
 kind = "validation"
 track = "isp2024"
 editions = ["2024"]
 data_layer = "source-data"
-source = "literate/isp2024/validation/source_data_inventory.jl"
-output = "generated/isp2024/validation/source-data-inventory.md"
+source = "literate/isp2024/validation/workbook_and_trace_structure.jl"
+output = "generated/isp2024/validation/workbook-and-trace-structure.md"
 status = "published"
 nav_order = 10
-snapshot = true
-related_reference_pages = ["generated/isp2024/reference/data-sources.md"]
-
-[[page]]
-id = "isp2024-trace-coverage-and-schema"
-title = "ISP 2024: Trace data availability and structure"
-kind = "validation"
-track = "isp2024"
-editions = ["2024"]
-data_layer = "source-data"
-source = "literate/isp2024/validation/trace_coverage_and_schema.jl"
-output = "generated/isp2024/validation/trace-coverage-and-schema.md"
-status = "published"
-nav_order = 20
-snapshot = true
-related_reference_pages = ["generated/isp2024/reference/data-sources.md", "concepts.md"]
+snapshot = false
+data_requirements = [
+    { root = "download", edition = "2024", path = "2024-isp-inputs-and-assumptions-workbook.xlsx", type = "file" },
+    { root = "download", edition = "2024", path = "2023-iasr-ev-workbook.xlsx", type = "file" },
+    { root = "download", edition = "2024", path = "Core", type = "directory" },
+    { root = "download", edition = "2024", path = "2024 ISP Model", type = "directory" },
+    { root = "download", edition = "2024", path = "Traces", type = "directory" },
+]
+related_reference_pages = ["generated/isp2024/reference/source-data.md", "editions/trace-coverage.md"]
 
 [[page]]
 id = "isp2024-temperature-data-coverage"
@@ -400,41 +416,65 @@ status = "published"
 nav_order = 30
 snapshot = true
 data_requirements = [{ root = "download", edition = "2024", path = "2024-isp-inputs-and-assumptions-workbook.xlsx", type = "file" }]
-related_reference_pages = ["generated/isp2024/reference/data-sources.md", "assumptions.md"]
+related_reference_pages = ["generated/isp2024/reference/source-data.md", "assumptions.md"]
 
 [[page]]
-id = "isp2026-source-availability"
-title = "ISP 2026: Source availability and release structure"
-kind = "validation"
+id = "isp2026-source-data"
+title = "ISP 2026: Source data"
+kind = "reference"
 track = "isp2026"
 editions = ["2026"]
 data_layer = "source-data"
-source = "literate/isp2026/validation/source_availability.jl"
-output = "generated/isp2026/validation/source-availability.md"
+source = "literate/isp2026/reference/source_data.jl"
+output = "generated/isp2026/reference/source-data.md"
 status = "published"
 nav_order = 10
 snapshot = false
 data_requirements = [
-    { root = "report", edition = "2026", path = "2026-integrated-system-plan.pdf", type = "file" },
-    { root = "report", edition = "2026", path = "2026-isp-plexos-model-instructions.pdf", type = "file" },
-    { root = "report", edition = "2026", path = "2025-inputs-assumptions-and-scenarios-report.pdf", type = "file" },
-    { root = "report", edition = "2026", path = "addendum-to-2025-inputs-assumptions-and-scenarios-report.pdf", type = "file" },
-    { root = "report", edition = "2026", path = "2025-isp-methodology.pdf", type = "file" },
-    { root = "report", edition = "2026", path = "a2-isp-development-opportunities.pdf", type = "file" },
-    { root = "report", edition = "2026", path = "a3-renewable-energy-zones.pdf", type = "file" },
-    { root = "report", edition = "2026", path = "a4-system-operability.pdf", type = "file" },
-    { root = "report", edition = "2026", path = "a6-cost-benefit-analysis.pdf", type = "file" },
-    { root = "report", edition = "2026", path = "a7-system-security.pdf", type = "file" },
-    { root = "download", edition = "2026", path = "zip/2026-isp-model.zip", type = "file" },
-    { root = "download", edition = "2026", path = "zip/2026-isp-generation-and-storage-outlook.zip", type = "file" },
-    { root = "download", edition = "2026", path = "zip/Traces/2026-isp-solar-traces.zip", type = "file" },
-    { root = "download", edition = "2026", path = "zip/Traces/2026-isp-wind-traces.zip", type = "file" },
-    { root = "download", edition = "2026", path = "2026 ISP Model", type = "directory" },
+    { root = "repo", path = "docs/config/isp2026-source-specs.toml", type = "file" },
+]
+related_reference_pages = [
+    "editions/isp2026.md",
+    "editions/source-material.md",
+    "generated/comparison/analyses/raw-source-comparison.md",
+]
+
+[[page]]
+id = "isp2026-workbook-and-trace-structure"
+title = "ISP 2026: Workbook and trace structure"
+kind = "validation"
+track = "isp2026"
+editions = ["2026"]
+data_layer = "source-data"
+source = "literate/isp2026/validation/workbook_and_trace_structure.jl"
+output = "generated/isp2026/validation/workbook-and-trace-structure.md"
+status = "published"
+nav_order = 10
+snapshot = false
+data_requirements = [
+    { root = "repo", path = "docs/config/isp2026-source-specs.toml", type = "file" },
+    { root = "download", edition = "2026", path = "2026-isp-inputs-and-assumptions-workbook.xlsm", type = "file" },
+    { root = "download", edition = "2026", path = "aemo-2025-iasr-ev-workbook.xlsx", type = "file" },
     { root = "download", edition = "2026", path = "Core scenarios", type = "directory" },
     { root = "download", edition = "2026", path = "Sensitivities", type = "directory" },
+    { root = "download", edition = "2026", path = "2026 ISP Model", type = "directory" },
     { root = "download", edition = "2026", path = "Traces", type = "directory" },
 ]
-related_reference_pages = ["editions/source-material.md", "editions/trace-coverage.md"]
+related_reference_pages = ["editions/isp2026.md", "editions/source-material.md", "editions/trace-coverage.md"]
+
+[[page]]
+id = "comparison-report-catalogue"
+title = "ISP report catalogue"
+kind = "reference"
+track = "comparison"
+editions = ["2024", "2026"]
+data_layer = "source-data"
+source = "literate/comparison/reference/report_catalogue.jl"
+output = "generated/comparison/references/report-catalogue.md"
+status = "published"
+nav_order = 5
+snapshot = false
+related_reference_pages = ["editions/comparison.md", "editions/source-material.md"]
 
 [[page]]
 id = "comparison-model-archive-structure"
@@ -512,7 +552,7 @@ output = "generated/isp2024/analyses/reference-trace-4006-profiles.md"
 status = "published"
 nav_order = 10
 snapshot = true
-related_reference_pages = ["generated/isp2024/reference/data-sources.md", "concepts.md", "generated/isp2024/reference/parameters-and-mappings.md"]
+related_reference_pages = ["generated/isp2024/reference/source-data.md", "concepts.md", "generated/isp2024/reference/parameters-and-mappings.md"]
 
 [[page]]
 id = "isp2024-historical-trace-years"
@@ -526,7 +566,7 @@ output = "generated/isp2024/analyses/historical-trace-year-comparison.md"
 status = "published"
 nav_order = 20
 snapshot = true
-related_reference_pages = ["generated/isp2024/reference/data-sources.md", "concepts.md"]
+related_reference_pages = ["generated/isp2024/reference/source-data.md", "concepts.md"]
 
 [[page]]
 id = "isp2024-seasonal-renewable-extremes"
@@ -540,7 +580,7 @@ output = "generated/isp2024/analyses/seasonal-renewable-extremes.md"
 status = "published"
 nav_order = 30
 snapshot = true
-related_reference_pages = ["generated/isp2024/reference/data-sources.md", "assumptions.md"]
+related_reference_pages = ["generated/isp2024/reference/source-data.md", "assumptions.md"]
 
 [[page]]
 id = "isp2024-demand-stress-low-solar"
@@ -583,7 +623,7 @@ status = "published"
 nav_order = 60
 snapshot = true
 data_requirements = [{ root = "download", edition = "2024", path = "2024-isp-inputs-and-assumptions-workbook.xlsx", type = "file" }]
-related_reference_pages = ["generated/isp2024/reference/data-sources.md", "generated/isp2024/reference/parameters-and-mappings.md", "assumptions.md"]
+related_reference_pages = ["generated/isp2024/reference/source-data.md", "generated/isp2024/reference/parameters-and-mappings.md", "assumptions.md"]
 
 [[page]]
 id = "isp2024-rez-resource-versus-connection-cost"
@@ -598,7 +638,7 @@ status = "published"
 nav_order = 70
 snapshot = true
 data_requirements = [{ root = "download", edition = "2024", path = "2024-isp-inputs-and-assumptions-workbook.xlsx", type = "file" }]
-related_reference_pages = ["generated/isp2024/reference/data-sources.md", "generated/isp2024/reference/parameters-and-mappings.md", "assumptions.md"]
+related_reference_pages = ["generated/isp2024/reference/source-data.md", "generated/isp2024/reference/parameters-and-mappings.md", "assumptions.md"]
 
 [[page]]
 id = "isp2024-storage-characteristics"
@@ -613,4 +653,4 @@ status = "published"
 nav_order = 80
 snapshot = true
 data_requirements = [{ root = "download", edition = "2024", path = "2024-isp-inputs-and-assumptions-workbook.xlsx", type = "file" }]
-related_reference_pages = ["generated/isp2024/reference/data-sources.md", "generated/isp2024/reference/parameters-and-mappings.md", "assumptions.md"]
+related_reference_pages = ["generated/isp2024/reference/source-data.md", "generated/isp2024/reference/parameters-and-mappings.md", "assumptions.md"]

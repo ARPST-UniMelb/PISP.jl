@@ -228,5 +228,3 @@ PISPDocUtils.markdown_table(retirement_conventions)
 | 1 | Progressive Change | 50 | 1 |
 | 2 | Step Change | 50 | 1 |
 | 3 | Green Energy Exports | 50 | 1 |
-
-
