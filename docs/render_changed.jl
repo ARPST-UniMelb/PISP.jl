@@ -2,7 +2,7 @@
 #
 # Re-renders ONLY the published/draft Literate pages whose source .jl changed
 # versus HEAD (staged, unstaged, or untracked), by resolving those sources to
-# page IDs and delegating to render_literate.jl through PISP_LITERATE_PAGES.
+# page IDs and delegating to render_literate.jl through ParseISP_LITERATE_PAGES.
 #
 # Usage:
 #   julia --project=docs docs/render_changed.jl
@@ -80,7 +80,7 @@ function main()
     end
 
     println("Changed pages to re-render: ", join(changed_pages, ", "))
-    ENV["PISP_LITERATE_PAGES"] = join(changed_pages, ",")
+    ENV["ParseISP_LITERATE_PAGES"] = join(changed_pages, ",")
     project_directory = active_project_directory()
     run(Cmd(`$(Base.julia_cmd()) --project=$(project_directory) $(RENDER_SCRIPT)`; dir = REPO_ROOT))
     println("\nIncremental render complete. Run a full render before committing regenerated Markdown.")

@@ -85,7 +85,7 @@ function inputDB_dsp(tv, df, der_ids, scenario, multiplier=1)
         dsp_pmax = df[!, yr]
         for band in 1:5 # LOOP OVER DSP BANDS (FROM CHEAPER TO EXPENSIVE, including reliability response (RR))
             dsp_pred = dsp_pmax[band]*multiplier
-            row_der_predmax_ched = [idx, der_ids[band], PISP.SCE[scenario], date_cost, dsp_pred]
+            row_der_predmax_ched = [idx, der_ids[band], ParseISP.SCE[scenario], date_cost, dsp_pred]
             push!(tv.der_pred, row_der_predmax_ched)
             idx+=1
         end

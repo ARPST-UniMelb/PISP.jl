@@ -1,10 +1,10 @@
-# Documenter.jl site build for PISP.jl.
+# Documenter.jl site build for ParseISP.jl.
 #
 # A normal docs build publishes the Markdown already present under docs/src/.
-# Executable pages are regenerated through the separate maintainer command in docs/render_literate.jl, so the site build does not require local AEMO or PISP output data.
+# Executable pages are regenerated through the separate maintainer command in docs/render_literate.jl, so the site build does not require local AEMO or ParseISP output data.
 
 using Documenter
-using PISP
+using ParseISP
 
 include(joinpath(@__DIR__, "utils", "page_registry.jl"))
 include(joinpath(@__DIR__, "utils", "navigation.jl"))
@@ -15,26 +15,26 @@ const STAGED_SRC = joinpath(DOCS_DIR, ".documenter-source")
 const BUILD = joinpath(DOCS_DIR, "build")
 const REGISTRY_PATH = joinpath(DOCS_DIR, "config", "page-registry.toml")
 const REPO_ROOT = realpath(dirname(DOCS_DIR))
-const PISP_REMOTE = Documenter.Remotes.GitHub("ARPST-UniMelb", "PISP.jl")
-const PISP_SOURCE_ROOT = realpath(dirname(dirname(pathof(PISP))))
+const ParseISP_REMOTE = Documenter.Remotes.GitHub("ARPST-UniMelb", "ParseISP.jl")
+const ParseISP_SOURCE_ROOT = realpath(dirname(dirname(pathof(ParseISP))))
 
-# Preserve source and edit links when the repository or PISP package is supplied
+# Preserve source and edit links when the repository or ParseISP package is supplied
 # as an archive rather than a Git checkout.
 const DOCUMENTATION_REMOTES = let
     remotes = Dict{String, Any}()
     if !ispath(joinpath(REPO_ROOT, ".git"))
-        remotes[REPO_ROOT] = (PISP_REMOTE, "main")
+        remotes[REPO_ROOT] = (ParseISP_REMOTE, "main")
     end
-    if PISP_SOURCE_ROOT != REPO_ROOT
-        remotes[PISP_SOURCE_ROOT] = (PISP_REMOTE, "v$(pkgversion(PISP))")
+    if ParseISP_SOURCE_ROOT != REPO_ROOT
+        remotes[ParseISP_SOURCE_ROOT] = (ParseISP_REMOTE, "v$(pkgversion(ParseISP))")
     end
     remotes
 end
 
 include(joinpath(DOCS_DIR, "utils", "source_links.jl"))
 
-link_target_name = get(ENV, "PISP_DOCS_LINK_TARGET", "local")
-link_target_name in ("local", "public") || error("PISP_DOCS_LINK_TARGET must be local or public")
+link_target_name = get(ENV, "ParseISP_DOCS_LINK_TARGET", "local")
+link_target_name in ("local", "public") || error("ParseISP_DOCS_LINK_TARGET must be local or public")
 link_target = Symbol(link_target_name)
 stage_documentation!(SRC, STAGED_SRC, joinpath(DOCS_DIR, "config", "source-links.toml"), link_target;
     repo_root = dirname(DOCS_DIR))
@@ -57,7 +57,7 @@ format = Documenter.HTML(;
 )
 
 makedocs(;
-    sitename = "PISP.jl",
+    sitename = "ParseISP.jl",
     format = format,
     build = BUILD,
     source = STAGED_SRC,

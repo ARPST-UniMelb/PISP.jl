@@ -1,4 +1,4 @@
-module PISP
+module ParseISP
     using Dates
     using DataFrames
     using OrderedCollections
@@ -7,13 +7,13 @@ module PISP
     using Arrow
     export DataFrames
 
-    include("PISPdatamodel.jl")
-    include("PISPstructures.jl")
-    include("PISPsource_specs.jl")
-    include("PISPutils.jl")
-    include("PISPparameters.jl")
-    include("PISPparsers.jl")
-    include("PISPscrappers.jl")
+    include("ParseISPdatamodel.jl")
+    include("ParseISPstructures.jl")
+    include("ParseISPsource_specs.jl")
+    include("ParseISPutils.jl")
+    include("ParseISPparameters.jl")
+    include("ParseISPparsers.jl")
+    include("ParseISPscrappers.jl")
 
     export build_pipeline,
         download_ISP24_reports,

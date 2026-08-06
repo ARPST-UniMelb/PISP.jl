@@ -4,30 +4,30 @@ EditURL = "../../../../literate/comparison/analysis/raw_source_comparison.jl"
 
 # ISP 2024 and ISP 2026 raw-source comparison
 
-The raw-source comparison tracks how AEMO's non-trace inputs changed before any PISP transformation.
-It is distinct from the model-archive comparison, which inventories archive packaging, and from PISP output-schema comparisons, which describe generated datasets.
+The raw-source comparison tracks how AEMO's non-trace inputs changed before any ParseISP transformation.
+It is distinct from the model-archive comparison, which inventories archive packaging, and from ParseISP output-schema comparisons, which describe generated datasets.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
 ```
 
 ````julia
-using PISP
+using ParseISP
 using DataFrames
 using XLSX
 
-const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
+const REPO_ROOT = normpath(get(ENV, "ParseISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
-import .PISPDocUtils
+include(joinpath(REPO_ROOT, "docs", "utils", "ParseISPDocUtils.jl"))
+import .ParseISPDocUtils
 
-const ISP2024 = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
-const ISP2026 = PISPDocUtils.edition_profile(REPO_ROOT, "2026")
-const INPUTS_2024 = PISP.source_spec(:existing_generator_summary, 2024)
-const EV_NUMBERS_2024 = PISP.source_spec(:ev_vehicle_numbers, 2024)
-const WORKBOOK2024 = PISP.source_path(ISP2024.download_root, INPUTS_2024)
+const ISP2024 = ParseISPDocUtils.edition_profile(REPO_ROOT, "2024")
+const ISP2026 = ParseISPDocUtils.edition_profile(REPO_ROOT, "2026")
+const INPUTS_2024 = ParseISP.source_spec(:existing_generator_summary, 2024)
+const EV_NUMBERS_2024 = ParseISP.source_spec(:ev_vehicle_numbers, 2024)
+const WORKBOOK2024 = ParseISP.source_path(ISP2024.download_root, INPUTS_2024)
 const WORKBOOK2026 = joinpath(ISP2026.download_root, "2026-isp-inputs-and-assumptions-workbook.xlsm")
-const EV2023 = PISP.source_path(ISP2024.download_root, EV_NUMBERS_2024)
+const EV2023 = ParseISP.source_path(ISP2024.download_root, EV_NUMBERS_2024)
 const EV2025 = joinpath(ISP2026.download_root, "aemo-2025-iasr-ev-workbook.xlsx")
 ````
 
@@ -45,13 +45,13 @@ The EV publication also gains one worksheet, while the outlook package keeps thr
 ```
 
 ````julia
-publication_inventory = PISPDocUtils.read_workbook_inventory([
+publication_inventory = ParseISPDocUtils.read_workbook_inventory([
     "ISP 2024 inputs and assumptions" => WORKBOOK2024,
     "ISP 2026 inputs and assumptions" => WORKBOOK2026,
     "2023 IASR EV" => EV2023,
     "2025 IASR EV" => EV2025,
 ])
-PISPDocUtils.markdown_table(publication_inventory)
+ParseISPDocUtils.markdown_table(publication_inventory)
 ````
 
 ```@raw html
@@ -72,14 +72,14 @@ PISPDocUtils.markdown_table(publication_inventory)
 
 ````julia
 outlook_inventory = vcat(
-    PISPDocUtils.read_outlook_inventory(joinpath(ISP2024.download_root, "Core"), "2024"),
-    PISPDocUtils.read_outlook_inventory(joinpath(ISP2024.download_root, "Sensitivities"), "2024"),
-    PISPDocUtils.read_outlook_inventory(joinpath(ISP2026.download_root, "Core scenarios"), "2026"),
-    PISPDocUtils.read_outlook_inventory(joinpath(ISP2026.download_root, "Sensitivities"), "2026"),
+    ParseISPDocUtils.read_outlook_inventory(joinpath(ISP2024.download_root, "Core"), "2024"),
+    ParseISPDocUtils.read_outlook_inventory(joinpath(ISP2024.download_root, "Sensitivities"), "2024"),
+    ParseISPDocUtils.read_outlook_inventory(joinpath(ISP2026.download_root, "Core scenarios"), "2026"),
+    ParseISPDocUtils.read_outlook_inventory(joinpath(ISP2026.download_root, "Sensitivities"), "2026"),
 )
 outlook_counts = combine(groupby(outlook_inventory, [:edition, :group]), nrow => :workbooks)
 sort!(outlook_counts, [:edition, :group])
-PISPDocUtils.markdown_table(outlook_counts)
+ParseISPDocUtils.markdown_table(outlook_counts)
 ````
 
 ```@raw html
@@ -124,7 +124,7 @@ worksheet_comparison = DataFrame([
     for (edition, available) in comparison_sheet_names
     for sheet in comparison_sheets
 ])
-PISPDocUtils.markdown_table(worksheet_comparison)
+ParseISPDocUtils.markdown_table(worksheet_comparison)
 ````
 
 ```@raw html
@@ -179,7 +179,7 @@ They include stored cells and formatting, so they are useful for comparison but 
 ```
 
 ````julia
-dimension_2024 = PISPDocUtils.read_sheet_dimensions(
+dimension_2024 = ParseISPDocUtils.read_sheet_dimensions(
     WORKBOOK2024,
     [
         "Scenarios", "Existing Gen Data Summary", "New Entrant Data Summary",
@@ -190,7 +190,7 @@ dimension_2024 = PISPDocUtils.read_sheet_dimensions(
 )
 dimension_2024.edition = fill("2024", nrow(dimension_2024))
 
-dimension_2026 = PISPDocUtils.read_sheet_dimensions(
+dimension_2026 = ParseISPDocUtils.read_sheet_dimensions(
     WORKBOOK2026,
     [
         "Scenarios", "Existing Gen Data Summary", "New Entrant Data Summary",
@@ -207,7 +207,7 @@ source_dimensions = select(
     :worksheet,
     :workbook_declared_dimension,
 )
-PISPDocUtils.markdown_table(source_dimensions)
+ParseISPDocUtils.markdown_table(source_dimensions)
 ````
 
 ```@raw html
@@ -315,7 +315,7 @@ source_family_changes = DataFrame([
         change = "Workbook organisation changed",
     ),
 ])
-PISPDocUtils.markdown_table(source_family_changes; alignment = [:l, :l, :l, :l])
+ParseISPDocUtils.markdown_table(source_family_changes; alignment = [:l, :l, :l, :l])
 ````
 
 ```@raw html
@@ -337,4 +337,4 @@ PISPDocUtils.markdown_table(source_family_changes; alignment = [:l, :l, :l, :l])
 
 
 Detailed evidence is organised by subject under [AEMO ISP source material](../../shared/source-material/coverage-and-ownership.md).
-The [model archive comparison](model-archive-comparison.md) remains the authority for archive packaging, and the existing PISP dataset pages remain the authority for generated output schemas.
+The [model archive comparison](model-archive-comparison.md) remains the authority for archive packaging, and the existing ParseISP dataset pages remain the authority for generated output schemas.

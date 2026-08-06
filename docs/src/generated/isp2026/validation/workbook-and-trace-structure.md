@@ -18,11 +18,11 @@ using DataFrames
 using TOML
 using XLSX
 
-const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
-include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
-import .PISPDocUtils
+const REPO_ROOT = normpath(get(ENV, "ParseISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
+include(joinpath(REPO_ROOT, "docs", "utils", "ParseISPDocUtils.jl"))
+import .ParseISPDocUtils
 
-const PROFILE = PISPDocUtils.edition_profile(REPO_ROOT, "2026")
+const PROFILE = ParseISPDocUtils.edition_profile(REPO_ROOT, "2026")
 const SOURCE_MAP_PATH = joinpath(REPO_ROOT, "docs", "config", "isp2026-source-specs.toml")
 const SOURCE_MAP = TOML.parsefile(SOURCE_MAP_PATH)
 const SOURCE_SPECS = SOURCE_MAP["source"]
@@ -128,7 +128,7 @@ workbook_structure = DataFrame(
         "Capacity, Storage Capacity, Storage Energy, REZ Generation Capacity, and development-path tables",
     ],
 )
-PISPDocUtils.markdown_table(
+ParseISPDocUtils.markdown_table(
     workbook_structure;
     column_labels = ["Source collection", "Files", "Selections"],
 )
@@ -165,7 +165,7 @@ model_structure = DataFrame(
         "Project or region and reference-year label",
     ],
 )
-PISPDocUtils.markdown_table(
+ParseISPDocUtils.markdown_table(
     model_structure;
     column_labels = ["Source collection", "Files", "Selections"],
 )
@@ -202,7 +202,7 @@ trace_schema = DataFrame([
     )
     for source in trace_sources
 ])
-PISPDocUtils.markdown_table(
+ParseISPDocUtils.markdown_table(
     trace_schema;
     column_labels = ["Trace family", "File or pattern", "Keys", "Fields and units"],
 )

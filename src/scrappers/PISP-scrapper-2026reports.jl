@@ -1,6 +1,6 @@
 module ISP2026ReportDownloader
 
-    using PISP.ISPReportDownloader: ISPReportTarget, download_report_targets
+    using ParseISP.ISPReportDownloader: ISPReportTarget, download_report_targets
 
     export report_targets,
         download_reports

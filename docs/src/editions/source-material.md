@@ -8,7 +8,7 @@ without assuming that a matching filename or worksheet has the same structure.
 The documentation follows the lifecycle:
 
 ```text
-AEMO source data -> PISP transformation -> PISP datasets
+AEMO source data -> ParseISP transformation -> ParseISP datasets
 ```
 
 The [ISP report catalogue](../generated/comparison/references/report-catalogue.md)
@@ -50,8 +50,8 @@ Bulk trace payloads are described under [trace coverage](trace-coverage.md).
 | Model archive | The 2024 archive contains scenario models and model-side trace folders used by the package. | The 2026 archive contains Accelerated Transition, Slower Growth, and Step Change models with demand, DNSP, gas, hydro, load-subtractor, rooftop-PV, and timeslice folders. |
 | Generation and storage outlook | The 2024 outlooks provide capacity, storage, REZ, and sensitivity tables used by preprocessing. | The 2026 outlooks provide revised core and sensitivity workbooks, storage tables, REZ capacity, and candidate development paths. |
 | Solar and wind trace archives | The 2024 traces are organised by technology, project, and reference year. | The 2026 traces are published as separate project-level solar and wind archives using `RefYear5000` filenames. |
-| `Auxiliary` material | The 2024 build creates and consumes `Auxiliary` outlook workbooks as PISP-generated preprocessing intermediates. | No equivalent 2026 `Auxiliary` layout or build consumer is documented. |
-| Generated PISP datasets | `PISP.build_ISP24_datasets` writes the documented ISP 2024 static and schedule outputs. | No integrated ISP 2026 dataset builder or generated-output contract exists yet. |
+| `Auxiliary` material | The 2024 build creates and consumes `Auxiliary` outlook workbooks as ParseISP-generated preprocessing intermediates. | No equivalent 2026 `Auxiliary` layout or build consumer is documented. |
+| Generated ParseISP datasets | `ParseISP.build_ISP24_datasets` writes the documented ISP 2024 static and schedule outputs. | No integrated ISP 2026 dataset builder or generated-output contract exists yet. |
 
 The [2024 ISP PLEXOS Model Instructions, pp. 5 and 7](../../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=5)
 and the [2026 ISP PLEXOS Model Instructions, pp. 5 and 7](../../../data/2026/pisp-reports/2026-isp-plexos-model-instructions.pdf#page=5)

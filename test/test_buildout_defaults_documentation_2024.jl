@@ -4,17 +4,17 @@ using Dates
 using Tables
 using XLSX
 
-if !isdefined(@__MODULE__, :PISPDocUtils)
-    include(joinpath(@__DIR__, "..", "docs", "utils", "PISPDocUtils.jl"))
+if !isdefined(@__MODULE__, :ParseISPDocUtils)
+    include(joinpath(@__DIR__, "..", "docs", "utils", "ParseISPDocUtils.jl"))
 end
-import .PISPDocUtils
+import .ParseISPDocUtils
 
 const BUILDOUT_LABELS = [
     "bess_1h", "bess_2h", "bess_4h", "bess_8h", "phsp_24h", "phsp_48h",
     "ccgt", "ocgt_l", "ocgt_s",
 ]
-const BUILDOUT_ESS_LABELS = filter(label -> label in PISP._BUILDOUT_ESS_TECHS, BUILDOUT_LABELS)
-const BUILDOUT_GEN_LABELS = filter(label -> label in PISP._BUILDOUT_GEN_TECHS, BUILDOUT_LABELS)
+const BUILDOUT_ESS_LABELS = filter(label -> label in ParseISP._BUILDOUT_ESS_TECHS, BUILDOUT_LABELS)
+const BUILDOUT_GEN_LABELS = filter(label -> label in ParseISP._BUILDOUT_GEN_TECHS, BUILDOUT_LABELS)
 
 buildout_name(label) = uppercase(label * "_NQ") * "_NEW"
 
@@ -30,8 +30,8 @@ function buildout_fixture(; year = 2030, n_value = nothing)
 end
 
 function initialise_buildout_structures()
-    ts = PISP.PISPtimeStatic()
-    tv = PISP.PISPtimeVarying()
+    ts = ParseISP.ParseISPtimeStatic()
+    tv = ParseISP.ParseISPtimeVarying()
     push!(ts.bus, [17, "NQ", "NQ", 1, 0.0, 0.0, 1])
     return ts, tv
 end
@@ -42,15 +42,15 @@ end
 
 function assert_uniform_schedule(schedule, asset_column, asset_id, source_row)
     rows = schedule[schedule[!, asset_column] .== asset_id, :]
-    @test nrow(rows) == length(PISP.ID2SCE)
-    @test sort(rows.scenario) == sort(collect(keys(PISP.ID2SCE)))
+    @test nrow(rows) == length(ParseISP.ID2SCE)
+    @test sort(rows.scenario) == sort(collect(keys(ParseISP.ID2SCE)))
     @test all(==(DateTime(source_row.year, 1, 1)), rows.date)
     @test all(==(source_row.n), rows.value)
 end
 
 @testset "ISP 2024 build-out defaults documentation" begin
-    parser_path = joinpath(@__DIR__, "..", "src", "parsers", "PISP-2024buildout.jl")
-    @test PISPDocUtils.validate_buildout_defaults_contract(parser_path)
+    parser_path = joinpath(@__DIR__, "..", "src", "parsers", "ParseISP-2024buildout.jl")
+    @test ParseISPDocUtils.validate_buildout_defaults_contract(parser_path)
 
     generated_path = joinpath(
         @__DIR__, "..", "docs", "src", "generated", "isp2024", "reference", "buildout-defaults.md",
@@ -58,10 +58,10 @@ end
     @test isfile(generated_path)
     generated = replace(read(generated_path, String), "\r\n" => "\n")
 
-    reference_tables = PISPDocUtils.buildout_reference_tables()
+    reference_tables = ParseISPDocUtils.buildout_reference_tables()
     for (table_name, table) in pairs(reference_tables)
         expected = strip(replace(
-            PISPDocUtils.markdown_table(table; allow_markdown_in_cells = true).text,
+            ParseISPDocUtils.markdown_table(table; allow_markdown_in_cells = true).text,
             "\r\n" => "\n",
         ))
         @testset "rendered $(table_name) table" begin
@@ -70,24 +70,24 @@ end
     end
 
     for field in union(
-        Set(PISPDocUtils.ESS_TEMPLATE_FIELDS),
-        Set(PISPDocUtils.GEN_TEMPLATE_FIELDS),
+        Set(ParseISPDocUtils.ESS_TEMPLATE_FIELDS),
+        Set(ParseISPDocUtils.GEN_TEMPLATE_FIELDS),
     )
         @test occursin("`$field`", generated)
     end
-    for row in PISPDocUtils.buildout_technology_rows()
+    for row in ParseISPDocUtils.buildout_technology_rows()
         @test occursin("`$(row.buildout_label)`", generated)
     end
-    for row in PISPDocUtils.buildout_placeholder_rows()
+    for row in ParseISPDocUtils.buildout_placeholder_rows()
         @test occursin("`$(row.field)`", generated)
     end
     for source in Iterators.flatten((
-        values(PISPDocUtils.ESS_FIELD_SOURCES),
-        values(PISPDocUtils.GEN_FIELD_SOURCES),
+        values(ParseISPDocUtils.ESS_FIELD_SOURCES),
+        values(ParseISPDocUtils.GEN_FIELD_SOURCES),
     ))
         @test any(
             startswith(source, prefix)
-            for prefix in PISPDocUtils.BUILDOUT_SOURCE_PREFIXES
+            for prefix in ParseISPDocUtils.BUILDOUT_SOURCE_PREFIXES
         )
     end
     @test !occursin(r"\|\s*`[^`]+`\s*\|\s*`?nothing`?\s*\|", generated)
@@ -104,7 +104,7 @@ end
             overwrite = true,
         )
 
-        static_data, tvarying_data = PISP.read_buildout_table(
+        static_data, tvarying_data = ParseISP.read_buildout_table(
             workbook_path;
             sheetname = "buildout_1",
         )
@@ -118,12 +118,12 @@ end
         @test tvarying_data.n == fixture.n
 
         ts, tv = initialise_buildout_structures()
-        PISP.add_buildouts!(ts, tv, workbook_path; sheetname = "buildout_1")
+        ParseISP.add_buildouts!(ts, tv, workbook_path; sheetname = "buildout_1")
 
         @test nrow(ts.ess) == length(BUILDOUT_ESS_LABELS)
         @test nrow(ts.gen) == length(BUILDOUT_GEN_LABELS)
-        @test nrow(tv.ess_n) == length(BUILDOUT_ESS_LABELS) * length(PISP.ID2SCE)
-        @test nrow(tv.gen_n) == length(BUILDOUT_GEN_LABELS) * length(PISP.ID2SCE)
+        @test nrow(tv.ess_n) == length(BUILDOUT_ESS_LABELS) * length(ParseISP.ID2SCE)
+        @test nrow(tv.gen_n) == length(BUILDOUT_GEN_LABELS) * length(ParseISP.ID2SCE)
         @test collect(tv.ess_n.id) == collect(1:nrow(tv.ess_n))
         @test collect(tv.gen_n.id) == collect(1:nrow(tv.gen_n))
 
@@ -131,7 +131,7 @@ end
             name = buildout_name(label)
             source_row = input_row(fixture, label)
             row = only(eachrow(ts.ess[ts.ess.name .== name, :]))
-            template = PISP.params_buildout_bess[Symbol(label)]
+            template = ParseISP.params_buildout_bess[Symbol(label)]
 
             @test row.id_ess == expected_id
             @test row.name == name
@@ -140,10 +140,10 @@ end
             @test row.capacity == source_row.capacity
             @test row.pmax == source_row.capacity
             @test row.lmax == source_row.capacity
-            @test row.emax == PISP._BESS_DURATION_H[label] * source_row.capacity
+            @test row.emax == ParseISP._BESS_DURATION_H[label] * source_row.capacity
             @test row.latitude == 0.0
             @test row.longitude == 0.0
-            for field in PISPDocUtils.ESS_TEMPLATE_FIELDS
+            for field in ParseISPDocUtils.ESS_TEMPLATE_FIELDS
                 @test row[Symbol(field)] == template[field]
             end
 
@@ -154,7 +154,7 @@ end
             name = buildout_name(label)
             source_row = input_row(fixture, label)
             row = only(eachrow(ts.gen[ts.gen.name .== name, :]))
-            template = PISP.params_buildout_gen[PISP._BUILDOUT_GEN_TECH_KEY[label]]
+            template = ParseISP.params_buildout_gen[ParseISP._BUILDOUT_GEN_TECH_KEY[label]]
 
             @test row.id_gen == expected_id
             @test row.name == name
@@ -164,7 +164,7 @@ end
             @test row.pmax == source_row.capacity
             @test row.latitude == 0.0
             @test row.longitude == 0.0
-            for field in PISPDocUtils.GEN_TEMPLATE_FIELDS
+            for field in ParseISPDocUtils.GEN_TEMPLATE_FIELDS
                 @test row[Symbol(field)] == template[field]
             end
 
@@ -176,7 +176,7 @@ end
 @testset "ISP 2024 scenario-specific build-out applied rows" begin
     mktempdir() do directory
         workbook_path = joinpath(directory, "buildout-scenarios.xlsx")
-        scenario_ids = sort(collect(keys(PISP.ID2SCE)))
+        scenario_ids = sort(collect(keys(ParseISP.ID2SCE)))
         scenario_frames = Dict(
             scid => buildout_fixture(year = 2030 + scid, n_value = scid)
             for scid in scenario_ids
@@ -189,7 +189,7 @@ end
 
         ts, tv = initialise_buildout_structures()
         scenario_sheets = Dict(scid => "scenario_$scid" for scid in scenario_ids)
-        PISP.add_buildouts!(ts, tv, workbook_path; sc_buildouts = scenario_sheets)
+        ParseISP.add_buildouts!(ts, tv, workbook_path; sc_buildouts = scenario_sheets)
 
         @test nrow(ts.ess) == length(BUILDOUT_ESS_LABELS)
         @test nrow(ts.gen) == length(BUILDOUT_GEN_LABELS)

@@ -1,3 +1,3 @@
-include("parsers/PISP-2024parser.jl")
-include("parsers/PISP-2024core.jl")
-include("parsers/PISP-2024buildout.jl")
+include("parsers/ParseISP-2024parser.jl")
+include("parsers/ParseISP-2024core.jl")
+include("parsers/ParseISP-2024buildout.jl")

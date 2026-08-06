@@ -1,6 +1,6 @@
 module ISPFileDownloader
 
-    using PISP.PISPScrapperUtils: DEFAULT_FILE_HEADERS,
+    using ParseISP.ParseISPScrapperUtils: DEFAULT_FILE_HEADERS,
         FileDownloadOptions,
         download_file,
         interactive_overwrite_prompt,

@@ -1,4 +1,4 @@
-"""Common abstraction for one semantic PISP source definition."""
+"""Common abstraction for one semantic ParseISP source definition."""
 abstract type SourceSpec end
 
 """Expected column metadata for a source table."""

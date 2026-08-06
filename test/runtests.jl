@@ -1,16 +1,16 @@
-using PISP
+using ParseISP
 using Test
 using Dates
 
-include(joinpath(@__DIR__, "..", "docs", "utils", "PISPDocUtils.jl"))
-import .PISPDocUtils
+include(joinpath(@__DIR__, "..", "docs", "utils", "ParseISPDocUtils.jl"))
+import .ParseISPDocUtils
 
 # The suite is partitioned into one file per topic. The source-availability checks
 # run at top level (matching the original layout); the package-behaviour tests run
-# under the "PISP.jl" test set.
+# under the "ParseISP.jl" test set.
 include("test_source_availability.jl")
 
-@testset "PISP.jl" begin
+@testset "ParseISP.jl" begin
     include("test_zip_extraction.jl")
     include("test_report_downloader_2024.jl")
     include("test_report_downloader_2026.jl")

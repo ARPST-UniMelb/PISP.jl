@@ -1,22 +1,22 @@
-# Tables every configured PISP ISP report against how many times its PDF is
+# Tables every configured ParseISP ISP report against how many times its PDF is
 # cited in the documentation and how many distinct pages are cited.
 #
 # Run with: julia --project=docs docs/test/report_citation_audit.jl
 
-import PISP
+import ParseISP
 
 const REPO_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 const DOCS_UTILS_DIR = joinpath(REPO_ROOT, "docs", "utils")
 const LITERATE_ROOT = joinpath(REPO_ROOT, "docs", "literate")
 
-include(joinpath(DOCS_UTILS_DIR, "PISPDocUtils.jl"))
-import .PISPDocUtils
+include(joinpath(DOCS_UTILS_DIR, "ParseISPDocUtils.jl"))
+import .ParseISPDocUtils
 
 function configured_reports()
     rows = NamedTuple[]
     for (edition, targets) in (
-        ("2024", PISP.ISP2024ReportDownloader.report_targets()),
-        ("2026", PISP.ISP2026ReportDownloader.report_targets()),
+        ("2024", ParseISP.ISP2024ReportDownloader.report_targets()),
+        ("2026", ParseISP.ISP2026ReportDownloader.report_targets()),
     )
         for target in targets
             push!(rows, (; edition, key = target.key, title = target.title, filename = target.filename))
@@ -57,7 +57,7 @@ end
 
 if abspath(PROGRAM_FILE) == @__FILE__
     rows = audit_report_citations()
-    table = PISPDocUtils.markdown_table(
+    table = ParseISPDocUtils.markdown_table(
         ["Edition", "Report", "Filename", "Citations", "Unique pages"],
         [[row.edition, row.title, row.filename, row.citations, row.unique_pages] for row in rows];
         alignment = [:left, :left, :left, :right, :right],

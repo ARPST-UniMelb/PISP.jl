@@ -2,7 +2,7 @@ using Test
 using DataFrames
 using Dates
 using TOML
-import PISP
+import ParseISP
 
 const TEST_DOCS_DIR = normpath(joinpath(@__DIR__, ".."))
 
@@ -36,9 +36,9 @@ include(joinpath(@__DIR__, "doc_invariants.jl"))
     @test sort(root_entries) == expected_root_entries
 
     utils_dir = joinpath(TEST_DOCS_DIR, "utils")
-    facade_path = joinpath(utils_dir, "PISPDocUtils.jl")
+    facade_path = joinpath(utils_dir, "ParseISPDocUtils.jl")
     facade = read(facade_path, String)
-    @test length(collect(eachmatch(r"(?m)^\s*module\s+PISPDocUtils\s*$", facade))) == 1
+    @test length(collect(eachmatch(r"(?m)^\s*module\s+ParseISPDocUtils\s*$", facade))) == 1
 
     utility_sources = String[]
     module_declarations = String[]
@@ -53,7 +53,7 @@ include(joinpath(@__DIR__, "doc_invariants.jl"))
             )
         end
     end
-    @test module_declarations == ["module PISPDocUtils"]
+    @test module_declarations == ["module ParseISPDocUtils"]
     @test !occursin(r"(?m)^\s*(export|public)\b", join(utility_sources, "\n"))
 
     for filename in (
@@ -69,15 +69,15 @@ include(joinpath(@__DIR__, "doc_invariants.jl"))
         for filename in files
             endswith(filename, ".jl") || continue
             source = read(joinpath(directory, filename), String)
-            occursin("PISPDocUtils.", source) || continue
-            @test occursin("import .PISPDocUtils", source)
-            @test !occursin("using .PISPDocUtils", source)
+            occursin("ParseISPDocUtils.", source) || continue
+            @test occursin("import .ParseISPDocUtils", source)
+            @test !occursin("using .ParseISPDocUtils", source)
         end
     end
 end
 
 @testset "Markdown table rendering" begin
-    rendered = PISPDocUtils.markdown_table(DataFrame(Label=["alpha", "beta"], Value=[1.0, 2.0]))
+    rendered = ParseISPDocUtils.markdown_table(DataFrame(Label=["alpha", "beta"], Value=[1.0, 2.0]))
     separator_cells = strip.(split(split(chomp(rendered.text), '\n')[2], '|'; keepempty=false))
 
     @test length(separator_cells) == 2
@@ -85,26 +85,26 @@ end
     @test endswith(separator_cells[2], ":")
     @test occursin("alpha", rendered.text)
 
-    currency = PISPDocUtils.markdown_table(DataFrame(Label=["Cost (\$/MW)"], Value=[2.0]))
+    currency = ParseISPDocUtils.markdown_table(DataFrame(Label=["Cost (\$/MW)"], Value=[2.0]))
     @test occursin(raw"\$", currency.text)
 
-    missing_numeric = PISPDocUtils.markdown_table(
+    missing_numeric = ParseISPDocUtils.markdown_table(
         DataFrame(Label=["alpha", "beta"], Value=Union{Missing,Float64}[1.0, missing]),
     )
     missing_separator = strip.(split(split(chomp(missing_numeric.text), '\n')[2], '|'; keepempty=false))
     @test endswith(missing_separator[2], ":")
 
-    empty_typed = PISPDocUtils.markdown_table(DataFrame(Label=String[], Value=Float64[]))
+    empty_typed = ParseISPDocUtils.markdown_table(DataFrame(Label=String[], Value=Float64[]))
     empty_separator = strip.(split(split(chomp(empty_typed.text), '\n')[2], '|'; keepempty=false))
     @test !endswith(empty_separator[1], ":")
     @test endswith(empty_separator[2], ":")
 
-    mixed_any = PISPDocUtils.markdown_table(DataFrame(Mixed=Any[1, "two"], Value=Any[1, 2]))
+    mixed_any = ParseISPDocUtils.markdown_table(DataFrame(Mixed=Any[1, "two"], Value=Any[1, 2]))
     mixed_separator = strip.(split(split(chomp(mixed_any.text), '\n')[2], '|'; keepempty=false))
     @test !endswith(mixed_separator[1], ":")
     @test endswith(mixed_separator[2], ":")
 
-    overridden = PISPDocUtils.markdown_table(
+    overridden = ParseISPDocUtils.markdown_table(
         DataFrame(Label=["alpha"], Value=[1.0]);
         alignment=[:r, :l],
     )
@@ -112,18 +112,18 @@ end
     @test endswith(overridden_separator[1], ":")
     @test !endswith(overridden_separator[2], ":")
 
-    multiline = PISPDocUtils.markdown_table(DataFrame(Label=["alpha\nbeta"], Value=[1]))
+    multiline = ParseISPDocUtils.markdown_table(DataFrame(Label=["alpha\nbeta"], Value=[1]))
     @test occursin("alpha beta", multiline.text)
     @test !occursin("alpha\nbeta", multiline.text)
 
-    metrics = PISPDocUtils.metric_value_table(["Rows" => 12, "Coverage (%)" => 98.5])
+    metrics = ParseISPDocUtils.metric_value_table(["Rows" => 12, "Coverage (%)" => 98.5])
     @test occursin("Metric", metrics.text)
     @test occursin("Coverage (%)", metrics.text)
 
-    table_interface = PISPDocUtils.markdown_table((Label=["alpha"], Value=[1.0]))
+    table_interface = ParseISPDocUtils.markdown_table((Label=["alpha"], Value=[1.0]))
     @test occursin("alpha", table_interface.text)
 
-    manual = PISPDocUtils.markdown_table(
+    manual = ParseISPDocUtils.markdown_table(
         ["Name", "Value"],
         [Any["alpha|beta", nothing], Any["line\nbreak", 2]];
         alignment = [:left, :right],
@@ -134,39 +134,39 @@ end
     @test occursin("| — |", manual.text)
     @test occursin("---:", manual.text)
 
-    raw = PISPDocUtils.RawMarkdown("**unescaped Markdown**")
+    raw = ParseISPDocUtils.RawMarkdown("**unescaped Markdown**")
     @test sprint(show, MIME"text/markdown"(), raw) == "**unescaped Markdown**"
-    @test PISPDocUtils.markdown_items(["a|b", "c"]) == "`a\\|b`, `c`"
+    @test ParseISPDocUtils.markdown_items(["a|b", "c"]) == "`a\\|b`, `c`"
 end
 
 @testset "Shared documentation transformations" begin
-    @test PISPDocUtils.TABLE_ROOT == normpath(joinpath(TEST_DOCS_DIR, "src", "tables"))
-    @test PISPDocUtils.FIGURE_ROOT == normpath(joinpath(TEST_DOCS_DIR, "src", "figures"))
+    @test ParseISPDocUtils.TABLE_ROOT == normpath(joinpath(TEST_DOCS_DIR, "src", "tables"))
+    @test ParseISPDocUtils.FIGURE_ROOT == normpath(joinpath(TEST_DOCS_DIR, "src", "figures"))
 
     matrix = Any[1 missing missing; missing missing missing; 2 missing missing]
-    trimmed = PISPDocUtils.trim_sheet(matrix)
+    trimmed = ParseISPDocUtils.trim_sheet(matrix)
     @test size(trimmed) == (3, 1)
     @test isequal(trimmed[:, 1], Any[1, missing, 2])
-    @test size(PISPDocUtils.trim_sheet(fill(missing, 2, 2))) == (0, 0)
+    @test size(ParseISPDocUtils.trim_sheet(fill(missing, 2, 2))) == (0, 0)
 
     frame = DataFrame(Year=[2024, 2024], Month=[1, 1], Day=[1, 2], a=[1.0, 3.0], b=[3.0, 5.0])
-    @test PISPDocUtils.add_datetime!(frame) === frame
+    @test ParseISPDocUtils.add_datetime!(frame) === frame
     @test frame.datetime == [Date(2024, 1, 1), Date(2024, 1, 2)]
-    @test PISPDocUtils.row_mean(frame, [:a, :b]) == [2.0, 4.0]
-    @test isequal(PISPDocUtils.rolling_mean([1.0, 2.0, 3.0], 2), [missing, 1.5, 2.5])
+    @test ParseISPDocUtils.row_mean(frame, [:a, :b]) == [2.0, 4.0]
+    @test isequal(ParseISPDocUtils.rolling_mean([1.0, 2.0, 3.0], 2), [missing, 1.5, 2.5])
 
 end
 
 @testset "Report availability catalogue parity" begin
     catalogue_cases = (
-        ("2024", PISP.ISP2024ReportDownloader.report_targets(), 27),
-        ("2026", PISP.ISP2026ReportDownloader.report_targets(), 19),
+        ("2024", ParseISP.ISP2024ReportDownloader.report_targets(), 27),
+        ("2026", ParseISP.ISP2026ReportDownloader.report_targets(), 19),
     )
 
     for (edition, targets, expected_count) in catalogue_cases
         report_requirements = filter(
             requirement -> requirement.class == :report,
-            PISPDocUtils.edition_requirements(edition),
+            ParseISPDocUtils.edition_requirements(edition),
         )
         @test [requirement.relative_path for requirement in report_requirements] ==
             [target.filename for target in targets]
@@ -177,8 +177,8 @@ end
 @testset "Report catalogue registry parity" begin
     registry = load_registry(joinpath(TEST_DOCS_DIR, "config", "source-links.toml"))
     targets = vcat(
-        [(edition = "2024", target = target) for target in PISP.ISP2024ReportDownloader.report_targets()],
-        [(edition = "2026", target = target) for target in PISP.ISP2026ReportDownloader.report_targets()],
+        [(edition = "2024", target = target) for target in ParseISP.ISP2024ReportDownloader.report_targets()],
+        [(edition = "2026", target = target) for target in ParseISP.ISP2026ReportDownloader.report_targets()],
     )
     expected = Dict(
         "data/$(item.edition)/pisp-reports/$(item.target.filename)" =>
@@ -211,11 +211,11 @@ end
         :consultation_summary => :consultation_summary,
     ]
 
-    @test isdefined(PISPDocUtils, :report_counterpart_key_map)
-    if isdefined(PISPDocUtils, :report_counterpart_key_map)
-        pairs = PISPDocUtils.report_counterpart_key_map()
-        keys_2024 = Set(target.key for target in PISP.ISP2024ReportDownloader.report_targets())
-        keys_2026 = Set(target.key for target in PISP.ISP2026ReportDownloader.report_targets())
+    @test isdefined(ParseISPDocUtils, :report_counterpart_key_map)
+    if isdefined(ParseISPDocUtils, :report_counterpart_key_map)
+        pairs = ParseISPDocUtils.report_counterpart_key_map()
+        keys_2024 = Set(target.key for target in ParseISP.ISP2024ReportDownloader.report_targets())
+        keys_2026 = Set(target.key for target in ParseISP.ISP2026ReportDownloader.report_targets())
         mapped_2024 = first.(pairs)
         mapped_2026 = last.(pairs)
 
@@ -271,8 +271,8 @@ end
     if isfile(generated_path)
         generated = read(generated_path, String)
         targets_by_edition = Dict(
-            "2024" => collect(PISP.ISP2024ReportDownloader.report_targets()),
-            "2026" => collect(PISP.ISP2026ReportDownloader.report_targets()),
+            "2024" => collect(ParseISP.ISP2024ReportDownloader.report_targets()),
+            "2026" => collect(ParseISP.ISP2026ReportDownloader.report_targets()),
         )
         for (edition, heading) in (
             "2024" => "## ISP 2024 report inventory",
@@ -294,9 +294,9 @@ end
         counterpart_rows = generated_table_rows(generated, "## Explicit counterparts")
         @test length(counterpart_rows) == 15
         if length(counterpart_rows) == 15
-            targets_2024 = Dict(target.key => target for target in PISP.ISP2024ReportDownloader.report_targets())
-            targets_2026 = Dict(target.key => target for target in PISP.ISP2026ReportDownloader.report_targets())
-            for (row, (key_2024, key_2026)) in zip(counterpart_rows, PISPDocUtils.report_counterpart_key_map())
+            targets_2024 = Dict(target.key => target for target in ParseISP.ISP2024ReportDownloader.report_targets())
+            targets_2026 = Dict(target.key => target for target in ParseISP.ISP2026ReportDownloader.report_targets())
+            for (row, (key_2024, key_2026)) in zip(counterpart_rows, ParseISPDocUtils.report_counterpart_key_map())
                 for (cell, edition, target) in (
                     (row[1], "2024", targets_2024[key_2024]),
                     (row[2], "2026", targets_2026[key_2026]),
@@ -347,9 +347,9 @@ end
     shared_source_root = joinpath(literate_root, "shared", "source_material")
     for filename in spec_driven_2024_pages
         source = read(joinpath(shared_source_root, filename), String)
-        @test occursin("PISP.source_spec(", source)
-        @test occursin("PISP.source_path(", source)
-        @test occursin(r"PISP\.read_(xlsx_rows|csv_source)\(", source)
+        @test occursin("ParseISP.source_spec(", source)
+        @test occursin("ParseISP.source_path(", source)
+        @test occursin(r"ParseISP\.read_(xlsx_rows|csv_source)\(", source)
         @test occursin("XLSX.readdata(", source)
     end
 end
@@ -379,11 +379,11 @@ end
     @test isfile(raw_source_path)
     raw_source = isfile(raw_source_path) ? read(raw_source_path, String) : ""
     for required in (
-        "PISP.source_spec(:operational_demand_trace, 2024)",
-        "PISP.source_path(",
-        "PISPDocUtils.edition_profile(REPO_ROOT, \"2026\")",
-        "PISP_DOCS_RAW_REFTRACE",
-        "PISP_DOCS_RAW_POE",
+        "ParseISP.source_spec(:operational_demand_trace, 2024)",
+        "ParseISP.source_path(",
+        "ParseISPDocUtils.edition_profile(REPO_ROOT, \"2026\")",
+        "ParseISP_DOCS_RAW_REFTRACE",
+        "ParseISP_DOCS_RAW_POE",
         "RefYear5000",
     )
         @test occursin(required, raw_source)
@@ -400,9 +400,9 @@ end
         String,
     )
     for required in (
-        "PISP_DOCS_ISP2024_REFTRACE",
-        "PISP_DOCS_ISP2024_POE",
-        "PISP_DOCS_ISP2024_YEAR",
+        "ParseISP_DOCS_ISP2024_REFTRACE",
+        "ParseISP_DOCS_ISP2024_POE",
+        "ParseISP_DOCS_ISP2024_YEAR",
         "out-ref\$(REFTRACE)-poe\$(POE)",
         "schedule-\$(PLANNING_YEAR)",
         "available_builds",
@@ -425,7 +425,7 @@ end
     sources = inventory["source"]
     @test length(sources) == 39
     @test length(unique(source["id"] for source in sources)) == 39
-    registered_2024_ids = Set(string(spec.id) for spec in PISP.source_specs(2024))
+    registered_2024_ids = Set(string(spec.id) for spec in ParseISP.source_specs(2024))
     @test isempty(intersect(Set(source["id"] for source in sources), registered_2024_ids))
     source_lineage_ids = reduce(vcat, [source["lineage_2024"] for source in sources])
     @test length(source_lineage_ids) == length(unique(source_lineage_ids))
@@ -527,7 +527,7 @@ end
     @test occursin("# ## Model and trace files", source_spec)
     @test occursin("Fields and units", source_spec)
     @test !occursin("pipeline_role", source_spec)
-    @test !occursin("Candidate PISP consumer", source_spec)
+    @test !occursin("Candidate ParseISP consumer", source_spec)
     @test !occursin("Observed trace files by scenario", source_spec)
 
     source_validation = read(validation_path, String)
@@ -690,7 +690,7 @@ end
         "optimal development path (ODP)",
         "`CDP14`",
         "`CDP 4`",
-        "PISP currently filters relevant ISP 2024 generation and storage outlook reads",
+        "ParseISP currently filters relevant ISP 2024 generation and storage outlook reads",
         "a6-cost-benefit-analysis.pdf#page=16",
         "a6-cost-benefit-analysis.pdf#page=124",
         "a6-cost-benefit-analysis.pdf#page=162",
@@ -726,7 +726,7 @@ end
 
     source_material = read_doc("editions", "source-material.md")
     for required in (
-        "AEMO source data -> PISP transformation -> PISP datasets",
+        "AEMO source data -> ParseISP transformation -> ParseISP datasets",
         "A2, A3, A4, A6, and A7",
         "2023 IASR EV workbook",
         "2025 IASR EV workbook",
@@ -747,7 +747,7 @@ end
     for required in (
         "# AEMO ISP source coverage and ownership",
         "Source-read classifications",
-        "PISP-generated intermediates",
+        "ParseISP-generated intermediates",
         "Parameter-file ownership",
         "Mapping-family ownership",
     )
@@ -757,10 +757,10 @@ end
     @test !occursin("docs/source-material-coverage.toml", source_coverage)
 
     mappings = read_doc("editions", "parameters-and-mappings.md")
-    @test occursin("$(length(PISP.NEMBUSNAME)) package bus aliases", mappings)
+    @test occursin("$(length(ParseISP.NEMBUSNAME)) package bus aliases", mappings)
     for required in (
         "`1`, `2`, and `3`",
-        "PISP.ISPdatabuilder.DATE_RANGES_REFYEARS",
+        "ParseISP.ISPdatabuilder.DATE_RANGES_REFYEARS",
         "problem-table and build-out paths",
         "source coverage and ownership",
         "Report-defined mappings",
@@ -783,11 +783,11 @@ end
     @test occursin("2024-isp-plexos-model-instructions.pdf#page=5", generated_mappings)
     @test occursin("2024-isp-plexos-model-instructions.pdf#page=6", generated_mappings)
     @test occursin("4006 demand builder", generated_mappings)
-    @test occursin("`PISPparameters.jl` includes six parameter files", generated_mappings)
+    @test occursin("`ParseISPparameters.jl` includes six parameter files", generated_mappings)
     @test !occursin("second handwritten copy", generated_mappings)
     @test occursin("Reference Year and VRE Reference Year", generated_mappings)
-    @test occursin("PISP.ISPdatabuilder.DATE_RANGES_REFYEARS", generated_mappings)
-    @test !occursin("PISP.WEATHER_YEARS_ISP", generated_mappings)
+    @test occursin("ParseISP.ISPdatabuilder.DATE_RANGES_REFYEARS", generated_mappings)
+    @test !occursin("ParseISP.WEATHER_YEARS_ISP", generated_mappings)
 
     renewable_energy_zones = read_doc(
         "generated",
@@ -802,8 +802,8 @@ end
         "analyses",
         "reference-trace-4006-composite-mapping.md",
     )
-    @test occursin("PISP.ISPdatabuilder.DATE_RANGES_REFYEARS", generated_4006_mapping)
-    @test !occursin("PISP.WEATHER_YEARS_ISP", generated_4006_mapping)
+    @test occursin("ParseISP.ISPdatabuilder.DATE_RANGES_REFYEARS", generated_4006_mapping)
+    @test !occursin("ParseISP.WEATHER_YEARS_ISP", generated_4006_mapping)
 
     hydro_parameters = read_doc(
         "generated",
@@ -890,7 +890,7 @@ end
     download_layout = read_doc("generated", "shared", "reference", "pisp-downloads-layout.md")
     for required in (
         "Core/ or Core scenarios/",
-        "PISP-generated intermediates",
+        "ParseISP-generated intermediates",
         "Extracted outlook directories",
         "2024-isp-generation-and-storage-outlook.zip",
         "2026-isp-generation-and-storage-outlook.zip",
@@ -900,16 +900,16 @@ end
 
     supported_editions = read_doc("editions", "supported-editions.md")
     for required in (
-        "PISP.download_ISP26_reports",
-        "PISP.download_isp2026_assets",
-        "PISP.ISPdatabuilder.extract_downloads",
+        "ParseISP.download_ISP26_reports",
+        "ParseISP.download_isp2026_assets",
+        "ParseISP.ISPdatabuilder.extract_downloads",
         "ParseISP.jl",
-        "PISP.build_ISP24_datasets",
+        "ParseISP.build_ISP24_datasets",
         "| Report and source download |",
         "| Archive extraction |",
         "| Parser development |",
-        "| PISP.jl parser integration |",
-        "| Build a PISP dataset |",
+        "| ParseISP.jl parser integration |",
+        "| Build a ParseISP dataset |",
         "| Generated-output contract |",
         "| Published validation evidence |",
         "| Published analysis or EDA evidence |",
@@ -982,8 +982,8 @@ end
         mkpath(joinpath(root, "zip", "Traces"))
         write(joinpath(root, "zip", "Traces", "2024-isp-solar-traces.zip"), "trace")
 
-        @test PISPDocUtils.outlook_directories(root) == ["Core", "Sensitivities"]
-        @test PISPDocUtils.source_archives(root) == [
+        @test ParseISPDocUtils.outlook_directories(root) == ["Core", "Sensitivities"]
+        @test ParseISPDocUtils.source_archives(root) == [
             "2024-isp-generation-and-storage-outlook.zip",
             "2024-isp-model.zip",
         ]
@@ -1116,7 +1116,7 @@ function with_environment(callback::Function, overrides::Pair...)
     end
 end
 
-@testset "PISP documentation page registry" begin
+@testset "ParseISP documentation page registry" begin
     @testset "status semantics and published generated outputs" begin
         published = fixture_page(id="published", nav_order=10)
         draft = fixture_page(id="draft", status="draft", nav_order=20)
@@ -1360,9 +1360,9 @@ end
         ]
 
         with_environment(
-            "PISP_LITERATE_PAGES" => nothing,
-            "PISP_LITERATE_SET" => nothing,
-            "PISP_DOCS_TRACK" => nothing,
+            "ParseISP_LITERATE_PAGES" => nothing,
+            "ParseISP_LITERATE_SET" => nothing,
+            "ParseISP_DOCS_TRACK" => nothing,
         ) do
             @test [page.id for page in select_pages(pages)] == [
                 "shared-published",
@@ -1371,41 +1371,41 @@ end
         end
 
         with_environment(
-            "PISP_LITERATE_PAGES" => nothing,
-            "PISP_LITERATE_SET" => "published",
-            "PISP_DOCS_TRACK" => "isp2024",
+            "ParseISP_LITERATE_PAGES" => nothing,
+            "ParseISP_LITERATE_SET" => "published",
+            "ParseISP_DOCS_TRACK" => "isp2024",
         ) do
             @test [page.id for page in select_pages(pages)] == ["isp2024-published"]
         end
 
         with_environment(
-            "PISP_LITERATE_PAGES" => nothing,
-            "PISP_LITERATE_SET" => "draft",
-            "PISP_DOCS_TRACK" => "isp2024",
+            "ParseISP_LITERATE_PAGES" => nothing,
+            "ParseISP_LITERATE_SET" => "draft",
+            "ParseISP_DOCS_TRACK" => "isp2024",
         ) do
             @test [page.id for page in select_pages(pages)] == ["isp2024-draft"]
         end
 
         with_environment(
-            "PISP_LITERATE_PAGES" => "isp2024-archived",
-            "PISP_LITERATE_SET" => nothing,
-            "PISP_DOCS_TRACK" => nothing,
+            "ParseISP_LITERATE_PAGES" => "isp2024-archived",
+            "ParseISP_LITERATE_SET" => nothing,
+            "ParseISP_DOCS_TRACK" => nothing,
         ) do
             @test_throws ErrorException select_pages(pages)
         end
 
         with_environment(
-            "PISP_LITERATE_PAGES" => "isp2024-published",
-            "PISP_LITERATE_SET" => "all",
-            "PISP_DOCS_TRACK" => nothing,
+            "ParseISP_LITERATE_PAGES" => "isp2024-published",
+            "ParseISP_LITERATE_SET" => "all",
+            "ParseISP_DOCS_TRACK" => nothing,
         ) do
             @test_throws ErrorException select_pages(pages)
         end
 
         with_environment(
-            "PISP_LITERATE_PAGES" => "isp2024-published",
-            "PISP_LITERATE_SET" => nothing,
-            "PISP_DOCS_TRACK" => "isp2024",
+            "ParseISP_LITERATE_PAGES" => "isp2024-published",
+            "ParseISP_LITERATE_SET" => nothing,
+            "ParseISP_DOCS_TRACK" => "isp2024",
         ) do
             @test_throws ErrorException select_pages(pages)
         end
@@ -1523,7 +1523,7 @@ end
         @test first.(navigation) == [
             "Home",
             "Quickstart",
-            "Understand PISP and ISP data",
+            "Understand ParseISP and ISP data",
             "ISP 2024",
             "ISP 2026",
             "Compare ISP 2024 and ISP 2026",
@@ -1534,11 +1534,11 @@ end
         navigation_by_title = Dict(first(entry) => last(entry) for entry in navigation)
         @test navigation_by_title["Contributing"] == "contributing.md"
 
-        shared_material = navigation_by_title["Understand PISP and ISP data"]
+        shared_material = navigation_by_title["Understand ParseISP and ISP data"]
         @test first.(shared_material) == [
             "ISP source data",
-            "PISP transformation",
-            "PISP datasets",
+            "ParseISP transformation",
+            "ParseISP datasets",
         ]
         @test first.(last(shared_material[1])) == [
             "Source material by edition",
@@ -1609,7 +1609,7 @@ end
                 "Renderer comparison-source-data"=>
                     "generated/fixture/comparison-source-data.md",
             ],
-            "PISP datasets"=>Any[
+            "ParseISP datasets"=>Any[
                 "Renderer comparison-pisp-dataset"=>
                     "generated/fixture/comparison-pisp-dataset.md",
             ],

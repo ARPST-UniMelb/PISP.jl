@@ -16,13 +16,13 @@ describe those sources.
 
 ````julia
 using DataFrames
-using PISP
+using ParseISP
 
-const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
-include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
-import .PISPDocUtils
+const REPO_ROOT = normpath(get(ENV, "ParseISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
+include(joinpath(REPO_ROOT, "docs", "utils", "ParseISPDocUtils.jl"))
+import .ParseISPDocUtils
 
-const PROFILE = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
+const PROFILE = ParseISPDocUtils.edition_profile(REPO_ROOT, "2024")
 
 function source_name(id)
     name = titlecase(replace(string(id), "_" => " "))
@@ -69,7 +69,7 @@ source_rows = DataFrame([
         keys = isempty(row.keys) ? "Defined by the selected table" : replace(row.keys, "; " => ", "),
         fields_units = fields_and_units(row),
     )
-    for row in PISP.source_spec_rows(2024)
+    for row in ParseISP.source_spec_rows(2024)
 ])
 
 function reader_table(rows)
@@ -80,7 +80,7 @@ function reader_table(rows)
         :keys,
         :fields_units,
     )
-    return PISPDocUtils.markdown_table(
+    return ParseISPDocUtils.markdown_table(
         table;
         column_labels = ["Source", "File and selection", "Keys", "Fields and units"],
     )
@@ -127,7 +127,7 @@ reader_table(inputs_rows)
 | Bess Maximum Capacity | 2024-isp-inputs-and-assumptions-workbook.xlsx — Maximum capacity!P8:U62 | Defined by the selected table | See the named source selection |
 | Bess Storage Properties | 2024-isp-inputs-and-assumptions-workbook.xlsx — Storage properties!B4:H13 | Defined by the selected table | See the named source selection |
 | Bess Summary Mapping | 2024-isp-inputs-and-assumptions-workbook.xlsx — Summary Mapping!B314:AB370 | Defined by the selected table | See the named source selection |
-| Buildout Schedule | PISP-buildouts/buildouts.xlsx — buildout\_1 | Defined by the selected table | tech, subregion, year, capacity, n. capacity=MW |
+| Buildout Schedule | ParseISP-buildouts/buildouts.xlsx — buildout\_1 | Defined by the selected table | tech, subregion, year, capacity, n. capacity=MW |
 | Coal Minimum Stable Generation | 2024-isp-inputs-and-assumptions-workbook.xlsx — Generation limits!B8:D52 | Defined by the selected table | See the named source selection |
 | Committed Generator Maximum Capacity | 2024-isp-inputs-and-assumptions-workbook.xlsx — Maximum capacity!F8:I35 | Defined by the selected table | See the named source selection |
 | Condensed Capacity Outlook | Auxiliary/CapacityOutlook2024\_Condensed.xlsx — CapacityOutlook!A1:G14356 | Defined by the selected table | Scenario, Subregion, Technology, date, value. value=MW |

@@ -1,14 +1,14 @@
-mutable struct PISPtimeConfig
+mutable struct ParseISPtimeConfig
     problem::DataFrame
 
     # Default constructor
-    function PISPtimeConfig()
-        problem    = PISP.schema_to_dataframe(PISP.MOD_PROBLEM)
+    function ParseISPtimeConfig()
+        problem    = ParseISP.schema_to_dataframe(ParseISP.MOD_PROBLEM)
         new(problem)
     end
 end
 
-mutable struct PISPtimeStatic
+mutable struct ParseISPtimeStatic
     bus::DataFrame
     dem::DataFrame
     ess::DataFrame
@@ -17,18 +17,18 @@ mutable struct PISPtimeStatic
     der::DataFrame
 
     # Default constructor
-    function PISPtimeStatic()
-        bus    = PISP.schema_to_dataframe(PISP.MOD_BUS)
-        dem    = PISP.schema_to_dataframe(PISP.MOD_DEMAND)
-        ess    = PISP.schema_to_dataframe(PISP.MOD_ESS)
-        gen    = PISP.schema_to_dataframe(PISP.MOD_GEN)
-        line   = PISP.schema_to_dataframe(PISP.MOD_LINE)
-        der    = PISP.schema_to_dataframe(PISP.MOD_DER)
+    function ParseISPtimeStatic()
+        bus    = ParseISP.schema_to_dataframe(ParseISP.MOD_BUS)
+        dem    = ParseISP.schema_to_dataframe(ParseISP.MOD_DEMAND)
+        ess    = ParseISP.schema_to_dataframe(ParseISP.MOD_ESS)
+        gen    = ParseISP.schema_to_dataframe(ParseISP.MOD_GEN)
+        line   = ParseISP.schema_to_dataframe(ParseISP.MOD_LINE)
+        der    = ParseISP.schema_to_dataframe(ParseISP.MOD_DER)
         new(bus, dem, ess, gen, line, der)
     end
 end
 
-mutable struct PISPtimeVarying
+mutable struct ParseISPtimeVarying
     dem_load::DataFrame
     ess_emax::DataFrame
     ess_lmax::DataFrame
@@ -43,19 +43,19 @@ mutable struct PISPtimeVarying
     der_pred::DataFrame
 
     # Default constructor
-    function PISPtimeVarying()
-        dem_load   = PISP.schema_to_dataframe(PISP.MOD_DEMAND_LOAD)
-        ess_emax   = PISP.schema_to_dataframe(PISP.MOD_ESS_EMAX)
-        ess_lmax   = PISP.schema_to_dataframe(PISP.MOD_ESS_LMAX)
-        ess_n      = PISP.schema_to_dataframe(PISP.MOD_ESS_N)
-        ess_pmax   = PISP.schema_to_dataframe(PISP.MOD_ESS_PMAX)
-        ess_inflow = PISP.schema_to_dataframe(PISP.MOD_ESS_INFLOW)
-        gen_n      = PISP.schema_to_dataframe(PISP.MOD_GEN_N)
-        gen_pmax   = PISP.schema_to_dataframe(PISP.MOD_GEN_PMAX)
-        gen_inflow = PISP.schema_to_dataframe(PISP.MOD_GEN_INFLOW)
-        line_fwcap = PISP.schema_to_dataframe(PISP.MOD_LINE_FWCAP)
-        line_rvcap = PISP.schema_to_dataframe(PISP.MOD_LINE_RVCAP)
-        der_pred   = PISP.schema_to_dataframe(PISP.MOD_DER_PRED_MAX)
+    function ParseISPtimeVarying()
+        dem_load   = ParseISP.schema_to_dataframe(ParseISP.MOD_DEMAND_LOAD)
+        ess_emax   = ParseISP.schema_to_dataframe(ParseISP.MOD_ESS_EMAX)
+        ess_lmax   = ParseISP.schema_to_dataframe(ParseISP.MOD_ESS_LMAX)
+        ess_n      = ParseISP.schema_to_dataframe(ParseISP.MOD_ESS_N)
+        ess_pmax   = ParseISP.schema_to_dataframe(ParseISP.MOD_ESS_PMAX)
+        ess_inflow = ParseISP.schema_to_dataframe(ParseISP.MOD_ESS_INFLOW)
+        gen_n      = ParseISP.schema_to_dataframe(ParseISP.MOD_GEN_N)
+        gen_pmax   = ParseISP.schema_to_dataframe(ParseISP.MOD_GEN_PMAX)
+        gen_inflow = ParseISP.schema_to_dataframe(ParseISP.MOD_GEN_INFLOW)
+        line_fwcap = ParseISP.schema_to_dataframe(ParseISP.MOD_LINE_FWCAP)
+        line_rvcap = ParseISP.schema_to_dataframe(ParseISP.MOD_LINE_RVCAP)
+        der_pred   = ParseISP.schema_to_dataframe(ParseISP.MOD_DER_PRED_MAX)
 
         new(dem_load, ess_emax, ess_lmax, ess_n, ess_pmax, ess_inflow,
             gen_n, gen_pmax, gen_inflow, line_fwcap, line_rvcap, der_pred)

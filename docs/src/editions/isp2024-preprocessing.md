@@ -1,6 +1,6 @@
 # ISP 2024 preprocessing workflow
 
-PISP transforms the published ISP 2024 source material in two phases.
+ParseISP transforms the published ISP 2024 source material in two phases.
 It first prepares the edition-specific source files, then constructs the static asset tables and time-varying schedules used by downstream studies.
 
 The workflow below follows that transformation from the public build request to the written dataset.
@@ -34,14 +34,14 @@ overlay time-varying schedules
 write CSV and Arrow outputs
 ```
 
-Source preparation runs once for each call to `PISP.build_ISP24_datasets`.
+Source preparation runs once for each call to `ParseISP.build_ISP24_datasets`.
 Dataset construction then runs once for every requested planning year or explicit date range.
 
 ## Prepare the source files
 
 `downloadpath` identifies the root containing the ISP 2024 workbooks, extracted model material, outlook workbooks, and trace directories.
-When `download_from_AEMO = true`, PISP acquires the configured sources before processing them.
-When it is `false`, PISP starts from files already present under the same root.
+When `download_from_AEMO = true`, ParseISP acquires the configured sources before processing them.
+When it is `false`, ParseISP starts from files already present under the same root.
 
 Both paths continue through archive extraction and source preparation.
 The acquisition flag therefore controls where the source bytes come from, not whether the remaining preprocessing stages run.
@@ -51,9 +51,9 @@ The source files and selections are documented in [ISP 2024 source data](../gene
 ## Normalise the outlook workbooks
 
 The generation and storage outlook archive publishes scenario workbooks with wide, source-oriented tables.
-PISP reads the relevant capacity, storage, and renewable-energy-zone sheets and writes auxiliary tables with predictable scenario and time fields for the later parser stages.
+ParseISP reads the relevant capacity, storage, and renewable-energy-zone sheets and writes auxiliary tables with predictable scenario and time fields for the later parser stages.
 
-These auxiliary workbooks are PISP-generated intermediates.
+These auxiliary workbooks are ParseISP-generated intermediates.
 They preserve selected source values while changing the table shape needed by the package; they are not original AEMO publications.
 See [source data](../generated/isp2024/reference/source-data.md) for the source selections and [parameters and mappings](../generated/isp2024/reference/parameters-and-mappings.md) for the package conventions applied during normalisation.
 
@@ -78,7 +78,7 @@ See [building a problem table](../generated/isp2024/tutorials/building-problem-t
 
 ## Construct static assets before schedules
 
-PISP constructs buses, demands, transmission elements, generators, storage, and distributed-energy-resource rows before it builds their schedules.
+ParseISP constructs buses, demands, transmission elements, generators, storage, and distributed-energy-resource rows before it builds their schedules.
 This stage reconciles source names with package identifiers and retains intermediate identities needed by the later schedule calculations.
 
 The static tables describe assets and comparatively stable attributes.
@@ -111,9 +111,9 @@ The [Quickstart](../quickstart.md) shows the public controls in a small build, w
 
 An optional build-out workbook is applied after the base static tables and schedules have been populated.
 New generator or storage rows are inserted together with their unit-count schedules, so they follow the same static-to-schedule relationship as parsed assets.
-The workbook supplies technology, location, capacity, build year, and unit count; PISP supplies the remaining static-row defaults and computes capacity-dependent fields.
+The workbook supplies technology, location, capacity, build year, and unit count; ParseISP supplies the remaining static-row defaults and computes capacity-dependent fields.
 See [ISP 2024 build-out defaults](../generated/isp2024/reference/buildout-defaults.md) for the complete field-level values and override rules.
 
-PISP then writes the selected CSV and Arrow outputs.
+ParseISP then writes the selected CSV and Arrow outputs.
 Static tables share the dataset root, while schedules are grouped by the requested planning year or date range.
-See [working with PISP-generated outputs](../generated/isp2024/tutorials/working-with-pisp-outputs.md) for joins and downstream use.
+See [working with ParseISP-generated outputs](../generated/isp2024/tutorials/working-with-pisp-outputs.md) for joins and downstream use.

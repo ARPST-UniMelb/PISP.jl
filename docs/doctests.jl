@@ -6,8 +6,8 @@
 # Usage:
 #   julia --project=docs docs/doctests.jl
 using Documenter
-using PISP
+using ParseISP
 
-DocMeta.setdocmeta!(PISP, :DocTestSetup, :(using PISP; using DataFrames; using Dates); recursive = true)
+DocMeta.setdocmeta!(ParseISP, :DocTestSetup, :(using ParseISP; using DataFrames; using Dates); recursive = true)
 
-doctest(PISP; manual = false)
+doctest(ParseISP; manual = false)

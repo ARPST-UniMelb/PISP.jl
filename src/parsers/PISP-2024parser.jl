@@ -490,16 +490,16 @@ register_source_specs!(ISP2024_DSP_SOURCE_SPECS...)
     bus_table(ts)
 
 Populate the `ts.bus` time-static table with every transmission node defined in
-`PISP.NEMBUSES`. Each entry captures the bus id, name, alias, geographic coordinates, and area identifier so downstream routines can
+`ParseISP.NEMBUSES`. Each entry captures the bus id, name, alias, geographic coordinates, and area identifier so downstream routines can
 refer to a consistent index of locations.
 
 # Arguments
-- `ts::PISPtimeStatic`: Static container whose `bus` table is mutated in place.
+- `ts::ParseISPtimeStatic`: Static container whose `bus` table is mutated in place.
 """
-function bus_table(ts::PISPtimeStatic)
+function bus_table(ts::ParseISPtimeStatic)
     idx = 1
-    for b in keys(PISP.NEMBUSES)
-        push!(ts.bus,(idx, b, PISP.NEMBUSNAME[b], 1, PISP.NEMBUSES[b][1], PISP.NEMBUSES[b][2], PISP.STID[PISP.BUS2AREA[b]]))
+    for b in keys(ParseISP.NEMBUSES)
+        push!(ts.bus,(idx, b, ParseISP.NEMBUSNAME[b], 1, ParseISP.NEMBUSES[b][1], ParseISP.NEMBUSES[b][2], ParseISP.STID[ParseISP.BUS2AREA[b]]))
         idx += 1
     end
 end
@@ -514,7 +514,7 @@ the inclusive date window `[dstart, dend]`, compared at day resolution.
 ```jldoctest
 julia> df = DataFrame(Year = [2024, 2024, 2025], Month = [6, 12, 1], Day = [15, 31, 1]);
 
-julia> window = PISP.select_trace_date_window(df, DateTime(2024, 1, 1), DateTime(2024, 12, 31));
+julia> window = ParseISP.select_trace_date_window(df, DateTime(2024, 1, 1), DateTime(2024, 12, 31));
 
 julia> nrow(window)
 2
@@ -536,19 +536,19 @@ while a summary `DataFrame` of raw limits is returned for use by schedule
 generation routines.
 
 # Arguments
-- `ts::PISPtimeStatic`: Receives the static line rows.
-- `tv::PISPtimeVarying`: Used to seed the staged commissioning entries for
+- `ts::ParseISPtimeStatic`: Receives the static line rows.
+- `tv::ParseISPtimeVarying`: Used to seed the staged commissioning entries for
   Project EnergyConnect.
 - `ispdata24::String`: Path to the ISP inputs workbook.
 
 # Returns
 - `DataFrame`: Raw seasonal capacity data keyed by line alias.
 """
-function line_table(ts::PISPtimeStatic, tv::PISPtimeVarying, ispdata24::String)
+function line_table(ts::ParseISPtimeStatic, tv::ParseISPtimeVarying, ispdata24::String)
     bust = ts.bus
     # Read ISP Workbook with line capacities
-    DATALINES   = PISP.read_xlsx_with_header(ispdata24, ISP2024_NETWORK_CAPABILITY_SOURCE)
-    RELIALINES  = PISP.read_xlsx_with_header(ispdata24, ISP2024_TRANSMISSION_RELIABILITY_SOURCE)
+    DATALINES   = ParseISP.read_xlsx_with_header(ispdata24, ISP2024_NETWORK_CAPABILITY_SOURCE)
+    RELIALINES  = ParseISP.read_xlsx_with_header(ispdata24, ISP2024_TRANSMISSION_RELIABILITY_SOURCE)
     Results = DataFrame(name = String[], busA = String[], busB = String[], idbusA = Int64[], idbusB = Int64[], fwd_peak = Float64[], fwd_summer = Float64[], fwd_winter = Float64[], rev_peak = Float64[], rev_summer = Float64[], rev_winter = Float64[])
     # Link names
     NEMTX = ["CQ->NQ", "CQ->GG", "SQ->CQ", "QNI North", "Terranora", "QNI South","CNSW->SNW North","CNSW->SNW South", "VNI North","VNI South","Heywood","SESA->CSA","Murraylink", "Basslink"]
@@ -676,11 +676,11 @@ problem level so each week inherits the appropriate seasonal value, adding an
 extra transition row when a window straddles the boundary.
 
 # Arguments
-- `tc::PISPtimeConfig`: Supplies start/end timestamps for each problem block.
-- `tv::PISPtimeVarying`: Target schedule tables (`line_fwcap`, `line_rvcap`).
+- `tc::ParseISPtimeConfig`: Supplies start/end timestamps for each problem block.
+- `tv::ParseISPtimeVarying`: Target schedule tables (`line_fwcap`, `line_rvcap`).
 - `TXdata::DataFrame`: Raw ratings from `line_table` indexed by line.
 """
-function line_sched_table(tc::PISPtimeConfig, tv::PISPtimeVarying, TXdata::DataFrame)
+function line_sched_table(tc::ParseISPtimeConfig, tv::ParseISPtimeVarying, TXdata::DataFrame)
     wmonths = [4,5,6,7,8,9]     # Winter months
     smonths = [10,11,12,1,2,3]  # Summer months
     probs   = tc.problem        # Call problem table 
@@ -733,13 +733,13 @@ investments considered in the 2024 ISP. Each option is normalised into the `ts.l
 ratings, and activation flags.
 
 # Arguments
-- `ts::PISPtimeStatic`: Receives the appended candidate-line metadata.
+- `ts::ParseISPtimeStatic`: Receives the appended candidate-line metadata.
 - `ispdata24::String`: Path to the ISP workbook containing augmentation data.
 """
-function line_invoptions(ts::PISPtimeStatic, ispdata24::String)
+function line_invoptions(ts::ParseISPtimeStatic, ispdata24::String)
     bust = ts.bus
     maxidlin = isempty(ts.line) ? 0 : maximum(ts.line.id_lin)
-    DATALININV = PISP.read_xlsx_with_header(ispdata24, ISP2024_FLOW_PATH_AUGMENTATION_SOURCE)
+    DATALININV = ParseISP.read_xlsx_with_header(ispdata24, ISP2024_FLOW_PATH_AUGMENTATION_SOURCE)
     skip = ["Option Name",""]
     df = DataFrame(Option = String[], Direction = String[], Forward = Float64[], Reverse = Float64[], Cost = Float64[], LeadYears = Float64[])
 
@@ -761,10 +761,10 @@ function line_invoptions(ts::PISPtimeStatic, ispdata24::String)
                 bn2,                                                                 # BUS_TO_NAME
                 bust[bust[!, :name] .== bn1,:id_bus][1],                                 # BUS_FROM_ID
                 bust[bust[!, :name] .== bn2,:id_bus][1],                                 # BUS_TO_ID
-                PISP.flow2num(split(string(DATALININV[a, 7]),    ['(','\n'])[1]),    # FWD POWER
-                PISP.flow2num(split(string(DATALININV[a, 8]),    ['(','\n'])[1]),    # REV POWER
-                PISP.inv2num(split(string(DATALININV[a, 9]),     ['(','\n'])),       # INDICATIVE_COST_ESTIMATE
-                PISP.lead2year(split(string(DATALININV[a, 13]),  ['(','\n'])[1])]    # LEAD TIME
+                ParseISP.flow2num(split(string(DATALININV[a, 7]),    ['(','\n'])[1]),    # FWD POWER
+                ParseISP.flow2num(split(string(DATALININV[a, 8]),    ['(','\n'])[1]),    # REV POWER
+                ParseISP.inv2num(split(string(DATALININV[a, 9]),     ['(','\n'])),       # INDICATIVE_COST_ESTIMATE
+                ParseISP.lead2year(split(string(DATALININV[a, 13]),  ['(','\n'])[1])]    # LEAD TIME
         push!(Results, aux)
     end
 
@@ -794,7 +794,7 @@ writes the merged dataset into `ts.gen`, and returns auxiliary DataFrames requir
 for time-varying tables(synchronous unit limits, the full generator table, and the pumped-storage subset).
 
 # Arguments
-- `ts::PISPtimeStatic`: Static container that receives the combined generator
+- `ts::ParseISPtimeStatic`: Static container that receives the combined generator
   table.
 - `ispdata19::String`: Path to the historical assumptions workbook used for
   supplementary attributes.
@@ -805,7 +805,7 @@ for time-varying tables(synchronous unit limits, the full generator table, and t
 - `Tuple{DataFrame,DataFrame,DataFrame}`: `(SYNC4, GENERATORS, PS)` for use by
   scheduling, ESS, and inflow routines.
 """
-function generator_table(ts::PISPtimeStatic, ispdata19::String, ispdata24::String)
+function generator_table(ts::ParseISPtimeStatic, ispdata19::String, ispdata24::String)
     # ============================================ #
     # ============== Generator data ============== #
     # ============================================ #
@@ -818,21 +818,21 @@ function generator_table(ts::PISPtimeStatic, ispdata19::String, ispdata24::Strin
                 "january" => 1, "february" => 2, "march" => 3, "april" => 4, "may" => 5, "june" => 6, "july" => 7, "august" => 8, "september" => 9, "october" => 10, "november" => 11, "december" => 12)
 
     str2date(date) = date isa Number ? Dates.DateTime(1899, 12, 30) + Dates.Day(date) : DateTime(parse(Int64,split(date,' ')[2]),m2n[lowercase(split(date,' ')[1])])
-    MAPPING  = PISP.read_xlsx_with_header(ispdata24, ISP2024_GENERATOR_MAPPING_NAMES_SOURCE)      # EXISTING GENERATOR
-    MAPPING2 = PISP.read_xlsx_with_header(ispdata24, ISP2024_GENERATOR_MAPPING_MLF_SOURCE)    # MLF
-    namedict = PISP.OrderedDict(zip(MAPPING[!,1], MAPPING2[!,1]))
+    MAPPING  = ParseISP.read_xlsx_with_header(ispdata24, ISP2024_GENERATOR_MAPPING_NAMES_SOURCE)      # EXISTING GENERATOR
+    MAPPING2 = ParseISP.read_xlsx_with_header(ispdata24, ISP2024_GENERATOR_MAPPING_MLF_SOURCE)    # MLF
+    namedict = ParseISP.OrderedDict(zip(MAPPING[!,1], MAPPING2[!,1]))
 
     # ====================================== #
     # ==== General list of Power Plants ==== #
     # ====================================== #
-    GENS = PISP.read_xlsx_with_header(ispdata24, ISP2024_EXISTING_GENERATOR_MAX_CAPACITY_SOURCE)
+    GENS = ParseISP.read_xlsx_with_header(ispdata24, ISP2024_EXISTING_GENERATOR_MAX_CAPACITY_SOURCE)
     GENS[!, :Generator] = [k == "Bogong / Mackay" ? "Bogong / MacKay" : k for k in GENS[!, :Generator]] # Fix for Bogong / Mackay
     GENS[!, :Generator] = [k == "Lincoln Gap Wind Farm - Stage 2" ? "Lincoln Gap Wind Farm - stage 2" : k for k in GENS[!, :Generator]] # Fix for Bogong / Mackay
 
-    COMGEN_MAXCAP = PISP.read_xlsx_with_header(ispdata24, ISP2024_COMMITTED_GENERATOR_MAX_CAPACITY_SOURCE)
-    ADVGEN_MAXCAP = PISP.read_xlsx_with_header(ispdata24, ISP2024_ANTICIPATED_GENERATOR_MAX_CAPACITY_SOURCE)
+    COMGEN_MAXCAP = ParseISP.read_xlsx_with_header(ispdata24, ISP2024_COMMITTED_GENERATOR_MAX_CAPACITY_SOURCE)
+    ADVGEN_MAXCAP = ParseISP.read_xlsx_with_header(ispdata24, ISP2024_ANTICIPATED_GENERATOR_MAX_CAPACITY_SOURCE)
 
-    MAPPING3 = PISP.read_xlsx_with_header(ispdata24, ISP2024_GENERATOR_SUMMARY_MAPPING_SOURCE)
+    MAPPING3 = ParseISP.read_xlsx_with_header(ispdata24, ISP2024_GENERATOR_SUMMARY_MAPPING_SOURCE)
     MAPPING3 = MAPPING3[completecases(MAPPING3),:]                              # SELECT ONLY ROWS OF MAPPING3 WITHOUT MISSING VALUES
     rename!(MAPPING3, 1 => :Generator)                                          # Rename first column to "Generator" 
 
@@ -865,17 +865,17 @@ function generator_table(ts::PISPtimeStatic, ispdata19::String, ispdata24::Strin
     # Units with unit commitment and ramping #
     # ====================================== #
     # Generation limits and stable levels for coal and gas generators
-    DATA_COALMSG = PISP.read_xlsx_with_header(ispdata24, ISP2024_COAL_MINIMUM_STABLE_GENERATION_SOURCE)
-    DATA_GPGMSG = PISP.read_xlsx_with_header(ispdata24, ISP2024_GPG_MINIMUM_STABLE_GENERATION_SOURCE)
+    DATA_COALMSG = ParseISP.read_xlsx_with_header(ispdata24, ISP2024_COAL_MINIMUM_STABLE_GENERATION_SOURCE)
+    DATA_GPGMSG = ParseISP.read_xlsx_with_header(ispdata24, ISP2024_GPG_MINIMUM_STABLE_GENERATION_SOURCE)
     select!(DATA_GPGMSG, Not(Symbol("Technology Type")))
 
     # Minimum up times for different units
-    DATA_MINUP_UNITS = PISP.read_xlsx_with_header(ispdata24, ISP2024_GENERATOR_MIN_UP_DOWN_SOURCE)
-    DATA_MINUP_UNITS19 = PISP.read_xlsx_with_header(ispdata19, ISP2024_LEGACY_GENERATOR_MIN_UP_SOURCE) # Min UP and DW - GAS+COAL UNITS (2019)
+    DATA_MINUP_UNITS = ParseISP.read_xlsx_with_header(ispdata24, ISP2024_GENERATOR_MIN_UP_DOWN_SOURCE)
+    DATA_MINUP_UNITS19 = ParseISP.read_xlsx_with_header(ispdata19, ISP2024_LEGACY_GENERATOR_MIN_UP_SOURCE) # Min UP and DW - GAS+COAL UNITS (2019)
     select!(DATA_MINUP_UNITS, Not(Symbol("Technology Type")))
     XLSX.writetable(".tmp/DATA_MINUP_UNITS19.xlsx", Tables.columntable(DATA_MINUP_UNITS19); sheetname="Generators19", overwrite=true)
     # Ramp rates for different units
-    UC = PISP.read_xlsx_with_header(ispdata24, ISP2024_GENERATOR_RAMP_RATES_SOURCE)
+    UC = ParseISP.read_xlsx_with_header(ispdata24, ISP2024_GENERATOR_RAMP_RATES_SOURCE)
     select!(UC, Not(Symbol("Technology Type")))
     XLSX.writetable(".tmp/UC.xlsx", Tables.columntable(UC); sheetname="UC", overwrite=true)
 
@@ -945,9 +945,9 @@ function generator_table(ts::PISPtimeStatic, ispdata19::String, ispdata24::Strin
     # ====================================== #
     # ============= RETIREMENTS ============ #
     # ====================================== #
-    UNITS = PISP.read_xlsx_with_header(ispdata24, ISP2024_GENERATOR_RETIREMENTS_SOURCE)
+    UNITS = ParseISP.read_xlsx_with_header(ispdata24, ISP2024_GENERATOR_RETIREMENTS_SOURCE)
     rename!(UNITS, 1 => "Generator")
-    UNITS[!,:RETIRE] = DateTime.(PISP.parseif(UNITS[:,3]))
+    UNITS[!,:RETIRE] = DateTime.(ParseISP.parseif(UNITS[:,3]))
 
     # FIX SOME MISMATCHES BETWEEN NAMES IN SHEETS
     UNITS[!,:Generator] = [n == "Bogong / Mackay" ? "Bogong / MacKay" : n for n in UNITS[!,:Generator]]
@@ -963,15 +963,15 @@ function generator_table(ts::PISPtimeStatic, ispdata19::String, ispdata24::Strin
     # ====================================== #
     # ============= RELIABILITY ============ #
     # ====================================== #
-    RELIA = PISP.read_xlsx_with_header(ispdata24, ISP2024_EXISTING_GENERATOR_RELIABILITY_SOURCE)
-    RELIANEW = PISP.read_xlsx_with_header(ispdata24, ISP2024_NEW_GENERATOR_RELIABILITY_SOURCE)
+    RELIA = ParseISP.read_xlsx_with_header(ispdata24, ISP2024_EXISTING_GENERATOR_RELIABILITY_SOURCE)
+    RELIANEW = ParseISP.read_xlsx_with_header(ispdata24, ISP2024_NEW_GENERATOR_RELIABILITY_SOURCE)
 
 
     # ====================================== #
     # ========= GENERATION SUMMARY ========= #
     # ====================================== #
-    GENSUM     = PISP.read_xlsx_with_header(ispdata24, ISP2024_EXISTING_GENERATOR_SUMMARY_SOURCE)
-    GENSUM_ADD = PISP.read_xlsx_with_header(ispdata24, ISP2024_ADDITIONAL_GENERATOR_SUMMARY_SOURCE)
+    GENSUM     = ParseISP.read_xlsx_with_header(ispdata24, ISP2024_EXISTING_GENERATOR_SUMMARY_SOURCE)
+    GENSUM_ADD = ParseISP.read_xlsx_with_header(ispdata24, ISP2024_ADDITIONAL_GENERATOR_SUMMARY_SOURCE)
     GENSUM     = vcat(GENSUM, GENSUM_ADD)
     GENSUM     = GENSUM[3:end,:]
     flagrow    = [!all(ismissing.(Matrix(GENSUM[k:k,2:end]))) for k in 1:nrow(GENSUM)]
@@ -1043,7 +1043,7 @@ function generator_table(ts::PISPtimeStatic, ispdata19::String, ispdata24::Strin
 
     sort!(SYNC, [Symbol("Fuel type"), :Generator]) #sort table
     gens = unique(SYNC[!,:Generator])
-    gensfreq = PISP.OrderedDict([(g,count(x->x==g,SYNC[!,:Generator])) for g in gens]) # Count number of units per generator
+    gensfreq = ParseISP.OrderedDict([(g,count(x->x==g,SYNC[!,:Generator])) for g in gens]) # Count number of units per generator
 
     selar = Bool[]
     nar = Int64[]
@@ -1072,15 +1072,15 @@ function generator_table(ts::PISPtimeStatic, ispdata19::String, ispdata24::Strin
         tty = SYNC3[r, Symbol("Fuel type")]         #  Fuel type
         # println(gty, " // ", fty, " // ", tty)
 
-        if gty in keys(PISP.units)
-            SYNC3[r,:n] = PISP.units[gty][1]
-            push!(fuel, PISP.units[gty][2])
-            push!(tech, PISP.units[gty][3])
-            push!(type, PISP.units[gty][4])
-            push!(lat,  PISP.units[gty][5])
-            push!(lon,  PISP.units[gty][6])
+        if gty in keys(ParseISP.units)
+            SYNC3[r,:n] = ParseISP.units[gty][1]
+            push!(fuel, ParseISP.units[gty][2])
+            push!(tech, ParseISP.units[gty][3])
+            push!(type, ParseISP.units[gty][4])
+            push!(lat,  ParseISP.units[gty][5])
+            push!(lon,  ParseISP.units[gty][6])
         else
-            for t in PISP.fueltype
+            for t in ParseISP.fueltype
                 if fty in t[2]
                     push!(fuel,t[1])
                     if t[1] == "Coal" 
@@ -1118,7 +1118,7 @@ function generator_table(ts::PISPtimeStatic, ispdata19::String, ispdata24::Strin
     # ====================================== #
     # ============ EMMISSIONS ============== #
     # ====================================== #
-    EMI = PISP.read_xlsx_with_header(ispdata24, ISP2024_GENERATOR_EMISSIONS_SOURCE)
+    EMI = ParseISP.read_xlsx_with_header(ispdata24, ISP2024_GENERATOR_EMISSIONS_SOURCE)
     select!(EMI, Not(2))
     rename!(EMI, 2 => "Emissions")
     EMI[!,:Generator] = strip.(EMI[!,:Generator])
@@ -1318,14 +1318,14 @@ and activates units across every configured scenario once their start date is
 reached.
 
 # Arguments
-- `tv::PISPtimeVarying`: Receives the availability schedule records.
+- `tv::ParseISPtimeVarying`: Receives the availability schedule records.
 - `SYNC4::DataFrame`: Structured UC-friendly view of synchronous units.
 - `GENERATORS::DataFrame`: Master generator table used to map names to ids.
 """
-function gen_n_sched_table(tv::PISPtimeVarying, SYNC4::DataFrame, GENERATORS::DataFrame)
+function gen_n_sched_table(tv::ParseISPtimeVarying, SYNC4::DataFrame, GENERATORS::DataFrame)
     # COMMITED AND ANTICIPATED PROJECTS DATES
-    MISSING_DATES = PISP.OrderedDict("Kogan Gas" => "2026-07-01T00:00:00")
-    N_SCHED_COMM = DataFrame([Symbol(k) => Vector{Any}() for k in keys(PISP.MOD_GEN_N)])
+    MISSING_DATES = ParseISP.OrderedDict("Kogan Gas" => "2026-07-01T00:00:00")
+    N_SCHED_COMM = DataFrame([Symbol(k) => Vector{Any}() for k in keys(ParseISP.MOD_GEN_N)])
     i = isempty(tv.gen_n.id) ? 1 : maximum(tv.gen_n.id) + 1
     for r in 1:nrow(SYNC4) 
         # FIX COMMISSIONING DATE FOR GENERATORS
@@ -1343,7 +1343,7 @@ function gen_n_sched_table(tv::PISPtimeVarying, SYNC4::DataFrame, GENERATORS::Da
             genid = GENERATORS[GENERATORS[!,:name] .== SYNC4[r,:Generator], :id_gen][1]
             genname = GENERATORS[GENERATORS[!,:name] .== SYNC4[r,:Generator], :name][1]
             # @warn("Setting commissioning date for $(SYNC4[r,:Generator]) to $(d)")
-            for sc in keys(PISP.ID2SCE)
+            for sc in keys(ParseISP.ID2SCE)
                 # BEFORE COMMISSIONING -> deactivated
                 row = [i, genid, sc, DateTime("2020-01-01T00:00:00"), 0]
                 push!(N_SCHED_COMM, row)
@@ -1370,14 +1370,14 @@ end
     gen_retirements(ts, tv)
 
 Write time-varying retirement and capacity-reduction events into `tv.gen_n` and
-`tv.gen_pmax` based on the `PISP.Retirements2024` and `PISP.Reduction2024`
+`tv.gen_pmax` based on the `ParseISP.Retirements2024` and `ParseISP.Reduction2024`
 tables (Gathered manually from the 2024 Generation Outlook). 
 This ensures each scenario reflects the staged withdrawal or derating of
 specific units.
 
 # Arguments
-- `ts::PISPtimeStatic`: Supplies the generator id mapping.
-- `tv::PISPtimeVarying`: Mutated to include the retirement/pmax events.
+- `ts::ParseISPtimeStatic`: Supplies the generator id mapping.
+- `tv::ParseISPtimeVarying`: Mutated to include the retirement/pmax events.
 """
 function gen_retirements(ts, tv)
     gent = ts.gen
@@ -1385,8 +1385,8 @@ function gen_retirements(ts, tv)
     pnid    = isempty(tv.gen_n) ? 0 : maximum(tv.gen_n.id)
     ppmaxid = isempty(tv.gen_pmax) ? 0 : maximum(tv.gen_pmax.id)
 
-    for scid in keys(PISP.ID2SCE)
-        for unit in PISP.Retirements2024[scid]
+    for scid in keys(ParseISP.ID2SCE)
+        for unit in ParseISP.Retirements2024[scid]
             genid = gent[gent[!,:name] .== unit[1], :id_gen][1]
             for ndata in unit[2]
                 pnid+=1; 
@@ -1394,7 +1394,7 @@ function gen_retirements(ts, tv)
             end
         end
 
-        for unit in PISP.Reduction2024[scid]
+        for unit in ParseISP.Reduction2024[scid]
             genid = gent[gent[!,:name] .== unit[1], :id_gen][1]
             for ndata in unit[2]
                 ppmaxid+=1; 
@@ -1413,19 +1413,19 @@ with pumped-storage metadata to describe batteries, charge/discharge limits, and
 loss factors.
 
 # Arguments
-- `ts::PISPtimeStatic`: Destination for static ESS tables.
-- `tv::PISPtimeVarying`: Receives supporting indices when needed.
+- `ts::ParseISPtimeStatic`: Destination for static ESS tables.
+- `tv::ParseISPtimeVarying`: Receives supporting indices when needed.
 - `PSESS::DataFrame`: Pumped-storage subset returned by `generator_table`.
 - `ispdata24::String`: Path to ISP workbook for BESS proposals and limits.
 """
-function ess_tables(ts::PISPtimeStatic, tv::PISPtimeVarying, PSESS::DataFrame, ispdata24::String)
+function ess_tables(ts::ParseISPtimeStatic, tv::ParseISPtimeVarying, PSESS::DataFrame, ispdata24::String)
     bust = ts.bus
 
-    BESS_PROP   = PISP.read_xlsx_with_header(ispdata24, ISP2024_BESS_PROPERTIES_SOURCE)
-    PS_PROP     = PISP.read_xlsx_with_header(ispdata24, ISP2024_PUMPED_STORAGE_PROPERTIES_SOURCE)
-    BESS_CAP    = PISP.read_xlsx_with_header(ispdata24, ISP2024_BESS_MAX_CAPACITY_SOURCE)
-    BESS_SUM    = PISP.read_xlsx_with_header(ispdata24, ISP2024_BESS_SUMMARY_MAPPING_SOURCE)
-    RELIANEW    = PISP.read_xlsx_with_header(ispdata24, ISP2024_NEW_GENERATOR_RELIABILITY_SOURCE)
+    BESS_PROP   = ParseISP.read_xlsx_with_header(ispdata24, ISP2024_BESS_PROPERTIES_SOURCE)
+    PS_PROP     = ParseISP.read_xlsx_with_header(ispdata24, ISP2024_PUMPED_STORAGE_PROPERTIES_SOURCE)
+    BESS_CAP    = ParseISP.read_xlsx_with_header(ispdata24, ISP2024_BESS_MAX_CAPACITY_SOURCE)
+    BESS_SUM    = ParseISP.read_xlsx_with_header(ispdata24, ISP2024_BESS_SUMMARY_MAPPING_SOURCE)
+    RELIANEW    = ParseISP.read_xlsx_with_header(ispdata24, ISP2024_NEW_GENERATOR_RELIABILITY_SOURCE)
 
     BESS_SUM = BESS_SUM[3:end,:]
     BESS_SUM[!,:cheff] = [replace(BESS_SUM[i,Symbol("VOM (\$/MWh sent-out)")], "All " => "") for i in 1:nrow(BESS_SUM)]
@@ -1434,7 +1434,7 @@ function ess_tables(ts::PISPtimeStatic, tv::PISPtimeVarying, PSESS::DataFrame, i
     BESS = BESS_CAP
     BESS_FOR = DataFrame(id_ess = 1:nrow(BESS))
     BESS_FOR[!,:name] = BESS[!,:Storage]
-    BESS_FOR[!,:alias] = [PISP.databess[BESS[!,:Storage][k]][2] for k in 1:length(BESS[!,:Storage])]
+    BESS_FOR[!,:alias] = [ParseISP.databess[BESS[!,:Storage][k]][2] for k in 1:length(BESS[!,:Storage])]
     BESS_FOR[!,:tech] = ["BESS" for k in 1:nrow(BESS)]
     BESS_FOR[!,:type] = ["SHALLOW" for k in 1:nrow(BESS)]
     BESS_FOR[!,:capacity] = BESS[!,Symbol("Installed capacity (MW)")]
@@ -1465,30 +1465,30 @@ function ess_tables(ts::PISPtimeStatic, tv::PISPtimeVarying, PSESS::DataFrame, i
     BESS_FOR[!,:fr_dt] = [ 0.05 for k in 1:nrow(BESS)]
     BESS_FOR[!,:fr_frt] = [ 1000.0 for k in 1:nrow(BESS)]
     BESS_FOR[!,:fr_fr] = [ 70 for k in 1:nrow(BESS)]
-    BESS_FOR[!,:longitude] = [ PISP.databess[k][1][2] for k in BESS[!,:Storage]]
-    BESS_FOR[!,:latitude] = [ PISP.databess[k][1][1] for k in BESS[!,:Storage]]
+    BESS_FOR[!,:longitude] = [ ParseISP.databess[k][1][2] for k in BESS[!,:Storage]]
+    BESS_FOR[!,:latitude] = [ ParseISP.databess[k][1][1] for k in BESS[!,:Storage]]
     BESS_FOR[!,:n] = Int64.(BESS_CAP[!,Symbol("Project status")] .!= "Anticipated")
     # @warn("Anticipated BESS projects are deactivated initially")
     BESS_FOR[!,:contingency] = [ 0 for k in 1:nrow(BESS)]
 
     PS_FOR = DataFrame(id_ess = (nrow(BESS)+1):(nrow(BESS)+nrow(PSESS)))
     PS_FOR[!,:name] = string.(PSESS[!,:Generator])
-    PS_FOR[!,:alias] = [PISP.dataps[k][8] for k in PSESS[!,:Generator]]
+    PS_FOR[!,:alias] = [ParseISP.dataps[k][8] for k in PSESS[!,:Generator]]
     PS_FOR[!,:tech] = ["PS" for k in 1:nrow(PSESS)]
-    PS_FOR[!,:type] = [PISP.dataps[k][9] for k in PSESS[!,:Generator] ]
-    PS_FOR[!,:capacity] = [Float64(max(PISP.dataps[k][3], PISP.dataps[k][4])) for k in PSESS[!,:Generator] ]#PSESS[!,Symbol("CAPACITY")] 
+    PS_FOR[!,:type] = [ParseISP.dataps[k][9] for k in PSESS[!,:Generator] ]
+    PS_FOR[!,:capacity] = [Float64(max(ParseISP.dataps[k][3], ParseISP.dataps[k][4])) for k in PSESS[!,:Generator] ]#PSESS[!,Symbol("CAPACITY")] 
     PS_FOR[!,:investment] = [ 0 for k in 1:nrow(PSESS) ]
     PS_FOR[!,:active] = [ 1 for k in 1:nrow(PSESS) ]
     PS_FOR[!,:id_bus] = Int64.(PSESS[!,:id_bus])
-    PS_FOR[!,:ch_eff] = [ PISP.dataps[k][1] for k in PSESS[!,:Generator] ] ./ 100
-    PS_FOR[!,:dch_eff] = [ PISP.dataps[k][2] for k in PSESS[!,:Generator] ] ./ 100
+    PS_FOR[!,:ch_eff] = [ ParseISP.dataps[k][1] for k in PSESS[!,:Generator] ] ./ 100
+    PS_FOR[!,:dch_eff] = [ ParseISP.dataps[k][2] for k in PSESS[!,:Generator] ] ./ 100
     PS_FOR[!,:eini] = [10.0 for k in PSESS[!,:Generator] ]
     PS_FOR[!,:emin] = [10.0 for k in PSESS[!,:Generator] ]
-    PS_FOR[!,:emax] = [ PISP.dataps[k][5] for k in PSESS[!,:Generator] ]
+    PS_FOR[!,:emax] = [ ParseISP.dataps[k][5] for k in PSESS[!,:Generator] ]
     PS_FOR[!,:pmin] = [ 0.0 for k in PSESS[!,:Generator] ]
-    PS_FOR[!,:pmax] = [ PISP.dataps[k][3] for k in PSESS[!,:Generator] ]
+    PS_FOR[!,:pmax] = [ ParseISP.dataps[k][3] for k in PSESS[!,:Generator] ]
     PS_FOR[!,:lmin] = [ 0.0 for k in PSESS[!,:Generator] ]
-    PS_FOR[!,:lmax] = [ PISP.dataps[k][4] for k in PSESS[!,:Generator] ]
+    PS_FOR[!,:lmax] = [ ParseISP.dataps[k][4] for k in PSESS[!,:Generator] ]
     PS_FOR[!,:fullout] = [RELIANEW[15,2]/100 for k in 1:nrow(PSESS)]
     PS_FOR[!,:partialout] = [0 for k in 1:nrow(PSESS)]
     PS_FOR[!,:mttrfull] = [RELIANEW[15,4] for k in 1:nrow(PSESS)]
@@ -1504,13 +1504,13 @@ function ess_tables(ts::PISPtimeStatic, tv::PISPtimeVarying, PSESS::DataFrame, i
     PS_FOR[!,:fr_dt] = [ 0.0 for k in 1:nrow(PSESS)]
     PS_FOR[!,:fr_frt] = [ 0.0 for k in 1:nrow(PSESS)]
     PS_FOR[!,:fr_fr] = [ 70 for k in 1:nrow(PSESS)]
-    PS_FOR[!,:longitude] = [ PISP.dataps[k][7] for k in PSESS[!,:Generator]]
-    PS_FOR[!,:latitude] = [ PISP.dataps[k][6] for k in PSESS[!,:Generator]]
+    PS_FOR[!,:longitude] = [ ParseISP.dataps[k][7] for k in PSESS[!,:Generator]]
+    PS_FOR[!,:latitude] = [ ParseISP.dataps[k][6] for k in PSESS[!,:Generator]]
     PS_FOR[!,:n] = Int64.(PSESS[!,Symbol("Commissioning date")] .< DateTime(2024,1,1))
     # @warn("Storage comissioned after 01-01-2024 is set as inactive")
     PS_FOR[!,:contingency] = [ 0 for k in 1:nrow(PSESS)]
 
-    l_cethana = [maximum(PS_FOR[!,:id_ess])+1, "Cethana", PISP.dataps["Cethana"][end-1], "PS", PISP.dataps["Cethana"][end], PISP.dataps["Cethana"][3], 0, 0, 10,PISP.dataps["Cethana"][1]/100, PISP.dataps["Cethana"][2]/100, 10,10,PISP.dataps["Cethana"][5],0,PISP.dataps["Cethana"][3], 0, PISP.dataps["Cethana"][4],RELIANEW[15,2],0,RELIANEW[15,4],0 , 2.2,0.85,0,1,1,0,0,0,0,0,70,PISP.dataps["Cethana"][7],PISP.dataps["Cethana"][6],1,0]
+    l_cethana = [maximum(PS_FOR[!,:id_ess])+1, "Cethana", ParseISP.dataps["Cethana"][end-1], "PS", ParseISP.dataps["Cethana"][end], ParseISP.dataps["Cethana"][3], 0, 0, 10,ParseISP.dataps["Cethana"][1]/100, ParseISP.dataps["Cethana"][2]/100, 10,10,ParseISP.dataps["Cethana"][5],0,ParseISP.dataps["Cethana"][3], 0, ParseISP.dataps["Cethana"][4],RELIANEW[15,2],0,RELIANEW[15,4],0 , 2.2,0.85,0,1,1,0,0,0,0,0,70,ParseISP.dataps["Cethana"][7],ParseISP.dataps["Cethana"][6],1,0]
     push!(PS_FOR, l_cethana)
 
     # Combine BESS and PS DataFrames
@@ -1520,7 +1520,7 @@ function ess_tables(ts::PISPtimeStatic, tv::PISPtimeVarying, PSESS::DataFrame, i
     idk = isempty(tv.ess_n) ? 1 : maximum(tv.ess_n[!,:id]) + 1
     for k in 1:nrow(BESS_CAP) 
         if BESS_FOR[k,:n] == 0 
-            for sc in keys(PISP.ID2SCE)
+            for sc in keys(ParseISP.ID2SCE)
                 tgtdate = BESS_CAP[k,Symbol("Indicative commissioning date")]
                 push!(tv.ess_n, [idk, BESS_FOR[k,:id_ess], sc, DateTime(Dates.year(tgtdate), Dates.month(tgtdate), 1, 0, 0, 0), 1])
                 idk+=1
@@ -1534,7 +1534,7 @@ function ess_tables(ts::PISPtimeStatic, tv::PISPtimeVarying, PSESS::DataFrame, i
         end 
         tgtdate = PSESS[k,Symbol("Commissioning date")]
         if tgtdate >= DateTime(2024,1,1)
-            for sc in keys(PISP.ID2SCE)
+            for sc in keys(ParseISP.ID2SCE)
                 push!(tv.ess_n, [idk, PS_FOR[k,:id_ess], sc, DateTime(Dates.year(tgtdate), Dates.month(tgtdate), 1, 0, 0, 0), 1])
                 idk+=1
             end
@@ -1551,20 +1551,20 @@ to the generator entries defined in `ts` so rooftop PV contributes to the
 time-varying fleet.
 
 # Arguments
-- `tc::PISPtimeConfig`: Indicates which days and durations to sample from the
+- `tc::ParseISPtimeConfig`: Indicates which days and durations to sample from the
   profiles.
-- `ts::PISPtimeStatic`: Provides generator ids for distributed PV entries.
-- `tv::PISPtimeVarying`: Receives the computed pmax time series.
+- `ts::ParseISPtimeStatic`: Provides generator ids for distributed PV entries.
+- `tv::ParseISPtimeVarying`: Receives the computed pmax time series.
 - `profilespath::String`: Directory holding the DER traces.
 """
-function gen_pmax_distpv(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, profilespath::String; refyear::Int64=2011, poe::Int64=10, skip_traces::Bool=false)
+function gen_pmax_distpv(tc::ParseISPtimeConfig, ts::ParseISPtimeStatic, tv::ParseISPtimeVarying, profilespath::String; refyear::Int64=2011, poe::Int64=10, skip_traces::Bool=false)
     probs = tc.problem;
     bust = ts.bus;
 
     gid = isempty(ts.gen.id_gen) ? 0 : maximum(ts.gen.id_gen);
     pmaxid = isempty(tv.gen_pmax.id) ? 0 : maximum(tv.gen_pmax.id);
 
-    for st in keys(PISP.NEMBUSNAME)
+    for st in keys(ParseISP.NEMBUSNAME)
         gid += 1
         bus_data = bust[bust[!,:name] .== st, :]
         bus_id = bus_data[!, :id_bus][1]
@@ -1575,18 +1575,18 @@ function gen_pmax_distpv(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVar
         if !skip_traces
         for p in 1:nrow(probs)
             scid = probs[p,:scenario][1]
-            sc = PISP.ID2SCE[scid]
+            sc = ParseISP.ID2SCE[scid]
 
-            trace_path = PISP.source_path(
+            trace_path = ParseISP.source_path(
                 profilespath,
                 ISP2024_DISTRIBUTED_PV_TRACE_SOURCE;
                 subregion = st,
                 scenario = sc,
                 reference_year = refyear,
-                scenario_code = replace(uppercase(PISP.ID2SCE2[scid]), " " => "_"),
+                scenario_code = replace(uppercase(ParseISP.ID2SCE2[scid]), " " => "_"),
                 poe = poe,
             )
-            df = PISP.read_csv_source(trace_path, ISP2024_DISTRIBUTED_PV_TRACE_SOURCE)
+            df = ParseISP.read_csv_source(trace_path, ISP2024_DISTRIBUTED_PV_TRACE_SOURCE)
 
             dstart = probs[p,:dstart]
             dend = probs[p,:dend]
@@ -1612,16 +1612,16 @@ stored in `ts.dem`, while scenario-specific load traces derived from the profile
 directory are written into `tv.dem_sched` for each period defined in `tc`.
 
 # Arguments
-- `tc::PISPtimeConfig`: Specifies schedule windows to generate.
-- `ts::PISPtimeStatic`: Receives regional demand descriptors.
-- `tv::PISPtimeVarying`: Receives chronological demand schedules.
+- `tc::ParseISPtimeConfig`: Specifies schedule windows to generate.
+- `ts::ParseISPtimeStatic`: Receives regional demand descriptors.
+- `tv::ParseISPtimeVarying`: Receives chronological demand schedules.
 - `profilespath::String`: Root folder containing demand trace files.
 """
-function dem_load(ts::PISPtimeStatic)
+function dem_load(ts::ParseISPtimeStatic)
     bust  = ts.bus
     did     = isempty(ts.dem.id_dem) ? 0 : maximum(ts.dem.id_dem)
 
-    for st in keys(PISP.NEMBUSNAME)
+    for st in keys(ParseISP.NEMBUSNAME)
         did += 1
         bus_data = bust[bust[!,:name] .== st, :]
         bus_id = bus_data[!, :id_bus][1]
@@ -1638,32 +1638,32 @@ Populate both static demand tables. Scenario-specific load traces derived from t
 directory are written into `tv.dem_sched` for each period defined in `tc`.
 
 # Arguments
-- `tc::PISPtimeConfig`: Specifies schedule windows to generate.
-- `ts::PISPtimeStatic`: Receives regional demand descriptors.
-- `tv::PISPtimeVarying`: Receives chronological demand schedules.
+- `tc::ParseISPtimeConfig`: Specifies schedule windows to generate.
+- `ts::ParseISPtimeStatic`: Receives regional demand descriptors.
+- `tv::ParseISPtimeVarying`: Receives chronological demand schedules.
 - `profilespath::String`: Root folder containing demand trace files.
 """
-function dem_load_sched(tc::PISPtimeConfig, tv::PISPtimeVarying, profilespath::String; refyear::Int64=2011, poe::Int64=10)
+function dem_load_sched(tc::ParseISPtimeConfig, tv::ParseISPtimeVarying, profilespath::String; refyear::Int64=2011, poe::Int64=10)
     probs = tc.problem
     did     = 0 # Demands counter
     lmaxid  = isempty(tv.dem_load.id) ? 0 : maximum(tv.dem_load.id)
 
-    for st in keys(PISP.NEMBUSNAME)
+    for st in keys(ParseISP.NEMBUSNAME)
         did += 1
         for p in 1:nrow(probs)
             scid = probs[p,:scenario][1]
-            sc = PISP.ID2SCE[scid]
+            sc = ParseISP.ID2SCE[scid]
 
-            trace_path = PISP.source_path(
+            trace_path = ParseISP.source_path(
                 profilespath,
                 ISP2024_OPERATIONAL_DEMAND_TRACE_SOURCE;
                 subregion = st,
                 scenario = sc,
                 reference_year = refyear,
-                scenario_code = replace(uppercase(PISP.ID2SCE2[scid]), " " => "_"),
+                scenario_code = replace(uppercase(ParseISP.ID2SCE2[scid]), " " => "_"),
                 poe = poe,
             )
-            df = PISP.read_csv_source(trace_path, ISP2024_OPERATIONAL_DEMAND_TRACE_SOURCE)
+            df = ParseISP.read_csv_source(trace_path, ISP2024_OPERATIONAL_DEMAND_TRACE_SOURCE)
 
             dstart = probs[p,:dstart]
             dend   = probs[p,:dend]
@@ -1689,15 +1689,15 @@ scenario trajectories, maps them to generator ids and appends the time-varying
 limits into `tv.gen_pmax` for every study block in `tc`.
 
 # Arguments
-- `tc::PISPtimeConfig`: Defines the time horizon to populate.
-- `ts::PISPtimeStatic`: Supplies generator identifiers and mapping info.
-- `tv::PISPtimeVarying`: Receives the pmax schedules.
+- `tc::ParseISPtimeConfig`: Defines the time horizon to populate.
+- `ts::ParseISPtimeStatic`: Supplies generator identifiers and mapping info.
+- `tv::ParseISPtimeVarying`: Receives the pmax schedules.
 - `ispdata24::String`: Source of installed capacity and mapping tables.
 - `outlookdata::String`: Storage/generation outlook workbook path.
 - `outlookAEMO::String`: Melted capacity outlook file providing scenario series.
 - `profilespath::String`: Directory with solar trace profiles.
 """
-function gen_pmax_solar(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, ispdata24::String, outlookdata::String, outlookAEMO::String, profilespath::String; refyear::Int64=2011, skip_traces::Bool=false)
+function gen_pmax_solar(tc::ParseISPtimeConfig, ts::ParseISPtimeStatic, tv::ParseISPtimeVarying, ispdata24::String, outlookdata::String, outlookAEMO::String, profilespath::String; refyear::Int64=2011, skip_traces::Bool=false)
     probs = tc.problem
     bust = ts.bus
 
@@ -1705,15 +1705,15 @@ function gen_pmax_solar(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVary
     pmaxid = isempty(tv.gen_pmax.id) ? 0 : maximum(tv.gen_pmax.id);
 
     tch = "Solar"
-    EXIST_TECH = PISP.read_xlsx_with_header(ispdata24, ISP2024_EXISTING_GENERATORS_SOURCE)
+    EXIST_TECH = ParseISP.read_xlsx_with_header(ispdata24, ISP2024_EXISTING_GENERATORS_SOURCE)
     EXIST_SOLAR = EXIST_TECH[occursin.(tch[2:end], coalesce.(EXIST_TECH[!,2],"")),:]
     # @warn("Anticipated solar PV projects not considered in the existing data")
 
-    REZ_BUS = PISP.read_xlsx_with_header(ispdata24, ISP2024_RENEWABLE_ENERGY_ZONES_SOURCE)
+    REZ_BUS = ParseISP.read_xlsx_with_header(ispdata24, ISP2024_RENEWABLE_ENERGY_ZONES_SOURCE)
     # println(REZ_BUS)
 
     genid = Dict()
-    for st in setdiff(keys(PISP.NEMBUSNAME),["GG", "SNW"]) ## Buses with no large-scale solar projects or REZ are not considered
+    for st in setdiff(keys(ParseISP.NEMBUSNAME),["GG", "SNW"]) ## Buses with no large-scale solar projects or REZ are not considered
         gid += 1
         bus_data = bust[bust[!,:name] .== st, :]
         bus_id = bus_data[!, :id_bus][1]    
@@ -1737,19 +1737,19 @@ function gen_pmax_solar(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVary
 
     for p in 1:nrow(probs)
         scid = probs[p,:scenario][1]
-        sc = PISP.ID2SCE[scid]
+        sc = ParseISP.ID2SCE[scid]
         dstart = probs[p,:dstart]
         dend = probs[p,:dend]
         yr = Dates.year(dstart)
         ms = Dates.month(dstart)
-        outlookfile = PISP.source_path(
+        outlookfile = ParseISP.source_path(
             normpath(outlookdata, ".."),
             ISP2024_AUXILIARY_REZ_CAPACITY_SOURCE;
             scenario = sc,
         )
 
-        TECH_CAP = PISP.read_xlsx_with_header(outlookAEMO, ISP2024_CONDENSED_CAPACITY_OUTLOOK_SOURCE)
-        SOLAR_CAP = PISP.read_xlsx_with_header(outlookfile, ISP2024_AUXILIARY_REZ_CAPACITY_SOURCE)
+        TECH_CAP = ParseISP.read_xlsx_with_header(outlookAEMO, ISP2024_CONDENSED_CAPACITY_OUTLOOK_SOURCE)
+        SOLAR_CAP = ParseISP.read_xlsx_with_header(outlookfile, ISP2024_AUXILIARY_REZ_CAPACITY_SOURCE)
         # println(SOLAR_CAP)
         # print first rows of SOLAR_CAP
         # println(first(SOLAR_CAP,5))
@@ -1757,7 +1757,7 @@ function gen_pmax_solar(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVary
         
         y = ms < 7 ? yr - 1 : yr
 
-        for st in setdiff(keys(PISP.NEMBUSNAME),["GG", "SNW"]) # Buses with no large-scale solar projects are not considered
+        for st in setdiff(keys(ParseISP.NEMBUSNAME),["GG", "SNW"]) # Buses with no large-scale solar projects are not considered
 
             REZs = REZ_BUS[(REZ_BUS[!,Symbol("ISP Sub-region")] .== st),:ID]
             REZSUM = REZ_BUS[(REZ_BUS[!,Symbol("ISP Sub-region")] .== st),[:ID,:Name,Symbol("ISP Sub-region")]]
@@ -1796,13 +1796,13 @@ function gen_pmax_solar(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVary
                         end
                     end
 
-                    trace_path = PISP.source_path(
+                    trace_path = ParseISP.source_path(
                         profilespath,
                         ISP2024_EXISTING_SOLAR_TRACE_SOURCE;
                         reference_year = refyear,
                         generator_file = file,
                     )
-                    df = PISP.read_csv_source(trace_path, ISP2024_EXISTING_SOLAR_TRACE_SOURCE)
+                    df = ParseISP.read_csv_source(trace_path, ISP2024_EXISTING_SOLAR_TRACE_SOURCE)
 
                     df2 = select_trace_date_window(df, dstart, dend)
                     dataexi = dataexi .+ vec(permutedims(Tables.matrix(df2[:,4:end]))) * EXIST_SOLAR[r,10]
@@ -1826,13 +1826,13 @@ function gen_pmax_solar(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVary
                     for f in filter(f -> !startswith(f, "._"), readdir(foldertech))
                         sub = split(f,['_','.'])
                         if "REZ" in sub && "SAT" in sub && sub[2] in REZs
-                            trace_path = PISP.source_path(
+                            trace_path = ParseISP.source_path(
                                 profilespath,
                                 ISP2024_REZ_SOLAR_TRACE_SOURCE;
                                 reference_year = refyear,
                                 rez_trace_file = f,
                             )
-                            df = PISP.read_csv_source(trace_path, ISP2024_REZ_SOLAR_TRACE_SOURCE)
+                            df = ParseISP.read_csv_source(trace_path, ISP2024_REZ_SOLAR_TRACE_SOURCE)
                             df2 = select_trace_date_window(df, dstart, dend)
                             datanew = datanew .+ vec(permutedims(Tables.matrix(df2[:,4:end])))
                             naux += 1
@@ -1888,12 +1888,12 @@ metadata, scenario outlooks and wind traces to populate `tv.gen_pmax` for each
 scenario block.
 
 # Arguments
-- `tc::PISPtimeConfig`, `ts::PISPtimeStatic`, `tv::PISPtimeVarying`: See
+- `tc::ParseISPtimeConfig`, `ts::ParseISPtimeStatic`, `tv::ParseISPtimeVarying`: See
   `gen_pmax_solar`.
 - `ispdata24::String`, `outlookdata::String`, `outlookAEMO::String`,
   `profilespath::String`: Data sources containing wind capacities and traces.
 """
-function gen_pmax_wind(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, ispdata24::String, outlookdata::String, outlookAEMO::String, profilespath::String; refyear::Int64=2011, skip_traces::Bool=false)
+function gen_pmax_wind(tc::ParseISPtimeConfig, ts::ParseISPtimeStatic, tv::ParseISPtimeVarying, ispdata24::String, outlookdata::String, outlookAEMO::String, profilespath::String; refyear::Int64=2011, skip_traces::Bool=false)
     probs = tc.problem
     bust = ts.bus
 
@@ -1901,12 +1901,12 @@ function gen_pmax_wind(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVaryi
     pmaxid = isempty(tv.gen_pmax.id) ? 0 : maximum(tv.gen_pmax.id);
 
     tch = "Wind"
-    EXIST_TECH = PISP.read_xlsx_with_header(ispdata24, ISP2024_EXISTING_GENERATORS_SOURCE)
+    EXIST_TECH = ParseISP.read_xlsx_with_header(ispdata24, ISP2024_EXISTING_GENERATORS_SOURCE)
     EXIST_WIND = EXIST_TECH[occursin.(tch[2:end], coalesce.(EXIST_TECH[!,2],"")),:]
-    REZ_BUS = PISP.read_xlsx_with_header(ispdata24, ISP2024_RENEWABLE_ENERGY_ZONES_SOURCE)
+    REZ_BUS = ParseISP.read_xlsx_with_header(ispdata24, ISP2024_RENEWABLE_ENERGY_ZONES_SOURCE)
 
     genid = Dict()
-    for st in setdiff(keys(PISP.NEMBUSNAME),["GG"]) ## Buses with no large-scale solar projects or REZ are not considered
+    for st in setdiff(keys(ParseISP.NEMBUSNAME),["GG"]) ## Buses with no large-scale solar projects or REZ are not considered
         gid += 1
         bus_data = bust[bust[!,:name] .== st, :]
         bus_id = bus_data[!, :id_bus][1]    
@@ -1935,25 +1935,25 @@ function gen_pmax_wind(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVaryi
 
     for p in 1:nrow(probs)
         scid = probs[p,:scenario][1]
-        sc = PISP.ID2SCE[scid]
+        sc = ParseISP.ID2SCE[scid]
         dstart = probs[p,:dstart]
         dend = probs[p,:dend]
         yr = Dates.year(dstart)
         ms = Dates.month(dstart)
         # normpath outlook data going one level above
-        outlookfile = PISP.source_path(
+        outlookfile = ParseISP.source_path(
             normpath(outlookdata, ".."),
             ISP2024_AUXILIARY_REZ_CAPACITY_SOURCE;
             scenario = sc,
         )
 
-        TECH_CAP = PISP.read_xlsx_with_header(outlookAEMO, ISP2024_CONDENSED_CAPACITY_OUTLOOK_SOURCE)
-        WIND_CAP = PISP.read_xlsx_with_header(outlookfile, ISP2024_AUXILIARY_REZ_CAPACITY_SOURCE)
+        TECH_CAP = ParseISP.read_xlsx_with_header(outlookAEMO, ISP2024_CONDENSED_CAPACITY_OUTLOOK_SOURCE)
+        WIND_CAP = ParseISP.read_xlsx_with_header(outlookfile, ISP2024_AUXILIARY_REZ_CAPACITY_SOURCE)
         WIND_CAP = dropmissing(WIND_CAP,:CDP)
         
         y = ms < 7 ? yr - 1 : yr
 
-        for st in setdiff(keys(PISP.NEMBUSNAME),["GG"]) # Buses with no large-scale wind are not considered
+        for st in setdiff(keys(ParseISP.NEMBUSNAME),["GG"]) # Buses with no large-scale wind are not considered
 
             REZs = REZ_BUS[(REZ_BUS[!,Symbol("ISP Sub-region")] .== st),:ID]
             REZSUM = REZ_BUS[(REZ_BUS[!,Symbol("ISP Sub-region")] .== st),[:ID,:Name,Symbol("ISP Sub-region")]]
@@ -1978,7 +1978,7 @@ function gen_pmax_wind(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVaryi
                     end
                     # println(" =============== $(k) ============== ")
                     file = ""
-                    name_ex_weather_year = PISP.get_name_ex(refyear)
+                    name_ex_weather_year = ParseISP.get_name_ex(refyear)
                     if k in keys(name_ex_weather_year)
                         file = name_ex_weather_year[k]
                     else
@@ -1994,13 +1994,13 @@ function gen_pmax_wind(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVaryi
                     end
                     # println(" $(k) ======>", file)
 
-                    trace_path = PISP.source_path(
+                    trace_path = ParseISP.source_path(
                         profilespath,
                         ISP2024_EXISTING_WIND_TRACE_SOURCE;
                         reference_year = refyear,
                         generator_file = file,
                     )
-                    df = PISP.read_csv_source(trace_path, ISP2024_EXISTING_WIND_TRACE_SOURCE)
+                    df = ParseISP.read_csv_source(trace_path, ISP2024_EXISTING_WIND_TRACE_SOURCE)
 
                     df2 = select_trace_date_window(df, dstart, dend)
                     dataexi = dataexi .+ vec(permutedims(Tables.matrix(df2[:,4:end]))) * EXIST_WIND[r,7]
@@ -2024,13 +2024,13 @@ function gen_pmax_wind(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVaryi
                 for f in filter(f -> !startswith(f, "._"), readdir(foldertech))
                     sub = split(f,['_','.'])
                     if sub[1] in REZs && "WH" in sub#f[1] == st[1]
-                        trace_path = PISP.source_path(
+                        trace_path = ParseISP.source_path(
                             profilespath,
                             ISP2024_REZ_WIND_TRACE_SOURCE;
                             reference_year = refyear,
                             rez_trace_file = f,
                         )
-                        df = PISP.read_csv_source(trace_path, ISP2024_REZ_WIND_TRACE_SOURCE)
+                        df = ParseISP.read_csv_source(trace_path, ISP2024_REZ_WIND_TRACE_SOURCE)
                         df2 = select_trace_date_window(df, dstart, dend)
                         datanew = datanew .+ vec(permutedims(Tables.matrix(df2[:,4:end])))
                         naux += 1
@@ -2093,7 +2093,7 @@ VPP definitions with time-varying commissioning and power/energy trajectories.
 - `vpp_cap::String`: Path to the capacity outlook workbook.
 - `vpp_ene::String`: Path to the energy outlook workbook.
 """
-function ess_vpps(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, vpp_cap::String, vpp_ene::String; skip_traces::Bool=false)
+function ess_vpps(tc::ParseISPtimeConfig, ts::ParseISPtimeStatic, tv::ParseISPtimeVarying, vpp_cap::String, vpp_ene::String; skip_traces::Bool=false)
     bust = ts.bus
     probs = tc.problem
 
@@ -2103,32 +2103,32 @@ function ess_vpps(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, v
     bmemid = isempty(tv.ess_emax.id) ? 0 : maximum(tv.ess_emax.id)
     BMBESSid = Dict()
 
-    sc = collect(keys(PISP.SCE))[2]
+    sc = collect(keys(ParseISP.SCE))[2]
     # CER STORAGE CAPACITY
-    VPPCAP = PISP.read_xlsx_with_header(vpp_cap, ISP2024_VPP_CAPACITY_SOURCE; worksheet = string(sc))
+    VPPCAP = ParseISP.read_xlsx_with_header(vpp_cap, ISP2024_VPP_CAPACITY_SOURCE; worksheet = string(sc))
     VPPCAP = VPPCAP[(VPPCAP[!,1] .== "CDP14") .& (VPPCAP[!,Symbol("storage category")] .== "Coordinated CER storage"),:]
     rename!(VPPCAP, Dict(:Subregion => :bus))
 
     #CER STORAGE ENERGY
-    VPPENE = PISP.read_xlsx_with_header(vpp_ene, ISP2024_VPP_ENERGY_SOURCE; worksheet = string(sc))
+    VPPENE = ParseISP.read_xlsx_with_header(vpp_ene, ISP2024_VPP_ENERGY_SOURCE; worksheet = string(sc))
     VPPENE = VPPENE[(VPPENE[!,1] .== "CDP14") .& (VPPENE[!,Symbol("Technology")] .== "Coordinated CER storage"),:]
     rename!(VPPENE, Dict(:Subregion => :bus))
 
-    for st in keys(PISP.NEMBUSES)
+    for st in keys(ParseISP.NEMBUSES)
         yr = 2024
         bmid += 1
         bus_id = bust[bust[!,:name] .== st, :id_bus][1]
         data_cap = VPPCAP[VPPCAP[!,:bus] .== st, Symbol("$(yr)-$(string(yr+1)[3:end])")][1]
         data_ene = VPPENE[VPPENE[!,:bus] .== st, Symbol("$(yr)-$(string(yr+1)[3:end])")][1]*1000
         BMBESSid[st] = [bmid, data_cap, data_ene]
-        arrbmss = [bmid,"VPP_CER_$(st)","VPP_CER_$(st)","BESS","SHALLOW", data_cap, 0, 1, bus_id, 0.9, 0.9, 10.0, 10.0, data_ene, 0.0, data_cap, 0.0, data_cap, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0, 0, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, PISP.NEMBUSES[st][2], PISP.NEMBUSES[st][1], 1, 0]
+        arrbmss = [bmid,"VPP_CER_$(st)","VPP_CER_$(st)","BESS","SHALLOW", data_cap, 0, 1, bus_id, 0.9, 0.9, 10.0, 10.0, data_ene, 0.0, data_cap, 0.0, data_cap, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0, 0, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, ParseISP.NEMBUSES[st][2], ParseISP.NEMBUSES[st][1], 1, 0]
         push!(ts.ess, arrbmss)
     end
 
     if !skip_traces
     for p in 1:nrow(probs)
         scid = probs[p,:scenario][1]
-        sc = PISP.ID2SCE[scid]
+        sc = ParseISP.ID2SCE[scid]
         dstart = probs[p,:dstart]
         dend = probs[p,:dend]
         yr = Dates.year(dstart)
@@ -2138,9 +2138,9 @@ function ess_vpps(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying, v
         me = Dates.month(dend)
 
         yr = ms < 7 ? yr - 1 : yr
-        VPPCAP = PISP.read_xlsx_with_header(vpp_cap, ISP2024_VPP_CAPACITY_SOURCE; worksheet = string(sc))
-        VPPENE = PISP.read_xlsx_with_header(vpp_ene, ISP2024_VPP_ENERGY_SOURCE; worksheet = string(sc))
-        for st in keys(PISP.NEMBUSES)
+        VPPCAP = ParseISP.read_xlsx_with_header(vpp_cap, ISP2024_VPP_CAPACITY_SOURCE; worksheet = string(sc))
+        VPPENE = ParseISP.read_xlsx_with_header(vpp_ene, ISP2024_VPP_ENERGY_SOURCE; worksheet = string(sc))
+        for st in keys(ParseISP.NEMBUSES)
             # CER STORAGE CAPACITY
             VPPCAP = VPPCAP[(VPPCAP[!,1] .== "CDP14") .& (VPPCAP[!,Symbol("storage category")] .== "Coordinated CER storage"),:]
             rename!(VPPCAP, names(VPPCAP)[4] => :bus)
@@ -2169,9 +2169,9 @@ placeholders expected by downstream schedulers. These tables track aggregated
 DER participation factors and ids used when scheduling DER forecasts.
 
 # Arguments
-- `ts::PISPtimeStatic`: Mutated with DER metadata rows.
+- `ts::ParseISPtimeStatic`: Mutated with DER metadata rows.
 """
-function der_tables(ts::PISPtimeStatic)
+function der_tables(ts::ParseISPtimeStatic)
     # ============================================ #
     # DSP table development  ===================== #
     # ============================================ #
@@ -2228,106 +2228,106 @@ schedules. The resulting time-varying traces are linked back to the DER entries
 inserted by `der_tables`.
 
 # Arguments
-- `ts::PISPtimeStatic`: Provides DER ids.
-- `tv::PISPtimeVarying`: Receives DER time series.
+- `ts::ParseISPtimeStatic`: Provides DER ids.
+- `tv::ParseISPtimeVarying`: Receives DER time series.
 - `dsp_data::String`: Path to the DSP workbook or data file.
 """
-function der_pred_sched(ts::PISPtimeStatic, tv::PISPtimeVarying, ispdata24::String)
+function der_pred_sched(ts::ParseISPtimeStatic, tv::ParseISPtimeVarying, ispdata24::String)
     dsp_sources = ISP2024_DSP_SOURCE_SPEC_BY_KEY
 
-    for scenario in collect(keys(PISP.SCE))
-        QLD_SUM = PISP.read_xlsx_with_header(ispdata24, dsp_sources[(scenario, "QLD", "SUMMER")])
-        QLD_WIN = PISP.read_xlsx_with_header(ispdata24, dsp_sources[(scenario, "QLD", "WINTER")])
+    for scenario in collect(keys(ParseISP.SCE))
+        QLD_SUM = ParseISP.read_xlsx_with_header(ispdata24, dsp_sources[(scenario, "QLD", "SUMMER")])
+        QLD_WIN = ParseISP.read_xlsx_with_header(ispdata24, dsp_sources[(scenario, "QLD", "WINTER")])
 
-        NSW_SUM = PISP.read_xlsx_with_header(ispdata24, dsp_sources[(scenario, "NSW", "SUMMER")])
-        NSW_WIN = PISP.read_xlsx_with_header(ispdata24, dsp_sources[(scenario, "NSW", "WINTER")])
+        NSW_SUM = ParseISP.read_xlsx_with_header(ispdata24, dsp_sources[(scenario, "NSW", "SUMMER")])
+        NSW_WIN = ParseISP.read_xlsx_with_header(ispdata24, dsp_sources[(scenario, "NSW", "WINTER")])
 
-        SA_SUM = PISP.read_xlsx_with_header(ispdata24, dsp_sources[(scenario, "SA", "SUMMER")])
-        SA_WIN = PISP.read_xlsx_with_header(ispdata24, dsp_sources[(scenario, "SA", "WINTER")])
+        SA_SUM = ParseISP.read_xlsx_with_header(ispdata24, dsp_sources[(scenario, "SA", "SUMMER")])
+        SA_WIN = ParseISP.read_xlsx_with_header(ispdata24, dsp_sources[(scenario, "SA", "WINTER")])
 
-        TAS_SUM = PISP.read_xlsx_with_header(ispdata24, dsp_sources[(scenario, "TAS", "SUMMER")])
-        TAS_WIN = PISP.read_xlsx_with_header(ispdata24, dsp_sources[(scenario, "TAS", "WINTER")])
+        TAS_SUM = ParseISP.read_xlsx_with_header(ispdata24, dsp_sources[(scenario, "TAS", "SUMMER")])
+        TAS_WIN = ParseISP.read_xlsx_with_header(ispdata24, dsp_sources[(scenario, "TAS", "WINTER")])
 
-        VIC_SUM = PISP.read_xlsx_with_header(ispdata24, dsp_sources[(scenario, "VIC", "SUMMER")])
-        VIC_WIN = PISP.read_xlsx_with_header(ispdata24, dsp_sources[(scenario, "VIC", "WINTER")])
+        VIC_SUM = ParseISP.read_xlsx_with_header(ispdata24, dsp_sources[(scenario, "VIC", "SUMMER")])
+        VIC_WIN = ParseISP.read_xlsx_with_header(ispdata24, dsp_sources[(scenario, "VIC", "WINTER")])
         # ======================================== #
         # <><><> QLD
         # ++ NQ
         perc = 0.0
         der_ids = ts.der[occursin.("NQ", ts.der[!, :name]), :].id_der
-        PISP.inputDB_dsp(tv, QLD_SUM, der_ids, scenario, perc)
-        PISP.inputDB_dsp(tv, QLD_WIN, der_ids, scenario, perc)
+        ParseISP.inputDB_dsp(tv, QLD_SUM, der_ids, scenario, perc)
+        ParseISP.inputDB_dsp(tv, QLD_WIN, der_ids, scenario, perc)
 
         # ++ CQ
         perc = 0.0
         der_ids = ts.der[occursin.("CQ", ts.der[!, :name]), :].id_der
-        PISP.inputDB_dsp(tv, QLD_SUM, der_ids, scenario, perc)
-        PISP.inputDB_dsp(tv, QLD_WIN, der_ids, scenario, perc)
+        ParseISP.inputDB_dsp(tv, QLD_SUM, der_ids, scenario, perc)
+        ParseISP.inputDB_dsp(tv, QLD_WIN, der_ids, scenario, perc)
 
         # ++ GG
         perc = 0.0
         der_ids = ts.der[occursin.("GG", ts.der[!, :name]), :].id_der
-        PISP.inputDB_dsp(tv, QLD_SUM, der_ids, scenario, perc)
-        PISP.inputDB_dsp(tv, QLD_WIN, der_ids, scenario, perc)
+        ParseISP.inputDB_dsp(tv, QLD_SUM, der_ids, scenario, perc)
+        ParseISP.inputDB_dsp(tv, QLD_WIN, der_ids, scenario, perc)
 
         # ++ SQ
         perc = 1.0 # Total assigned to SQ
         der_ids = ts.der[occursin.("SQ", ts.der[!, :name]), :].id_der
-        PISP.inputDB_dsp(tv, QLD_SUM, der_ids, scenario, perc)
-        PISP.inputDB_dsp(tv, QLD_WIN, der_ids, scenario, perc)
+        ParseISP.inputDB_dsp(tv, QLD_SUM, der_ids, scenario, perc)
+        ParseISP.inputDB_dsp(tv, QLD_WIN, der_ids, scenario, perc)
         # ======================================== #
         # ======================================== #
         # <><><> NSW
         # ++ NNSW
         perc = 0.0
         der_ids = ts.der[occursin.("NNSW", ts.der[!, :name]), :].id_der
-        PISP.inputDB_dsp(tv, NSW_SUM, der_ids, scenario, perc)
-        PISP.inputDB_dsp(tv, NSW_WIN, der_ids, scenario, perc)
+        ParseISP.inputDB_dsp(tv, NSW_SUM, der_ids, scenario, perc)
+        ParseISP.inputDB_dsp(tv, NSW_WIN, der_ids, scenario, perc)
 
         # ++ CNSW
         perc = 0.0
         der_ids = ts.der[occursin.("CNSW", ts.der[!, :name]), :].id_der
-        PISP.inputDB_dsp(tv, NSW_SUM, der_ids, scenario, perc)
-        PISP.inputDB_dsp(tv, NSW_WIN, der_ids, scenario, perc)
+        ParseISP.inputDB_dsp(tv, NSW_SUM, der_ids, scenario, perc)
+        ParseISP.inputDB_dsp(tv, NSW_WIN, der_ids, scenario, perc)
 
         # ++ SNW
         perc = 1.0 # Total assigned to Sydney, Newcastle and Wollongong
         der_ids = ts.der[occursin.("SNW", ts.der[!, :name]), :].id_der
-        PISP.inputDB_dsp(tv, NSW_SUM, der_ids, scenario, perc)
-        PISP.inputDB_dsp(tv, NSW_WIN, der_ids, scenario, perc)
+        ParseISP.inputDB_dsp(tv, NSW_SUM, der_ids, scenario, perc)
+        ParseISP.inputDB_dsp(tv, NSW_WIN, der_ids, scenario, perc)
 
         # ++ SNSW
         perc = 0.0
         der_ids = ts.der[occursin.("SNSW", ts.der[!, :name]), :].id_der
-        PISP.inputDB_dsp(tv, NSW_SUM, der_ids, scenario, perc)
-        PISP.inputDB_dsp(tv, NSW_WIN, der_ids, scenario, perc)
+        ParseISP.inputDB_dsp(tv, NSW_SUM, der_ids, scenario, perc)
+        ParseISP.inputDB_dsp(tv, NSW_WIN, der_ids, scenario, perc)
         # ======================================== #
         # VIC
         perc = 1.0 # Total assigned to VIC
         der_ids = ts.der[occursin.("VIC", ts.der[!, :name]), :].id_der
-        PISP.inputDB_dsp(tv, VIC_SUM, der_ids, scenario, perc)
-        PISP.inputDB_dsp(tv, VIC_WIN, der_ids, scenario, perc)
+        ParseISP.inputDB_dsp(tv, VIC_SUM, der_ids, scenario, perc)
+        ParseISP.inputDB_dsp(tv, VIC_WIN, der_ids, scenario, perc)
 
         # ======================================== #
         # TAS
         perc = 1.0 # Total assigned to TAS
         der_ids = ts.der[occursin.("TAS", ts.der[!, :name]), :].id_der
-        PISP.inputDB_dsp(tv, TAS_SUM, der_ids, scenario, perc)
-        PISP.inputDB_dsp(tv, TAS_WIN, der_ids, scenario, perc)
+        ParseISP.inputDB_dsp(tv, TAS_SUM, der_ids, scenario, perc)
+        ParseISP.inputDB_dsp(tv, TAS_WIN, der_ids, scenario, perc)
 
         # ======================================== #
         # <><><> SA
         # ++ CSA
         perc = 1.0
         der_ids = ts.der[occursin.("CSA", ts.der[!, :name]), :].id_der
-        PISP.inputDB_dsp(tv, SA_SUM, der_ids, scenario, perc)
-        PISP.inputDB_dsp(tv, SA_WIN, der_ids, scenario, perc)
+        ParseISP.inputDB_dsp(tv, SA_SUM, der_ids, scenario, perc)
+        ParseISP.inputDB_dsp(tv, SA_WIN, der_ids, scenario, perc)
 
         # ++ SESA
         perc = 0.0
         der_ids = ts.der[occursin.("SESA", ts.der[!, :name]), :].id_der
-        PISP.inputDB_dsp(tv, SA_SUM, der_ids, scenario, perc)
-        PISP.inputDB_dsp(tv, SA_WIN, der_ids, scenario, perc)
+        ParseISP.inputDB_dsp(tv, SA_SUM, der_ids, scenario, perc)
+        ParseISP.inputDB_dsp(tv, SA_WIN, der_ids, scenario, perc)
     end
 end
 
@@ -2339,14 +2339,14 @@ on ISP workbook assumptions. The helper ties reservoir inflows to generator ids
 and returns the Snowy subset for re-use by ESS inflow routines (specific for TUMUT 3 pumped).
 
 # Arguments
-- `ts::PISPtimeStatic`, `tv::PISPtimeVarying`, `tc::PISPtimeConfig`: Standard
+- `ts::ParseISPtimeStatic`, `tv::ParseISPtimeVarying`, `tc::ParseISPtimeConfig`: Standard
   ISP containers.
 - `ispdata24::String`: Workbook providing inflow/release assumptions.
 
 # Returns
 - `DataFrame`: Snowy generator inflow schedule used by `ess_inflow_sched`.
 """
-function gen_inflow_sched(ts::PISPtimeStatic, tv::PISPtimeVarying, tc::PISPtimeConfig, ispdata24::String, ispmodel::String)
+function gen_inflow_sched(ts::ParseISPtimeStatic, tv::ParseISPtimeVarying, tc::ParseISPtimeConfig, ispdata24::String, ispmodel::String)
     HOURS_PER_DAY = 24
 
     gen       = ts.gen
@@ -2358,8 +2358,8 @@ function gen_inflow_sched(ts::PISPtimeStatic, tv::PISPtimeVarying, tc::PISPtimeC
     df_snowy_capacity = nothing
 
     # Pre-group generators by inflow file
-    gens_by_file = Dict{String, Vector{typeof(first(first(PISP.HYDRO2FILE)))}}()
-    for (gen_id, fname) in PISP.HYDRO2FILE
+    gens_by_file = Dict{String, Vector{typeof(first(first(ParseISP.HYDRO2FILE)))}}()
+    for (gen_id, fname) in ParseISP.HYDRO2FILE
         push!(get!(Vector{typeof(gen_id)}, gens_by_file, fname), gen_id)
     end
 
@@ -2370,9 +2370,9 @@ function gen_inflow_sched(ts::PISPtimeStatic, tv::PISPtimeVarying, tc::PISPtimeC
     )
 
     # 1 - Hydro Inflows
-    for scenario in keys(PISP.SCE)
-        sce_label     = PISP.SCE[scenario]      # Scenario number
-        hydro_sce     = PISP.HYDROSCE[scenario] # Hydro scenario from PLEXOS model
+    for scenario in keys(ParseISP.SCE)
+        sce_label     = ParseISP.SCE[scenario]      # Scenario number
+        hydro_sce     = ParseISP.HYDROSCE[scenario] # Hydro scenario from PLEXOS model
 
         for (file_name, gen_ids) in gens_by_file_sorted
             startswith(file_name, "MonthlyNaturalInflow") || continue # Skip file with energy constraints and only process inflow files
@@ -2383,14 +2383,14 @@ function gen_inflow_sched(ts::PISPtimeStatic, tv::PISPtimeVarying, tc::PISPtimeC
             #print gen_entries id_gen, gen_totcap, partial
             # println(gen_entries[:, [:id_gen, :name, :gen_totcap, :partial]])
 
-            filepath = PISP.source_path(
+            filepath = ParseISP.source_path(
                 ispmodel,
                 ISP2024_HYDRO_NATURAL_INFLOW_TRACE_SOURCE;
                 scenario = scenario,
                 file_name = file_name,
                 hydro_scenario = hydro_sce,
             )
-            inflow_data = PISP.read_csv_source(
+            inflow_data = ParseISP.read_csv_source(
                 filepath,
                 ISP2024_HYDRO_NATURAL_INFLOW_TRACE_SOURCE,
             )
@@ -2434,29 +2434,29 @@ function gen_inflow_sched(ts::PISPtimeStatic, tv::PISPtimeVarying, tc::PISPtimeC
     end
 
     # 2 - Yearly Energy Limits
-    for scenario in keys(PISP.SCE)
-        sce_label     = PISP.SCE[scenario]      # Scenario number
-        hydro_sce     = PISP.HYDROSCE[scenario] # Hydro scenario from PLEXOS model
+    for scenario in keys(ParseISP.SCE)
+        sce_label     = ParseISP.SCE[scenario]      # Scenario number
+        hydro_sce     = ParseISP.HYDROSCE[scenario] # Hydro scenario from PLEXOS model
 
         for (file_name, gen_ids) in gens_by_file_sorted
             startswith(file_name, "MaxEnergyYear") || continue # Skip file with energy constraints and only process inflow files
 
             gen_entries = hydro_groups[file_name]
-            gen_entries[!, :constraint] = [PISP.HYDRO2CNS[row.id_gen] for row in eachrow(gen_entries)] # Map generator to its energy constraint
+            gen_entries[!, :constraint] = [ParseISP.HYDRO2CNS[row.id_gen] for row in eachrow(gen_entries)] # Map generator to its energy constraint
 
-            filepath = PISP.source_path(
+            filepath = ParseISP.source_path(
                 ispmodel,
                 ISP2024_HYDRO_ANNUAL_ENERGY_TRACE_SOURCE;
                 scenario = scenario,
                 file_name = file_name,
                 hydro_scenario = hydro_sce,
             )
-            inflow_data = PISP.read_csv_source(
+            inflow_data = ParseISP.read_csv_source(
                 filepath,
                 ISP2024_HYDRO_ANNUAL_ENERGY_TRACE_SOURCE,
             )
 
-            for constraint in unique(values(PISP.HYDRO2CNS))                        # Loop over unique constraints (many generators may be associated to one constraint)
+            for constraint in unique(values(ParseISP.HYDRO2CNS))                        # Loop over unique constraints (many generators may be associated to one constraint)
                 cns_gens = filter(row -> row.constraint == constraint, gen_entries) # Get generators under this constraint
 
                 total_cns_cap          = sum(cns_gens.gen_totcap)               # Total capacity of generators under this constraint
@@ -2484,15 +2484,15 @@ function gen_inflow_sched(ts::PISPtimeStatic, tv::PISPtimeVarying, tc::PISPtimeC
     end
 
     # 3 - Snowy Scheme Inflows
-    for scenario in keys(PISP.SCE)
-        sce_label     = PISP.SCE[scenario]      # Scenario number
+    for scenario in keys(ParseISP.SCE)
+        sce_label     = ParseISP.SCE[scenario]      # Scenario number
         for (file_name, gen_ids) in gens_by_file_sorted
             startswith(file_name, "SNOWY_SCHEME") || continue   # Skip file with energy constraints and only process inflow files
             # Work on a copy to avoid mutating the original hydro_groups lookup
             gen_entries = deepcopy(hydro_groups[file_name])
 
             # For each Snowy group keep only the generator with the largest capacity (avoid double counting)
-            for group in values(PISP.SNOWY_HYDRO_GROUPS)
+            for group in values(ParseISP.SNOWY_HYDRO_GROUPS)
                 present = filter(row -> row.id_gen in group, gen_entries)
                 if nrow(present) > 1
                     # find index of the generator with the largest capacity and keep it
@@ -2517,14 +2517,14 @@ function gen_inflow_sched(ts::PISPtimeStatic, tv::PISPtimeVarying, tc::PISPtimeC
 
             gen_n_lookup = Dict(row.id_gen => row.n for row in eachrow(hydro_gen))
 
-            for group in values(PISP.SNOWY_HYDRO_GROUPS)
+            for group in values(ParseISP.SNOWY_HYDRO_GROUPS)
                 # Generators associated to the Snowy group
                 group_entries = filter(row -> row.id_gen in group, gen_entries)
                 share_group   = sum(group_entries.partial) # Generation share of the group (%)
 
                 for id_gen in group # Generators forming the Snowy group
-                    hydro_dam = PISP.HYDRO_DAMS_GENS[id_gen]
-                    share_dam = get(PISP.DAM_SHARES, hydro_dam, 0.0)
+                    hydro_dam = ParseISP.HYDRO_DAMS_GENS[id_gen]
+                    share_dam = get(ParseISP.DAM_SHARES, hydro_dam, 0.0)
                     share_gen = share_group * share_dam
                     # println("Scenario: ", sce_label, " Gen: ", id_gen, " Share gen: ", share_gen)
                     n_units = get(gen_n_lookup, id_gen, 1)
@@ -2566,12 +2566,12 @@ ESS units, using the Snowy capacity outputs from `gen_inflow_sched` to cap
 charge/discharge schedules.
 
 # Arguments
-- `ts::PISPtimeStatic`, `tv::PISPtimeVarying`, `tc::PISPtimeConfig`: Core ISP
+- `ts::ParseISPtimeStatic`, `tv::ParseISPtimeVarying`, `tc::ParseISPtimeConfig`: Core ISP
   containers mutated/read as part of schedule construction.
 - `ispdata24::String`: Source workbook for inflow assumptions.
 - `df_snowy_capacity::DataFrame`: Snowy-specific inflow data for ESS linkage.
 """
-function ess_inflow_sched(ts::PISPtimeStatic, tv::PISPtimeVarying, tc::PISPtimeConfig, ispdata24::String, df_snowy_capacity::DataFrame)
+function ess_inflow_sched(ts::ParseISPtimeStatic, tv::ParseISPtimeVarying, tc::ParseISPtimeConfig, ispdata24::String, df_snowy_capacity::DataFrame)
     ess       = ts.ess
     gen       = ts.gen
     tumut_ps  = filter(row -> row.name == "Tumut 3", ess)
@@ -2580,14 +2580,14 @@ function ess_inflow_sched(ts::PISPtimeStatic, tv::PISPtimeVarying, tc::PISPtimeC
     ess_inflow_dummy = deepcopy(tv.ess_inflow)
 
     # Calculate dam share
-    t3_dams  = PISP.HYDRO_DAMS_STORAGE[id_tumut]
+    t3_dams  = ParseISP.HYDRO_DAMS_STORAGE[id_tumut]
     t3_share = 0.0
     for dam in t3_dams
-        t3_share += get(PISP.DAM_SHARES, dam, 0.0)
+        t3_share += get(ParseISP.DAM_SHARES, dam, 0.0)
     end
 
     # Calculate generator share
-    tumut_gen = PISP.HYDRO_STORAGE_GEN[id_tumut]
+    tumut_gen = ParseISP.HYDRO_STORAGE_GEN[id_tumut]
     tumut_entry = filter(row -> row.id_gen == tumut_gen, df_snowy_capacity)
     tumut_partial = tumut_entry.partial
 
@@ -2597,8 +2597,8 @@ function ess_inflow_sched(ts::PISPtimeStatic, tv::PISPtimeVarying, tc::PISPtimeC
     hourly_values = hourly_snowy.value
     n_hourly      = nrow(hourly_snowy)
     hourly_ids    = collect(1:n_hourly)
-    for scenario in keys(PISP.SCE)
-        sce_label      = PISP.SCE[scenario]      # Scenario number
+    for scenario in keys(ParseISP.SCE)
+        sce_label      = ParseISP.SCE[scenario]      # Scenario number
         scaled_inflows = hourly_values .* t3_total_share * 1000.0 ./ tumut_gen_n
         append!(ess_inflow_dummy, DataFrame(
             id       = hourly_ids,

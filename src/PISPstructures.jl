@@ -1,3 +1,3 @@
-include("structures/PISPstructures-df.jl")
+include("structures/ParseISPstructures-df.jl")
 
-export PISPtimeStatic, PISPtimeVarying, PISPtimeConfig # Export structures to store the generated data
+export ParseISPtimeStatic, ParseISPtimeVarying, ParseISPtimeConfig # Export structures to store the generated data

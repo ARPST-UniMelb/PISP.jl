@@ -31,14 +31,14 @@ using XLSX
 using Printf
 using Statistics
 
-const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
+const REPO_ROOT = normpath(get(ENV, "ParseISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
-import .PISPDocUtils
+include(joinpath(REPO_ROOT, "docs", "utils", "ParseISPDocUtils.jl"))
+import .ParseISPDocUtils
 
 
 const SCRIPT_STEM = "isp2024_11_rez_resource_vs_cost"
-const ISP2024_PROFILE = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
+const ISP2024_PROFILE = ParseISPDocUtils.edition_profile(REPO_ROOT, "2024")
 const DOWNLOADS = relpath(ISP2024_PROFILE.download_root, REPO_ROOT)  # kept relative: this is the path form recorded below
 const IASR_WORKBOOK = joinpath(DOWNLOADS, "2024-isp-inputs-and-assumptions-workbook.xlsx")
 abs_path(relative_path) = joinpath(REPO_ROOT, relative_path)  # resolves a DOWNLOADS-relative path to an absolute location for reading
@@ -219,7 +219,7 @@ println("Workbook exists: ", isfile(abs_path(IASR_WORKBOOK)))
 isfile(abs_path(IASR_WORKBOOK)) || error("IASR workbook not found at $IASR_WORKBOOK")
 
 resource_matrix, augmentation_matrix = XLSX.openxlsx(abs_path(IASR_WORKBOOK)) do xf
-    PISPDocUtils.trim_sheet(xf["Build limits"][:]), PISPDocUtils.trim_sheet(xf["REZ Augmentations Options"][:])
+    ParseISPDocUtils.trim_sheet(xf["Build limits"][:]), ParseISPDocUtils.trim_sheet(xf["REZ Augmentations Options"][:])
 end
 ````
 
@@ -240,7 +240,7 @@ Workbook exists: true
 
 ````julia
 resource_limits = load_rez_resource_limits(resource_matrix)
-PISPDocUtils.write_table(resource_limits, SCRIPT_STEM, "rez_resource_limits")
+ParseISPDocUtils.write_table(resource_limits, SCRIPT_STEM, "rez_resource_limits")
 println("REZ resource-limit rows (Build limits sheet): ", nrow(resource_limits))
 resource_display = select(
     first(resource_limits, 8),
@@ -251,7 +251,7 @@ resource_display = select(
     :solar_mw => Symbol("Solar resource limit (MW)"),
     :total_resource_limit_mw => Symbol("Total resource limit (MW)"),
 )
-PISPDocUtils.markdown_table(resource_display)
+ParseISPDocUtils.markdown_table(resource_display)
 ````
 
 ```@raw html
@@ -276,7 +276,7 @@ PISPDocUtils.markdown_table(resource_display)
 
 ````julia
 augmentation_options = load_rez_augmentation_options(augmentation_matrix)
-PISPDocUtils.write_table(augmentation_options, SCRIPT_STEM, "rez_augmentation_options")
+ParseISPDocUtils.write_table(augmentation_options, SCRIPT_STEM, "rez_augmentation_options")
 println("REZ augmentation-option rows (REZ Augmentations Options sheet): ", nrow(augmentation_options))
 augmentation_display = select(
     first(augmentation_options, 8),
@@ -287,7 +287,7 @@ augmentation_display = select(
     :expected_cost_million => Symbol("Expected cost (\$ million)"),
     :dollar_million_per_mw => Symbol("Source cost ratio (\$ million/MW)"),
 )
-PISPDocUtils.markdown_table(augmentation_display)
+ParseISPDocUtils.markdown_table(augmentation_display)
 ````
 
 ```@raw html
@@ -314,10 +314,10 @@ PISPDocUtils.markdown_table(augmentation_display)
 
 ````julia
 primary_options, excluded = primary_option_per_rez(augmentation_options)
-PISPDocUtils.write_table(excluded, SCRIPT_STEM, "rez_augmentation_excluded")
+ParseISPDocUtils.write_table(excluded, SCRIPT_STEM, "rez_augmentation_excluded")
 println("REZs with a usable primary (first-listed) option: ", nrow(primary_options))
 println("REZs excluded (first-listed option has no standalone numeric capacity/cost -- a cross-reference to a shared augmentation, or a named option with blank/non-numeric figures): ", nrow(excluded))
-PISPDocUtils.markdown_table(excluded; column_labels = ["REZ ID", "REZ name", "First-listed option"])
+ParseISPDocUtils.markdown_table(excluded; column_labels = ["REZ ID", "REZ name", "First-listed option"])
 ````
 
 ```@raw html
@@ -354,7 +354,7 @@ PISPDocUtils.markdown_table(excluded; column_labels = ["REZ ID", "REZ name", "Fi
 ````julia
 joined = innerjoin(resource_limits, primary_options, on = [:rez_id, :rez_name])
 joined_row_count = nrow(joined)
-PISPDocUtils.write_table(joined, SCRIPT_STEM, "rez_resource_vs_cost")
+ParseISPDocUtils.write_table(joined, SCRIPT_STEM, "rez_resource_vs_cost")
 println("Joined REZs (resource limit + primary augmentation option): ", joined_row_count)
 joined_display = select(
     first(joined, 8),
@@ -365,7 +365,7 @@ joined_display = select(
     :additional_capacity_mw => Symbol("Additional capacity (MW)"),
     :expected_cost_million => Symbol("Expected cost (\$ million)"),
 )
-PISPDocUtils.markdown_table(joined_display)
+ParseISPDocUtils.markdown_table(joined_display)
 ````
 
 ```@raw html
@@ -395,9 +395,9 @@ One REZ (N12, Illawarra) carries a genuine 0 MW total resource limit in this wor
 ````julia
 zero_resource_rez = filter(:total_resource_limit_mw => iszero, joined)
 zero_resource_exclusion_count = nrow(zero_resource_rez)
-zero_resource_exclusion_count > 0 && PISPDocUtils.write_table(zero_resource_rez, SCRIPT_STEM, "rez_zero_resource_limit_excluded")
+zero_resource_exclusion_count > 0 && ParseISPDocUtils.write_table(zero_resource_rez, SCRIPT_STEM, "rez_zero_resource_limit_excluded")
 joined = filter(:total_resource_limit_mw => (v -> v > 0), joined)
-PISPDocUtils.markdown_table(zero_resource_rez[:, [:rez_id, :rez_name, :total_resource_limit_mw, :expected_cost_million]])
+ParseISPDocUtils.markdown_table(zero_resource_rez[:, [:rez_id, :rez_name, :total_resource_limit_mw, :expected_cost_million]])
 ````
 
 ```@raw html
@@ -424,8 +424,8 @@ correlation_summary = DataFrame(
     source_column_x = ["total_resource_limit_mw"],
     source_column_y = ["expected_cost_million"],
 )
-PISPDocUtils.write_table(correlation_summary, SCRIPT_STEM, "rez_resource_cost_correlation_summary")
-PISPDocUtils.metric_value_table([
+ParseISPDocUtils.write_table(correlation_summary, SCRIPT_STEM, "rez_resource_cost_correlation_summary")
+ParseISPDocUtils.metric_value_table([
     "Pearson correlation" => correlation,
     "Usable joined rows" => nrow(joined),
     "Zero-resource exclusions" => zero_resource_exclusion_count,
@@ -453,7 +453,7 @@ PISPDocUtils.metric_value_table([
 joined.cost_per_resource_mw = joined.expected_cost_million ./ joined.total_resource_limit_mw
 ranking = sort(joined, :cost_per_resource_mw)
 ranking = select(ranking, [:rez_id, :rez_name, :total_resource_limit_mw, :expected_cost_million, :dollar_million_per_mw, :cost_per_resource_mw])
-PISPDocUtils.write_table(ranking, SCRIPT_STEM, "rez_cost_efficiency_ranking")
+ParseISPDocUtils.write_table(ranking, SCRIPT_STEM, "rez_cost_efficiency_ranking")
 nrow(ranking)
 ````
 
@@ -472,7 +472,7 @@ Lowest cost per MW of workbook-derived resource potential:
 ```
 
 ````julia
-PISPDocUtils.markdown_table(first(rounded_columns(ranking, [:cost_per_resource_mw]; digits = 4), 6))
+ParseISPDocUtils.markdown_table(first(rounded_columns(ranking, [:cost_per_resource_mw]; digits = 4), 6))
 ````
 
 ```@raw html
@@ -496,7 +496,7 @@ Highest cost per MW of workbook-derived resource potential:
 ```
 
 ````julia
-PISPDocUtils.markdown_table(last(rounded_columns(ranking, [:cost_per_resource_mw]; digits = 4), 6))
+ParseISPDocUtils.markdown_table(last(rounded_columns(ranking, [:cost_per_resource_mw]; digits = 4), 6))
 ````
 
 ```@raw html

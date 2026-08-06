@@ -11,7 +11,7 @@ A near-term or far-term renewable profile is therefore a reuse of selected histo
 
 | Item | Definition |
 |---|---|
-| Runtime mapping | `PISP.ISPdatabuilder.DATE_RANGES_REFYEARS` |
+| Runtime mapping | `ParseISP.ISPdatabuilder.DATE_RANGES_REFYEARS` |
 | Historical labels | 2011-2023 |
 | Representative sites | `Bannerton_SAT` solar and `DUNDWF1` wind |
 | Near-term group | Financial years ending 2025-2029 |
@@ -33,17 +33,17 @@ using Dates
 using Printf
 using Statistics
 using Plots
-using PISP
+using ParseISP
 
 gr();
 
-const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
+const REPO_ROOT = normpath(get(ENV, "ParseISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
-import .PISPDocUtils
+include(joinpath(REPO_ROOT, "docs", "utils", "ParseISPDocUtils.jl"))
+import .ParseISPDocUtils
 
 const SCRIPT_STEM = "isp2024_08_4006_composite_map"
-const ISP2024_PROFILE = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
+const ISP2024_PROFILE = ParseISPDocUtils.edition_profile(REPO_ROOT, "2024")
 const TRACES = relpath(joinpath(ISP2024_PROFILE.download_root, "Traces"), REPO_ROOT)
 abs_path(relative_path) = joinpath(REPO_ROOT, relative_path)  # resolves a TRACES-relative path to an absolute file location for reading
 
@@ -61,14 +61,14 @@ const FAR_YEARS = [2045, 2046, 2047, 2048, 2049]
 </details>
 ```
 
-The financial-year-to-historical-year mapping is the same `PISP.ISPdatabuilder.DATE_RANGES_REFYEARS` object consumed by the runtime trace builder. An invariant check confirms every financial-year range is contiguous.
+The financial-year-to-historical-year mapping is the same `ParseISP.ISPdatabuilder.DATE_RANGES_REFYEARS` object consumed by the runtime trace builder. An invariant check confirms every financial-year range is contiguous.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
 ```
 
 ````julia
-const DATE_RANGES_REFYEARS = PISP.ISPdatabuilder.DATE_RANGES_REFYEARS
+const DATE_RANGES_REFYEARS = ParseISP.ISPdatabuilder.DATE_RANGES_REFYEARS
 
 for i in 1:(length(DATE_RANGES_REFYEARS) - 1)
     this_fy_end = DATE_RANGES_REFYEARS[i][2]
@@ -141,8 +141,8 @@ mapping_table = DataFrame(
     fy_label = fy_label,
     ref_label = ref_label,
 )
-PISPDocUtils.write_table(mapping_table, SCRIPT_STEM, "mapping_table")
-PISPDocUtils.markdown_table(mapping_table)
+ParseISPDocUtils.write_table(mapping_table, SCRIPT_STEM, "mapping_table")
+ParseISPDocUtils.markdown_table(mapping_table)
 ````
 
 ```@raw html
@@ -261,8 +261,8 @@ for yr in sort(unique(mapping_table.ref_year))
     end
 end
 historical_year_vre_stats = DataFrame(historical_year_vre_stats_rows)
-PISPDocUtils.write_table(historical_year_vre_stats, SCRIPT_STEM, "historical_year_vre_stats")
-PISPDocUtils.markdown_table(historical_year_vre_stats)
+ParseISPDocUtils.write_table(historical_year_vre_stats, SCRIPT_STEM, "historical_year_vre_stats")
+ParseISPDocUtils.markdown_table(historical_year_vre_stats)
 ````
 
 ```@raw html
@@ -324,7 +324,7 @@ for (tech, loc, hh_cols) in (("solar", SOLAR_LOC, HH_COLS_SOL), ("wind", WIND_LO
     end
 end
 near_vs_far_term_daily_cf = DataFrame(near_vs_far_term_rows)
-PISPDocUtils.write_table(near_vs_far_term_daily_cf, SCRIPT_STEM, "near_vs_far_term_daily_cf")
+ParseISPDocUtils.write_table(near_vs_far_term_daily_cf, SCRIPT_STEM, "near_vs_far_term_daily_cf")
 
 near_vs_far_term_summary = combine(
     groupby(near_vs_far_term_daily_cf, [:tech, :term]),
@@ -334,7 +334,7 @@ near_vs_far_term_summary = combine(
     nrow => :n_days,
 )
 sort!(near_vs_far_term_summary, [:tech, :term])
-PISPDocUtils.markdown_table(near_vs_far_term_summary)
+ParseISPDocUtils.markdown_table(near_vs_far_term_summary)
 ````
 
 ```@raw html
@@ -368,8 +368,8 @@ for (tech, loc, hh_cols) in (("solar", SOLAR_LOC, HH_COLS_SOL), ("wind", WIND_LO
     end
 end
 vre_heatmap = DataFrame(vre_heatmap_rows)
-PISPDocUtils.write_table(vre_heatmap, SCRIPT_STEM, "vre_heatmap")
-PISPDocUtils.markdown_table(vre_heatmap)
+ParseISPDocUtils.write_table(vre_heatmap, SCRIPT_STEM, "vre_heatmap")
+ParseISPDocUtils.markdown_table(vre_heatmap)
 ````
 
 ```@raw html
@@ -421,8 +421,8 @@ println("Unique historical years used: ", sort(unique(mapping_table.ref_year)))
 
 ref_year_counts = combine(groupby(mapping_table, :ref_year), nrow => :count)
 sort!(ref_year_counts, :ref_year)
-PISPDocUtils.write_table(ref_year_counts, SCRIPT_STEM, "ref_year_counts")
-PISPDocUtils.markdown_table(ref_year_counts)
+ParseISPDocUtils.write_table(ref_year_counts, SCRIPT_STEM, "ref_year_counts")
+ParseISPDocUtils.markdown_table(ref_year_counts)
 ````
 
 ```@raw html
@@ -472,8 +472,8 @@ end
 fy_labels = [string(year(row.fy_start)) for row in eachrow(mapping_table)]
 plot!(p1, xticks=(1:nrow(mapping_table), fy_labels), xrotation=90)
 
-savefig(p1, PISPDocUtils.figure_path(SCRIPT_STEM, "08_4006_timeline_map.png"))
-PISPDocUtils.embed_figure(PISPDocUtils.figure_path(SCRIPT_STEM, "08_4006_timeline_map.png"), "08_4006_timeline_map.png")
+savefig(p1, ParseISPDocUtils.figure_path(SCRIPT_STEM, "08_4006_timeline_map.png"))
+ParseISPDocUtils.embed_figure(ParseISPDocUtils.figure_path(SCRIPT_STEM, "08_4006_timeline_map.png"), "08_4006_timeline_map.png")
 ````
 
 ```@raw html
@@ -491,7 +491,7 @@ Reads back the historical-year statistics table reported above and plots summer 
 ```
 
 ````julia
-stats = CSV.read(PISPDocUtils.table_path(SCRIPT_STEM, "historical_year_vre_stats"), DataFrame)
+stats = CSV.read(ParseISPDocUtils.table_path(SCRIPT_STEM, "historical_year_vre_stats"), DataFrame)
 
 p2 = plot(
     layout=(1,2), size=(1400, 650),
@@ -518,8 +518,8 @@ for (idx, tech) in enumerate(("solar", "wind"))
           xrotation=45, xtickfont=font(8), ylim=(0, 0.5), grid=true, gridalpha=0.3)
 end
 
-savefig(p2, PISPDocUtils.figure_path(SCRIPT_STEM, "08_vre_by_historical_year.png"))
-PISPDocUtils.embed_figure(PISPDocUtils.figure_path(SCRIPT_STEM, "08_vre_by_historical_year.png"), "08_vre_by_historical_year.png")
+savefig(p2, ParseISPDocUtils.figure_path(SCRIPT_STEM, "08_vre_by_historical_year.png"))
+ParseISPDocUtils.embed_figure(ParseISPDocUtils.figure_path(SCRIPT_STEM, "08_vre_by_historical_year.png"), "08_vre_by_historical_year.png")
 ````
 
 ```@raw html
@@ -561,8 +561,8 @@ for (idx, (tech, loc, hh_cols, color)) in enumerate([("solar", SOLAR_LOC, HH_COL
           xlabel="Day of Year", ylabel="Daily Mean CF", ylim=(0, 0.6), legend=:topright, grid=true, gridalpha=0.3)
 end
 
-savefig(p3, PISPDocUtils.figure_path(SCRIPT_STEM, "08_near_vs_far_term.png"))
-PISPDocUtils.embed_figure(PISPDocUtils.figure_path(SCRIPT_STEM, "08_near_vs_far_term.png"), "08_near_vs_far_term.png")
+savefig(p3, ParseISPDocUtils.figure_path(SCRIPT_STEM, "08_near_vs_far_term.png"))
+ParseISPDocUtils.embed_figure(ParseISPDocUtils.figure_path(SCRIPT_STEM, "08_near_vs_far_term.png"), "08_near_vs_far_term.png")
 ````
 
 ```@raw html
@@ -580,7 +580,7 @@ Reads back the year-by-year matrix reported above and renders it as a heatmap wi
 ```
 
 ````julia
-heatmap_df = CSV.read(PISPDocUtils.table_path(SCRIPT_STEM, "vre_heatmap"), DataFrame)
+heatmap_df = CSV.read(ParseISPDocUtils.table_path(SCRIPT_STEM, "vre_heatmap"), DataFrame)
 
 years_unique = sort(unique(heatmap_df.ref_year))
 solar_data = filter(row -> row.tech == "solar", heatmap_df)
@@ -614,8 +614,8 @@ for (i, tech) in enumerate(["Solar", "Wind"])
     end
 end
 
-savefig(p4, PISPDocUtils.figure_path(SCRIPT_STEM, "08_vre_heatmap.png"))
-PISPDocUtils.embed_figure(PISPDocUtils.figure_path(SCRIPT_STEM, "08_vre_heatmap.png"), "08_vre_heatmap.png")
+savefig(p4, ParseISPDocUtils.figure_path(SCRIPT_STEM, "08_vre_heatmap.png"))
+ParseISPDocUtils.embed_figure(ParseISPDocUtils.figure_path(SCRIPT_STEM, "08_vre_heatmap.png"), "08_vre_heatmap.png")
 ````
 
 ```@raw html

@@ -1,9 +1,9 @@
-module PISPDocUtils
+module ParseISPDocUtils
 
 using CSV
 using DataFrames
 using Dates
-using PISP
+using ParseISP
 using PrettyTables
 using Statistics
 using TOML

@@ -1,11 +1,11 @@
-include("scrappers/PISP-scrapper-utils.jl")
-include("scrappers/PISP-scrapper-2024traces.jl")
-include("scrappers/PISP-scrapper-2024files.jl")
-include("scrappers/PISP-scrapper-report-core.jl")
-include("scrappers/PISP-scrapper-2024reports.jl")
-include("scrappers/PISP-scrapper-2026reports.jl")
-include("scrappers/PISP-scrapper-2026files.jl")
-include("scrappers/PISP-scrapper-build.jl")
+include("scrappers/ParseISP-scrapper-utils.jl")
+include("scrappers/ParseISP-scrapper-2024traces.jl")
+include("scrappers/ParseISP-scrapper-2024files.jl")
+include("scrappers/ParseISP-scrapper-report-core.jl")
+include("scrappers/ParseISP-scrapper-2024reports.jl")
+include("scrappers/ParseISP-scrapper-2026reports.jl")
+include("scrappers/ParseISP-scrapper-2026files.jl")
+include("scrappers/ParseISP-scrapper-build.jl")
 using .ISPdatabuilder: build_pipeline
 using .ISP2024ReportDownloader: download_reports as download_ISP24_reports
 using .ISP2026ReportDownloader: download_reports as download_ISP26_reports

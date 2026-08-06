@@ -1,35 +1,35 @@
 """
     initialise_time_structures()
 
-Create and return fresh `PISPtimeConfig`, `PISPtimeStatic`, and `PISPtimeVarying`
+Create and return fresh `ParseISPtimeConfig`, `ParseISPtimeStatic`, and `ParseISPtimeVarying`
 containers. Encapsulating this logic in one helper keeps the script consistent
 any time new runs are started or when the structures are re-created in tests.
 
 # Returns
-- `Tuple{PISPtimeConfig,PISPtimeStatic,PISPtimeVarying}`: The three empty
+- `Tuple{ParseISPtimeConfig,ParseISPtimeStatic,ParseISPtimeVarying}`: The three empty
   containers required by the subsequent population routines.
 """
 function initialise_time_structures()
-    return (PISPtimeConfig(), PISPtimeStatic(), PISPtimeVarying())
+    return (ParseISPtimeConfig(), ParseISPtimeStatic(), ParseISPtimeVarying())
 end
 
 """
     fill_problem_example(tc)
 
 Example to populate the `tc.problem` table with a week-long block for each scenario
-registered in `PISP.ID2SCE`. The helper constructs start and end dates by
+registered in `ParseISP.ID2SCE`. The helper constructs start and end dates by
 stepping from 1 January 2025 and wrapping at the June boundary so that no
 interval spans financial years.
 
 # Arguments
-- `tc::PISPtimeConfig`: Time configuration container whose `problem` DataFrame
+- `tc::ParseISPtimeConfig`: Time configuration container whose `problem` DataFrame
   receives the generated rows.
 """
-function fill_problem_example(tc::PISPtimeConfig)
+function fill_problem_example(tc::ParseISPtimeConfig)
     start_date = DateTime(2030, 1, 1, 0, 0, 0)
     step_ = Day(120)
     nblocks = 3
-    date_blocks = PISP.OrderedDict()
+    date_blocks = ParseISP.OrderedDict()
     ref_year = 2025
 
     for i in 1:nblocks
@@ -48,8 +48,8 @@ function fill_problem_example(tc::PISPtimeConfig)
     end
 
     i = 1
-    for sc in keys(PISP.ID2SCE)
-        pbname = "$(PISP.ID2SCE[sc])_$(i)"
+    for sc in keys(ParseISP.ID2SCE)
+        pbname = "$(ParseISP.ID2SCE[sc])_$(i)"
         nd_yr = ref_year
         dstart = DateTime(nd_yr, month(date_blocks[i][1]), day(date_blocks[i][1]), 0, 0, 0)
         dend = DateTime(nd_yr, month(date_blocks[i][2]), day(date_blocks[i][2]), 23, 0, 0)
@@ -67,13 +67,13 @@ the mutation steps for `tc` in a single call-site so that new configuration
 sections can be added in one place.
 
 # Arguments
-- `tc::PISPtimeConfig`: The configuration container to populate.
+- `tc::ParseISPtimeConfig`: The configuration container to populate.
 
 # Returns
-- `PISPtimeConfig`: The same instance that was mutated, which permits piping the
+- `ParseISPtimeConfig`: The same instance that was mutated, which permits piping the
   result into subsequent functions when convenient.
 """
-function populate_time_config!(tc::PISPtimeConfig, fill_problem_function::Function)
+function populate_time_config!(tc::ParseISPtimeConfig, fill_problem_function::Function)
     fill_problem_function(tc)
     return tc
 end
@@ -87,9 +87,9 @@ demand, line, generator, ESS and DER metadata using the file paths provided by
 for later steps).
 
 # Arguments
-- `tc::PISPtimeConfig`: Configuration container that supplies time blocks for demand processing.
-- `ts::PISPtimeStatic`: Static data container that receives the tabular data.
-- `tv::PISPtimeVarying`: Passed through so that `PISP.dem_load` can populate the static and varying demand components together.
+- `tc::ParseISPtimeConfig`: Configuration container that supplies time blocks for demand processing.
+- `ts::ParseISPtimeStatic`: Static data container that receives the tabular data.
+- `tv::ParseISPtimeVarying`: Passed through so that `ParseISP.dem_load` can populate the static and varying demand components together.
 - `paths::NamedTuple`: Must contain `profiledata`, `ispdata19`, and `ispdata24`.
 
 # Returns
@@ -97,17 +97,17 @@ for later steps).
   (currently exposing the `SYNC4`, `GENERATORS`, and `PS` tables) that are
   required by the time-varying stage.
 """
-function populate_time_static!(ts::PISPtimeStatic, tv::PISPtimeVarying, paths::NamedTuple; refyear::Int64=2011, poe::Int64=10)
-    PISP.bus_table(ts)
-    PISP.dem_load(ts)
+function populate_time_static!(ts::ParseISPtimeStatic, tv::ParseISPtimeVarying, paths::NamedTuple; refyear::Int64=2011, poe::Int64=10)
+    ParseISP.bus_table(ts)
+    ParseISP.dem_load(ts)
 
-    txdata = PISP.line_table(ts, tv, paths.ispdata24)
-    PISP.line_invoptions(ts, paths.ispdata24)
+    txdata = ParseISP.line_table(ts, tv, paths.ispdata24)
+    ParseISP.line_invoptions(ts, paths.ispdata24)
 
-    SYNC4, GENERATORS, PS = PISP.generator_table(ts, paths.ispdata19, paths.ispdata24)
-    PISP.ess_tables(ts, tv, PS, paths.ispdata24)
-    PISP.der_tables(ts)
-    PISP.ev_der_tables(ts)
+    SYNC4, GENERATORS, PS = ParseISP.generator_table(ts, paths.ispdata19, paths.ispdata24)
+    ParseISP.ess_tables(ts, tv, PS, paths.ispdata24)
+    ParseISP.der_tables(ts)
+    ParseISP.ev_der_tables(ts)
 
     return (
         txdata = txdata,
@@ -124,9 +124,9 @@ profiles. The function expects the `static_artifacts` output of
 derived without recomputing inputs.
 
 # Arguments
-- `tc::PISPtimeConfig`: Provides the configured periods for time-varying traces.
-- `ts::PISPtimeStatic`: Supplies static context for inflows and DER schedules.
-- `tv::PISPtimeVarying`: Target container for time-varying tables.
+- `tc::ParseISPtimeConfig`: Provides the configured periods for time-varying traces.
+- `ts::ParseISPtimeStatic`: Supplies static context for inflows and DER schedules.
+- `tv::ParseISPtimeVarying`: Target container for time-varying tables.
 - `paths::NamedTuple`: Must include `profiledata`, `ispdata24`, `outlookdata`,
   `outlookAEMO`, `vpp_cap`, `vpp_ene`, and `dsp_data`.
 - `static_artifacts::NamedTuple`: A direct output of
@@ -136,32 +136,32 @@ derived without recomputing inputs.
 - `NamedTuple`: Contains `SNOWY_GENS`, which may be needed by downstream
   post-processing utilities.
 """
-function populate_time_varying!(tc::PISPtimeConfig, ts::PISPtimeStatic, tv::PISPtimeVarying,
+function populate_time_varying!(tc::ParseISPtimeConfig, ts::ParseISPtimeStatic, tv::ParseISPtimeVarying,
         paths::NamedTuple, static_artifacts::NamedTuple; refyear::Int64=2011, poe::Int64=10, skip_traces::Bool=false)
     txdata = static_artifacts.txdata
     generator_tables = static_artifacts.generator_tables
 
     # Light functions — always run
-    PISP.line_sched_table(tc, tv, txdata)
-    PISP.gen_n_sched_table(tv, generator_tables.SYNC4, generator_tables.GENERATORS)
-    PISP.gen_retirements(ts, tv)
+    ParseISP.line_sched_table(tc, tv, txdata)
+    ParseISP.gen_n_sched_table(tv, generator_tables.SYNC4, generator_tables.GENERATORS)
+    ParseISP.gen_retirements(ts, tv)
 
     if !skip_traces
-        PISP.dem_load_sched(tc, tv, paths.profiledata; refyear=refyear, poe=poe)
+        ParseISP.dem_load_sched(tc, tv, paths.profiledata; refyear=refyear, poe=poe)
     end
 
     # Heavy functions with static side-effects — always run static part, skip tv when skip_traces
-    PISP.gen_pmax_distpv(tc, ts, tv, paths.profiledata; refyear=refyear, poe=poe, skip_traces=skip_traces)
-    PISP.gen_pmax_solar(tc, ts, tv, paths.ispdata24, paths.outlookdata, paths.outlookAEMO, paths.profiledata; refyear=refyear, skip_traces=skip_traces)
-    PISP.gen_pmax_wind(tc, ts, tv, paths.ispdata24, paths.outlookdata, paths.outlookAEMO, paths.profiledata; refyear=refyear, skip_traces=skip_traces)
+    ParseISP.gen_pmax_distpv(tc, ts, tv, paths.profiledata; refyear=refyear, poe=poe, skip_traces=skip_traces)
+    ParseISP.gen_pmax_solar(tc, ts, tv, paths.ispdata24, paths.outlookdata, paths.outlookAEMO, paths.profiledata; refyear=refyear, skip_traces=skip_traces)
+    ParseISP.gen_pmax_wind(tc, ts, tv, paths.ispdata24, paths.outlookdata, paths.outlookAEMO, paths.profiledata; refyear=refyear, skip_traces=skip_traces)
 
-    PISP.ess_vpps(tc, ts, tv, paths.vpp_cap, paths.vpp_ene; skip_traces=skip_traces)
+    ParseISP.ess_vpps(tc, ts, tv, paths.vpp_cap, paths.vpp_ene; skip_traces=skip_traces)
 
     if !skip_traces
-        SNOWY_GENS = PISP.gen_inflow_sched(ts, tv, tc, paths.ispdata24, paths.ispmodel)
-        PISP.ess_inflow_sched(ts, tv, tc, paths.ispdata24, SNOWY_GENS)
-        PISP.der_pred_sched(ts, tv, paths.ispdata24)
-        PISP.ev_der_sched(tc, ts, tv, paths.ispdata24, paths.iasr23_ev_workbook)
+        SNOWY_GENS = ParseISP.gen_inflow_sched(ts, tv, tc, paths.ispdata24, paths.ispmodel)
+        ParseISP.ess_inflow_sched(ts, tv, tc, paths.ispdata24, SNOWY_GENS)
+        ParseISP.der_pred_sched(ts, tv, paths.ispdata24)
+        ParseISP.ev_der_sched(tc, ts, tv, paths.ispdata24, paths.iasr23_ev_workbook)
     end
 end
 
@@ -183,8 +183,8 @@ overridden via keyword arguments.
 - `write_varying`:      Set to `false` to skip writing the time-varying tables.
 """
 function write_time_data(
-        ts::PISPtimeStatic,
-        tv::PISPtimeVarying;
+        ts::ParseISPtimeStatic,
+        tv::ParseISPtimeVarying;
         csv_static_path::AbstractString,
         csv_varying_path::AbstractString,
         arrow_static_path::AbstractString,
@@ -198,13 +198,13 @@ function write_time_data(
     to_path(p) = isnothing(output_root) ? p : normpath(output_root, p)
 
     if write_static
-        if write_csv PISP.PISPwritedataCSV(ts, to_path(csv_static_path)) end
-        if write_arrow PISP.PISPwritedataArrow(ts, to_path(arrow_static_path)) end
+        if write_csv ParseISP.ParseISPwritedataCSV(ts, to_path(csv_static_path)) end
+        if write_arrow ParseISP.ParseISPwritedataArrow(ts, to_path(arrow_static_path)) end
     end
 
     if write_varying
-        if write_csv PISP.PISPwritedataCSV(tv, to_path(csv_varying_path)) end
-        if write_arrow PISP.PISPwritedataArrow(tv, to_path(arrow_varying_path)) end
+        if write_csv ParseISP.ParseISPwritedataCSV(tv, to_path(csv_varying_path)) end
+        if write_arrow ParseISP.ParseISPwritedataArrow(tv, to_path(arrow_varying_path)) end
     else
         # Unit-count schedules are lightweight and always computed — write them regardless
         if write_csv

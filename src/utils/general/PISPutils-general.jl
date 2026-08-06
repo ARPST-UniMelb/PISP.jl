@@ -26,23 +26,23 @@ function default_data_paths(;filepath=@__DIR__)
 end
 
 """
-    fill_problem_table_year(tc, year; sce = keys(PISP.ID2SCE))
+    fill_problem_table_year(tc, year; sce = keys(ParseISP.ID2SCE))
 
 Populate `tc.problem` with half-year blocks for each scenario in `sce`. For the
 given `year`, two entries are created (Jan–Jun and Jul–Dec) with a 60-minute
 time step, unit weight, and problem type `"UC"`.
 
 # Arguments
-- `tc::PISPtimeConfig`: Target time-configuration container mutated in place.
+- `tc::ParseISPtimeConfig`: Target time-configuration container mutated in place.
 - `year::Int`: Calendar year to populate.
 
 # Keyword Arguments
-- `sce`: Iterable of scenario IDs to include (defaults to all `PISP.ID2SCE`
+- `sce`: Iterable of scenario IDs to include (defaults to all `ParseISP.ID2SCE`
   keys).
 """
-function fill_problem_table_year(tc::PISPtimeConfig, year::Int; sce=keys(PISP.ID2SCE))
+function fill_problem_table_year(tc::ParseISPtimeConfig, year::Int; sce=keys(ParseISP.ID2SCE))
     # Generate date blocks from 2025 to 2035, with periods starting 01/01 and 01/07
-    date_blocks = PISP.OrderedDict()
+    date_blocks = ParseISP.OrderedDict()
     block_id = 1
     
     # First block: January 1 to June 30
@@ -61,7 +61,7 @@ function fill_problem_table_year(tc::PISPtimeConfig, year::Int; sce=keys(PISP.ID
     row_id = 1
     for (block_num, (dstart, dend, year)) in date_blocks
         for sc in sce
-            pbname = "$(PISP.ID2SCE[sc])_$(year)_$(month(dstart) == 1 ? "H1" : "H2")" # H1 for first half, H2 for second half   
+            pbname = "$(ParseISP.ID2SCE[sc])_$(year)_$(month(dstart) == 1 ? "H1" : "H2")" # H1 for first half, H2 for second half   
             arr = [row_id, replace(pbname, " " => "_"), sc, 1, "UC", dstart, dend, 60]
             push!(tc.problem, arr)
             row_id += 1
@@ -79,10 +79,10 @@ calendar day. `d` may be a `DateTime`, a `Date`, or a `"dd-mm-yyyy"` string.
 
 # Examples
 ```jldoctest
-julia> PISP._to_datetime("15-03-2024", :start)
+julia> ParseISP._to_datetime("15-03-2024", :start)
 2024-03-15T00:00:00
 
-julia> PISP._to_datetime("15-03-2024", :end)
+julia> ParseISP._to_datetime("15-03-2024", :end)
 2024-03-15T23:00:00
 ```
 """
@@ -95,7 +95,7 @@ function _to_datetime(d, bound::Symbol)
 end
 
 """
-    fill_problem_table_drange(tc, dstart, dend; sce = keys(PISP.ID2SCE))
+    fill_problem_table_drange(tc, dstart, dend; sce = keys(ParseISP.ID2SCE))
 
 Populate `tc.problem` for an arbitrary date range. If the range crosses the
 July 1 half-year boundary it is automatically split into two blocks (H1/H2),
@@ -104,14 +104,14 @@ block per scenario is created with a 60-minute time step, unit weight, and
 problem type `"UC"`.
 
 # Arguments
-- `tc::PISPtimeConfig`: Target time-configuration container mutated in place.
+- `tc::ParseISPtimeConfig`: Target time-configuration container mutated in place.
 - `dstart::DateTime`: Start of the date range (inclusive, at 00:00:00).
 - `dend::DateTime`: End of the date range (inclusive, at 23:00:00).
 
 # Keyword Arguments
-- `sce`: Iterable of scenario IDs to include (defaults to all `PISP.ID2SCE` keys).
+- `sce`: Iterable of scenario IDs to include (defaults to all `ParseISP.ID2SCE` keys).
 """
-function fill_problem_table_drange(tc::PISPtimeConfig, dstart::DateTime, dend::DateTime; sce=keys(PISP.ID2SCE))
+function fill_problem_table_drange(tc::ParseISPtimeConfig, dstart::DateTime, dend::DateTime; sce=keys(ParseISP.ID2SCE))
     july1 = DateTime(year(dstart), 7, 1, 0, 0, 0)
     blocks = if dstart < july1 && dend >= july1
         [(dstart, DateTime(year(dstart), 6, 30, 23, 0, 0)),
@@ -125,7 +125,7 @@ function fill_problem_table_drange(tc::PISPtimeConfig, dstart::DateTime, dend::D
         for sc in sce
             start_str = Dates.format(ds, "ddmmyyyy")
             end_str   = Dates.format(de, "ddmmyyyy")
-            pbname = replace("$(PISP.ID2SCE[sc])_$(start_str)-$(end_str)", " " => "_")
+            pbname = replace("$(ParseISP.ID2SCE[sc])_$(start_str)-$(end_str)", " " => "_")
             push!(tc.problem, [row_id, pbname, sc, 1, "UC", ds, de, 60])
             row_id += 1
         end
@@ -169,7 +169,7 @@ static/varying tables from the ISP inputs, and writes CSV/Arrow outputs under
 - `write_arrow::Bool = true`: Enable Arrow exports.
 - `download_from_AEMO::Bool = true`: Download ISP files before building when
   true; otherwise expects them to already be present.
-- `scenarios::AbstractVector{<:Int64} = keys(PISP.ID2SCE)`: Scenario IDs to
+- `scenarios::AbstractVector{<:Int64} = keys(ParseISP.ID2SCE)`: Scenario IDs to
   include in the build.
 - `buildout_filepath::Union{Nothing,AbstractString} = nothing`: Path to an Excel
   workbook containing buildout schedules. When `nothing` (default), no buildouts
@@ -191,7 +191,7 @@ function build_ISP24_datasets(;
     write_csv::Bool = true,
     write_arrow::Bool = true,
     download_from_AEMO::Bool = true,
-    scenarios::AbstractVector{<:Int64} = keys(PISP.ID2SCE),
+    scenarios::AbstractVector{<:Int64} = keys(ParseISP.ID2SCE),
     write_traces::Bool = true,
     check_exist_trace::Bool = false,
     buildout_filepath::Union{Nothing,AbstractString} = nothing,
@@ -207,10 +207,10 @@ function build_ISP24_datasets(;
         throw(ArgumentError("Years must be between 2025 and 2050 (got $(years))."))
     end
 
-    data_paths = PISP.default_data_paths(filepath=downloadpath)
+    data_paths = ParseISP.default_data_paths(filepath=downloadpath)
 
     # Download/extract/build inputs once
-    PISP.build_pipeline(data_root = downloadpath, poe = poe, download_files = download_from_AEMO, overwrite_extracts = false)
+    ParseISP.build_pipeline(data_root = downloadpath, poe = poe, download_files = download_from_AEMO, overwrite_extracts = false)
 
     base_name = "$(output_name)-ref$(reftrace)-poe$(poe)"
 
@@ -225,7 +225,7 @@ function build_ISP24_datasets(;
     mode  = years !== nothing ? :year : :drange
 
     for item in items
-        tc, ts, tv = PISP.initialise_time_structures()
+        tc, ts, tv = ParseISP.initialise_time_structures()
 
         if mode === :year
             fill_problem_table_year(tc, item, sce=scenarios)
@@ -243,16 +243,16 @@ function build_ISP24_datasets(;
             @info "Skipping heavy trace computation for schedule $(tag) (write_traces=$(write_traces), check_exist_trace=$(check_exist_trace))"
         end
 
-        static_params = PISP.populate_time_static!(ts, tv, data_paths; refyear = reftrace, poe = poe)
+        static_params = ParseISP.populate_time_static!(ts, tv, data_paths; refyear = reftrace, poe = poe)
 
         @info "Populating time-varying data from ISP 2024 - POE $(poe) - reference weather trace $(reftrace) - schedule $(tag) ..."
-        PISP.populate_time_varying!(tc, ts, tv, data_paths, static_params; refyear = reftrace, poe = poe, skip_traces = skip_traces)
+        ParseISP.populate_time_varying!(tc, ts, tv, data_paths, static_params; refyear = reftrace, poe = poe, skip_traces = skip_traces)
 
         if buildout_filepath !== nothing
             _apply_buildouts!(ts, tv, buildout_filepath, sc_buildouts)
         end
 
-        PISP.write_time_data(ts, tv;
+        ParseISP.write_time_data(ts, tv;
             csv_static_path    = "$(base_name)/csv",
             csv_varying_path   = "$(base_name)/csv/schedule-$(tag)",
             arrow_static_path  = "$(base_name)/arrow",

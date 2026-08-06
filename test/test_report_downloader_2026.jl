@@ -2,8 +2,8 @@
 # overwrite / failure handling (mocked download function, no network).
 
 @testset "ISP 2026 report downloader" begin
-    core = PISP.ISPReportDownloader
-    report_downloader = PISP.ISP2026ReportDownloader
+    core = ParseISP.ISPReportDownloader
+    report_downloader = ParseISP.ISP2026ReportDownloader
     targets = report_downloader.report_targets()
     expected_targets = [
         (:integrated_system_plan, "2026 Integrated System Plan", "2026-integrated-system-plan.pdf", "https://www.aemo.com.au/-/media/files/major-publications/isp/2026/2026-integrated-system-plan-isp.pdf?rev=7f5dfd18aa1b4a3aab704c424f75afd3&sc_lang=en"),
@@ -27,10 +27,10 @@
         (:consultation_summary, "2026 ISP Consultation Summary Report", "2026-isp-consultation-summary-report.pdf", "https://www.aemo.com.au/-/media/files/major-publications/isp/2026/supporting-materials/2026-isp-consultation-summary-report.pdf?rev=7982dc7041d4477d988d9f75485846d3&sc_lang=en"),
     ]
 
-    @test isdefined(PISP, :download_ISP26_reports)
-    @test PISP.download_ISP26_reports === report_downloader.download_reports
-    @test !isdefined(PISP, :download_isp_reports)
-    @test !isdefined(PISP, :download_isp2026_reports)
+    @test isdefined(ParseISP, :download_ISP26_reports)
+    @test ParseISP.download_ISP26_reports === report_downloader.download_reports
+    @test !isdefined(ParseISP, :download_isp_reports)
+    @test !isdefined(ParseISP, :download_isp2026_reports)
     @test targets isa Tuple
     @test [(target.key, target.title, target.filename, target.url) for target in targets] == expected_targets
 
@@ -39,7 +39,7 @@
             write(joinpath(outdir, target.filename), "%PDF-1.7\nexisting")
         end
 
-        @test PISP.download_ISP26_reports(outdir=outdir) === nothing
+        @test ParseISP.download_ISP26_reports(outdir=outdir) === nothing
     end
 
     mktempdir() do outdir

@@ -15,8 +15,8 @@ const KIND_LABELS = Dict(
 
 const COMPARISON_DATA_LAYER_LABELS = [
     "source-data" => "ISP source data",
-    "package-workflow" => "PISP transformation",
-    "pisp-dataset" => "PISP datasets",
+    "package-workflow" => "ParseISP transformation",
+    "pisp-dataset" => "ParseISP datasets",
     "cross-layer" => "Cross-layer comparisons",
 ]
 
@@ -81,12 +81,12 @@ function shared_lifecycle_navigation(registry_pages)
 
     return Any[
         "ISP source data" => source_pages,
-        "PISP transformation" => Any[
+        "ParseISP transformation" => Any[
             "Workflow support by edition" => "editions/supported-editions.md",
             "Source-to-dataset processing" => "editions/source-inventory.md",
             "Parameters, mappings, and constants" => "editions/parameters-and-mappings.md",
         ],
-        "PISP datasets" => Any[
+        "ParseISP datasets" => Any[
             "Assets, relationships, and schedules" => "concepts.md",
             "Output tables, fields, and units" => "editions/output-data-model.md",
             "Dataset interpretation and study bounds" => "assumptions.md",
@@ -102,7 +102,7 @@ function registry_navigation(registry_pages)
 
     push!(
         navigation,
-        "Understand PISP and ISP data" => shared_lifecycle_navigation(registry_pages),
+        "Understand ParseISP and ISP data" => shared_lifecycle_navigation(registry_pages),
     )
     isp2024_navigation = track_navigation(registry_pages, "isp2024", "Overview", "editions/isp2024.md")
     insert!(isp2024_navigation, 2, "Preprocessing workflow" => "editions/isp2024-preprocessing.md")

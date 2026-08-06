@@ -59,9 +59,9 @@ report_counterpart_key_map() = collect(REPORT_COUNTERPART_KEY_MAP)
 
 function report_filenames(edition)
     targets = if edition == "2024"
-        PISP.ISP2024ReportDownloader.report_targets()
+        ParseISP.ISP2024ReportDownloader.report_targets()
     elseif edition == "2026"
-        PISP.ISP2026ReportDownloader.report_targets()
+        ParseISP.ISP2026ReportDownloader.report_targets()
     else
         throw(ArgumentError("unsupported ISP edition: $edition"))
     end
@@ -89,8 +89,8 @@ function source_availability_profiles(repo_root; env = ENV)
         ("2024", joinpath("data", "2024", "pisp-reports"), joinpath("data", "2024", "pisp-downloads")),
         ("2026", joinpath("data", "2026", "pisp-reports"), joinpath("data", "2026", "pisp-downloads")),
     )
-        report_root, report_source = configured_root(repo_root, env, "PISP_ISP$(edition)_REPORT_ROOT", report_default)
-        download_root, download_source = configured_root(repo_root, env, "PISP_ISP$(edition)_DOWNLOAD_ROOT", download_default)
+        report_root, report_source = configured_root(repo_root, env, "ParseISP_ISP$(edition)_REPORT_ROOT", report_default)
+        download_root, download_source = configured_root(repo_root, env, "ParseISP_ISP$(edition)_DOWNLOAD_ROOT", download_default)
         push!(profiles, SourceAvailabilityProfile(
             edition = edition,
             report_root = report_root,
@@ -157,17 +157,17 @@ function inspect_edition(profile::SourceAvailabilityProfile)
 end
 
 # The direct ISP 2024 demand-trace groups are named `demand_{subregion}_{scenario}`
-# for every subregion in `PISP.NEMBUSNAME` and every scenario in `PISP.ID2SCE` —
+# for every subregion in `ParseISP.NEMBUSNAME` and every scenario in `ParseISP.ID2SCE` —
 # a fixed 12 x 3 = 36 combination regardless of which files a given download
 # actually contains. Other editions have no such registered enumeration yet, so
 # they fall back to the broader substring match below rather than asserting a
-# bound PISP does not yet support.
+# bound ParseISP does not yet support.
 function known_demand_group_names(edition)
     edition == "2024" || return nothing
     Set(
         "demand_$(subregion)_$(scenario)"
-        for subregion in keys(PISP.NEMBUSNAME)
-        for scenario in values(PISP.ID2SCE)
+        for subregion in keys(ParseISP.NEMBUSNAME)
+        for scenario in values(ParseISP.ID2SCE)
     )
 end
 

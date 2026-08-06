@@ -2,10 +2,10 @@
 EditURL = "../../../../literate/isp2024/validation/temperature_data_coverage.jl"
 ```
 
-# ISP 2024: Temperature information and PISP coverage
+# ISP 2024: Temperature information and ParseISP coverage
 
-The 2024 ISP Inputs and Assumptions workbook contains temperature-related assumptions, but it does not provide an observed ambient-temperature time series for PISP.
-The current PISP.jl parser also does not read the workbook's temperature lookup tables or export a temperature field.
+The 2024 ISP Inputs and Assumptions workbook contains temperature-related assumptions, but it does not provide an observed ambient-temperature time series for ParseISP.
+The current ParseISP.jl parser also does not read the workbook's temperature lookup tables or export a temperature field.
 
 This distinction matters for weather-aware studies: regional reference temperatures and temperature-dependent network limits are model assumptions, while an hourly weather series is an external input that needs its own source and mapping.
 
@@ -15,15 +15,15 @@ This distinction matters for weather-aware studies: regional reference temperatu
 
 ````julia
 using DataFrames
-using PISP
+using ParseISP
 using XLSX
 
-const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
+const REPO_ROOT = normpath(get(ENV, "ParseISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
-import .PISPDocUtils
+include(joinpath(REPO_ROOT, "docs", "utils", "ParseISPDocUtils.jl"))
+import .ParseISPDocUtils
 
-isp2024_profile = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
+isp2024_profile = ParseISPDocUtils.edition_profile(REPO_ROOT, "2024")
 workbook_path = joinpath(isp2024_profile.download_root, "2024-isp-inputs-and-assumptions-workbook.xlsx")
 isfile(workbook_path) || error("ISP 2024 inputs workbook not found: $workbook_path")
 ````
@@ -61,7 +61,7 @@ scenario_temperature = XLSX.openxlsx(workbook_path) do workbook
     )
 end
 
-PISPDocUtils.markdown_table(scenario_temperature)
+ParseISPDocUtils.markdown_table(scenario_temperature)
 ````
 
 ```@raw html
@@ -102,7 +102,7 @@ regional_reference_temperature = XLSX.openxlsx(workbook_path) do workbook
     )
 end
 
-PISPDocUtils.markdown_table(regional_reference_temperature)
+ParseISPDocUtils.markdown_table(regional_reference_temperature)
 ````
 
 ```@raw html
@@ -140,7 +140,7 @@ murraylink_temperature_capability = XLSX.openxlsx(workbook_path) do workbook
     )
 end
 
-PISPDocUtils.markdown_table(murraylink_temperature_capability)
+ParseISPDocUtils.markdown_table(murraylink_temperature_capability)
 ````
 
 ```@raw html
@@ -166,9 +166,9 @@ PISPDocUtils.markdown_table(murraylink_temperature_capability)
 | 47> | 0.0 | 0.0 |
 
 
-## What PISP.jl currently uses
+## What ParseISP.jl currently uses
 
-PISP.jl reads the first network-capability table, which contains seasonal forward and reverse limits.
+ParseISP.jl reads the first network-capability table, which contains seasonal forward and reverse limits.
 The later regional-temperature and Murraylink lookup tables are outside the range currently read by `line_table`.
 The package source also contains no field or parser identifier named `temperature`.
 
@@ -177,7 +177,7 @@ The package source also contains no field or parser identifier named `temperatur
 ```
 
 ````julia
-network_capability_ranges = [PISP.source_spec(:network_capability, 2024).cell_range]
+network_capability_ranges = [ParseISP.source_spec(:network_capability, 2024).cell_range]
 
 source_files = String[]
 for (directory, _, files) in walkdir(joinpath(REPO_ROOT, "src"))
@@ -195,9 +195,9 @@ temperature_source_hits = [
 package_coverage = DataFrame(
     Layer = [
         "AEMO workbook",
-        "PISP network parser",
-        "PISP source and data model",
-        "PISP renewable traces",
+        "ParseISP network parser",
+        "ParseISP source and data model",
+        "ParseISP renewable traces",
     ],
     Coverage = [
         "Static temperature assumptions and lookup tables are present",
@@ -207,12 +207,12 @@ package_coverage = DataFrame(
     ],
     Consequence = [
         "Useful as source assumptions",
-        "Temperature-dependent limits are not carried into current PISP line tables",
+        "Temperature-dependent limits are not carried into current ParseISP line tables",
         "No temperature series or temperature-response function is exported",
         "Cannot be used as a substitute for meteorological temperature data",
     ],
 )
-PISPDocUtils.markdown_table(package_coverage; alignment = [:l, :l, :l])
+ParseISPDocUtils.markdown_table(package_coverage; alignment = [:l, :l, :l])
 ````
 
 ```@raw html
@@ -222,9 +222,9 @@ PISPDocUtils.markdown_table(package_coverage; alignment = [:l, :l, :l])
 | **Layer** | **Coverage** | **Consequence** |
 |:--|:--|:--|
 | AEMO workbook | Static temperature assumptions and lookup tables are present | Useful as source assumptions |
-| PISP network parser | Reads Network Capability B6:H21; does not read B77:E82 or B89:D104 | Temperature-dependent limits are not carried into current PISP line tables |
-| PISP source and data model | No exact temperature field or parser identifier | No temperature series or temperature-response function is exported |
-| PISP renewable traces | Solar and wind capacity factors, not ambient temperature | Cannot be used as a substitute for meteorological temperature data |
+| ParseISP network parser | Reads Network Capability B6:H21; does not read B77:E82 or B89:D104 | Temperature-dependent limits are not carried into current ParseISP line tables |
+| ParseISP source and data model | No exact temperature field or parser identifier | No temperature series or temperature-response function is exported |
+| ParseISP renewable traces | Solar and wind capacity factors, not ambient temperature | Cannot be used as a substitute for meteorological temperature data |
 
 
 The `derate` field in `Generator.csv` is populated from the workbook's generator-reliability settings for partial outages.
@@ -232,7 +232,7 @@ It is not a temperature-driven derating curve.
 
 ## Implication for weather-aware studies
 
-A temperature-aware PISP study needs three additions outside the current ISP 2024 dataset contract:
+A temperature-aware ParseISP study needs three additions outside the current ISP 2024 dataset contract:
 
 1. an observed or climate-model temperature time series with explicit spatial and temporal coverage;
 2. a mapping from weather locations to generators, lines, demand regions, or other assets;

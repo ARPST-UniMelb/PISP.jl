@@ -1,29 +1,29 @@
-# PISP.jl: Julia parser of the Integrated System Plan
+# ParseISP.jl: Julia parser of the Integrated System Plan
 
-[![Build Status](https://github.com/ARPST-UniMelb/PISP.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/ARPST-UniMelb/PISP.jl/actions/workflows/CI.yml?query=branch%3Amain)
+[![Build Status](https://github.com/ARPST-UniMelb/ParseISP.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/ARPST-UniMelb/ParseISP.jl/actions/workflows/CI.yml?query=branch%3Amain)
 
-**PISP** (short for *Julia Parser of the Integrated System Plan*) is an open-source toolkit for parsing and generating structured datasets of the East Coast Australian Power System for power system studies.
+**ParseISP** (short for *Julia Parser of the Integrated System Plan*) is an open-source toolkit for parsing and generating structured datasets of the East Coast Australian Power System for power system studies.
 
 The data parsing functionalities are built on publicly available information from the Integrated System Plan (ISP) released by the Australian Energy Market Operator (AEMO) for the Australian National Electricity Market (NEM).
 
 > [!CAUTION]
-> The current release is fully functional and has been extensively tested; however, bugs or other issues may still arise. We would greatly appreciate any feedback or bug reports submitted via <https://github.com/ARPST-UniMelb/PISP.jl/issues>
+> The current release is fully functional and has been extensively tested; however, bugs or other issues may still arise. We would greatly appreciate any feedback or bug reports submitted via <https://github.com/ARPST-UniMelb/ParseISP.jl/issues>
 
 ## Core function
 
-Dataset construction in PISP is performed through a high-level function, `build_ISP24_datasets`. Usage examples are shown below.
+Dataset construction in ParseISP is performed through a high-level function, `build_ISP24_datasets`. Usage examples are shown below.
 
 **By planning year** (original mode):
 
 ```julia
-using PISP
+using ParseISP
 
 # Set some of the input parameters (see all parameters below)
 reference_trace = 4006         # Reference weather trace. 4006 is the one of the Optimal Development Path (ODP) of the ISP
 poe             = 10           # Probability of exceedance (POE) for demand
 target_years    = [2030, 2031] # Planning years for which to generate datasets
 
-PISP.build_ISP24_datasets(
+ParseISP.build_ISP24_datasets(
     downloadpath = joinpath(@__DIR__, "..", "data", "2024", "pisp-downloads"),
     poe          = poe,
     reftrace     = reference_trace,
@@ -38,10 +38,10 @@ PISP.build_ISP24_datasets(
 **By arbitrary date range** (new `drange` mode):
 
 ```julia
-using PISP
+using ParseISP
 
 # Build datasets for specific date windows instead of full calendar years
-PISP.build_ISP24_datasets(
+ParseISP.build_ISP24_datasets(
     downloadpath = joinpath(@__DIR__, "..", "data", "2024", "pisp-downloads"),
     poe          = 10,
     reftrace     = 4006,
@@ -58,14 +58,14 @@ PISP.build_ISP24_datasets(
 Download selected ISP report PDFs from AEMO:
 
 ```julia
-using PISP
+using ParseISP
 
-PISP.download_ISP24_reports(
+ParseISP.download_ISP24_reports(
     outdir    = joinpath(@__DIR__, "..", "data", "2024", "pisp-reports"),
     overwrite = false,
     )
 
-PISP.download_ISP26_reports(
+ParseISP.download_ISP26_reports(
     outdir    = joinpath(@__DIR__, "..", "data", "2026", "pisp-reports"),
     overwrite = false,
     )
@@ -76,15 +76,15 @@ PISP.download_ISP26_reports(
 Download 2026 ISP source assets from AEMO:
 
 ```julia
-using PISP
+using ParseISP
 
 isp2026_downloads_dir = joinpath(@__DIR__, "..", "data", "2026", "pisp-downloads")
-source_paths = PISP.download_isp2026_assets(
+source_paths = ParseISP.download_isp2026_assets(
     outdir    = isp2026_downloads_dir,
     overwrite = false,
     )
 
-PISP.ISPdatabuilder.extract_downloads(
+ParseISP.ISPdatabuilder.extract_downloads(
     data_root = isp2026_downloads_dir,
 )
 ```
@@ -92,7 +92,7 @@ PISP.ISPdatabuilder.extract_downloads(
 > [!NOTE]
 > The 2026 ISP parser is still under review, see [ParseISP.jl](https://github.com/airampg/ParseISP.jl).
 
-## Optional parameters for PISP.build_ISP24_datasets()
+## Optional parameters for ParseISP.build_ISP24_datasets()
 
 There are multiple parameters that can be adjusted when generating the dataset from the public 2024 Integrated System Plan (ISP) datafiles:
 
@@ -114,19 +114,19 @@ There are multiple parameters that can be adjusted when generating the dataset f
 
 ### User-supplied buildout schedules
 
-`buildout_filepath` and `sc_buildouts` are unrelated to AEMO's published ISP data: PISP does not ship a buildout workbook and does not download one. They exist so you can inject your own planned new-entrant generation and storage assets into a dataset build, on top of the ISP's existing fleet.
+`buildout_filepath` and `sc_buildouts` are unrelated to AEMO's published ISP data: ParseISP does not ship a buildout workbook and does not download one. They exist so you can inject your own planned new-entrant generation and storage assets into a dataset build, on top of the ISP's existing fleet.
 
-To use this feature, provide your own Excel workbook (a common convention is to keep it at `data/PISP-buildouts/buildouts.xlsx`, alongside the other `data/` folders, but any path works) with one row per (technology, subregion, year) and these columns:
+To use this feature, provide your own Excel workbook (a common convention is to keep it at `data/ParseISP-buildouts/buildouts.xlsx`, alongside the other `data/` folders, but any path works) with one row per (technology, subregion, year) and these columns:
 
 | Column      | Type    | Description                                                    |
 | ----------- | ------- | ---------------------------------------------------------------- |
-| `tech`      | String  | Technology label (matched against PISP's own technology set)     |
+| `tech`      | String  | Technology label (matched against ParseISP's own technology set)     |
 | `subregion` | String  | NEM subregion                                                    |
 | `year`      | Integer | Year the entrant becomes available                              |
 | `capacity`  | Real    | Capacity, in MW                                                  |
 | `n`         | Integer | Number of units                                                  |
 
-By default, PISP reads a single worksheet named `buildout_1` for every scenario. To give each scenario its own worksheet instead, pass `sc_buildouts`, mapping each scenario ID (`1`, `2`, `3`) to its worksheet name, e.g. `Dict(1 => "buildout_1", 2 => "buildout_2", 3 => "buildout_3")`.
+By default, ParseISP reads a single worksheet named `buildout_1` for every scenario. To give each scenario its own worksheet instead, pass `sc_buildouts`, mapping each scenario ID (`1`, `2`, `3`) to its worksheet name, e.g. `Dict(1 => "buildout_1", 2 => "buildout_2", 3 => "buildout_3")`.
 
 ## Description of dataset formatting
 
@@ -311,10 +311,10 @@ Below, an overview of each of the databases the parser produces is given.
 | `mttrfull`    | Mean time to repair - single credible contingency (hr)                          |
 | `n`           | Maximum number of units online (p.u.)                                           |
 
-## Data sources of PISP
+## Data sources of ParseISP
 >
 > [!IMPORTANT]
-> All the datasets that PISP generates are based on publicly available data from AEMO.
+> All the datasets that ParseISP generates are based on publicly available data from AEMO.
 >
 > All files are obtained from: <https://www.aemo.com.au/energy-systems/major-publications/integrated-system-plan-isp/2024-integrated-system-plan-isp>
 >
@@ -323,12 +323,12 @@ Below, an overview of each of the databases the parser produces is given.
 > - 2024 Integrated System Plan **Model**
 > - 2024 Integrated System Plan **Demand & Variable Renewable Energy trace data**
 
-PISP combines AEMO source files with package-defined mappings and records derived during dataset construction. The table below summarises how each static output table is created and identifies the additional source data used for its time-varying schedules.
+ParseISP combines AEMO source files with package-defined mappings and records derived during dataset construction. The table below summarises how each static output table is created and identifies the additional source data used for its time-varying schedules.
 
 | Table       | Static table construction                                                                                                              | Time-varying schedule sources                                                                                                                                                                      |
 | ----------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Bus`       | Bus names, locations, and NEM area mappings are defined as package constants.                                                          | No time-varying bus schedules are produced.                                                                                                                                                        |
-| `Demand`    | PISP creates one demand record for each bus.                                                                                           | Hourly demand profiles are obtained from the **Demand & Variable Renewable Energy trace data**.                                                                                                    |
+| `Demand`    | ParseISP creates one demand record for each bus.                                                                                           | Hourly demand profiles are obtained from the **Demand & Variable Renewable Energy trace data**.                                                                                                    |
 | `Line`      | Network capability, transmission reliability, and augmentation-option data are obtained from the **Inputs and Assumptions workbook**.  | Line schedules use the same source family; no additional AEMO dataset is required.                                                                                                                 |
 | `Generator` | Generator characteristics, capacities, mappings, and reliability parameters are obtained from the **Inputs and Assumptions workbook**. | Solar and wind schedules also use the **generation and storage outlook** and the **Demand & Variable Renewable Energy trace data**. Hydro inflow schedules additionally use the **Model** dataset. |
 | `ESS`       | Storage characteristics, capacities, mappings, and reliability parameters are obtained from the **Inputs and Assumptions workbook**.   | Behind-the-meter and virtual power plant battery schedules also use the **generation and storage outlook**.                                                                                        |
@@ -351,10 +351,10 @@ Some test sets exercise the ISP report and source downloaders against the on-dis
 
 | Environment variable         | Selects                            |
 | ---------------------------- | ---------------------------------- |
-| `PISP_ISP2024_REPORT_ROOT`   | ISP 2024 report PDFs               |
-| `PISP_ISP2024_DOWNLOAD_ROOT` | ISP 2024 model and trace downloads |
-| `PISP_ISP2026_REPORT_ROOT`   | ISP 2026 report PDFs               |
-| `PISP_ISP2026_DOWNLOAD_ROOT` | ISP 2026 model and trace downloads |
+| `ParseISP_ISP2024_REPORT_ROOT`   | ISP 2024 report PDFs               |
+| `ParseISP_ISP2024_DOWNLOAD_ROOT` | ISP 2024 model and trace downloads |
+| `ParseISP_ISP2026_REPORT_ROOT`   | ISP 2026 report PDFs               |
+| `ParseISP_ISP2026_DOWNLOAD_ROOT` | ISP 2026 model and trace downloads |
 
 A few tests also skip themselves when the `zip` / `unzip` command-line tools are not available.
 
@@ -367,7 +367,7 @@ using Pkg
 Pkg.test(; coverage=true)
 ```
 
-This writes `*.cov` files alongside the sources. Process them into a summary or `lcov` report with [Coverage.jl](https://github.com/JuliaCI/Coverage.jl), which you add to your own environment (it is not a dependency of PISP).
+This writes `*.cov` files alongside the sources. Process them into a summary or `lcov` report with [Coverage.jl](https://github.com/JuliaCI/Coverage.jl), which you add to your own environment (it is not a dependency of ParseISP).
 
 ```sh
 ./scripts/test_coverage.sh

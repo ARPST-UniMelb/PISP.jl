@@ -16,13 +16,13 @@ AEMO describes Step Change as a refinement of the 2023 scenario with the same na
 using DataFrames
 using XLSX
 
-const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
+const REPO_ROOT = normpath(get(ENV, "ParseISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
-import .PISPDocUtils
+include(joinpath(REPO_ROOT, "docs", "utils", "ParseISPDocUtils.jl"))
+import .ParseISPDocUtils
 
-const ISP2024 = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
-const ISP2026 = PISPDocUtils.edition_profile(REPO_ROOT, "2026")
+const ISP2024 = ParseISPDocUtils.edition_profile(REPO_ROOT, "2024")
+const ISP2026 = ParseISPDocUtils.edition_profile(REPO_ROOT, "2026")
 const WORKBOOK2024 = joinpath(ISP2024.download_root, "2024-isp-inputs-and-assumptions-workbook.xlsx")
 const WORKBOOK2026 = joinpath(ISP2026.download_root, "2026-isp-inputs-and-assumptions-workbook.xlsm")
 all(isfile, (WORKBOOK2024, WORKBOOK2026)) || error("both selected ISP inputs workbooks are required")
@@ -62,7 +62,7 @@ for column in names(scenario_2024)
     scenario_2024[!, column] = strip_scenario_marker.(scenario_2024[!, column])
 end
 filter!(row -> any(value -> !ismissing(value), Tuple(row)[2:end]), scenario_2024)
-PISPDocUtils.markdown_table(scenario_2024)
+ParseISPDocUtils.markdown_table(scenario_2024)
 ````
 
 ```@raw html
@@ -97,7 +97,7 @@ for column in names(scenario_2026)
     scenario_2026[!, column] = strip_scenario_marker.(scenario_2026[!, column])
 end
 filter!(row -> any(value -> !ismissing(value), Tuple(row)[2:end]), scenario_2026)
-PISPDocUtils.markdown_table(scenario_2026)
+ParseISPDocUtils.markdown_table(scenario_2026)
 ````
 
 ```@raw html
@@ -124,14 +124,14 @@ Each workbook is a result package with many worksheets rather than a single flat
 
 ````julia
 outlook_inventory = vcat(
-    PISPDocUtils.read_outlook_inventory(joinpath(ISP2024.download_root, "Core"), "2024"),
-    PISPDocUtils.read_outlook_inventory(joinpath(ISP2024.download_root, "Sensitivities"), "2024"),
-    PISPDocUtils.read_outlook_inventory(joinpath(ISP2026.download_root, "Core scenarios"), "2026"),
-    PISPDocUtils.read_outlook_inventory(joinpath(ISP2026.download_root, "Sensitivities"), "2026"),
+    ParseISPDocUtils.read_outlook_inventory(joinpath(ISP2024.download_root, "Core"), "2024"),
+    ParseISPDocUtils.read_outlook_inventory(joinpath(ISP2024.download_root, "Sensitivities"), "2024"),
+    ParseISPDocUtils.read_outlook_inventory(joinpath(ISP2026.download_root, "Core scenarios"), "2026"),
+    ParseISPDocUtils.read_outlook_inventory(joinpath(ISP2026.download_root, "Sensitivities"), "2026"),
 )
 outlook_counts = combine(groupby(outlook_inventory, [:edition, :group]), nrow => :workbooks)
 sort!(outlook_counts, [:edition, :group])
-PISPDocUtils.markdown_table(outlook_counts)
+ParseISPDocUtils.markdown_table(outlook_counts)
 ````
 
 ```@raw html
@@ -152,7 +152,7 @@ PISPDocUtils.markdown_table(outlook_counts)
 
 ````julia
 outlook_cases = select(outlook_inventory, :edition, :group, :scenario_or_sensitivity)
-PISPDocUtils.markdown_table(outlook_cases)
+ParseISPDocUtils.markdown_table(outlook_cases)
 ````
 
 ```@raw html

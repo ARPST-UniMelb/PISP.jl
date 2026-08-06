@@ -43,5 +43,5 @@ jobs:
       - name: Build and deploy committed documentation
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PISP_DOCS_LINK_TARGET: public
+          ParseISP_DOCS_LINK_TARGET: public
         run: julia --color=yes --project=docs docs/make.jl

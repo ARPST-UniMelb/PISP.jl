@@ -1,27 +1,27 @@
-# PISP documentation maintenance
+# ParseISP documentation maintenance
 
 This guide describes the maintained documentation sources, the Literate rendering workflow, and the checks required before publishing the Documenter site.
 It is for maintainers; ordinary readers should begin with the rendered site.
 
 ## Fresh-clone setup
 
-PISP's root `Project.toml` declares Julia `1.11` compatibility.
+ParseISP's root `Project.toml` declares Julia `1.11` compatibility.
 Clone the canonical repository, then instantiate the package and documentation environments separately:
 
 ```sh
-git clone https://github.com/ARPST-UniMelb/PISP.jl.git
-cd PISP.jl
+git clone https://github.com/ARPST-UniMelb/ParseISP.jl.git
+cd ParseISP.jl
 julia --project=. -e 'using Pkg; Pkg.instantiate()'
 julia --project=docs -e 'using Pkg; Pkg.instantiate()'
 ```
 
-The root environment contains PISP and its runtime and test dependencies.
+The root environment contains ParseISP and its runtime and test dependencies.
 `docs/Project.toml` is a separate environment for Documenter, Literate, plotting, workbook inspection, and documentation tests.
-Its committed source override resolves PISP from the same checkout:
+Its committed source override resolves ParseISP from the same checkout:
 
 ```toml
 [sources]
-PISP = {path = ".."}
+ParseISP = {path = ".."}
 ```
 
 These are the local-maintainer environment defaults.
@@ -49,7 +49,7 @@ While iterating on Literate sources, re-render only the pages whose source chang
 julia --project=docs docs/render_changed.jl
 ```
 
-`render_changed.jl` resolves the changed `docs/literate/**/*.jl` files (staged, unstaged, or untracked, versus `HEAD`) to their registry page IDs and re-renders just those in place through `PISP_LITERATE_PAGES`.
+`render_changed.jl` resolves the changed `docs/literate/**/*.jl` files (staged, unstaged, or untracked, versus `HEAD`) to their registry page IDs and re-renders just those in place through `ParseISP_LITERATE_PAGES`.
 It reports changed documentation `.jl` files that are not registered page sources, including shared files under `docs/utils/`, since those can affect many pages.
 Run the full `docs/render_literate.jl` before committing regenerated Markdown; the changed-only path skips the whole-set completeness and atomic-replacement checks.
 
@@ -59,7 +59,7 @@ Regenerating every published Literate page requires the referenced ISP report PD
 Start Julia at the repository root with `julia --project=.` and run:
 
 ```julia
-using PISP
+using ParseISP
 
 repo = pwd()
 
@@ -71,30 +71,30 @@ reports_2026   = joinpath(repo, "data", "2026", "pisp-reports")
 downloads_2026 = joinpath(repo, "data", "2026", "pisp-downloads")
 
 # Reports referenced by the documentation.
-PISP.download_ISP24_reports(
+ParseISP.download_ISP24_reports(
     outdir = reports_2024,
     overwrite = false,
 )
 
-PISP.download_ISP26_reports(
+ParseISP.download_ISP26_reports(
     outdir = reports_2026,
     overwrite = false,
 )
 
 # ISP 2026 shared source and comparison pages.
-PISP.download_isp2026_assets(
+ParseISP.download_isp2026_assets(
     outdir = downloads_2026,
     overwrite = false,
 )
 
-PISP.ISPdatabuilder.extract_downloads(
+ParseISP.ISPdatabuilder.extract_downloads(
     data_root = downloads_2026,
 )
 
 # ISP 2024 datasets consumed by the published executable pages.
 # This also downloads and extracts the required 2024 source assets.
 for poe in (10, 50), reference_trace in (2017, 4006)
-    PISP.build_ISP24_datasets(
+    ParseISP.build_ISP24_datasets(
         downloadpath = joinpath(@__DIR__, "..", "data", "2024", "pisp-downloads"),
         poe          = poe,
         reftrace     = reference_trace,
@@ -142,7 +142,7 @@ Local data are required for complete Literate regeneration, but not for a site b
 | `docs/config/source-material-coverage.toml` | Machine-readable ownership ledger for active source reads, parameter files, and mapping families. |
 | `docs/config/page-registry.toml` | Authority for every registry-managed Literate source and generated Markdown output. |
 | `docs/config/source-links.toml` | Local-to-public source-link registry used by the Documenter staging step. |
-| `docs/utils/PISPDocUtils.jl` | Module facade for documentation and tutorial support used with qualified `PISPDocUtils.*` calls. |
+| `docs/utils/ParseISPDocUtils.jl` | Module facade for documentation and tutorial support used with qualified `ParseISPDocUtils.*` calls. |
 | `docs/utils/` | Reusable tutorial support and documentation build helpers. |
 | `docs/src/generated/` | Committed Markdown and embedded figures installed from registered Literate pages. |
 | `docs/src/tables/` and `docs/src/figures/` | Ignored canonical CSV and PNG diagnostics produced while executing Literate pages; selected figures are copied into `docs/src/generated/` for publication. |
@@ -177,9 +177,9 @@ Processed-data compatibility still requires edition-specific parser and schema v
 The source-material family reads the two inputs workbooks, both EV workbooks, the edition-specific outlook directories, the 2019 operating-assumptions supplement used by the current parser, and bounded hydro CSVs under the 2024 model directory.
 Each page declares its exact local prerequisites in `docs/config/page-registry.toml`; no source-selection path is maintained in this table.
 
-For ISP 2024 sources registered by the package, Literate pages resolve the canonical `PISP.SourceSpec`, derive the path with `PISP.source_path`, and read through the corresponding PISP source reader.
+For ISP 2024 sources registered by the package, Literate pages resolve the canonical `ParseISP.SourceSpec`, derive the path with `ParseISP.source_path`, and read through the corresponding ParseISP source reader.
 ISP 2026 source evidence, and ISP 2024 evidence without a package specification, uses explicit `XLSX.jl` access in the owning Literate page.
-`PISPDocUtils` receives already-read matrices or tables for documentation-specific preparation and presentation; it does not own workbook paths, worksheet names, cell ranges, or source-file discovery.
+`ParseISPDocUtils` receives already-read matrices or tables for documentation-specific preparation and presentation; it does not own workbook paths, worksheet names, cell ranges, or source-file discovery.
 
 ## Page registry
 
@@ -209,24 +209,24 @@ The registry also rejects duplicate IDs, titles, outputs, and renderable `(track
 
 | Status | Navigation | Default render selection | Generated-output requirement |
 | --- | --- | --- | --- |
-| `published` | Included in the published navigation. | Included by `PISP_LITERATE_SET=published`, the default. | Required before `docs/make.jl` can build the site. |
-| `draft` | Omitted from published navigation. | Included only by `PISP_LITERATE_SET=draft` or `all`. | Not required by `docs/make.jl`. |
+| `published` | Included in the published navigation. | Included by `ParseISP_LITERATE_SET=published`, the default. | Required before `docs/make.jl` can build the site. |
+| `draft` | Omitted from published navigation. | Included only by `ParseISP_LITERATE_SET=draft` or `all`. | Not required by `docs/make.jl`. |
 | `archived` | Omitted. | Never renderable, including through an explicit page-ID selection. | Not required. |
 
-`PISP_LITERATE_SET` accepts `published`, `draft`, or `all`; `eda-drafts` is also accepted as a draft alias.
-`PISP_DOCS_TRACK` filters the selected status set by `shared`, `isp2024`, `isp2026`, or `comparison`.
-`PISP_LITERATE_PAGES` selects explicit comma-separated page IDs, but it cannot be combined with a non-default set or with a track filter.
+`ParseISP_LITERATE_SET` accepts `published`, `draft`, or `all`; `eda-drafts` is also accepted as a draft alias.
+`ParseISP_DOCS_TRACK` filters the selected status set by `shared`, `isp2024`, `isp2026`, or `comparison`.
+`ParseISP_LITERATE_PAGES` selects explicit comma-separated page IDs, but it cannot be combined with a non-default set or with a track filter.
 
 For example, render the current published ISP 2024 track with:
 
 ```sh
-PISP_DOCS_TRACK=isp2024 julia --project=docs docs/render_literate.jl
+ParseISP_DOCS_TRACK=isp2024 julia --project=docs docs/render_literate.jl
 ```
 
 Render one known page by its registry ID with:
 
 ```sh
-PISP_LITERATE_PAGES=isp2024-historical-trace-years julia --project=docs docs/render_literate.jl
+ParseISP_LITERATE_PAGES=isp2024-historical-trace-years julia --project=docs docs/render_literate.jl
 ```
 
 ### Edition-parallel raw-source documentation
@@ -241,7 +241,7 @@ Render the affected edition pair explicitly after changing source definitions
 or source comparisons. For ISP 2026:
 
 ```sh
-PISP_LITERATE_PAGES=isp2026-source-data,isp2026-workbook-and-trace-structure \
+ParseISP_LITERATE_PAGES=isp2026-source-data,isp2026-workbook-and-trace-structure \
     julia --project=docs docs/render_literate.jl
 ```
 
@@ -252,24 +252,24 @@ cross-edition raw-source comparison.
 
 `isp2024` and `isp2026` pages are placed automatically, grouped by `kind` under their track's section.
 `comparison` pages are placed automatically, grouped by `data_layer` under "Compare ISP 2024 and ISP 2026".
-Published `shared` pages in the `source-data` layer are placed automatically under "Understand PISP and ISP data" in registry order.
+Published `shared` pages in the `source-data` layer are placed automatically under "Understand ParseISP and ISP data" in registry order.
 `docs/test/runtests.jl` fails and names any published page whose output path is not reachable from the built navigation.
 
 ## Edition profiles and data preflight
 
-`docs/utils/edition_profiles.jl`, loaded through `PISPDocUtils`, centralises local roots and schedule defaults used by documentation rendering.
+`docs/utils/edition_profiles.jl`, loaded through `ParseISPDocUtils`, centralises local roots and schedule defaults used by documentation rendering.
 Relative environment-variable values are resolved from the repository root.
 
 | Edition | Environment variable | Default |
 | --- | --- | --- |
-| ISP 2024 | `PISP_DOCS_ISP2024_REPORT_ROOT` | `data/2024/pisp-reports` |
-| ISP 2024 | `PISP_DOCS_ISP2024_DOWNLOAD_ROOT` | `data/2024/pisp-downloads` |
-| ISP 2024 | `PISP_DOCS_ISP2024_OUTPUT_ROOT` | `data/2024/pisp-datasets/out-ref4006-poe10/csv` |
-| ISP 2024 | `PISP_DOCS_ISP2024_SCHEDULE_TAG` | `schedule-2030` |
-| ISP 2026 | `PISP_DOCS_ISP2026_DOWNLOAD_ROOT` | `data/2026/pisp-downloads` |
-| ISP 2026 | `PISP_DOCS_ISP2026_REPORT_ROOT` | `data/2026/pisp-reports` |
-| ISP 2026 | `PISP_DOCS_ISP2026_OUTPUT_ROOT` | Unset unless explicitly configured. |
-| ISP 2026 | `PISP_DOCS_ISP2026_SCHEDULE_TAG` | Unset unless explicitly configured. |
+| ISP 2024 | `ParseISP_DOCS_ISP2024_REPORT_ROOT` | `data/2024/pisp-reports` |
+| ISP 2024 | `ParseISP_DOCS_ISP2024_DOWNLOAD_ROOT` | `data/2024/pisp-downloads` |
+| ISP 2024 | `ParseISP_DOCS_ISP2024_OUTPUT_ROOT` | `data/2024/pisp-datasets/out-ref4006-poe10/csv` |
+| ISP 2024 | `ParseISP_DOCS_ISP2024_SCHEDULE_TAG` | `schedule-2030` |
+| ISP 2026 | `ParseISP_DOCS_ISP2026_DOWNLOAD_ROOT` | `data/2026/pisp-downloads` |
+| ISP 2026 | `ParseISP_DOCS_ISP2026_REPORT_ROOT` | `data/2026/pisp-reports` |
+| ISP 2026 | `ParseISP_DOCS_ISP2026_OUTPUT_ROOT` | Unset unless explicitly configured. |
+| ISP 2026 | `ParseISP_DOCS_ISP2026_SCHEDULE_TAG` | Unset unless explicitly configured. |
 
 A `data_requirements` item is an inline TOML table with `root`, `path`, and `type`; `download` and `output` requirements also need an `edition` that the page declares.
 The allowed roots are `repo`, `report`, `download`, and `output`, while the allowed types are `file`, `directory`, and `path`.
@@ -288,8 +288,8 @@ Local source-tree completeness is a maintainer test rather than a published
 documentation page. `test/test_source_availability.jl` exercises the helper in
 `docs/utils/source_availability.jl`; it skips an edition only when both local
 roots are absent and fails when a configured edition is incomplete. Run it as
-part of the package test command below, using the `PISP_ISP<edition>_REPORT_ROOT`
-and `PISP_ISP<edition>_DOWNLOAD_ROOT` overrides documented in the repository
+part of the package test command below, using the `ParseISP_ISP<edition>_REPORT_ROOT`
+and `ParseISP_ISP<edition>_DOWNLOAD_ROOT` overrides documented in the repository
 README when the data live outside `data/<edition>/`.
 
 Before any Literate page runs, the renderer resolves each selected requirement through the relevant edition profile and checks its type.
@@ -305,7 +305,7 @@ Run checks from the repository root.
 | Documentation infrastructure tests | `julia --project=docs docs/test/runtests.jl` | Reads registry, navigation, renderer, utility, and source-link fixtures; writes temporary test directories. | No. |
 | Literate render | `julia --project=docs docs/render_literate.jl` | Reads registered sources and their declared data requirements; writes committed generated Markdown and embedded figures plus ignored canonical diagnostics under `docs/src/tables/` and `docs/src/figures/`. | Yes for selected data-dependent pages. |
 | Local-link site build | `julia --project=docs docs/make.jl` | Reads maintained and committed generated Markdown; writes `docs/.documenter-source/` and `docs/build/`. | No. |
-| Public-link site build | `PISP_DOCS_LINK_TARGET=public julia --project=docs docs/make.jl` | Reads source-link mappings and documentation sources; writes staged public-link pages and `docs/build/`. | No. |
+| Public-link site build | `ParseISP_DOCS_LINK_TARGET=public julia --project=docs docs/make.jl` | Reads source-link mappings and documentation sources; writes staged public-link pages and `docs/build/`. | No. |
 | Render and local build | `julia --project=docs docs/build_all.jl` | Runs the registered Literate render followed by the local-link site build. | Yes for data-dependent published pages. |
 
 Package tests and documentation tests are normal contributor checks.
@@ -347,7 +347,7 @@ Maintained Markdown keeps repository-local links to registered source PDFs.
 Build the public-link variant with:
 
 ```sh
-PISP_DOCS_LINK_TARGET=public julia --project=docs docs/make.jl
+ParseISP_DOCS_LINK_TARGET=public julia --project=docs docs/make.jl
 ```
 
 Validate source-link routing with the documentation infrastructure tests:
@@ -381,11 +381,11 @@ Keep executable page work in the registered source under `docs/literate/` or in 
 
 | Concern | Source location |
 | --- | --- |
-| ISP 2024 source download targets | `src/scrappers/PISP-scrapper-2024files.jl` |
-| ISP 2024 trace configuration | `src/scrappers/PISP-scrapper-2024traces.jl` |
-| ISP 2026 source-asset download targets | `src/scrappers/PISP-scrapper-2026files.jl` |
-| ISP 2026 report-download targets | `src/scrappers/PISP-scrapper-2026reports.jl` |
+| ISP 2024 source download targets | `src/scrappers/ParseISP-scrapper-2024files.jl` |
+| ISP 2024 trace configuration | `src/scrappers/ParseISP-scrapper-2024traces.jl` |
+| ISP 2026 source-asset download targets | `src/scrappers/ParseISP-scrapper-2026files.jl` |
+| ISP 2026 report-download targets | `src/scrappers/ParseISP-scrapper-2026reports.jl` |
 | Static and schedule schemas | `src/datamodel/` |
-| Exported filename mapping | `src/utils/writing/PISPutils-writing.jl` |
-| ISP 2024 scenario, bus, area, and weather-year mappings | [`src/parameters/general2024ISP.jl`](https://github.com/ARPST-UniMelb/PISP.jl/blob/main/src/parameters/general2024ISP.jl) |
-| ISP 2024 parser | [`src/parsers/PISP-2024parser.jl`](https://github.com/ARPST-UniMelb/PISP.jl/blob/main/src/parsers/PISP-2024parser.jl) |
+| Exported filename mapping | `src/utils/writing/ParseISPutils-writing.jl` |
+| ISP 2024 scenario, bus, area, and weather-year mappings | [`src/parameters/general2024ISP.jl`](https://github.com/ARPST-UniMelb/ParseISP.jl/blob/main/src/parameters/general2024ISP.jl) |
+| ISP 2024 parser | [`src/parsers/ParseISP-2024parser.jl`](https://github.com/ARPST-UniMelb/ParseISP.jl/blob/main/src/parsers/ParseISP-2024parser.jl) |

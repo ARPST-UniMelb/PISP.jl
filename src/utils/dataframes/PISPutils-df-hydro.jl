@@ -78,7 +78,7 @@ end
 
 function build_hourly_snowy(
     ispdata24;
-    weather_years = PISP.WEATHER_YEARS,
+    weather_years = ParseISP.WEATHER_YEARS,
     source_spec::XlsxSourceSpec = ISP2024_HYDRO_SCHEME_INFLOWS_SOURCE,
     sheet_name = nothing,
     cell_range = nothing,
@@ -91,7 +91,7 @@ function build_hourly_snowy(
 
     weather_df = weather_years_df(weather_years)
 
-    data = PISP.read_xlsx_with_header(
+    data = ParseISP.read_xlsx_with_header(
         ispdata24,
         source_spec;
         worksheet = something(sheet_name, source_spec.worksheet),

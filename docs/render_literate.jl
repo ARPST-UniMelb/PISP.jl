@@ -5,8 +5,8 @@
 
 using Literate
 
-include(joinpath(@__DIR__, "utils", "PISPDocUtils.jl"))
-import .PISPDocUtils
+include(joinpath(@__DIR__, "utils", "ParseISPDocUtils.jl"))
+import .ParseISPDocUtils
 include(joinpath(@__DIR__, "utils", "page_registry.jl"))
 
 const DOCS_DIR = @__DIR__
@@ -17,31 +17,31 @@ const TRACK_ORDER = Dict("shared" => 1, "isp2024" => 2, "isp2026" => 3, "compari
 const KIND_ORDER = Dict("reference" => 1, "tutorial" => 2, "validation" => 3, "analysis" => 4)
 
 function select_pages(registry_pages)
-    explicit_ids = strip(get(ENV, "PISP_LITERATE_PAGES", ""))
-    source_set = lowercase(strip(get(ENV, "PISP_LITERATE_SET", "published")))
-    requested_track = lowercase(strip(get(ENV, "PISP_DOCS_TRACK", "")))
+    explicit_ids = strip(get(ENV, "ParseISP_LITERATE_PAGES", ""))
+    source_set = lowercase(strip(get(ENV, "ParseISP_LITERATE_SET", "published")))
+    requested_track = lowercase(strip(get(ENV, "ParseISP_DOCS_TRACK", "")))
 
     if !isempty(explicit_ids)
         source_set == "published" || error(
-            "PISP_LITERATE_PAGES cannot be combined with PISP_LITERATE_SET=$source_set; " *
+            "ParseISP_LITERATE_PAGES cannot be combined with ParseISP_LITERATE_SET=$source_set; " *
             "use the default published set when selecting explicit page IDs",
         )
         isempty(requested_track) || error(
-            "PISP_LITERATE_PAGES cannot be combined with PISP_DOCS_TRACK=$requested_track",
+            "ParseISP_LITERATE_PAGES cannot be combined with ParseISP_DOCS_TRACK=$requested_track",
         )
         requested_ids = String.(filter(id -> !isempty(id), strip.(split(explicit_ids, ","))))
-        isempty(requested_ids) && error("PISP_LITERATE_PAGES must name at least one page ID")
+        isempty(requested_ids) && error("ParseISP_LITERATE_PAGES must name at least one page ID")
         length(requested_ids) == length(unique(requested_ids)) ||
-            error("PISP_LITERATE_PAGES contains duplicate page IDs")
+            error("ParseISP_LITERATE_PAGES contains duplicate page IDs")
 
         pages_by_id = Dict(page.id => page for page in registry_pages)
         unknown_ids = filter(id -> !haskey(pages_by_id, id), requested_ids)
-        isempty(unknown_ids) || error("unknown page IDs in PISP_LITERATE_PAGES: $(join(unknown_ids, ", "))")
+        isempty(unknown_ids) || error("unknown page IDs in ParseISP_LITERATE_PAGES: $(join(unknown_ids, ", "))")
         selected = [pages_by_id[id] for id in requested_ids]
         archived_ids = [
             page.id for page in selected if !is_renderable(page)
         ]
-        isempty(archived_ids) || error("PISP_LITERATE_PAGES cannot render archived page IDs: $(join(archived_ids, ", "))")
+        isempty(archived_ids) || error("ParseISP_LITERATE_PAGES cannot render archived page IDs: $(join(archived_ids, ", "))")
         return sort(selected; by = page -> (TRACK_ORDER[page.track], KIND_ORDER[page.kind], page.nav_order, page.id))
     end
 
@@ -53,28 +53,28 @@ function select_pages(registry_pages)
         filter(is_renderable, registry_pages)
     else
         error(
-            "unsupported PISP_LITERATE_SET=\"$source_set\"; " *
-            "use \"published\", \"draft\", or \"all\", or set PISP_LITERATE_PAGES",
+            "unsupported ParseISP_LITERATE_SET=\"$source_set\"; " *
+            "use \"published\", \"draft\", or \"all\", or set ParseISP_LITERATE_PAGES",
         )
     end
 
     if !isempty(requested_track)
         requested_track in keys(TRACK_ORDER) || error(
-            "unsupported PISP_DOCS_TRACK=\"$requested_track\"; " *
+            "unsupported ParseISP_DOCS_TRACK=\"$requested_track\"; " *
             "use \"shared\", \"isp2024\", \"isp2026\", or \"comparison\"",
         )
         selected = filter(page -> page.track == requested_track, selected)
     end
 
     isempty(selected) && error(
-        "no renderable pages matched PISP_LITERATE_SET=$source_set and " *
-        "PISP_DOCS_TRACK=$(isempty(requested_track) ? "all" : requested_track)",
+        "no renderable pages matched ParseISP_LITERATE_SET=$source_set and " *
+        "ParseISP_DOCS_TRACK=$(isempty(requested_track) ? "all" : requested_track)",
     )
     return sort(selected; by = page -> (TRACK_ORDER[page.track], KIND_ORDER[page.kind], page.nav_order, page.id))
 end
 
 function profile_lookup()
-    profiles = PISPDocUtils.edition_profiles(REPO_ROOT)
+    profiles = ParseISPDocUtils.edition_profiles(REPO_ROOT)
     return Dict(profile.edition => profile for profile in profiles)
 end
 
@@ -200,11 +200,11 @@ function validate_selected_requirements(pages, profiles)
 end
 
 function with_page_environment(callback, output_dir)
-    keys = ("PISP_DOCS_REPO_ROOT", "PISP_LITERATE_OUTPUT_DIR")
+    keys = ("ParseISP_DOCS_REPO_ROOT", "ParseISP_LITERATE_OUTPUT_DIR")
     previous = Dict(key => get(ENV, key, nothing) for key in keys)
 
-    ENV["PISP_DOCS_REPO_ROOT"] = REPO_ROOT
-    ENV["PISP_LITERATE_OUTPUT_DIR"] = output_dir
+    ENV["ParseISP_DOCS_REPO_ROOT"] = REPO_ROOT
+    ENV["ParseISP_LITERATE_OUTPUT_DIR"] = output_dir
 
     try
         return callback()

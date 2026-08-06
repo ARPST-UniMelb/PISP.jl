@@ -1,9 +1,9 @@
 module ISPdatabuilder
 
-    using PISP
-    using PISP.ISPTraceDownloader
-    using PISP.ISPFileDownloader
-    using PISP.PISPScrapperUtils
+    using ParseISP
+    using ParseISP.ISPTraceDownloader
+    using ParseISP.ISPFileDownloader
+    using ParseISP.ParseISPScrapperUtils
     using XLSX
     using DataFrames
     using DataFrames: Not
@@ -26,7 +26,7 @@ module ISPdatabuilder
 
     const DEFAULT_DATA_ROOT = normpath(@__DIR__, "..", "..", "data-download")
 
-    const ISP2024_CORE_CAPACITY_SOURCE = PISP.XlsxSourceSpec(
+    const ISP2024_CORE_CAPACITY_SOURCE = ParseISP.XlsxSourceSpec(
         id = :core_capacity_outlook,
         edition = 2024,
         workbook = "Core/{core_workbook}",
@@ -36,7 +36,7 @@ module ISPdatabuilder
         source_family = :generation_outlook,
         consumer = :build_capacity_outlook_aux,
     )
-    const ISP2024_CORE_STORAGE_ENERGY_SOURCE = PISP.XlsxSourceSpec(
+    const ISP2024_CORE_STORAGE_ENERGY_SOURCE = ParseISP.XlsxSourceSpec(
         id = :core_storage_energy_outlook,
         edition = 2024,
         workbook = "Core/{core_workbook}",
@@ -46,7 +46,7 @@ module ISPdatabuilder
         source_family = :storage_outlook,
         consumer = :build_storage_outlook_aux,
     )
-    const ISP2024_CORE_STORAGE_CAPACITY_SOURCE = PISP.XlsxSourceSpec(
+    const ISP2024_CORE_STORAGE_CAPACITY_SOURCE = ParseISP.XlsxSourceSpec(
         id = :core_storage_capacity_outlook,
         edition = 2024,
         workbook = "Core/{core_workbook}",
@@ -56,7 +56,7 @@ module ISPdatabuilder
         source_family = :storage_outlook,
         consumer = :build_storage_outlook_aux,
     )
-    const ISP2024_CORE_REZ_CAPACITY_SOURCE = PISP.XlsxSourceSpec(
+    const ISP2024_CORE_REZ_CAPACITY_SOURCE = ParseISP.XlsxSourceSpec(
         id = :core_rez_generation_capacity,
         edition = 2024,
         workbook = "Core/{core_workbook}",
@@ -66,22 +66,22 @@ module ISPdatabuilder
         source_family = :generation_outlook,
         consumer = :build_rez_capacity_aux,
     )
-    const ISP2024_REFERENCE_YEAR_TRACE_SOURCE = PISP.CsvSourceSpec(
+    const ISP2024_REFERENCE_YEAR_TRACE_SOURCE = ParseISP.CsvSourceSpec(
         id = :reference_year_trace,
         edition = 2024,
         filename_pattern = "Traces/{technology}_{reference_year}/{trace_file}",
         description = "Reference-year trace selected while constructing the synthetic RefYear4006 series.",
-        columns = PISP.ColumnSpec[
-            PISP.ColumnSpec(name = "Year", data_type = :Integer),
-            PISP.ColumnSpec(name = "Month", data_type = :Integer),
-            PISP.ColumnSpec(name = "Day", data_type = :Integer),
+        columns = ParseISP.ColumnSpec[
+            ParseISP.ColumnSpec(name = "Year", data_type = :Integer),
+            ParseISP.ColumnSpec(name = "Month", data_type = :Integer),
+            ParseISP.ColumnSpec(name = "Day", data_type = :Integer),
         ],
         keys = ["Year", "Month", "Day"],
         source_family = :reference_year_traces,
         consumer = :process_traces,
     )
 
-    PISP.register_source_specs!(
+    ParseISP.register_source_specs!(
         ISP2024_CORE_CAPACITY_SOURCE,
         ISP2024_CORE_STORAGE_ENERGY_SOURCE,
         ISP2024_CORE_STORAGE_CAPACITY_SOURCE,
@@ -226,7 +226,7 @@ module ISPdatabuilder
                 file_path       = normpath(outlook_core_path, f)
                 parts           = split(f, " - ")
                 scenario_full   = length(parts) >= 2 ? strip(parts[2]) : ""
-                capacity_df = PISP.read_xlsx_with_header(
+                capacity_df = ParseISP.read_xlsx_with_header(
                     file_path,
                     ISP2024_CORE_CAPACITY_SOURCE,
                 )
@@ -280,7 +280,7 @@ module ISPdatabuilder
                 parts         = split(f, " - ")
                 scenario_full = length(parts) >= 2 ? strip(parts[2]) : ""
 
-                energy_df = PISP.read_xlsx_with_header(
+                energy_df = ParseISP.read_xlsx_with_header(
                     file_path,
                     ISP2024_CORE_STORAGE_ENERGY_SOURCE,
                 )
@@ -288,7 +288,7 @@ module ISPdatabuilder
                 energy_df = filter(row -> any(x -> x isa Number && !ismissing(x), row), energy_df)
                 push!(storage_energy_dfs, energy_df)
 
-                capacity_df = PISP.read_xlsx_with_header(
+                capacity_df = ParseISP.read_xlsx_with_header(
                     file_path,
                     ISP2024_CORE_STORAGE_CAPACITY_SOURCE,
                 )
@@ -303,7 +303,7 @@ module ISPdatabuilder
 
         storage_energy_path   = normpath(outlook_auxiliary_path, "StorageEnergyOutlook_2024_ISP.xlsx")
         storage_capacity_path = normpath(outlook_auxiliary_path, "StorageCapacityOutlook_2024_ISP.xlsx")
-        scenario_labels = collect(keys(PISP.SCE))
+        scenario_labels = collect(keys(ParseISP.SCE))
 
         energy_sheets = Pair{String,Any}[]
         capacity_sheets = Pair{String,Any}[]
@@ -335,7 +335,7 @@ module ISPdatabuilder
     end
 
     function read_rez_capacity(path::AbstractString)
-        return PISP.read_xlsx_with_header(path, ISP2024_CORE_REZ_CAPACITY_SOURCE)
+        return ParseISP.read_xlsx_with_header(path, ISP2024_CORE_REZ_CAPACITY_SOURCE)
     end
 
     function build_rez_capacity_aux(; data_root::AbstractString = DEFAULT_DATA_ROOT)
@@ -362,9 +362,9 @@ module ISPdatabuilder
 
     function process_traces(
         path::AbstractString,
-        source_spec::PISP.CsvSourceSpec = ISP2024_REFERENCE_YEAR_TRACE_SOURCE,
+        source_spec::ParseISP.CsvSourceSpec = ISP2024_REFERENCE_YEAR_TRACE_SOURCE,
     )
-        df = PISP.read_csv_source(path, source_spec)
+        df = ParseISP.read_csv_source(path, source_spec)
         df.date = Date.(df.Year, df.Month, df.Day)
         return df
     end
@@ -424,7 +424,7 @@ module ISPdatabuilder
         poe_int  = Int(poe)
         tech_dir = isdir(joinpath(traces_root, tech)) ? joinpath(traces_root, tech) : traces_root
         base_dir = joinpath(tech_dir, "$(tech)_$(region)_$(scenario)")
-        base_name(y) = "$(region)_RefYear_$(y)_$(PISP.DEMSCE[scenario])_POE$(poe_int)"
+        base_name(y) = "$(region)_RefYear_$(y)_$(ParseISP.DEMSCE[scenario])_POE$(poe_int)"
 
         output_dir = joinpath(tech_dir, "$(tech)_$(region)_$(scenario)")
         mkpath(output_dir)
@@ -433,7 +433,7 @@ module ISPdatabuilder
         output_paths = String[]
 
         for dt in dem_types
-            output_path = joinpath(output_dir, "$(region)_RefYear_4006_$(PISP.DEMSCE[scenario])_POE$(poe_int)_$(dt).csv")
+            output_path = joinpath(output_dir, "$(region)_RefYear_4006_$(ParseISP.DEMSCE[scenario])_POE$(poe_int)_$(dt).csv")
             if isfile(output_path)
                 verbose && @info "Skipping existing 4006 demand trace" path = output_path
                 push!(output_paths, output_path)
@@ -465,9 +465,9 @@ module ISPdatabuilder
         wind_4006_paths  = generate_refyear4006_traces("wind"; traces_root = dirs.traces_dest, years = years, verbose = verbose)
 
         demand_outputs = Dict{Tuple{String,String},Vector{String}}()
-        for region in keys(PISP.NEMBUSNAME)
+        for region in keys(ParseISP.NEMBUSNAME)
             region_str = String(region)
-            for scenario in keys(PISP.DEMSCE)
+            for scenario in keys(ParseISP.DEMSCE)
                 scenario_str = String(scenario)
                 demand_outputs[(region_str, scenario_str)] =
                     generate_refyear4006_demand_traces("demand"; traces_root = dirs.traces_dest,

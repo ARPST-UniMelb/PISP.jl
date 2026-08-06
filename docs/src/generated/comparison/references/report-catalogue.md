@@ -14,13 +14,13 @@ website.
 ```
 
 ````julia
-using PISP
+using ParseISP
 
 const REPO_ROOT = normpath(
-    get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..", "..")),
+    get(ENV, "ParseISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..", "..")),
 )
-include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
-import .PISPDocUtils
+include(joinpath(REPO_ROOT, "docs", "utils", "ParseISPDocUtils.jl"))
+import .ParseISPDocUtils
 
 const REPORT_PDF_ROOT = "../../../../../data"
 
@@ -44,8 +44,8 @@ function inventory_rows(edition, targets)
     ]
 end
 
-targets_2024 = collect(PISP.ISP2024ReportDownloader.report_targets())
-targets_2026 = collect(PISP.ISP2026ReportDownloader.report_targets())
+targets_2024 = collect(ParseISP.ISP2024ReportDownloader.report_targets())
+targets_2026 = collect(ParseISP.ISP2026ReportDownloader.report_targets())
 targets_2024_by_key = Dict(target.key => target for target in targets_2024)
 targets_2026_by_key = Dict(target.key => target for target in targets_2026)
 counterpart_rows = [
@@ -53,7 +53,7 @@ counterpart_rows = [
         counterpart_cell("2024", targets_2024_by_key[key_2024]),
         counterpart_cell("2026", targets_2026_by_key[key_2026]),
     ]
-    for (key_2024, key_2026) in PISPDocUtils.report_counterpart_key_map()
+    for (key_2024, key_2026) in ParseISPDocUtils.report_counterpart_key_map()
 ]
 ````
 
@@ -71,7 +71,7 @@ explicit counterpart remain in the complete edition inventories below.
 ```
 
 ````julia
-PISPDocUtils.markdown_table(
+ParseISPDocUtils.markdown_table(
     ["ISP 2024 report", "ISP 2026 report"],
     counterpart_rows;
     alignment = [:left, :left],
@@ -109,7 +109,7 @@ The order follows `ISP2024ReportDownloader.report_targets()`.
 ```
 
 ````julia
-PISPDocUtils.markdown_table(
+ParseISPDocUtils.markdown_table(
     ["Report title", "Filename"],
     inventory_rows("2024", targets_2024);
     alignment = [:left, :left],
@@ -159,7 +159,7 @@ The order follows `ISP2026ReportDownloader.report_targets()`.
 ```
 
 ````julia
-PISPDocUtils.markdown_table(
+ParseISPDocUtils.markdown_table(
     ["Report title", "Filename"],
     inventory_rows("2026", targets_2026);
     alignment = [:left, :left],
