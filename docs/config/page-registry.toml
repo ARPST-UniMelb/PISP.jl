@@ -370,7 +370,7 @@ related_reference_pages = ["concepts.md", "generated/isp2024/reference/output-ta
 
 [[page]]
 id = "isp2024-working-with-pisp-outputs"
-title = "ISP 2024: Working with PISP-generated outputs"
+title = "ISP 2024: Working with ParseISP-generated outputs"
 kind = "tutorial"
 track = "isp2024"
 editions = ["2024"]
@@ -405,7 +405,7 @@ related_reference_pages = ["generated/isp2024/reference/source-data.md", "editio
 
 [[page]]
 id = "isp2024-temperature-data-coverage"
-title = "ISP 2024: Temperature information and PISP coverage"
+title = "ISP 2024: Temperature information and ParseISP coverage"
 kind = "validation"
 track = "isp2024"
 editions = ["2024"]
