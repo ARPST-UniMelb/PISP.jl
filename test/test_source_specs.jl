@@ -12,18 +12,18 @@ using CSV
 
 source_specs_edition_2024 = only(filter(
     p -> p.edition == "2024",
-    PISPDocUtils.source_availability_profiles(normpath(joinpath(@__DIR__, ".."))),
+    ParseISPDocUtils.source_availability_profiles(normpath(joinpath(@__DIR__, ".."))),
 ))
-source_specs_2024_available = PISPDocUtils.inspect_edition(source_specs_edition_2024).state == :complete
+source_specs_2024_available = ParseISPDocUtils.inspect_edition(source_specs_edition_2024).state == :complete
 
 @testset "source specs: hardcoded 2024 workbook/CSV read contracts" begin
     if !source_specs_2024_available
         @test_skip "2024 pisp-downloads material is absent; source-spec characterization requires the real AEMO workbooks/CSVs"
     else
-        paths = PISP.default_data_paths(filepath=source_specs_edition_2024.download_root)
+        paths = ParseISP.default_data_paths(filepath=source_specs_edition_2024.download_root)
 
         @testset "existing_generators — 2024-isp-inputs-and-assumptions-workbook.xlsx / Existing Gen Data Summary / B11:K297" begin
-            df = PISP.read_xlsx_with_header(paths.ispdata24, "Existing Gen Data Summary", "B11:K297")
+            df = ParseISP.read_xlsx_with_header(paths.ispdata24, "Existing Gen Data Summary", "B11:K297")
             # This range has a blank header row. `read_xlsx_with_header` converts each blank
             # cell to `"missing"` and numbers the duplicate names. The parser reads this
             # table by column position rather than by name.
@@ -35,7 +35,7 @@ source_specs_2024_available = PISPDocUtils.inspect_edition(source_specs_edition_
         end
 
         @testset "network_capability — 2024-isp-inputs-and-assumptions-workbook.xlsx / Network Capability / B6:H21" begin
-            df = PISP.read_xlsx_with_header(paths.ispdata24, "Network Capability", "B6:H21")
+            df = ParseISP.read_xlsx_with_header(paths.ispdata24, "Network Capability", "B6:H21")
             @test names(df) == ["Flow paths\n(Forward power flow direction)",
                                  "Forward direction capability approximation (MW) - Notes 1,2&3",
                                  "missing", "missing_1",
@@ -46,7 +46,7 @@ source_specs_2024_available = PISPDocUtils.inspect_edition(source_specs_edition_
         end
 
         @testset "legacy_min_up_time — 2019-input-and-assumptions-workbook-v1-3-dec-19.xlsx / Generation limits / O9:Q69" begin
-            df = PISP.read_xlsx_with_header(paths.ispdata19, "Generation limits", "O9:Q69")
+            df = ParseISP.read_xlsx_with_header(paths.ispdata19, "Generation limits", "O9:Q69")
             @test names(df) == ["Generator Station", "Generating unit", "Min Up Time (hours)"]
             @test size(df) == (60, 3)
             @test collect(df[1, :]) == Any["Bayswater", "BW01", 8]
@@ -55,7 +55,7 @@ source_specs_2024_available = PISPDocUtils.inspect_edition(source_specs_edition_
 
         @testset "core_capacity_outlook — Core/2024 ISP - Step Change - Core.xlsx / Capacity / A3:AG5000" begin
             file = joinpath(paths.outlookdata, "2024 ISP - Step Change - Core.xlsx")
-            df = PISP.read_xlsx_with_header(file, "Capacity", "A3:AG5000")
+            df = ParseISP.read_xlsx_with_header(file, "Capacity", "A3:AG5000")
             @test size(df) == (4997, 33)
             @test names(df)[1:8] ==
                   ["CDP", "Region", "Subregion", "Technology", "2023-24", "2024-25", "2025-26", "2026-27"]

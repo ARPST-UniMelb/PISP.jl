@@ -36,10 +36,10 @@ function figure_path(script_stem, figure_name; producer = "julia", root = FIGURE
     return joinpath(figure_dir(script_stem; producer = producer, root = root), filename)
 end
 
-# Copies a canonical figure next to the Documenter-generated Markdown page, but only when running through docs/render_literate.jl (which sets PISP_LITERATE_OUTPUT_DIR).
+# Copies a canonical figure next to the Documenter-generated Markdown page, but only when running through docs/render_literate.jl (which sets ParseISP_LITERATE_OUTPUT_DIR).
 # When a Literate source is run standalone, this env var is unset and there is no generated Markdown for an embedded copy to sit next to, so this is a no-op — nothing is ever written beside the Literate source itself.
 function embed_figure(canonical_path, figure_name)
-    output_dir = get(ENV, "PISP_LITERATE_OUTPUT_DIR", nothing)
+    output_dir = get(ENV, "ParseISP_LITERATE_OUTPUT_DIR", nothing)
     output_dir === nothing && return nothing
     embedded_path = joinpath(normpath(output_dir), figure_name)
     cp(canonical_path, embedded_path; force = true)

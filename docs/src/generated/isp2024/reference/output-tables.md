@@ -4,22 +4,22 @@ EditURL = "../../../../literate/isp2024/reference/output_tables.jl"
 
 # ISP 2024: Output tables
 
-A PISP build writes static asset tables once per build and time-varying schedule tables under one or more schedule directories. The tables below list the current output names, identifiers, relationships, and columns.
+A ParseISP build writes static asset tables once per build and time-varying schedule tables under one or more schedule directories. The tables below list the current output names, identifiers, relationships, and columns.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
 ```
 
 ````julia
-using PISP
+using ParseISP
 using DataFrames
 
-const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
+const REPO_ROOT = normpath(get(ENV, "ParseISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
-import .PISPDocUtils
+include(joinpath(REPO_ROOT, "docs", "utils", "ParseISPDocUtils.jl"))
+import .ParseISPDocUtils
 
-const ISP2024_PROFILE = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
+const ISP2024_PROFILE = ParseISPDocUtils.edition_profile(REPO_ROOT, "2024")
 
 
 function container_inventory(container)
@@ -27,7 +27,7 @@ function container_inventory(container)
     for field in fieldnames(typeof(container))
         table = getfield(container, field)
         table isa DataFrame || continue
-        output_name = get(PISP.alt_names, field, string(field))
+        output_name = get(ParseISP.alt_names, field, string(field))
         columns = string.(names(table))
         id_columns = filter(name -> startswith(name, "id"), columns)
         relationship_ids = length(id_columns) > 1 ? id_columns[2:end] : String[]
@@ -45,7 +45,7 @@ function container_inventory(container)
     return DataFrame(rows)
 end
 
-_tc, static_container, schedule_container = PISP.initialise_time_structures();
+_tc, static_container, schedule_container = ParseISP.initialise_time_structures();
 ````
 
 ```@raw html
@@ -62,7 +62,7 @@ Static tables define asset identity and time-invariant attributes. Schedule rows
 
 ````julia
 static_tables = container_inventory(static_container)
-PISPDocUtils.markdown_table(static_tables)
+ParseISPDocUtils.markdown_table(static_tables)
 ````
 
 ```@raw html
@@ -86,9 +86,9 @@ The `Bus` table fixes the spatial resolution of the dataset.
 ```
 
 ````julia
-PISPDocUtils.RawMarkdown(
-    "The static tables represent the NEM as $(length(PISP.NEMBUSES)) sub-regional network " *
-    "nodes spanning the $(length(unique(values(PISP.BUS2AREA)))) NEM regions - Queensland, " *
+ParseISPDocUtils.RawMarkdown(
+    "The static tables represent the NEM as $(length(ParseISP.NEMBUSES)) sub-regional network " *
+    "nodes spanning the $(length(unique(values(ParseISP.BUS2AREA)))) NEM regions - Queensland, " *
     "New South Wales, Victoria, Tasmania, and South Australia - interconnected by the `Line` records.",
 )
 ````
@@ -109,7 +109,7 @@ Schedule tables carry scenario- and time-dependent values. The output filename i
 
 ````julia
 schedule_tables = container_inventory(schedule_container)
-PISPDocUtils.markdown_table(schedule_tables)
+ParseISPDocUtils.markdown_table(schedule_tables)
 ````
 
 ```@raw html
@@ -168,7 +168,7 @@ let live = schedule_tables.output_table
         meaning, unit, relationship = SCHEDULE_SEMANTICS[name]
         push!(rows, "| `$name` | $meaning | $unit | $relationship |")
     end
-    PISPDocUtils.RawMarkdown(join(rows, "\n"))
+    ParseISPDocUtils.RawMarkdown(join(rows, "\n"))
 end
 ````
 
@@ -228,7 +228,7 @@ let asset_columns = Dict(row.output_table => Set(split(row.columns, ", ")) for r
         expression = "`" * join(factors, " × ") * "`"
         push!(rows, "| $asset | $quantity | $expression | $unit |")
     end
-    PISPDocUtils.RawMarkdown(join(rows, "\n"))
+    ParseISPDocUtils.RawMarkdown(join(rows, "\n"))
 end
 ````
 
@@ -371,7 +371,7 @@ function field_glossary(table)
         field in live || error("`$table.$field` is documented but is not a current column")
         push!(rows, "| `$field` | $meaning |")
     end
-    PISPDocUtils.RawMarkdown(join(rows, "\n"))
+    ParseISPDocUtils.RawMarkdown(join(rows, "\n"))
 end
 ````
 

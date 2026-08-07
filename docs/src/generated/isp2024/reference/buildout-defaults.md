@@ -4,25 +4,25 @@ EditURL = "../../../../literate/isp2024/reference/buildout_defaults.jl"
 
 # ISP 2024: Build-out defaults
 
-Optional build-out rows combine a user-supplied workbook with the generator and storage defaults used by PISP.
+Optional build-out rows combine a user-supplied workbook with the generator and storage defaults used by ParseISP.
 The workbook supplies the technology, subregion, capacity, build year, and unit count.
-PISP uses the selected template to complete the static asset row and create the corresponding unit-count schedule.
+ParseISP uses the selected template to complete the static asset row and create the corresponding unit-count schedule.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
 ```
 
 ````julia
-using PISP
+using ParseISP
 using DataFrames
 
-const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
+const REPO_ROOT = normpath(get(ENV, "ParseISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
-import .PISPDocUtils
+include(joinpath(REPO_ROOT, "docs", "utils", "ParseISPDocUtils.jl"))
+import .ParseISPDocUtils
 
-const BUILDOUT_PARSER = joinpath(REPO_ROOT, "src", "parsers", "PISP-2024buildout.jl")
-PISPDocUtils.validate_buildout_defaults_contract(BUILDOUT_PARSER)
+const BUILDOUT_PARSER = joinpath(REPO_ROOT, "src", "parsers", "ParseISP-2024buildout.jl")
+ParseISPDocUtils.validate_buildout_defaults_contract(BUILDOUT_PARSER)
 ````
 
 ```@raw html
@@ -32,22 +32,22 @@ PISPDocUtils.validate_buildout_defaults_contract(BUILDOUT_PARSER)
 ## Parameter sources
 
 The build-out workbook is user-supplied and is separate from AEMO's ISP workbooks.
-Stored template values are classified as `ISP workbook`, `Published report`, or `PISP default`.
-`PISP default` denotes a value currently maintained in PISP whose upstream workbook or report source has not yet been identified.
+Stored template values are classified as `ISP workbook`, `Published report`, or `ParseISP default`.
+`ParseISP default` denotes a value currently maintained in ParseISP whose upstream workbook or report source has not yet been identified.
 
 Field meanings and units are defined in the [output tables](output-tables.md).
 
 ## Supported build-out technology labels
 
-A workbook label selects one PISP template. Storage labels also select the duration used to calculate `ESS.emax`.
+A workbook label selects one ParseISP template. Storage labels also select the duration used to calculate `ESS.emax`.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
 ```
 
 ````julia
-reference_tables = PISPDocUtils.buildout_reference_tables()
-PISPDocUtils.markdown_table(reference_tables.technology; allow_markdown_in_cells = true)
+reference_tables = ParseISPDocUtils.buildout_reference_tables()
+ParseISPDocUtils.markdown_table(reference_tables.technology; allow_markdown_in_cells = true)
 ````
 
 ```@raw html
@@ -69,14 +69,14 @@ PISPDocUtils.markdown_table(reference_tables.technology; allow_markdown_in_cells
 
 ## How a build-out row is assembled
 
-PISP does not copy a complete static row from the workbook. Each output field is supplied by the build-out workbook, generated or looked up, calculated explicitly, or read from the selected stored defaults.
+ParseISP does not copy a complete static row from the workbook. Each output field is supplied by the build-out workbook, generated or looked up, calculated explicitly, or read from the selected stored defaults.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
 ```
 
 ````julia
-PISPDocUtils.markdown_table(reference_tables.origins; allow_markdown_in_cells = true)
+ParseISPDocUtils.markdown_table(reference_tables.origins; allow_markdown_in_cells = true)
 ````
 
 ```@raw html
@@ -86,15 +86,15 @@ PISPDocUtils.markdown_table(reference_tables.origins; allow_markdown_in_cells = 
 | **output** | **field_group** | **rule** |
 |:--|:--|:--|
 | ESS static row | Build-out workbook | `tech`, `subregion`, and `capacity` select, locate, and size the asset. |
-| ESS static row | Generated or looked up | PISP generates `id_ess`, `name`, and `alias`, and resolves `id_bus` from the subregion. |
+| ESS static row | Generated or looked up | ParseISP generates `id_ess`, `name`, and `alias`, and resolves `id_bus` from the subregion. |
 | ESS static row | Calculated or explicit | `emax = duration_h × capacity`; `pmax = capacity`; `lmax = capacity`; coordinates are `0.0`. |
-| ESS static row | Stored default | The 27 non-placeholder fields listed below come from `PISP.params_buildout_bess`. |
-| ESS unit-count schedule | Build-out workbook and generated | The workbook supplies `year` and `n`; PISP adds scenario IDs, row IDs, and `DateTime(year, 1, 1)`. |
+| ESS static row | Stored default | The 27 non-placeholder fields listed below come from `ParseISP.params_buildout_bess`. |
+| ESS unit-count schedule | Build-out workbook and generated | The workbook supplies `year` and `n`; ParseISP adds scenario IDs, row IDs, and `DateTime(year, 1, 1)`. |
 | Generator static row | Build-out workbook | `tech`, `subregion`, and `capacity` select, locate, and size the asset. |
-| Generator static row | Generated or looked up | PISP generates `id_gen`, `name`, and `alias`, and resolves `id_bus` from the subregion. |
+| Generator static row | Generated or looked up | ParseISP generates `id_gen`, `name`, and `alias`, and resolves `id_bus` from the subregion. |
 | Generator static row | Calculated or explicit | `pmax = capacity`; coordinates are `0.0`. |
-| Generator static row | Stored default | The 40 non-placeholder fields listed below come from `PISP.params_buildout_gen`. |
-| Generator unit-count schedule | Build-out workbook and generated | The workbook supplies `year` and `n`; PISP adds scenario IDs, row IDs, and `DateTime(year, 1, 1)`. |
+| Generator static row | Stored default | The 40 non-placeholder fields listed below come from `ParseISP.params_buildout_gen`. |
+| Generator unit-count schedule | Build-out workbook and generated | The workbook supplies `year` and `n`; ParseISP adds scenario IDs, row IDs, and `DateTime(year, 1, 1)`. |
 
 
 ## Template placeholders and applied rules
@@ -106,7 +106,7 @@ PISPDocUtils.markdown_table(reference_tables.origins; allow_markdown_in_cells = 
 ```
 
 ````julia
-PISPDocUtils.markdown_table(reference_tables.placeholders; allow_markdown_in_cells = true)
+ParseISPDocUtils.markdown_table(reference_tables.placeholders; allow_markdown_in_cells = true)
 ````
 
 ```@raw html
@@ -119,7 +119,7 @@ PISPDocUtils.markdown_table(reference_tables.placeholders; allow_markdown_in_cel
 | ESS | `capacity` | Read from the build-out workbook. |
 | ESS | `emax` | Computed as duration in hours multiplied by workbook capacity. |
 | ESS | `id_bus` | Looked up from the workbook subregion in the current bus table. |
-| ESS | `id_ess` | Sequential identifier generated by PISP. |
+| ESS | `id_ess` | Sequential identifier generated by ParseISP. |
 | ESS | `latitude` | Set explicitly to `0.0` by the build-out parser. |
 | ESS | `lmax` | Set to workbook capacity. |
 | ESS | `longitude` | Set explicitly to `0.0` by the build-out parser. |
@@ -128,7 +128,7 @@ PISPDocUtils.markdown_table(reference_tables.placeholders; allow_markdown_in_cel
 | Generator | `alias` | Set equal to the generated name. |
 | Generator | `capacity` | Read from the build-out workbook. |
 | Generator | `id_bus` | Looked up from the workbook subregion in the current bus table. |
-| Generator | `id_gen` | Sequential identifier generated by PISP. |
+| Generator | `id_gen` | Sequential identifier generated by ParseISP. |
 | Generator | `latitude` | Set explicitly to `0.0` by the build-out parser. |
 | Generator | `longitude` | Set explicitly to `0.0` by the build-out parser. |
 | Generator | `name` | Generated as `uppercase(tech * "_" * subregion) * "_NEW"`. |
@@ -137,7 +137,7 @@ PISPDocUtils.markdown_table(reference_tables.placeholders; allow_markdown_in_cel
 
 ## Storage defaults
 
-These fields are written from the selected entry in `PISP.params_buildout_bess` to every new `ESS` static row.
+These fields are written from the selected entry in `ParseISP.params_buildout_bess` to every new `ESS` static row.
 The static `n = 0` value is distinct from the time-varying unit count supplied by the workbook.
 
 ### Defaults shared by every storage template
@@ -147,7 +147,7 @@ The static `n = 0` value is distinct from the time-varying unit count supplied b
 ```
 
 ````julia
-PISPDocUtils.markdown_table(reference_tables.ess_common; allow_markdown_in_cells = true)
+ParseISPDocUtils.markdown_table(reference_tables.ess_common; allow_markdown_in_cells = true)
 ````
 
 ```@raw html
@@ -156,27 +156,27 @@ PISPDocUtils.markdown_table(reference_tables.ess_common; allow_markdown_in_cells
 
 | **field** | **value** | **source** |
 |:--|--:|:--|
-| `investment` | 0.0 | PISP default |
-| `active` | 1.0 | PISP default |
-| `eini` | 0.0 | PISP default |
-| `emin` | 0.0 | PISP default |
-| `pmin` | 0.0 | PISP default |
-| `lmin` | 0.0 | PISP default |
-| `partialout` | 0.0 | PISP default |
-| `mttrpart` | 1.0 | PISP default |
-| `inertia` | 0.0 | PISP default |
-| `powerfactor` | 1.0 | PISP default |
-| `ffr` | 1.0 | PISP default |
-| `pfr` | 0.0 | PISP default |
-| `res2` | 1.0 | PISP default |
-| `res3` | 0.0 | PISP default |
-| `fr_db` | 0.0 | PISP default |
-| `fr_ad` | 0.3 | PISP default |
-| `fr_dt` | 0.05 | PISP default |
-| `fr_frt` | 1000.0 | PISP default |
-| `fr_fr` | 70.0 | PISP default |
-| `n` | 0.0 | PISP default |
-| `contingency` | 0.0 | PISP default |
+| `investment` | 0.0 | ParseISP default |
+| `active` | 1.0 | ParseISP default |
+| `eini` | 0.0 | ParseISP default |
+| `emin` | 0.0 | ParseISP default |
+| `pmin` | 0.0 | ParseISP default |
+| `lmin` | 0.0 | ParseISP default |
+| `partialout` | 0.0 | ParseISP default |
+| `mttrpart` | 1.0 | ParseISP default |
+| `inertia` | 0.0 | ParseISP default |
+| `powerfactor` | 1.0 | ParseISP default |
+| `ffr` | 1.0 | ParseISP default |
+| `pfr` | 0.0 | ParseISP default |
+| `res2` | 1.0 | ParseISP default |
+| `res3` | 0.0 | ParseISP default |
+| `fr_db` | 0.0 | ParseISP default |
+| `fr_ad` | 0.3 | ParseISP default |
+| `fr_dt` | 0.05 | ParseISP default |
+| `fr_frt` | 1000.0 | ParseISP default |
+| `fr_fr` | 70.0 | ParseISP default |
+| `n` | 0.0 | ParseISP default |
+| `contingency` | 0.0 | ParseISP default |
 
 
 ### Defaults that vary by storage technology
@@ -188,7 +188,7 @@ Source of each varying field:
 ```
 
 ````julia
-PISPDocUtils.markdown_table(reference_tables.ess_varying_fields; allow_markdown_in_cells = true)
+ParseISPDocUtils.markdown_table(reference_tables.ess_varying_fields; allow_markdown_in_cells = true)
 ````
 
 ```@raw html
@@ -197,8 +197,8 @@ PISPDocUtils.markdown_table(reference_tables.ess_varying_fields; allow_markdown_
 
 | **field** | **source** |
 |:--|:--|
-| `tech` | PISP default |
-| `type` | PISP default |
+| `tech` | ParseISP default |
+| `type` | ParseISP default |
 | `ch_eff` | ISP workbook — Storage properties |
 | `dch_eff` | ISP workbook — Storage properties |
 | `fullout` | ISP workbook — Generator Reliability Settings |
@@ -212,7 +212,7 @@ Value of each varying field by storage technology:
 ```
 
 ````julia
-PISPDocUtils.markdown_table(reference_tables.ess_varying_values; allow_markdown_in_cells = true)
+ParseISPDocUtils.markdown_table(reference_tables.ess_varying_values; allow_markdown_in_cells = true)
 ````
 
 ```@raw html
@@ -231,7 +231,7 @@ PISPDocUtils.markdown_table(reference_tables.ess_varying_values; allow_markdown_
 
 ## Generator defaults
 
-These fields are written from the selected entry in `PISP.params_buildout_gen` to every new `Generator` static row.
+These fields are written from the selected entry in `ParseISP.params_buildout_gen` to every new `Generator` static row.
 The static `n = 0` value is distinct from the time-varying unit count supplied by the workbook.
 
 ### Defaults shared by every generator template
@@ -241,7 +241,7 @@ The static `n = 0` value is distinct from the time-varying unit count supplied b
 ```
 
 ````julia
-PISPDocUtils.markdown_table(reference_tables.gen_common; allow_markdown_in_cells = true)
+ParseISPDocUtils.markdown_table(reference_tables.gen_common; allow_markdown_in_cells = true)
 ````
 
 ```@raw html
@@ -250,31 +250,31 @@ PISPDocUtils.markdown_table(reference_tables.gen_common; allow_markdown_in_cells
 
 | **field** | **value** | **source** |
 |:--|:--|:--|
-| `fuel` | Natural Gas | PISP default |
-| `partialout` | 0.0 | PISP default |
-| `derate` | 0.0 | PISP default |
-| `mttrpart` | 0.0 | PISP default |
+| `fuel` | Natural Gas | ParseISP default |
+| `partialout` | 0.0 | ParseISP default |
+| `derate` | 0.0 | ParseISP default |
+| `mttrpart` | 0.0 | ParseISP default |
 | `rup` | 22.0 | ISP workbook — Max Ramp Rates |
 | `rdw` | 22.0 | ISP workbook — Max Ramp Rates |
-| `investment` | 0 | PISP default |
-| `active` | 1 | PISP default |
-| `pfrmax` | 0.1 | PISP default |
-| `g` | 0.0 | PISP default |
-| `inertia` | 4.0 | PISP default |
-| `ffr` | 0 | PISP default |
-| `pfr` | 1 | PISP default |
-| `res2` | 1 | PISP default |
-| `res3` | 0 | PISP default |
-| `powerfactor` | 0.85 | PISP default |
-| `n` | 0 | PISP default |
-| `contingency` | 1 | PISP default |
-| `last_state` | 0.0 | PISP default |
-| `last_state_period` | 0.0 | PISP default |
-| `last_state_output` | 0.0 | PISP default |
-| `start_up_cost` | 0.0 | PISP default |
-| `shut_down_cost` | 0.0 | PISP default |
-| `start_up_time` | 0.0 | PISP default |
-| `shut_down_time` | 0.0 | PISP default |
+| `investment` | 0 | ParseISP default |
+| `active` | 1 | ParseISP default |
+| `pfrmax` | 0.1 | ParseISP default |
+| `g` | 0.0 | ParseISP default |
+| `inertia` | 4.0 | ParseISP default |
+| `ffr` | 0 | ParseISP default |
+| `pfr` | 1 | ParseISP default |
+| `res2` | 1 | ParseISP default |
+| `res3` | 0 | ParseISP default |
+| `powerfactor` | 0.85 | ParseISP default |
+| `n` | 0 | ParseISP default |
+| `contingency` | 1 | ParseISP default |
+| `last_state` | 0.0 | ParseISP default |
+| `last_state_period` | 0.0 | ParseISP default |
+| `last_state_output` | 0.0 | ParseISP default |
+| `start_up_cost` | 0.0 | ParseISP default |
+| `shut_down_cost` | 0.0 | ParseISP default |
+| `start_up_time` | 0.0 | ParseISP default |
+| `shut_down_time` | 0.0 | ParseISP default |
 
 
 ### Defaults that vary by generator technology
@@ -284,7 +284,7 @@ PISPDocUtils.markdown_table(reference_tables.gen_common; allow_markdown_in_cells
 ```
 
 ````julia
-PISPDocUtils.markdown_table(reference_tables.gen_varying; allow_markdown_in_cells = true)
+ParseISPDocUtils.markdown_table(reference_tables.gen_varying; allow_markdown_in_cells = true)
 ````
 
 ```@raw html
@@ -293,26 +293,26 @@ PISPDocUtils.markdown_table(reference_tables.gen_varying; allow_markdown_in_cell
 
 | **field** | **source** | **ccgt** | **ocgt_l** | **ocgt_s** |
 |:--|:--|:--|:--|:--|
-| `tech` | PISP default | CCGT | OCGT | OCGT |
-| `type` | PISP default | CCGT | OCGT | OCGT |
+| `tech` | ParseISP default | CCGT | OCGT | OCGT |
+| `type` | ParseISP default | CCGT | OCGT | OCGT |
 | `forate` | ISP workbook — Generator Reliability Settings (derived) | 0.965 | 0.98 | 0.98 |
 | `fullout` | ISP workbook — Generator Reliability Settings | 0.035 | 0.02 | 0.02 |
 | `mttrfull` | ISP workbook — Generator Reliability Settings | 54.0 | 22.0 | 75.0 |
-| `pmin` | PISP default | 46.0 | 0.0 | 0.0 |
+| `pmin` | ParseISP default | 46.0 | 0.0 | 0.0 |
 | `cvar` | ISP workbook — New Entrant Data Summary | 118.123 | 192.876 | 185.356 |
 | `cfuel` | ISP workbook — New Entrant Data Summary | 15.7488 | 16.9304 | 16.9304 |
 | `cvom` | ISP workbook — New Entrant Data Summary | 3.95641 | 7.80589 | 12.8316 |
 | `cfom` | ISP workbook — New Entrant Data Summary | 11655.4 | 10906.9 | 13473.2 |
 | `co2` | ISP workbook — New Entrant Data Summary | 173.502 | 266.905 | 248.812 |
-| `slope` | PISP default | 0.4 | 0.6 | 0.6 |
+| `slope` | ParseISP default | 0.4 | 0.6 | 0.6 |
 | `hrate` | ISP workbook — New Entrant Data Summary | 7.24923 | 10.9312 | 10.1902 |
-| `down_time` | PISP default | 4.0 | 0.0 | 0.0 |
-| `up_time` | PISP default | 4.0 | 0.0 | 0.0 |
+| `down_time` | ParseISP default | 4.0 | 0.0 | 0.0 |
+| `up_time` | ParseISP default | 4.0 | 0.0 | 0.0 |
 
 
 ## Override and derivation rules
 
-The workbook cannot override stored defaults directly. Changing one requires changing PISP's build-out parameter dictionaries.
+The workbook cannot override stored defaults directly. Changing one requires changing ParseISP's build-out parameter dictionaries.
 Capacity affects `capacity`, `pmax`, and, for storage, `lmax` and `emax`; subregion affects `id_bus`; year and `n` affect only the unit-count schedule.
 Uniform mode applies one workbook sheet to every ISP scenario. Scenario-specific mode reads one sheet per scenario, unions static assets by generated name, and keeps each scenario's unit-count schedule separate.
 

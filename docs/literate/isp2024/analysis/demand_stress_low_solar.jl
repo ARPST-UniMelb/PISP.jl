@@ -1,14 +1,14 @@
 # # ISP 2024: Demand stress and low-solar coincidence
 #
 # High demand can coincide with low renewable availability, but that relationship depends on aligned dates, explicit thresholds, and a precise event definition.
-# The analysis combines the Victorian demand schedule from the selected `schedule-2030` PISP output with the Bannerton reference-trace `4006` solar series.
+# The analysis combines the Victorian demand schedule from the selected `schedule-2030` ParseISP output with the Bannerton reference-trace `4006` solar series.
 #
 # ## Definitions and data
 #
 # | Item | Definition |
 # |---|---|
 # | ISP edition | ISP 2024 |
-# | Demand evidence | Generated PISP demand schedule, POE10 premise, Victorian area `3` |
+# | Demand evidence | Generated ParseISP demand schedule, POE10 premise, Victorian area `3` |
 # | Solar evidence | Raw `4006` trace for `Bannerton_SAT` |
 # | Time aggregation | Half-hourly inputs reduced to daily mean demand and daily mean solar capacity factor |
 # | Coincidence screen | Demand above P90 and solar capacity factor below P10 within the matched sample |
@@ -27,24 +27,24 @@ using Plots
 
 gr();
 
-const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
+const REPO_ROOT = normpath(get(ENV, "ParseISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
-import .PISPDocUtils
+include(joinpath(REPO_ROOT, "docs", "utils", "ParseISPDocUtils.jl"))
+import .ParseISPDocUtils
 
 const SCRIPT_STEM = "isp2024_07_demand_heat_events"
 # The historical evidence and figure basenames retain `heat` for compatibility.
 # Reader-facing terminology and executable variables use `demand_stress` because no meteorological heatwave criterion is applied.
-const ISP2024_PROFILE = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
+const ISP2024_PROFILE = ParseISPDocUtils.edition_profile(REPO_ROOT, "2024")
 const TRACES = relpath(joinpath(ISP2024_PROFILE.download_root, "Traces"), REPO_ROOT)  # kept relative: this is the path form recorded in the tables below
 const OUTPUT_ROOT = ISP2024_PROFILE.output_root
 OUTPUT_ROOT === nothing && error(
-    "ISP 2024 profile does not define output_root; set PISP_DOCS_ISP2024_OUTPUT_ROOT to select a local output build.",
+    "ISP 2024 profile does not define output_root; set ParseISP_DOCS_ISP2024_OUTPUT_ROOT to select a local output build.",
 )
 const OUT = relpath(OUTPUT_ROOT, REPO_ROOT)  # kept relative, same reason
 const SCHEDULE_TAG = ISP2024_PROFILE.schedule_tag
 SCHEDULE_TAG === nothing && error(
-    "ISP 2024 profile does not define schedule_tag; set PISP_DOCS_ISP2024_SCHEDULE_TAG to select a local schedule.",
+    "ISP 2024 profile does not define schedule_tag; set ParseISP_DOCS_ISP2024_SCHEDULE_TAG to select a local schedule.",
 )
 
 abs_path(relative_path) = joinpath(REPO_ROOT, relative_path)  # resolves a TRACES/OUT-relative path to an absolute file location for reading
@@ -83,12 +83,12 @@ dem_files = sort(filter(name -> endswith(name, "_POE10_OPSO_MODELLING.csv"), rea
 println("Found $(length(dem_files)) demand trace files")
 
 demand_trace_inventory = DataFrame(file = dem_files)
-PISPDocUtils.write_table(demand_trace_inventory, SCRIPT_STEM, "demand_trace_inventory")
-PISPDocUtils.markdown_table(demand_trace_inventory)
+ParseISPDocUtils.write_table(demand_trace_inventory, SCRIPT_STEM, "demand_trace_inventory")
+ParseISPDocUtils.markdown_table(demand_trace_inventory)
 
 # ## Regional demand construction
 #
-# The PISP model output records each network node's half-hourly demand schedule and its bus, and each bus's NEM area; joining these mappings supports daily mean demand by area. The complete daily-by-area table is written to `demand_by_area_daily.csv`, and the table below summarises each area.
+# The ParseISP model output records each network node's half-hourly demand schedule and its bus, and each bus's NEM area; joining these mappings supports daily mean demand by area. The complete daily-by-area table is written to `demand_by_area_daily.csv`, and the table below summarises each area.
 
 dem_load = CSV.read(abs_path(joinpath(OUT, SCHEDULE_TAG, "Demand_load_sched.csv")), DataFrame)
 dem_df = CSV.read(abs_path(joinpath(OUT, "Demand.csv")), DataFrame)
@@ -102,7 +102,7 @@ dem_load.date_only = Date.(dem_load.date)
 
 dem_daily = combine(groupby(dem_load, [:date_only, :area]), :value => mean => :demand_mw)
 rename!(dem_daily, :date_only => :date)
-PISPDocUtils.write_table(dem_daily, SCRIPT_STEM, "demand_by_area_daily")
+ParseISPDocUtils.write_table(dem_daily, SCRIPT_STEM, "demand_by_area_daily")
 
 area_demand_summary = combine(
     groupby(dem_daily, :area),
@@ -112,7 +112,7 @@ area_demand_summary = combine(
     nrow => :n_days,
 )
 sort!(area_demand_summary, :area)
-PISPDocUtils.markdown_table(area_demand_summary)
+ParseISPDocUtils.markdown_table(area_demand_summary)
 
 # ## Representative Victorian solar input
 #
@@ -146,7 +146,7 @@ if haskey(sol_4006, "Bannerton_SAT")
         haskey(cf_of_date, row.date_only) || continue
         push!(merged, (date = row.date_only, demand = row.demand, solar_cf = cf_of_date[row.date_only]))
     end
-    PISPDocUtils.write_table(merged, SCRIPT_STEM, "vic_demand_solar_merged")
+    ParseISPDocUtils.write_table(merged, SCRIPT_STEM, "vic_demand_solar_merged")
 end
 
 merged_summary = DataFrame(
@@ -160,7 +160,7 @@ merged_summary = DataFrame(
     solar_cf_min = isempty(merged.solar_cf) ? missing : minimum(merged.solar_cf),
     solar_cf_max = isempty(merged.solar_cf) ? missing : maximum(merged.solar_cf),
 )
-PISPDocUtils.metric_value_table([
+ParseISPDocUtils.metric_value_table([
     "Matched days" => merged_summary.matched_days[1],
     "First date" => merged_summary.date_min[1],
     "Last date" => merged_summary.date_max[1],
@@ -191,8 +191,8 @@ if haskey(sol_4006, "Bannerton_SAT")
         bad_day_count = nrow(bad_days),
         total_day_count = nrow(merged),
     )
-    PISPDocUtils.write_table(high_demand_low_solar_summary, SCRIPT_STEM, "high_demand_low_solar_summary")
-    PISPDocUtils.metric_value_table([
+    ParseISPDocUtils.write_table(high_demand_low_solar_summary, SCRIPT_STEM, "high_demand_low_solar_summary")
+    ParseISPDocUtils.metric_value_table([
         "Demand quantile" => high_demand_low_solar_summary.demand_quantile[1],
         "Solar quantile" => high_demand_low_solar_summary.solar_quantile[1],
         "Demand threshold (MW)" => high_demand_low_solar_summary.threshold_demand_mw[1],
@@ -234,8 +234,8 @@ stress_normal_hourly_profile = DataFrame(
     demand_stress_mean_demand_mw = [get(demand_stress_hourly, h, missing) for h in 0:23],
     normal_mean_demand_mw = [get(normal_hourly, h, missing) for h in 0:23],
 )
-PISPDocUtils.write_table(stress_normal_hourly_profile, SCRIPT_STEM, "heat_normal_hourly_profile")
-PISPDocUtils.markdown_table(stress_normal_hourly_profile)
+ParseISPDocUtils.write_table(stress_normal_hourly_profile, SCRIPT_STEM, "heat_normal_hourly_profile")
+ParseISPDocUtils.markdown_table(stress_normal_hourly_profile)
 
 # ## Demand duration evidence
 #
@@ -243,7 +243,7 @@ PISPDocUtils.markdown_table(stress_normal_hourly_profile)
 
 sorted_demand = sort(vic_daily.demand; rev = true)
 demand_duration_curve = DataFrame(day_rank = 1:length(sorted_demand), demand_mw = sorted_demand)
-PISPDocUtils.write_table(demand_duration_curve, SCRIPT_STEM, "demand_duration_curve")
+ParseISPDocUtils.write_table(demand_duration_curve, SCRIPT_STEM, "demand_duration_curve")
 
 duration_curve_quantile_marks = DataFrame(
     quantile_label = ["max", "p95", "p90", "p75", "median", "p25", "min"],
@@ -257,7 +257,7 @@ duration_curve_quantile_marks = DataFrame(
         minimum(vic_daily.demand),
     ],
 )
-PISPDocUtils.markdown_table(duration_curve_quantile_marks)
+ParseISPDocUtils.markdown_table(duration_curve_quantile_marks)
 
 # ## Normalised demand and solar comparison
 #
@@ -270,13 +270,13 @@ if nrow(merged) > 0
         demand_norm = merged_sorted.demand ./ maximum(merged_sorted.demand),
         solar_norm = merged_sorted.solar_cf ./ maximum(merged_sorted.solar_cf),
     )
-    PISPDocUtils.write_table(normalized_vre_demand_summary, SCRIPT_STEM, "normalized_vre_demand_summary")
+    ParseISPDocUtils.write_table(normalized_vre_demand_summary, SCRIPT_STEM, "normalized_vre_demand_summary")
 
     normalized_demand_solar_correlation = DataFrame(
         day_count = nrow(normalized_vre_demand_summary),
         demand_solar_correlation = cor(normalized_vre_demand_summary.demand_norm, normalized_vre_demand_summary.solar_norm),
     )
-    PISPDocUtils.markdown_table(normalized_demand_solar_correlation)
+    ParseISPDocUtils.markdown_table(normalized_demand_solar_correlation)
 end
 
 # ## Key demand statistics
@@ -313,8 +313,8 @@ if haskey(sol_4006, "Bannerton_SAT")
         solar_cf = stress_day_cfs,
         mean_solar_cf_top10 = fill(mean_cf, length(stress_day_cfs)),
     )
-    PISPDocUtils.write_table(stress_day_solar_cf_detail, SCRIPT_STEM, "hot_day_solar_cf_detail")
-    PISPDocUtils.markdown_table(stress_day_solar_cf_detail)
+    ParseISPDocUtils.write_table(stress_day_solar_cf_detail, SCRIPT_STEM, "hot_day_solar_cf_detail")
+    ParseISPDocUtils.markdown_table(stress_day_solar_cf_detail)
 end
 
 # ## Threshold and event-count summary
@@ -332,8 +332,8 @@ demand_stress_event_summary = DataFrame(
     peak_date = peak_row.date_only,
     mean_demand_mw = mean(vic_daily.demand),
 )
-PISPDocUtils.write_table(demand_stress_event_summary, SCRIPT_STEM, "demand_heat_event_summary")
-PISPDocUtils.metric_value_table([
+ParseISPDocUtils.write_table(demand_stress_event_summary, SCRIPT_STEM, "demand_heat_event_summary")
+ParseISPDocUtils.metric_value_table([
     "Total days" => demand_stress_event_summary.total_days[1],
     "Demand P90 (MW)" => demand_stress_event_summary.demand_p90_mw[1],
     "Demand P95 (MW)" => demand_stress_event_summary.demand_p95_mw[1],
@@ -372,9 +372,9 @@ plot!(p1[2], vic_dem_dates, vic_rolling, color=:black, linewidth=2, label="7-day
 plot!(p1[2], title="2030 VIC Daily Mean Demand (MW)", xlabel="Date", ylabel="Demand (MW)",
       legend=:topright, grid=true, gridalpha=0.3)
 
-savefig(p1, PISPDocUtils.figure_path(SCRIPT_STEM, "07_vic_demand_solar_4006.png"))
+savefig(p1, ParseISPDocUtils.figure_path(SCRIPT_STEM, "07_vic_demand_solar_4006.png"))
 println("Saved: 07_vic_demand_solar_4006.png")
-PISPDocUtils.embed_figure(PISPDocUtils.figure_path(SCRIPT_STEM, "07_vic_demand_solar_4006.png"), "07_vic_demand_solar_4006.png")
+ParseISPDocUtils.embed_figure(ParseISPDocUtils.figure_path(SCRIPT_STEM, "07_vic_demand_solar_4006.png"), "07_vic_demand_solar_4006.png")
 nothing #hide
 
 # ![VIC daily solar capacity factor and daily mean demand over the full period, each with a 7-day rolling average](07_vic_demand_solar_4006.png)
@@ -398,9 +398,9 @@ if nrow(merged) > 0
             label="High demand (>$(round(Int, threshold_demand)) MW) + Low solar (<$(round(threshold_solar, digits=3)) CF)")
 end
 
-savefig(p2, PISPDocUtils.figure_path(SCRIPT_STEM, "07_demand_vs_solar_scatter.png"))
+savefig(p2, ParseISPDocUtils.figure_path(SCRIPT_STEM, "07_demand_vs_solar_scatter.png"))
 println("Saved: 07_demand_vs_solar_scatter.png")
-PISPDocUtils.embed_figure(PISPDocUtils.figure_path(SCRIPT_STEM, "07_demand_vs_solar_scatter.png"), "07_demand_vs_solar_scatter.png")
+ParseISPDocUtils.embed_figure(ParseISPDocUtils.figure_path(SCRIPT_STEM, "07_demand_vs_solar_scatter.png"), "07_demand_vs_solar_scatter.png")
 nothing #hide
 
 # ![VIC daily demand plotted against Bannerton solar capacity factor, with high-demand/low-solar days highlighted](07_demand_vs_solar_scatter.png)
@@ -460,9 +460,9 @@ if nrow(merged) > 0
           grid=true, gridalpha=0.3)
 end
 
-savefig(p3, PISPDocUtils.figure_path(SCRIPT_STEM, "07_demand_heat_events.png"))
+savefig(p3, ParseISPDocUtils.figure_path(SCRIPT_STEM, "07_demand_heat_events.png"))
 println("Saved: 07_demand_heat_events.png")
-PISPDocUtils.embed_figure(PISPDocUtils.figure_path(SCRIPT_STEM, "07_demand_heat_events.png"), "07_demand_heat_events.png")
+ParseISPDocUtils.embed_figure(ParseISPDocUtils.figure_path(SCRIPT_STEM, "07_demand_heat_events.png"), "07_demand_heat_events.png")
 nothing #hide
 
 # ![Hourly demand-stress versus normal-day profile, demand duration curve, month-by-hour demand heatmap, and normalised demand-solar comparison](07_demand_heat_events.png)

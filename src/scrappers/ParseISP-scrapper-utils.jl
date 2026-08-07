@@ -1,4 +1,4 @@
-module PISPScrapperUtils
+module ParseISPScrapperUtils
 
     using HTTP
     using Downloads

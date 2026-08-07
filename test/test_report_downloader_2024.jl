@@ -2,8 +2,8 @@
 # overwrite / failure handling (mocked download function, no network).
 
 @testset "ISP 2024 report downloader" begin
-    core = PISP.ISPReportDownloader
-    report_downloader = PISP.ISP2024ReportDownloader
+    core = ParseISP.ISPReportDownloader
+    report_downloader = ParseISP.ISP2024ReportDownloader
     targets = report_downloader.report_targets()
     expected_targets = [
         (:plexos_model_instructions, "2024 ISP PLEXOS Model Instructions", "2024-isp-plexos-model-instructions.pdf", "https://www.aemo.com.au/-/media/files/major-publications/isp/2024/supporting-materials/2024-isp-plexos-model-instructions.pdf?la=en"),
@@ -35,10 +35,10 @@
         (:aurecon_2022_cost_and_technical_parameter_review, "Aurecon 2022 Costs and Technical Parameters Review", "aurecon-2022-cost-and-technical-parameter-review.pdf", "https://www.aemo.com.au/-/media/files/stakeholder_consultation/consultations/nem-consultations/2022/2023-inputs-assumptions-and-scenarios-consultation/supporting-materials-for-2023/aurecon-2022-cost-and-technical-parameter-review.pdf"),
     ]
 
-    @test isdefined(PISP, :download_ISP24_reports)
-    @test PISP.download_ISP24_reports === report_downloader.download_reports
-    @test !isdefined(PISP, :download_isp_reports)
-    @test !isdefined(PISP, :download_isp2026_reports)
+    @test isdefined(ParseISP, :download_ISP24_reports)
+    @test ParseISP.download_ISP24_reports === report_downloader.download_reports
+    @test !isdefined(ParseISP, :download_isp_reports)
+    @test !isdefined(ParseISP, :download_isp2026_reports)
     @test targets isa Tuple
     @test [(target.key, target.title, target.filename, target.url) for target in targets] == expected_targets
     @test all(target -> endswith(lowercase(target.filename), ".pdf"), targets)
@@ -49,7 +49,7 @@
             write(joinpath(outdir, target.filename), "%PDF-1.7\nexisting")
         end
 
-        @test PISP.download_ISP24_reports(outdir=outdir) === nothing
+        @test ParseISP.download_ISP24_reports(outdir=outdir) === nothing
     end
 
     mktempdir() do outdir
@@ -92,7 +92,7 @@
         @test result.paths == [destination]
         @test isempty(result.failures)
         @test calls[] == 1
-        @test received_headers[] == PISP.PISPScrapperUtils.DEFAULT_FILE_HEADERS
+        @test received_headers[] == ParseISP.ParseISPScrapperUtils.DEFAULT_FILE_HEADERS
         @test read(destination, String) == "%PDF-1.7\nreplacement"
         @test readdir(outdir) == [target.filename]
     end

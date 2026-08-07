@@ -1,4 +1,4 @@
-# Mapping of PISP generator id (hydro) to Hydro files (4006)
+# Mapping of ParseISP generator id (hydro) to Hydro files (4006)
 HYDRO2FILE = Dict(
     23 => "MaxEnergyYear_LT_RefYear4006",
     24 => "MonthlyNaturalInflow_Anthony_Pieman_RefYear4006",

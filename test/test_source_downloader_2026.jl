@@ -2,7 +2,7 @@
 # catalogue plus download / skip-existing / failure handling (mocked, no network).
 
 @testset "ISP 2026 source downloader" begin
-    downloader = PISP.ISP2026FileDownloader
+    downloader = ParseISP.ISP2026FileDownloader
     targets = downloader.isp_file_targets()
     expected_targets = [
         (:isp26_inputs, "2026 ISP Inputs and Assumptions workbook", "2026-isp-inputs-and-assumptions-workbook.xlsm", "", "https://www.aemo.com.au/-/media/files/major-publications/isp/2026/supporting-materials/2026-isp-inputs-and-assumptions-workbook.xlsm?rev=de6f5853cd5e4d5cbb06bc90bdf0e378&sc_lang=en"),
@@ -13,9 +13,9 @@
         (:isp26_wind_traces, "2026 ISP Wind traces", "2026-isp-wind-traces.zip", "zip/Traces", "https://www.aemo.com.au/-/media/files/major-publications/isp/2026/isp-model/2026-isp-wind-traces.zip?rev=73674cd5bc6b4b7fbbc7d0e68ee0bc7c&sc_lang=en"),
     ]
 
-    @test isdefined(PISP, :download_isp2026_assets)
-    @test PISP.download_isp2026_assets === downloader.download_isp2026_files
-    @test downloader.DEFAULT_FILES_OUTDIR == PISP.ISPFileDownloader.DEFAULT_FILES_OUTDIR
+    @test isdefined(ParseISP, :download_isp2026_assets)
+    @test ParseISP.download_isp2026_assets === downloader.download_isp2026_files
+    @test downloader.DEFAULT_FILES_OUTDIR == ParseISP.ISPFileDownloader.DEFAULT_FILES_OUTDIR
     @test [(target.key, target.title, target.filename, target.subdir, target.url) for target in targets] == expected_targets
 
     mktempdir() do outdir

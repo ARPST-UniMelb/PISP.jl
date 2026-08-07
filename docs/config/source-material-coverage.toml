@@ -1,9 +1,9 @@
 # Canonical coverage and ownership ledger for non-trace ISP source documentation.
-# Classifications distinguish AEMO publications, PISP representations and intermediates, package conventions, user inputs, outputs, and excluded trace material.
+# Classifications distinguish AEMO publications, ParseISP representations and intermediates, package conventions, user inputs, outputs, and excluded trace material.
 
 [[source_read]]
 id = "xlsx-generic-selected-range"
-source_path = "src/utils/dataframes/PISPutils-dataframes.jl"
+source_path = "src/utils/dataframes/ParseISPutils-dataframes.jl"
 line = 34
 edition = "2024"
 classification = "parsed_representation"
@@ -16,7 +16,7 @@ notes = "Shared range reader used by the parser, scraper, and documentation evid
 
 [[source_read]]
 id = "hydro-workbook-reference-years"
-source_path = "src/utils/dataframes/PISPutils-df-hydro.jl"
+source_path = "src/utils/dataframes/ParseISPutils-df-hydro.jl"
 line = 64
 edition = "2024"
 classification = "aemo_raw_source"
@@ -29,7 +29,7 @@ notes = "Default range used to build the Snowy reference-year lookup."
 
 [[source_read]]
 id = "network-capability"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 62
 edition = "2024"
 classification = "aemo_raw_source"
@@ -42,7 +42,7 @@ notes = "Seasonal forward and reverse transfer limits."
 
 [[source_read]]
 id = "transmission-reliability"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 63
 edition = "2024"
 classification = "aemo_raw_source"
@@ -55,7 +55,7 @@ notes = "Line outage and repair assumptions."
 
 [[source_read]]
 id = "flow-path-augmentation"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 254
 edition = "2024"
 classification = "aemo_raw_source"
@@ -68,7 +68,7 @@ notes = "Candidate flow-path augmentations and timing/cost fields."
 
 [[source_read]]
 id = "summary-mapping-generator"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 333
 edition = "2024"
 classification = "aemo_raw_source"
@@ -81,7 +81,7 @@ notes = "Existing generator name mapping."
 
 [[source_read]]
 id = "summary-mapping-mlf"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 334
 edition = "2024"
 classification = "aemo_raw_source"
@@ -94,7 +94,7 @@ notes = "Marginal loss factor source column."
 
 [[source_read]]
 id = "maximum-capacity-existing"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 340
 edition = "2024"
 classification = "aemo_raw_source"
@@ -107,7 +107,7 @@ notes = "Existing-generator maximum-capacity records."
 
 [[source_read]]
 id = "maximum-capacity-committed"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 344
 edition = "2024"
 classification = "aemo_raw_source"
@@ -120,7 +120,7 @@ notes = "Committed generator capacity and commissioning records."
 
 [[source_read]]
 id = "maximum-capacity-anticipated"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 345
 edition = "2024"
 classification = "aemo_raw_source"
@@ -133,7 +133,7 @@ notes = "Anticipated generator capacity and commissioning records."
 
 [[source_read]]
 id = "summary-mapping-generator-detail"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 347
 edition = "2024"
 classification = "aemo_raw_source"
@@ -146,7 +146,7 @@ notes = "Generator-unit identifiers, technology, and location mapping."
 
 [[source_read]]
 id = "coal-generation-limits"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 380
 edition = "2024"
 classification = "aemo_raw_source"
@@ -159,7 +159,7 @@ notes = "Coal minimum-stable-level records."
 
 [[source_read]]
 id = "gpg-minimum-stable-level"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 381
 edition = "2024"
 classification = "aemo_raw_source"
@@ -172,7 +172,7 @@ notes = "Unit-level gas minimum-stable-level records."
 
 [[source_read]]
 id = "minimum-up-down-2024"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 385
 edition = "2024"
 classification = "aemo_raw_source"
@@ -185,7 +185,7 @@ notes = "Unit-level minimum up/down times available in the 2024 workbook."
 
 [[source_read]]
 id = "minimum-up-down-2019-supplement"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 386
 edition = "2024"
 classification = "aemo_raw_source"
@@ -198,7 +198,7 @@ notes = "Supplementary 2019 minimum up/down values used where the 2024 workbook 
 
 [[source_read]]
 id = "maximum-ramp-rates"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 390
 edition = "2024"
 classification = "aemo_raw_source"
@@ -211,7 +211,7 @@ notes = "Existing unit ramp-up and ramp-down limits."
 
 [[source_read]]
 id = "retirement-source"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 460
 edition = "2024"
 classification = "aemo_raw_source"
@@ -224,7 +224,7 @@ notes = "Technical-life and announced retirement source rows."
 
 [[source_read]]
 id = "reliability-existing"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 478
 edition = "2024"
 classification = "aemo_raw_source"
@@ -237,7 +237,7 @@ notes = "Existing technology outage and derating assumptions."
 
 [[source_read]]
 id = "reliability-new-entrant-generator"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 479
 edition = "2024"
 classification = "aemo_raw_source"
@@ -250,7 +250,7 @@ notes = "New-entrant generator outage and repair assumptions."
 
 [[source_read]]
 id = "existing-generator-summary"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 485
 edition = "2024"
 classification = "aemo_raw_source"
@@ -263,7 +263,7 @@ notes = "Station-level source summary used to populate generator records."
 
 [[source_read]]
 id = "existing-generator-summary-additional"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 486
 edition = "2024"
 classification = "aemo_raw_source"
@@ -276,7 +276,7 @@ notes = "Additional existing/committed source summary rows."
 
 [[source_read]]
 id = "emissions-intensity"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 633
 edition = "2024"
 classification = "aemo_raw_source"
@@ -289,7 +289,7 @@ notes = "Existing-generator emissions intensities."
 
 [[source_read]]
 id = "battery-properties"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 936
 edition = "2024"
 classification = "aemo_raw_source"
@@ -302,7 +302,7 @@ notes = "Battery duration, efficiency, and operating assumptions."
 
 [[source_read]]
 id = "pumped-hydro-properties"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 937
 edition = "2024"
 classification = "aemo_raw_source"
@@ -315,7 +315,7 @@ notes = "Pumped-hydro duration, efficiency, and operating assumptions."
 
 [[source_read]]
 id = "battery-maximum-capacity"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 938
 edition = "2024"
 classification = "aemo_raw_source"
@@ -328,7 +328,7 @@ notes = "Existing, committed, and anticipated battery capacities."
 
 [[source_read]]
 id = "battery-summary-mapping"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 939
 edition = "2024"
 classification = "aemo_raw_source"
@@ -341,7 +341,7 @@ notes = "Storage identifiers and source mapping."
 
 [[source_read]]
 id = "reliability-new-entrant-storage"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 940
 edition = "2024"
 classification = "aemo_raw_source"
@@ -354,7 +354,7 @@ notes = "The same new-entrant reliability table supplies storage reliability ass
 
 [[source_read]]
 id = "renewable-existing-solar-source"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1202
 edition = "2024"
 classification = "aemo_raw_source"
@@ -367,7 +367,7 @@ notes = "Operating-capacity source for utility-scale solar."
 
 [[source_read]]
 id = "renewable-rez-solar-source"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1206
 edition = "2024"
 classification = "aemo_raw_source"
@@ -380,7 +380,7 @@ notes = "REZ-to-bus mapping used for utility-scale solar."
 
 [[source_read]]
 id = "renewable-existing-wind-source"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1383
 edition = "2024"
 classification = "aemo_raw_source"
@@ -393,7 +393,7 @@ notes = "Operating-capacity source for wind."
 
 [[source_read]]
 id = "renewable-rez-wind-source"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1385
 edition = "2024"
 classification = "aemo_raw_source"
@@ -406,7 +406,7 @@ notes = "REZ-to-bus mapping used for wind."
 
 [[source_read]]
 id = "aux-capacity-outlook-solar"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1242
 edition = "2024"
 classification = "pisp_generated_intermediate"
@@ -419,7 +419,7 @@ notes = "Condensed capacity outlook used for solar schedule construction."
 
 [[source_read]]
 id = "aux-rez-capacity-solar"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1243
 edition = "2024"
 classification = "pisp_generated_intermediate"
@@ -432,7 +432,7 @@ notes = "Scenario-specific REZ capacity intermediate used for solar."
 
 [[source_read]]
 id = "aux-capacity-outlook-wind"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1426
 edition = "2024"
 classification = "pisp_generated_intermediate"
@@ -445,7 +445,7 @@ notes = "Condensed capacity outlook used for wind schedule construction."
 
 [[source_read]]
 id = "aux-rez-capacity-wind"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1427
 edition = "2024"
 classification = "pisp_generated_intermediate"
@@ -458,7 +458,7 @@ notes = "Scenario-specific REZ capacity intermediate used for wind."
 
 [[source_read]]
 id = "aux-storage-capacity-vpp"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1572
 edition = "2024"
 classification = "pisp_generated_intermediate"
@@ -467,11 +467,11 @@ worksheet = "<scenario>"
 range = "A1:AG1769"
 owner = "shared-source-generation-storage-outlook"
 status = "active"
-notes = "PISP-generated scenario storage-capacity intermediate."
+notes = "ParseISP-generated scenario storage-capacity intermediate."
 
 [[source_read]]
 id = "aux-storage-energy-vpp"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1577
 edition = "2024"
 classification = "pisp_generated_intermediate"
@@ -480,11 +480,11 @@ worksheet = "<scenario>"
 range = "A1:AG1769"
 owner = "shared-source-generation-storage-outlook"
 status = "active"
-notes = "PISP-generated scenario storage-energy intermediate."
+notes = "ParseISP-generated scenario storage-energy intermediate."
 
 [[source_read]]
 id = "aux-storage-capacity-vpp-loop"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1607
 edition = "2024"
 classification = "pisp_generated_intermediate"
@@ -497,7 +497,7 @@ notes = "Repeated active read during VPP schedule construction."
 
 [[source_read]]
 id = "aux-storage-energy-vpp-loop"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1608
 edition = "2024"
 classification = "pisp_generated_intermediate"
@@ -510,7 +510,7 @@ notes = "Repeated active read during VPP schedule construction."
 
 [[source_read]]
 id = "outlook-capacity"
-source_path = "src/scrappers/PISP-scrapper-build.jl"
+source_path = "src/scrappers/ParseISP-scrapper-build.jl"
 line = 166
 edition = "2024"
 classification = "aemo_raw_source"
@@ -523,7 +523,7 @@ notes = "Capacity outlook by technology and region."
 
 [[source_read]]
 id = "outlook-storage-energy"
-source_path = "src/scrappers/PISP-scrapper-build.jl"
+source_path = "src/scrappers/ParseISP-scrapper-build.jl"
 line = 217
 edition = "2024"
 classification = "aemo_raw_source"
@@ -536,7 +536,7 @@ notes = "Storage energy outlook by technology and region."
 
 [[source_read]]
 id = "outlook-storage-capacity"
-source_path = "src/scrappers/PISP-scrapper-build.jl"
+source_path = "src/scrappers/ParseISP-scrapper-build.jl"
 line = 222
 edition = "2024"
 classification = "aemo_raw_source"
@@ -549,7 +549,7 @@ notes = "Storage power capacity outlook by technology and region."
 
 [[source_read]]
 id = "outlook-rez-capacity"
-source_path = "src/scrappers/PISP-scrapper-build.jl"
+source_path = "src/scrappers/ParseISP-scrapper-build.jl"
 line = 266
 edition = "2024"
 classification = "aemo_raw_source"
@@ -562,7 +562,7 @@ notes = "REZ generation-capacity outlook."
 
 [[source_read]]
 id = "dsp-progressive-change-qld-summer"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1722
 edition = "2024"
 classification = "aemo_raw_source"
@@ -575,7 +575,7 @@ notes = "Progressive Change, QLD, Summer response blocks."
 
 [[source_read]]
 id = "dsp-progressive-change-qld-winter"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1723
 edition = "2024"
 classification = "aemo_raw_source"
@@ -588,7 +588,7 @@ notes = "Progressive Change, QLD, Winter response blocks."
 
 [[source_read]]
 id = "dsp-progressive-change-nsw-summer"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1725
 edition = "2024"
 classification = "aemo_raw_source"
@@ -601,7 +601,7 @@ notes = "Progressive Change, NSW, Summer response blocks."
 
 [[source_read]]
 id = "dsp-progressive-change-nsw-winter"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1726
 edition = "2024"
 classification = "aemo_raw_source"
@@ -614,7 +614,7 @@ notes = "Progressive Change, NSW, Winter response blocks."
 
 [[source_read]]
 id = "dsp-progressive-change-sa-summer"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1728
 edition = "2024"
 classification = "aemo_raw_source"
@@ -627,7 +627,7 @@ notes = "Progressive Change, SA, Summer response blocks."
 
 [[source_read]]
 id = "dsp-progressive-change-sa-winter"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1729
 edition = "2024"
 classification = "aemo_raw_source"
@@ -640,7 +640,7 @@ notes = "Progressive Change, SA, Winter response blocks."
 
 [[source_read]]
 id = "dsp-progressive-change-tas-summer"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1731
 edition = "2024"
 classification = "aemo_raw_source"
@@ -653,7 +653,7 @@ notes = "Progressive Change, TAS, Summer response blocks."
 
 [[source_read]]
 id = "dsp-progressive-change-tas-winter"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1732
 edition = "2024"
 classification = "aemo_raw_source"
@@ -666,7 +666,7 @@ notes = "Progressive Change, TAS, Winter response blocks."
 
 [[source_read]]
 id = "dsp-progressive-change-vic-summer"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1734
 edition = "2024"
 classification = "aemo_raw_source"
@@ -679,7 +679,7 @@ notes = "Progressive Change, VIC, Summer response blocks."
 
 [[source_read]]
 id = "dsp-progressive-change-vic-winter"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1735
 edition = "2024"
 classification = "aemo_raw_source"
@@ -692,7 +692,7 @@ notes = "Progressive Change, VIC, Winter response blocks."
 
 [[source_read]]
 id = "dsp-step-change-qld-summer"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1722
 edition = "2024"
 classification = "aemo_raw_source"
@@ -705,7 +705,7 @@ notes = "Step Change, QLD, Summer response blocks."
 
 [[source_read]]
 id = "dsp-step-change-qld-winter"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1723
 edition = "2024"
 classification = "aemo_raw_source"
@@ -718,7 +718,7 @@ notes = "Step Change, QLD, Winter response blocks."
 
 [[source_read]]
 id = "dsp-step-change-nsw-summer"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1725
 edition = "2024"
 classification = "aemo_raw_source"
@@ -731,7 +731,7 @@ notes = "Step Change, NSW, Summer response blocks."
 
 [[source_read]]
 id = "dsp-step-change-nsw-winter"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1726
 edition = "2024"
 classification = "aemo_raw_source"
@@ -744,7 +744,7 @@ notes = "Step Change, NSW, Winter response blocks."
 
 [[source_read]]
 id = "dsp-step-change-sa-summer"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1728
 edition = "2024"
 classification = "aemo_raw_source"
@@ -757,7 +757,7 @@ notes = "Step Change, SA, Summer response blocks."
 
 [[source_read]]
 id = "dsp-step-change-sa-winter"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1729
 edition = "2024"
 classification = "aemo_raw_source"
@@ -770,7 +770,7 @@ notes = "Step Change, SA, Winter response blocks."
 
 [[source_read]]
 id = "dsp-step-change-tas-summer"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1731
 edition = "2024"
 classification = "aemo_raw_source"
@@ -783,7 +783,7 @@ notes = "Step Change, TAS, Summer response blocks."
 
 [[source_read]]
 id = "dsp-step-change-tas-winter"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1732
 edition = "2024"
 classification = "aemo_raw_source"
@@ -796,7 +796,7 @@ notes = "Step Change, TAS, Winter response blocks."
 
 [[source_read]]
 id = "dsp-step-change-vic-summer"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1734
 edition = "2024"
 classification = "aemo_raw_source"
@@ -809,7 +809,7 @@ notes = "Step Change, VIC, Summer response blocks."
 
 [[source_read]]
 id = "dsp-step-change-vic-winter"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1735
 edition = "2024"
 classification = "aemo_raw_source"
@@ -822,7 +822,7 @@ notes = "Step Change, VIC, Winter response blocks."
 
 [[source_read]]
 id = "dsp-green-energy-exports-qld-summer"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1722
 edition = "2024"
 classification = "aemo_raw_source"
@@ -835,7 +835,7 @@ notes = "Green Energy Exports, QLD, Summer response blocks."
 
 [[source_read]]
 id = "dsp-green-energy-exports-qld-winter"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1723
 edition = "2024"
 classification = "aemo_raw_source"
@@ -848,7 +848,7 @@ notes = "Green Energy Exports, QLD, Winter response blocks."
 
 [[source_read]]
 id = "dsp-green-energy-exports-nsw-summer"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1725
 edition = "2024"
 classification = "aemo_raw_source"
@@ -861,7 +861,7 @@ notes = "Green Energy Exports, NSW, Summer response blocks."
 
 [[source_read]]
 id = "dsp-green-energy-exports-nsw-winter"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1726
 edition = "2024"
 classification = "aemo_raw_source"
@@ -874,7 +874,7 @@ notes = "Green Energy Exports, NSW, Winter response blocks."
 
 [[source_read]]
 id = "dsp-green-energy-exports-sa-summer"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1728
 edition = "2024"
 classification = "aemo_raw_source"
@@ -887,7 +887,7 @@ notes = "Green Energy Exports, SA, Summer response blocks."
 
 [[source_read]]
 id = "dsp-green-energy-exports-sa-winter"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1729
 edition = "2024"
 classification = "aemo_raw_source"
@@ -900,7 +900,7 @@ notes = "Green Energy Exports, SA, Winter response blocks."
 
 [[source_read]]
 id = "dsp-green-energy-exports-tas-summer"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1731
 edition = "2024"
 classification = "aemo_raw_source"
@@ -913,7 +913,7 @@ notes = "Green Energy Exports, TAS, Summer response blocks."
 
 [[source_read]]
 id = "dsp-green-energy-exports-tas-winter"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1732
 edition = "2024"
 classification = "aemo_raw_source"
@@ -926,7 +926,7 @@ notes = "Green Energy Exports, TAS, Winter response blocks."
 
 [[source_read]]
 id = "dsp-green-energy-exports-vic-summer"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1734
 edition = "2024"
 classification = "aemo_raw_source"
@@ -939,7 +939,7 @@ notes = "Green Energy Exports, VIC, Summer response blocks."
 
 [[source_read]]
 id = "dsp-green-energy-exports-vic-winter"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1735
 edition = "2024"
 classification = "aemo_raw_source"
@@ -952,7 +952,7 @@ notes = "Green Energy Exports, VIC, Winter response blocks."
 
 [[source_read]]
 id = "buildout-user-selected-sheet"
-source_path = "src/parsers/PISP-2024buildout.jl"
+source_path = "src/parsers/ParseISP-2024buildout.jl"
 line = 12
 edition = "2024"
 classification = "user_input"
@@ -965,7 +965,7 @@ notes = "Optional build-out input supplied by the package user."
 
 [[source_read]]
 id = "ev-weekend-profile"
-source_path = "src/utils/dataframes/PISPutils-df-evs-2024.jl"
+source_path = "src/utils/dataframes/ParseISPutils-df-evs-2024.jl"
 line = 48
 edition = "2024"
 classification = "aemo_raw_source"
@@ -978,7 +978,7 @@ notes = "Half-hourly weekend charging profiles."
 
 [[source_read]]
 id = "ev-weekday-profile"
-source_path = "src/utils/dataframes/PISPutils-df-evs-2024.jl"
+source_path = "src/utils/dataframes/ParseISPutils-df-evs-2024.jl"
 line = 48
 edition = "2024"
 classification = "aemo_raw_source"
@@ -991,7 +991,7 @@ notes = "Half-hourly weekday charging profiles."
 
 [[source_read]]
 id = "ev-bev-numbers"
-source_path = "src/utils/dataframes/PISPutils-df-evs-2024.jl"
+source_path = "src/utils/dataframes/ParseISPutils-df-evs-2024.jl"
 line = 48
 edition = "2024"
 classification = "aemo_raw_source"
@@ -1004,7 +1004,7 @@ notes = "BEV stock projections."
 
 [[source_read]]
 id = "ev-phev-numbers"
-source_path = "src/utils/dataframes/PISPutils-df-evs-2024.jl"
+source_path = "src/utils/dataframes/ParseISPutils-df-evs-2024.jl"
 line = 48
 edition = "2024"
 classification = "aemo_raw_source"
@@ -1017,7 +1017,7 @@ notes = "PHEV stock projections."
 
 [[source_read]]
 id = "ev-fcev-numbers"
-source_path = "src/utils/dataframes/PISPutils-df-evs-2024.jl"
+source_path = "src/utils/dataframes/ParseISPutils-df-evs-2024.jl"
 line = 48
 edition = "2024"
 classification = "aemo_raw_source"
@@ -1030,7 +1030,7 @@ notes = "FCEV stock projections."
 
 [[source_read]]
 id = "ev-ice-numbers"
-source_path = "src/utils/dataframes/PISPutils-df-evs-2024.jl"
+source_path = "src/utils/dataframes/ParseISPutils-df-evs-2024.jl"
 line = 48
 edition = "2024"
 classification = "aemo_raw_source"
@@ -1043,7 +1043,7 @@ notes = "Internal-combustion vehicle stock projections."
 
 [[source_read]]
 id = "ev-charge-type"
-source_path = "src/utils/dataframes/PISPutils-df-evs-2024.jl"
+source_path = "src/utils/dataframes/ParseISPutils-df-evs-2024.jl"
 line = 48
 edition = "2024"
 classification = "aemo_raw_source"
@@ -1056,7 +1056,7 @@ notes = "Charging-mode shares."
 
 [[source_read]]
 id = "ev-subregional-allocation"
-source_path = "src/utils/dataframes/PISPutils-df-evs-2024.jl"
+source_path = "src/utils/dataframes/ParseISPutils-df-evs-2024.jl"
 line = 347
 edition = "2024"
 classification = "aemo_raw_source"
@@ -1069,7 +1069,7 @@ notes = "Subregional EV demand allocation."
 
 [[source_read]]
 id = "ev-number-sheet-discovery"
-source_path = "src/utils/dataframes/PISPutils-df-evs-2024.jl"
+source_path = "src/utils/dataframes/ParseISPutils-df-evs-2024.jl"
 line = 272
 edition = "2024"
 classification = "aemo_raw_source"
@@ -1082,7 +1082,7 @@ notes = "EV number worksheets discovered by suffix."
 
 [[source_read]]
 id = "hydro-natural-inflow"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1871
 edition = "2024"
 classification = "aemo_raw_source"
@@ -1095,7 +1095,7 @@ notes = "Daily natural inflow records grouped into monthly and reference-year pr
 
 [[source_read]]
 id = "hydro-annual-energy-limit"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1924
 edition = "2024"
 classification = "aemo_raw_source"
@@ -1108,7 +1108,7 @@ notes = "Annual hydro energy constraints."
 
 [[source_read]]
 id = "trace-demand-pv-total"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1092
 edition = "2024"
 classification = "excluded_trace_material"
@@ -1121,7 +1121,7 @@ notes = "Half-hourly demand/PV trace payload."
 
 [[source_read]]
 id = "trace-demand-pvlite"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1160
 edition = "2024"
 classification = "excluded_trace_material"
@@ -1134,7 +1134,7 @@ notes = "Half-hourly demand trace payload."
 
 [[source_read]]
 id = "trace-solar-primary"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1290
 edition = "2024"
 classification = "excluded_trace_material"
@@ -1147,7 +1147,7 @@ notes = "Bulk solar trace payload."
 
 [[source_read]]
 id = "trace-solar-fallback"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1314
 edition = "2024"
 classification = "excluded_trace_material"
@@ -1160,7 +1160,7 @@ notes = "Alternative solar trace-file match."
 
 [[source_read]]
 id = "trace-wind-primary"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1473
 edition = "2024"
 classification = "excluded_trace_material"
@@ -1173,7 +1173,7 @@ notes = "Bulk wind trace payload."
 
 [[source_read]]
 id = "trace-wind-fallback"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1497
 edition = "2024"
 classification = "excluded_trace_material"
@@ -1186,7 +1186,7 @@ notes = "Alternative wind trace-file match."
 
 [[source_read]]
 id = "trace-scraper-preprocessing"
-source_path = "src/scrappers/PISP-scrapper-build.jl"
+source_path = "src/scrappers/ParseISP-scrapper-build.jl"
 line = 292
 edition = "2024"
 classification = "excluded_trace_material"
@@ -1247,7 +1247,7 @@ notes = "Complete default records used when a user requests optional build-outs.
 
 [[mapping_family]]
 id = "source-download-lookup"
-source_path = "src/scrappers/PISP-scrapper-2024files.jl"
+source_path = "src/scrappers/ParseISP-scrapper-2024files.jl"
 line = 80
 family = "fixed source-download keys and metadata"
 classification = "package_convention"
@@ -1256,7 +1256,7 @@ notes = "Maps downloader keys to published AEMO artefacts."
 
 [[mapping_family]]
 id = "buildout-generator-technology"
-source_path = "src/parsers/PISP-2024buildout.jl"
+source_path = "src/parsers/ParseISP-2024buildout.jl"
 line = 33
 family = "user build-out technology labels"
 classification = "package_convention"
@@ -1265,7 +1265,7 @@ notes = "Maps accepted labels to generator template keys."
 
 [[mapping_family]]
 id = "buildout-battery-duration"
-source_path = "src/parsers/PISP-2024buildout.jl"
+source_path = "src/parsers/ParseISP-2024buildout.jl"
 line = 34
 family = "battery duration labels"
 classification = "package_convention"
@@ -1274,7 +1274,7 @@ notes = "Maps battery build-out labels to storage duration."
 
 [[mapping_family]]
 id = "hydro-month-map"
-source_path = "src/utils/dataframes/PISPutils-df-hydro.jl"
+source_path = "src/utils/dataframes/ParseISPutils-df-hydro.jl"
 line = 57
 family = "month labels to calendar months"
 classification = "parsed_representation"
@@ -1283,16 +1283,16 @@ notes = "Normalises workbook month labels."
 
 [[mapping_family]]
 id = "line-reliability-map"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 67
 family = "named interconnector reliability rows"
 classification = "parsed_representation"
 owner = "shared-source-network-transmission"
-notes = "Assigns selected source rows to PISP line records."
+notes = "Assigns selected source rows to ParseISP line records."
 
 [[mapping_family]]
 id = "generator-month-map"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 329
 family = "month labels to calendar months"
 classification = "parsed_representation"
@@ -1301,7 +1301,7 @@ notes = "Normalises monthly source columns."
 
 [[mapping_family]]
 id = "generator-duid-aliases"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 441
 family = "generator-unit aliases"
 classification = "package_convention"
@@ -1310,7 +1310,7 @@ notes = "Resolves source naming mismatches for selected generating units."
 
 [[mapping_family]]
 id = "generator-emissions-fallbacks"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 639
 family = "technology emissions fallbacks"
 classification = "package_convention"
@@ -1319,7 +1319,7 @@ notes = "Fallback values used when a source record does not supply a direct matc
 
 [[mapping_family]]
 id = "generator-cost-slopes"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 661
 family = "technology cost-curve slopes"
 classification = "package_convention"
@@ -1328,7 +1328,7 @@ notes = "Package convention used in generated generator cost fields."
 
 [[mapping_family]]
 id = "generator-inertia"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 675
 family = "technology inertia constants"
 classification = "package_convention"
@@ -1337,7 +1337,7 @@ notes = "Package convention used in generated generator records."
 
 [[mapping_family]]
 id = "renewable-candidate-development-path-solar"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1228
 family = "scenario to candidate development path for solar"
 classification = "package_convention"
@@ -1346,7 +1346,7 @@ notes = "All current scenario identifiers select CDP14."
 
 [[mapping_family]]
 id = "renewable-candidate-development-path-wind"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1411
 family = "scenario to candidate development path for wind"
 classification = "package_convention"
@@ -1355,7 +1355,7 @@ notes = "All current scenario identifiers select CDP14."
 
 [[mapping_family]]
 id = "dsp-price-bands"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1661
 family = "DSP price-band identifiers"
 classification = "package_convention"
@@ -1364,7 +1364,7 @@ notes = "Maps source price bands to package values."
 
 [[mapping_family]]
 id = "dsp-source-ranges"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1702
 family = "scenario/region/season DSP ranges"
 classification = "package_convention"
@@ -1373,7 +1373,7 @@ notes = "Selects the 30 workbook blocks listed in the source-read ledger."
 
 [[mapping_family]]
 id = "hydro-file-groups"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1849
 family = "inflow files to generator groups"
 classification = "parsed_representation"
@@ -1382,7 +1382,7 @@ notes = "Constructed from package hydro file mappings."
 
 [[mapping_family]]
 id = "hydro-scheme-groups"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1850
 family = "hydro scheme groups"
 classification = "package_convention"
@@ -1391,7 +1391,7 @@ notes = "Groups hydro units for inflow allocation."
 
 [[mapping_family]]
 id = "ev-value-column-by-sheet"
-source_path = "src/utils/dataframes/PISPutils-df-evs-2024.jl"
+source_path = "src/utils/dataframes/ParseISPutils-df-evs-2024.jl"
 line = 16
 family = "EV number worksheet to output field"
 classification = "package_convention"
@@ -1400,7 +1400,7 @@ notes = "Maps BEV, PHEV, FCEV, and ICE worksheets to parsed fields."
 
 [[mapping_family]]
 id = "ev-state-name"
-source_path = "src/utils/dataframes/PISPutils-df-evs-2024.jl"
+source_path = "src/utils/dataframes/ParseISPutils-df-evs-2024.jl"
 line = 22
 family = "EV state name to NEM code"
 classification = "package_convention"
@@ -1409,7 +1409,7 @@ notes = "Reuses package area identifiers."
 
 [[mapping_family]]
 id = "ev-scenario-name"
-source_path = "src/utils/dataframes/PISPutils-df-evs-2024.jl"
+source_path = "src/utils/dataframes/ParseISPutils-df-evs-2024.jl"
 line = 23
 family = "EV scenario name to package ID"
 classification = "package_convention"
@@ -1418,25 +1418,25 @@ notes = "Reuses package scenario identifiers."
 
 [[mapping_family]]
 id = "ev-vehicle-category"
-source_path = "src/utils/dataframes/PISPutils-df-evs-2024.jl"
+source_path = "src/utils/dataframes/ParseISPutils-df-evs-2024.jl"
 line = 24
 family = "EV vehicle types to demand categories"
 classification = "package_convention"
 owner = "shared-source-electric-vehicles"
-notes = "Aggregates workbook vehicle types into PISP demand categories."
+notes = "Aggregates workbook vehicle types into ParseISP demand categories."
 
 [[mapping_family]]
 id = "output-alternative-names"
-source_path = "src/utils/writing/PISPutils-writing.jl"
+source_path = "src/utils/writing/ParseISPutils-writing.jl"
 line = 1
 family = "output table aliases"
 classification = "package_convention"
 owner = "isp2024-output-tables"
-notes = "Alternative PISP output names used by writers."
+notes = "Alternative ParseISP output names used by writers."
 
 [[mapping_family]]
 id = "sql-to-julia-types"
-source_path = "src/utils/mappers/PISPutils-mappers.jl"
+source_path = "src/utils/mappers/ParseISPutils-mappers.jl"
 line = 2
 family = "schema declarations to Julia types"
 classification = "package_convention"
@@ -1454,7 +1454,7 @@ notes = "Selects user-provided build-out tables for each scenario."
 
 [[mapping_family]]
 id = "solar-generator-id-runtime"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1209
 family = "solar source rows to generated IDs"
 classification = "parsed_representation"
@@ -1463,7 +1463,7 @@ notes = "Derived during parsing; not a separately maintained constant."
 
 [[mapping_family]]
 id = "solar-trace-name-runtime"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1224
 family = "solar source names to trace names"
 classification = "parsed_representation"
@@ -1472,7 +1472,7 @@ notes = "Derived during parsing from source and package trace mappings."
 
 [[mapping_family]]
 id = "wind-generator-id-runtime"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1387
 family = "wind source rows to generated IDs"
 classification = "parsed_representation"
@@ -1481,7 +1481,7 @@ notes = "Derived during parsing; not a separately maintained constant."
 
 [[mapping_family]]
 id = "storage-id-runtime"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1568
 family = "storage source rows to generated IDs"
 classification = "parsed_representation"
@@ -1490,7 +1490,7 @@ notes = "Derived during storage parsing."
 
 [[mapping_family]]
 id = "hydro-generator-number-runtime"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 1985
 family = "hydro generator IDs to row numbers"
 classification = "parsed_representation"
@@ -1499,7 +1499,7 @@ notes = "Derived from the generated hydro table."
 
 [[mapping_family]]
 id = "demand-by-bus-runtime"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 2107
 family = "bus IDs to demand records"
 classification = "parsed_representation"
@@ -1508,7 +1508,7 @@ notes = "Derived from the generated demand table."
 
 [[mapping_family]]
 id = "ev-vehicle-number-tables-runtime"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 2170
 family = "EV worksheet tables by source name"
 classification = "parsed_representation"
@@ -1517,7 +1517,7 @@ notes = "Ordered collection assembled from the four selected number worksheets."
 
 [[mapping_family]]
 id = "ev-vehicle-number-fields-runtime"
-source_path = "src/parsers/PISP-2024parser.jl"
+source_path = "src/parsers/ParseISP-2024parser.jl"
 line = 2174
 family = "EV output tables by vehicle number field"
 classification = "parsed_representation"
@@ -1526,34 +1526,34 @@ notes = "Ordered collection keyed by parsed output field."
 
 [[mapping_family]]
 id = "ev-bus-id-runtime"
-source_path = "src/utils/dataframes/PISPutils-df-evs-2024.jl"
+source_path = "src/utils/dataframes/ParseISPutils-df-evs-2024.jl"
 line = 413
 family = "bus names to bus IDs"
 classification = "parsed_representation"
 owner = "shared-source-electric-vehicles"
-notes = "Derived from PISP bus records."
+notes = "Derived from ParseISP bus records."
 
 [[mapping_family]]
 id = "ev-demand-by-bus-runtime"
-source_path = "src/utils/dataframes/PISPutils-df-evs-2024.jl"
+source_path = "src/utils/dataframes/ParseISPutils-df-evs-2024.jl"
 line = 462
 family = "bus IDs to demand records"
 classification = "parsed_representation"
 owner = "shared-source-electric-vehicles"
-notes = "Derived from PISP demand records."
+notes = "Derived from ParseISP demand records."
 
 [[mapping_family]]
 id = "ev-demand-der-runtime"
-source_path = "src/utils/dataframes/PISPutils-df-evs-2024.jl"
+source_path = "src/utils/dataframes/ParseISPutils-df-evs-2024.jl"
 line = 498
 family = "demand and DER relationship lookups"
 classification = "parsed_representation"
 owner = "shared-source-electric-vehicles"
-notes = "Derived from PISP demand and DER tables."
+notes = "Derived from ParseISP demand and DER tables."
 
 [[mapping_family]]
 id = "trace-year-runtime"
-source_path = "src/scrappers/PISP-scrapper-build.jl"
+source_path = "src/scrappers/ParseISP-scrapper-build.jl"
 line = 322
 family = "trace years to processed trace tables"
 classification = "excluded_trace_material"

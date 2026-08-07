@@ -12,19 +12,19 @@ ISP 2026 expands this source family with dedicated data-centre and distribution-
 ```
 
 ````julia
-using PISP
+using ParseISP
 using DataFrames
 using XLSX
 
-const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
+const REPO_ROOT = normpath(get(ENV, "ParseISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
-import .PISPDocUtils
+include(joinpath(REPO_ROOT, "docs", "utils", "ParseISPDocUtils.jl"))
+import .ParseISPDocUtils
 
-const ISP2024 = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
-const ISP2026 = PISPDocUtils.edition_profile(REPO_ROOT, "2026")
-const SUBREGIONAL_ALLOCATION_2024 = PISP.source_spec(:ev_subregional_demand_allocation, 2024)
-const WORKBOOK2024 = PISP.source_path(ISP2024.download_root, SUBREGIONAL_ALLOCATION_2024)
+const ISP2024 = ParseISPDocUtils.edition_profile(REPO_ROOT, "2024")
+const ISP2026 = ParseISPDocUtils.edition_profile(REPO_ROOT, "2026")
+const SUBREGIONAL_ALLOCATION_2024 = ParseISP.source_spec(:ev_subregional_demand_allocation, 2024)
+const WORKBOOK2024 = ParseISP.source_path(ISP2024.download_root, SUBREGIONAL_ALLOCATION_2024)
 const WORKBOOK2026 = joinpath(ISP2026.download_root, "2026-isp-inputs-and-assumptions-workbook.xlsm")
 ````
 
@@ -61,7 +61,7 @@ demand_sheet_presence = DataFrame([
     for (edition, available) in demand_sheet_names
     for sheet in demand_sheets
 ])
-PISPDocUtils.markdown_table(demand_sheet_presence)
+ParseISPDocUtils.markdown_table(demand_sheet_presence)
 ````
 
 ```@raw html
@@ -95,14 +95,14 @@ PISPDocUtils.markdown_table(demand_sheet_presence)
 ## ISP 2024 subregional allocation
 
 The allocation table expresses a regional total as shares assigned to ISP subregions over time.
-PISP uses a later block of this worksheet to distribute EV demand to buses; the rows below illustrate the same source structure without reproducing the full transformation.
+ParseISP uses a later block of this worksheet to distribute EV demand to buses; the rows below illustrate the same source structure without reproducing the full transformation.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
 ```
 
 ````julia
-subregional_allocation_source_2024 = PISP.read_xlsx_rows(
+subregional_allocation_source_2024 = ParseISP.read_xlsx_rows(
     WORKBOOK2024,
     SUBREGIONAL_ALLOCATION_2024,
 )
@@ -114,7 +114,7 @@ subregional_allocation_2024 = DataFrame(
     ]);
     makeunique = true,
 )
-PISPDocUtils.markdown_table(subregional_allocation_2024)
+ParseISPDocUtils.markdown_table(subregional_allocation_2024)
 ````
 
 ```@raw html
@@ -150,7 +150,7 @@ data_centres_2026 = DataFrame(
     Symbol.(["Region", "2025-26", "2026-27", "2027-28", "2028-29", "2029-30", "2030-31", "2031-32", "2032-33"]);
     makeunique = true,
 )
-PISPDocUtils.markdown_table(data_centres_2026)
+ParseISPDocUtils.markdown_table(data_centres_2026)
 ````
 
 ```@raw html
@@ -188,7 +188,7 @@ distribution_network_2026 = DataFrame(
     ]);
     makeunique = true,
 )
-PISPDocUtils.markdown_table(distribution_network_2026)
+ParseISPDocUtils.markdown_table(distribution_network_2026)
 ````
 
 ```@raw html

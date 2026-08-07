@@ -1,6 +1,6 @@
 module ISP2026FileDownloader
 
-    using PISP.PISPScrapperUtils: DEFAULT_FILE_HEADERS, download_file
+    using ParseISP.ParseISPScrapperUtils: DEFAULT_FILE_HEADERS, download_file
 
     struct ISPFileTarget
         key::Symbol

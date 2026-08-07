@@ -2,11 +2,11 @@
 EditURL = "../../../../literate/isp2024/tutorials/working_with_pisp_outputs.jl"
 ```
 
-# ISP 2024: Working with PISP-generated outputs
+# ISP 2024: Working with ParseISP-generated outputs
 
-This tutorial selects one existing PISP output by reference-weather trace, demand probability of exceedance, and planning year, then shows how static tables relate to time-varying schedules.
+This tutorial selects one existing ParseISP output by reference-weather trace, demand probability of exceedance, and planning year, then shows how static tables relate to time-varying schedules.
 The default selection is `reftrace = 4006`, `poe = 10`, and `year = 2030`.
-Set `PISP_DOCS_ISP2024_REFTRACE`, `PISP_DOCS_ISP2024_POE`, or `PISP_DOCS_ISP2024_YEAR` to select another available combination.
+Set `ParseISP_DOCS_ISP2024_REFTRACE`, `ParseISP_DOCS_ISP2024_POE`, or `ParseISP_DOCS_ISP2024_YEAR` to select another available combination.
 
 ## Prerequisites and selected build
 
@@ -41,15 +41,15 @@ using Plots
 
 gr();
 
-const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
+const REPO_ROOT = normpath(get(ENV, "ParseISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
-import .PISPDocUtils
+include(joinpath(REPO_ROOT, "docs", "utils", "ParseISPDocUtils.jl"))
+import .ParseISPDocUtils
 
-const ISP2024_PROFILE = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
+const ISP2024_PROFILE = ParseISPDocUtils.edition_profile(REPO_ROOT, "2024")
 const OUTPUT_ROOT = ISP2024_PROFILE.output_root
 OUTPUT_ROOT === nothing && error(
-    "ISP 2024 profile does not define output_root; set PISP_DOCS_ISP2024_OUTPUT_ROOT to an existing output CSV directory.",
+    "ISP 2024 profile does not define output_root; set ParseISP_DOCS_ISP2024_OUTPUT_ROOT to an existing output CSV directory.",
 )
 const DEFAULT_BUILD_MATCH = match(r"^out-ref(\d+)-poe(\d+)$", basename(dirname(OUTPUT_ROOT)))
 DEFAULT_BUILD_MATCH === nothing && error(
@@ -67,9 +67,9 @@ function integer_selection(variable, default)
     return parsed
 end
 
-const REFTRACE = integer_selection("PISP_DOCS_ISP2024_REFTRACE", parse(Int, DEFAULT_BUILD_MATCH.captures[1]))
-const POE = integer_selection("PISP_DOCS_ISP2024_POE", parse(Int, DEFAULT_BUILD_MATCH.captures[2]))
-const PLANNING_YEAR = integer_selection("PISP_DOCS_ISP2024_YEAR", parse(Int, DEFAULT_SCHEDULE_MATCH.captures[1]))
+const REFTRACE = integer_selection("ParseISP_DOCS_ISP2024_REFTRACE", parse(Int, DEFAULT_BUILD_MATCH.captures[1]))
+const POE = integer_selection("ParseISP_DOCS_ISP2024_POE", parse(Int, DEFAULT_BUILD_MATCH.captures[2]))
+const PLANNING_YEAR = integer_selection("ParseISP_DOCS_ISP2024_YEAR", parse(Int, DEFAULT_SCHEDULE_MATCH.captures[1]))
 const DATASET_ROOT = dirname(dirname(normpath(OUTPUT_ROOT)))
 const BUILD_NAME = "out-ref$(REFTRACE)-poe$(POE)"
 const DATA_ROOT = joinpath(DATASET_ROOT, BUILD_NAME, "csv")
@@ -100,7 +100,7 @@ The discovered build folders show which reference-trace and demand-POE combinati
 ```
 
 ````julia
-PISPDocUtils.markdown_table(available_builds)
+ParseISPDocUtils.markdown_table(available_builds)
 ````
 
 ```@raw html
@@ -149,7 +149,7 @@ The selected tuple resolves to one build folder for static tables and one year-s
 ```
 
 ````julia
-PISPDocUtils.markdown_table(selection_table)
+ParseISPDocUtils.markdown_table(selection_table)
 ````
 
 ```@raw html
@@ -176,7 +176,7 @@ required_files = [
     joinpath(SCHEDULE_DIR, "Demand_load_sched.csv"),
 ]
 missing_files = filter(path -> !isfile(path), required_files)
-isempty(missing_files) || error("missing PISP output files: $(join(missing_files, ", "))")
+isempty(missing_files) || error("missing ParseISP output files: $(join(missing_files, ", "))")
 ````
 
 ```@raw html
@@ -185,7 +185,7 @@ isempty(missing_files) || error("missing PISP output files: $(join(missing_files
 
 ## Load static tables
 
-`Generator.csv`, `Demand.csv`, and `Bus.csv` are static tables written once per PISP build.
+`Generator.csv`, `Demand.csv`, and `Bus.csv` are static tables written once per ParseISP build.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
@@ -220,7 +220,7 @@ Fuel and technology counts show the asset mix represented in the generated outpu
 
 ````julia
 fuel_counts = sort(combine(groupby(gen_df, :fuel), nrow => :count), :count; rev = true)
-PISPDocUtils.markdown_table(fuel_counts)
+ParseISPDocUtils.markdown_table(fuel_counts)
 ````
 
 ```@raw html
@@ -244,7 +244,7 @@ PISPDocUtils.markdown_table(fuel_counts)
 
 ````julia
 tech_counts = sort(combine(groupby(gen_df, :tech), nrow => :count), :count; rev = true)
-PISPDocUtils.markdown_table(tech_counts)
+ParseISPDocUtils.markdown_table(tech_counts)
 ````
 
 ```@raw html
@@ -305,7 +305,7 @@ The first rows make the schedule schema concrete.
 ```
 
 ````julia
-PISPDocUtils.markdown_table(first(gen_pmax, 5))
+ParseISPDocUtils.markdown_table(first(gen_pmax, 5))
 ````
 
 ```@raw html
@@ -346,7 +346,7 @@ Shape: (315360, 5)
 ```
 
 ````julia
-PISPDocUtils.markdown_table(first(dem_load, 5))
+ParseISPDocUtils.markdown_table(first(dem_load, 5))
 ````
 
 ```@raw html
@@ -405,7 +405,7 @@ Wind generators: 11
 solar_tech_counts = sort(
     combine(groupby(solar_gens, :tech), nrow => :count), :count; rev = true,
 )
-PISPDocUtils.markdown_table(solar_tech_counts)
+ParseISPDocUtils.markdown_table(solar_tech_counts)
 ````
 
 ```@raw html
@@ -426,7 +426,7 @@ PISPDocUtils.markdown_table(solar_tech_counts)
 wind_tech_counts = sort(
     combine(groupby(wind_gens, :tech), nrow => :count), :count; rev = true,
 )
-PISPDocUtils.markdown_table(wind_tech_counts)
+ParseISPDocUtils.markdown_table(wind_tech_counts)
 ````
 
 ```@raw html
@@ -518,9 +518,9 @@ ylabel!(fig, "GW")
 title!(fig, "$(SCHEDULE_TAG) — Daily Aggregate: Solar PMax, Wind PMax, Total Demand")
 
 const SCRIPT_STEM = "isp2024_working_with_pisp_outputs"
-const FIGURE_PATH = PISPDocUtils.figure_path(SCRIPT_STEM, "isp2024_working_with_pisp_outputs-timeseries.png")
+const FIGURE_PATH = ParseISPDocUtils.figure_path(SCRIPT_STEM, "isp2024_working_with_pisp_outputs-timeseries.png")
 savefig(fig, FIGURE_PATH)
-PISPDocUtils.embed_figure(FIGURE_PATH, "isp2024_working_with_pisp_outputs-timeseries.png")
+ParseISPDocUtils.embed_figure(FIGURE_PATH, "isp2024_working_with_pisp_outputs-timeseries.png")
 ````
 
 ```@raw html

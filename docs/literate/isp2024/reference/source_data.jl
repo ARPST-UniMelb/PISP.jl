@@ -7,13 +7,13 @@
 # describe those sources.
 
 using DataFrames
-using PISP
+using ParseISP
 
-const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
-include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
-import .PISPDocUtils
+const REPO_ROOT = normpath(get(ENV, "ParseISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
+include(joinpath(REPO_ROOT, "docs", "utils", "ParseISPDocUtils.jl"))
+import .ParseISPDocUtils
 
-const PROFILE = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
+const PROFILE = ParseISPDocUtils.edition_profile(REPO_ROOT, "2024")
 
 function source_name(id)
     name = titlecase(replace(string(id), "_" => " "))
@@ -60,7 +60,7 @@ source_rows = DataFrame([
         keys = isempty(row.keys) ? "Defined by the selected table" : replace(row.keys, "; " => ", "),
         fields_units = fields_and_units(row),
     )
-    for row in PISP.source_spec_rows(2024)
+    for row in ParseISP.source_spec_rows(2024)
 ])
 
 function reader_table(rows)
@@ -71,7 +71,7 @@ function reader_table(rows)
         :keys,
         :fields_units,
     )
-    return PISPDocUtils.markdown_table(
+    return ParseISPDocUtils.markdown_table(
         table;
         column_labels = ["Source", "File and selection", "Keys", "Fields and units"],
     )

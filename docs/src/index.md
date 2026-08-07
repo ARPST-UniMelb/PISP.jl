@@ -1,16 +1,16 @@
-# PISP.jl
+# ParseISP.jl
 
 AEMO publishes the Integrated System Plan as workbooks, model archives, outlook files, and time-series traces.
 Using those materials in a power-system study requires scenario reconciliation, common asset identifiers, financial-year handling, and explicit links between static assets and time-varying schedules.
 
-PISP.jl implements this data-preparation workflow for the 2024 Integrated System Plan.
+ParseISP.jl implements this data-preparation workflow for the 2024 Integrated System Plan.
 It converts supported ISP 2024 material and package-defined mappings into connected power-system tables for downstream optimisation, simulation, reliability, and data-analysis workflows.
-PISP.jl also downloads and extracts ISP 2026 reports, workbooks, model archives, outlooks, and traces for the source and comparison pages.
+ParseISP.jl also downloads and extracts ISP 2026 reports, workbooks, model archives, outlooks, and traces for the source and comparison pages.
 
 ## Choose an entry point
 
-- [Quickstart](quickstart.md) installs PISP.jl, builds a small ISP 2024 dataset, and checks representative outputs.
-- [AEMO ISP source material](editions/source-material.md) explains the non-trace workbooks, outlook material, and model CSVs before PISP transformation.
+- [Quickstart](quickstart.md) installs ParseISP.jl, builds a small ISP 2024 dataset, and checks representative outputs.
+- [AEMO ISP source material](editions/source-material.md) explains the non-trace workbooks, outlook material, and model CSVs before ParseISP transformation.
 - [ISP 2024](editions/isp2024.md) leads to the implemented source, output, tutorial, validation, and analysis documentation.
 - [Supported ISP editions](editions/supported-editions.md) links the source and workflow material for each edition.
 - [ISP 2026](editions/isp2026.md) describes the reports, workbooks, outlooks, model archive, and traces.
@@ -21,14 +21,14 @@ PISP.jl also downloads and extracts ISP 2026 reports, workbooks, model archives,
 AEMO describes the ISP as a collection of supporting materials, including workbooks, outlook material, traces, and appendices ([2024 Integrated System Plan, p. 92](../../data/2024/pisp-reports/2024-integrated-system-plan.pdf#page=92)).
 The public market-model package includes PLEXOS model instructions ([2024 ISP PLEXOS Model Instructions, p. 2](../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=2)) and scenario-specific model data ([2024 ISP PLEXOS Model Instructions, p. 5](../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=5)).
 The source documents define reference-trace and network conventions ([2024 ISP PLEXOS Model Instructions, pp. 5–7](../../data/2024/pisp-reports/2024-isp-plexos-model-instructions.pdf#page=5); [2023 Inputs, Assumptions and Scenarios Report, p. 141](../../data/2024/pisp-reports/2023-inputs-assumptions-and-scenarios-report.pdf#page=141)) and capacity-outlook probability-of-exceedance profiles ([ISP Methodology, p. 39](../../data/2024/pisp-reports/2023-isp-methodology.pdf#page=39)).
-AEMO publishes and maintains all of this material on its [2024 Integrated System Plan page](https://www.aemo.com.au/energy-systems/major-publications/integrated-system-plan-isp/2024-integrated-system-plan-isp), the same live page PISP.jl's own downloader targets, rather than only as the dated PDF snapshots cited above.
+AEMO publishes and maintains all of this material on its [2024 Integrated System Plan page](https://www.aemo.com.au/energy-systems/major-publications/integrated-system-plan-isp/2024-integrated-system-plan-isp), the same live page ParseISP.jl's own downloader targets, rather than only as the dated PDF snapshots cited above.
 
 The [source-material guide](editions/source-material.md) organises the non-trace source data by subject across ISP 2024 and ISP 2026.
 It keeps reports, source workbooks, package mappings, and generated datasets distinct so that a familiar worksheet name is not mistaken for an equivalent table.
 
 ## ISP 2024 output model
 
-An ISP 2024 PISP build produces three connected forms of information:
+An ISP 2024 ParseISP build produces three connected forms of information:
 
 | Dataset layer | What it provides | Typical use |
 |---|---|---|
@@ -42,7 +42,7 @@ See [Domain concepts](concepts.md) for the relationships and [ISP 2024 output ta
 
 ## Who the package is for
 
-PISP is intended for researchers and model developers who need a structured ISP 2024 NEM planning dataset before running a downstream optimisation, simulation, or reliability workflow.
+ParseISP is intended for researchers and model developers who need a structured ISP 2024 NEM planning dataset before running a downstream optimisation, simulation, or reliability workflow.
 It is particularly useful when a study needs to preserve the distinctions among ISP scenario, planning period, reference trace, probability of exceedance, and asset identity.
 
 The package does not remove the need for modelling judgement.
@@ -54,7 +54,7 @@ Users still need to review the aggregated network representation, hard-coded map
 AEMO ISP 2024 source material
           |
           v
-PISP 2024 parsing, reconciliation, and package mappings
+ParseISP 2024 parsing, reconciliation, and package mappings
           |
           +-----------------------+
           |                       |
@@ -77,13 +77,13 @@ A typical ISP 2024 workflow is:
 
 ## Build entry point
 
-The high-level entry point is `PISP.build_ISP24_datasets(; kwargs...)`.
+The high-level entry point is `ParseISP.build_ISP24_datasets(; kwargs...)`.
 It accepts whole planning years through `years` or explicit time windows through `drange`.
-Where the underlying ISP inputs use Australian financial years, PISP splits the requested period at 1 July so each problem block remains aligned with the source convention.
+Where the underlying ISP inputs use Australian financial years, ParseISP splits the requested period at 1 July so each problem block remains aligned with the source convention.
 
 New users should begin with the [Quickstart](quickstart.md), which installs the package, builds one short date range, and checks representative files.
 
-The [Building a `PISPtimeConfig` problem table](generated/isp2024/tutorials/building-problem-table.md) tutorial shows how those scenario/time blocks are constructed before source files are parsed.
+The [Building a `ParseISPtimeConfig` problem table](generated/isp2024/tutorials/building-problem-table.md) tutorial shows how those scenario/time blocks are constructed before source files are parsed.
 
 ## Understand ISP 2024 data before using it
 
@@ -95,10 +95,10 @@ The [Building a `PISPtimeConfig` problem table](generated/isp2024/tutorials/buil
 
 ## ISP 2024 tutorials
 
-[Building a `PISPtimeConfig` problem table](generated/isp2024/tutorials/building-problem-table.md) explains the scenario/time index that PISP creates before reading AEMO files.
+[Building a `ParseISPtimeConfig` problem table](generated/isp2024/tutorials/building-problem-table.md) explains the scenario/time index that ParseISP creates before reading AEMO files.
 It runs entirely in memory.
 
-[Working with PISP-generated outputs](generated/isp2024/tutorials/working-with-pisp-outputs.md) loads an ISP 2024 PISP output build and relates generator and demand schedules back to the static asset tables.
+[Working with ParseISP-generated outputs](generated/isp2024/tutorials/working-with-pisp-outputs.md) loads an ISP 2024 ParseISP output build and relates generator and demand schedules back to the static asset tables.
 The tutorial documents its default build path and the environment variables used to select another generated dataset.
 
 ## API reference

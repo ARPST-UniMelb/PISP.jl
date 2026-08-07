@@ -19,7 +19,7 @@ alt_names = Dict(
         :line_rvcap => "Line_rvcap_sched",
     )
 
-function PISPwritedataCSV(input::Union{PISPtimeStatic, PISPtimeVarying}, path::AbstractString)
+function ParseISPwritedataCSV(input::Union{ParseISPtimeStatic, ParseISPtimeVarying}, path::AbstractString)
     isdir(path) || mkpath(path)
     input_type = typeof(input)
 
@@ -31,7 +31,7 @@ function PISPwritedataCSV(input::Union{PISPtimeStatic, PISPtimeVarying}, path::A
     end
 end
 
-function PISPwritedataArrow(input::Union{PISPtimeStatic, PISPtimeVarying}, path::AbstractString)
+function ParseISPwritedataArrow(input::Union{ParseISPtimeStatic, ParseISPtimeVarying}, path::AbstractString)
     isdir(path) || mkpath(path)
     input_type = typeof(input)
 

@@ -1,7 +1,7 @@
 const ISP2024_BUILDOUT_TABLE_SOURCE = XlsxSourceSpec(
     id = :buildout_schedule,
     edition = 2024,
-    workbook = "PISP-buildouts/buildouts.xlsx",
+    workbook = "ParseISP-buildouts/buildouts.xlsx",
     worksheet = "buildout_1",
     cell_range = nothing,
     description = "User-provided generation and storage buildout schedule.",
@@ -64,14 +64,14 @@ const _BESS_DURATION_H       = Dict("bess_1h"  => 1.0,  "bess_2h"  => 2.0,
     add_buildout_ess!(ts, tv, static_data, tvarying_data)
 
 Append new ESS buildout entries to `ts.ess` and unit-count schedule entries to
-`tv.ess_n`, using engineering parameters from `PISP.params_buildout_bess`.
+`tv.ess_n`, using engineering parameters from `ParseISP.params_buildout_bess`.
 
 One row per unique name in `static_data` (filtered to BESS techs) is added to
 `ts.ess`; IDs start from `max(ts.ess.id_ess) + 1`. For each (name, year) row in
 `tvarying_data`, one entry per ISP scenario is added to `tv.ess_n` dated
 `01-01-YYYY 00:00:00`.
 """
-function add_buildout_ess!(ts::PISPtimeStatic, tv::PISPtimeVarying,
+function add_buildout_ess!(ts::ParseISPtimeStatic, tv::ParseISPtimeVarying,
                            static_data::DataFrame, tvarying_data::DataFrame)
     bust   = ts.bus
     ess_id = isempty(ts.ess.id_ess) ? 0 : maximum(ts.ess.id_ess)
@@ -83,7 +83,7 @@ function add_buildout_ess!(ts::PISPtimeStatic, tv::PISPtimeVarying,
     for row in eachrow(sd)
         ess_id += 1
         name_to_id[row.name] = ess_id
-        p      = PISP.params_buildout_bess[Symbol(row.tech)]
+        p      = ParseISP.params_buildout_bess[Symbol(row.tech)]
         bus_id = bust[bust.name .== row.subregion, :id_bus][1]
         # Column order matches MOD_ESS: id_ess, name, alias, tech, type, capacity,
         # investment, active, id_bus, ch_eff, dch_eff, eini, emin, emax,
@@ -106,7 +106,7 @@ function add_buildout_ess!(ts::PISPtimeStatic, tv::PISPtimeVarying,
     tvd = filter(r -> r.name ∈ keys(name_to_id), tvarying_data)
     for row in eachrow(tvd)
         id_ess = name_to_id[row.name]
-        for scid in keys(PISP.ID2SCE)
+        for scid in keys(ParseISP.ID2SCE)
             n_id += 1
             push!(tv.ess_n, [n_id, id_ess, scid, DateTime(row.year, 1, 1, 0, 0, 0), row.n])
         end
@@ -117,13 +117,13 @@ end
     add_buildout_gen!(ts, tv, static_data, tvarying_data)
 
 Append new generator buildout entries to `ts.gen` and unit-count schedule entries
-to `tv.gen_n`, using engineering parameters from `PISP.params_buildout_gen`.
+to `tv.gen_n`, using engineering parameters from `ParseISP.params_buildout_gen`.
 
 Supported techs: `ccgt`, `ocgt_l`, `ocgt_s`. IDs start from
 `max(ts.gen.id_gen) + 1`. One entry per ISP scenario per (name, year) row is
 added to `tv.gen_n` dated `01-01-YYYY 00:00:00`.
 """
-function add_buildout_gen!(ts::PISPtimeStatic, tv::PISPtimeVarying,
+function add_buildout_gen!(ts::ParseISPtimeStatic, tv::ParseISPtimeVarying,
                            static_data::DataFrame, tvarying_data::DataFrame)
     bust   = ts.bus
     gen_id = isempty(ts.gen.id_gen) ? 0 : maximum(ts.gen.id_gen)
@@ -135,7 +135,7 @@ function add_buildout_gen!(ts::PISPtimeStatic, tv::PISPtimeVarying,
     for row in eachrow(sd)
         gen_id += 1
         name_to_id[row.name] = gen_id
-        p      = PISP.params_buildout_gen[_BUILDOUT_GEN_TECH_KEY[row.tech]]
+        p      = ParseISP.params_buildout_gen[_BUILDOUT_GEN_TECH_KEY[row.tech]]
         bus_id = bust[bust.name .== row.subregion, :id_bus][1]
         # Column order matches MOD_GEN: id_gen, name, alias, fuel, tech, type, capacity,
         # forate, fullout, partialout, derate, mttrfull, mttrpart, id_bus,
@@ -164,7 +164,7 @@ function add_buildout_gen!(ts::PISPtimeStatic, tv::PISPtimeVarying,
     tvd = filter(r -> r.name ∈ keys(name_to_id), tvarying_data)
     for row in eachrow(tvd)
         id_gen = name_to_id[row.name]
-        for scid in keys(PISP.ID2SCE)
+        for scid in keys(ParseISP.ID2SCE)
             n_id += 1
             push!(tv.gen_n, [n_id, id_gen, scid, DateTime(row.year, 1, 1, 0, 0, 0), row.n])
         end
@@ -182,7 +182,7 @@ must map every scenario ID (1, 2, 3) to a sheet name; each scenario then receive
 its own time-varying buildout schedule while static asset entries are unioned across
 all sheets (first-occurrence wins for capacity/tech parameters).
 """
-function add_buildouts!(ts::PISPtimeStatic, tv::PISPtimeVarying,
+function add_buildouts!(ts::ParseISPtimeStatic, tv::ParseISPtimeVarying,
                         filepath::AbstractString;
                         sc_buildouts::Dict{Int,String} = Dict{Int,String}(),
                         sheetname::Union{AbstractString,Nothing} = nothing)
@@ -196,7 +196,7 @@ function add_buildouts!(ts::PISPtimeStatic, tv::PISPtimeVarying,
         add_buildout_ess!(ts, tv, static_data, tvarying_data)
         add_buildout_gen!(ts, tv, static_data, tvarying_data)
     else
-        for k in keys(PISP.ID2SCE)
+        for k in keys(ParseISP.ID2SCE)
             haskey(sc_buildouts, k) ||
                 error("sc_buildouts must include a key for every scenario. Missing: $k")
         end
@@ -208,7 +208,7 @@ function add_buildouts!(ts::PISPtimeStatic, tv::PISPtimeVarying,
 end
 
 # Internal: scenario-specific ESS buildout
-function _add_buildout_ess_sc!(ts::PISPtimeStatic, tv::PISPtimeVarying,
+function _add_buildout_ess_sc!(ts::ParseISPtimeStatic, tv::ParseISPtimeVarying,
                                 sc_data::Dict{Int,<:Tuple{DataFrame,DataFrame}})
     bust   = ts.bus
     ess_id = isempty(ts.ess.id_ess) ? 0 : maximum(ts.ess.id_ess)
@@ -223,7 +223,7 @@ function _add_buildout_ess_sc!(ts::PISPtimeStatic, tv::PISPtimeVarying,
             push!(seen, row.name)
             ess_id += 1
             name_to_id[row.name] = ess_id
-            p      = PISP.params_buildout_bess[Symbol(row.tech)]
+            p      = ParseISP.params_buildout_bess[Symbol(row.tech)]
             bus_id = bust[bust.name .== row.subregion, :id_bus][1]
             push!(ts.ess, [ess_id, row.name, row.name,
                            p["tech"], p["type"], row.capacity,
@@ -250,7 +250,7 @@ function _add_buildout_ess_sc!(ts::PISPtimeStatic, tv::PISPtimeVarying,
 end
 
 # Internal: scenario-specific generator buildout
-function _add_buildout_gen_sc!(ts::PISPtimeStatic, tv::PISPtimeVarying,
+function _add_buildout_gen_sc!(ts::ParseISPtimeStatic, tv::ParseISPtimeVarying,
                                 sc_data::Dict{Int,<:Tuple{DataFrame,DataFrame}})
     bust   = ts.bus
     gen_id = isempty(ts.gen.id_gen) ? 0 : maximum(ts.gen.id_gen)
@@ -265,7 +265,7 @@ function _add_buildout_gen_sc!(ts::PISPtimeStatic, tv::PISPtimeVarying,
             push!(seen, row.name)
             gen_id += 1
             name_to_id[row.name] = gen_id
-            p      = PISP.params_buildout_gen[_BUILDOUT_GEN_TECH_KEY[row.tech]]
+            p      = ParseISP.params_buildout_gen[_BUILDOUT_GEN_TECH_KEY[row.tech]]
             bus_id = bust[bust.name .== row.subregion, :id_bus][1]
             push!(ts.gen, [gen_id, row.name, row.name,
                            p["fuel"], p["tech"], p["type"], row.capacity,

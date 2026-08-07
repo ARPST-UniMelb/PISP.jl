@@ -1,7 +1,7 @@
 # API Reference
 
-PISP's dataset-construction API applies to ISP 2024.
-The main public entry point is `PISP.build_ISP24_datasets`; the problem-table helpers explain the scenario/time split used by that build pipeline and are exercised in the tutorial.
+ParseISP's dataset-construction API applies to ISP 2024.
+The main public entry point is `ParseISP.build_ISP24_datasets`; the problem-table helpers explain the scenario/time split used by that build pipeline and are exercised in the tutorial.
 
 Begin with the [Quickstart](quickstart.md) for installation, one small build, and output verification.
 Use this page for the complete public signatures and additional examples.
@@ -9,9 +9,9 @@ Use this page for the complete public signatures and additional examples.
 ## ISP 2024 dataset construction
 
 ```@docs
-PISP.build_ISP24_datasets
-PISP.fill_problem_table_year
-PISP.fill_problem_table_drange
+ParseISP.build_ISP24_datasets
+ParseISP.fill_problem_table_year
+ParseISP.fill_problem_table_drange
 ```
 
 ### Build examples
@@ -19,9 +19,9 @@ PISP.fill_problem_table_drange
 Build datasets for complete planning years:
 
 ```julia
-using PISP
+using ParseISP
 
-PISP.build_ISP24_datasets(
+ParseISP.build_ISP24_datasets(
     downloadpath = joinpath(@__DIR__, "..", "data", "2024", "pisp-downloads"),
     poe = 10,
     reftrace = 4006,
@@ -36,9 +36,9 @@ PISP.build_ISP24_datasets(
 Use `drange` instead of `years` to build specific date windows:
 
 ```julia
-using PISP
+using ParseISP
 
-PISP.build_ISP24_datasets(
+ParseISP.build_ISP24_datasets(
     downloadpath = joinpath(@__DIR__, "..", "data", "2024", "pisp-downloads"),
     poe = 10,
     reftrace = 4006,
@@ -55,20 +55,20 @@ PISP.build_ISP24_datasets(
 
 ## Source acquisition
 
-`PISP.download_ISP24_reports` downloads selected ISP 2024 report PDFs.
-`PISP.download_ISP26_reports` downloads selected ISP 2026 report PDFs, `PISP.download_isp2026_assets` downloads selected ISP 2026 source assets, and `PISP.ISPdatabuilder.extract_downloads` extracts downloaded source archives.
+`ParseISP.download_ISP24_reports` downloads selected ISP 2024 report PDFs.
+`ParseISP.download_ISP26_reports` downloads selected ISP 2026 report PDFs, `ParseISP.download_isp2026_assets` downloads selected ISP 2026 source assets, and `ParseISP.ISPdatabuilder.extract_downloads` extracts downloaded source archives.
 
 Download selected ISP report PDFs:
 
 ```julia
-using PISP
+using ParseISP
 
-PISP.download_ISP24_reports(
+ParseISP.download_ISP24_reports(
     outdir = joinpath(@__DIR__, "..", "data", "2024", "pisp-reports"),
     overwrite = false,
 )
 
-PISP.download_ISP26_reports(
+ParseISP.download_ISP26_reports(
     outdir = joinpath(@__DIR__, "..", "data", "2026", "pisp-reports"),
     overwrite = false,
 )
@@ -77,7 +77,7 @@ PISP.download_ISP26_reports(
 Download and extract the selected ISP 2026 source assets:
 
 ```julia
-using PISP
+using ParseISP
 
 isp2026_downloads_dir = joinpath(
     @__DIR__,
@@ -87,15 +87,15 @@ isp2026_downloads_dir = joinpath(
     "pisp-downloads",
 )
 
-source_paths = PISP.download_isp2026_assets(
+source_paths = ParseISP.download_isp2026_assets(
     outdir = isp2026_downloads_dir,
     overwrite = false,
 )
 
-PISP.ISPdatabuilder.extract_downloads(
+ParseISP.ISPdatabuilder.extract_downloads(
     data_root = isp2026_downloads_dir,
 )
 ```
 
-The [ISP 2026 overview](editions/isp2026.md) identifies the separate parser-development repository and the boundary between source acquisition and PISP.jl dataset construction.
+The [ISP 2026 overview](editions/isp2026.md) identifies the separate parser-development repository and the boundary between source acquisition and ParseISP.jl dataset construction.
 [Supported ISP editions](editions/supported-editions.md) is the capability authority.

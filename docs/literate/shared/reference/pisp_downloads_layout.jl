@@ -2,7 +2,7 @@
 #
 # Each ISP edition keeps downloaded source material and extracted source
 # directories under `data/<edition>/pisp-downloads/`. The ISP 2024 tree also
-# contains `Auxiliary/`, which PISP generates from the outlook workbooks during
+# contains `Auxiliary/`, which ParseISP generates from the outlook workbooks during
 # preprocessing.
 #
 # The main directory roles are:
@@ -11,7 +11,7 @@
 # pisp-downloads/
 # ├── Core/ or Core scenarios/   # extracted outlook workbooks
 # ├── Sensitivities/             # extracted outlook sensitivities
-# ├── Auxiliary/                 # ISP 2024 PISP-generated intermediates
+# ├── Auxiliary/                 # ISP 2024 ParseISP-generated intermediates
 # ├── Traces/                    # extracted trace inputs
 # └── zip/                       # retained source archives
 # ```
@@ -20,10 +20,10 @@
 # source family.
 
 const REPO_ROOT = normpath(
-    get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..", "..")),
+    get(ENV, "ParseISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..", "..")),
 )
-include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
-import .PISPDocUtils
+include(joinpath(REPO_ROOT, "docs", "utils", "ParseISPDocUtils.jl"))
+import .ParseISPDocUtils
 nothing #hide
 
 # ## Observed outlook directories and source archives
@@ -36,20 +36,20 @@ nothing #hide
 # `zip/Traces/` remain part of the trace source family.
 
 download_layouts = [
-    PISPDocUtils.inspect_download_layout(profile.label, profile.download_root)
-    for profile in PISPDocUtils.edition_profiles(REPO_ROOT)
+    ParseISPDocUtils.inspect_download_layout(profile.label, profile.download_root)
+    for profile in ParseISPDocUtils.edition_profiles(REPO_ROOT)
 ]
 
 layout_rows = [
     Any[
         layout.edition,
-        PISPDocUtils.markdown_items(layout.outlook_directories; nothing_text = "nothing"),
-        PISPDocUtils.markdown_items(layout.source_archives; nothing_text = "nothing"),
+        ParseISPDocUtils.markdown_items(layout.outlook_directories; nothing_text = "nothing"),
+        ParseISPDocUtils.markdown_items(layout.source_archives; nothing_text = "nothing"),
     ]
     for layout in download_layouts
 ]
 
-PISPDocUtils.markdown_table(
+ParseISPDocUtils.markdown_table(
     ["Edition", "Extracted outlook directories", "Retained source archives"],
     layout_rows;
     nothing_text = "nothing",

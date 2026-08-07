@@ -6,35 +6,35 @@
 #
 # `build_pipeline` is not run because it rebuilds and modifies the local data.
 # 
-# The test is skipped when the data is unavailable or `PISP_SKIP_SLOW_TESTS=1`.
+# The test is skipped when the data is unavailable or `ParseISP_SKIP_SLOW_TESTS=1`.
 #
 # Note: populate_time_static! -> generator_table creates a scratch test/.tmp/
 # (gitignored)directory (relative to the process's working directory) with ~26
-# intermediate workbooks. This is pre-existing PISP.jl/src behaviour.
+# intermediate workbooks. This is pre-existing ParseISP.jl/src behaviour.
 
 using DataFrames
 using Dates
 
 pipeline_integration_2024_edition = only(filter(
     p -> p.edition == "2024",
-    PISPDocUtils.source_availability_profiles(normpath(joinpath(@__DIR__, ".."))),
+    ParseISPDocUtils.source_availability_profiles(normpath(joinpath(@__DIR__, ".."))),
 ))
-pipeline_integration_2024_available = PISPDocUtils.inspect_edition(pipeline_integration_2024_edition).state == :complete
-pipeline_integration_2024_skip_slow = get(ENV, "PISP_SKIP_SLOW_TESTS", "") == "1"
+pipeline_integration_2024_available = ParseISPDocUtils.inspect_edition(pipeline_integration_2024_edition).state == :complete
+pipeline_integration_2024_skip_slow = get(ENV, "ParseISP_SKIP_SLOW_TESTS", "") == "1"
 
 @testset "pipeline integration: populate_time_static!/populate_time_varying! (2024, Step Change, one day)" begin
     if pipeline_integration_2024_skip_slow
-        @test_skip "PISP_SKIP_SLOW_TESTS=1; skipping the slow real-data pipeline integration test"
+        @test_skip "ParseISP_SKIP_SLOW_TESTS=1; skipping the slow real-data pipeline integration test"
     elseif !pipeline_integration_2024_available
         @test_skip "2024 pisp-downloads material is absent; pipeline integration test requires the real AEMO workbooks/CSVs"
     else
-        paths = PISP.default_data_paths(filepath=pipeline_integration_2024_edition.download_root)
+        paths = ParseISP.default_data_paths(filepath=pipeline_integration_2024_edition.download_root)
 
-        tc, ts, tv = PISP.initialise_time_structures()
-        PISP.fill_problem_table_drange(tc, DateTime(2030, 1, 1, 0, 0, 0), DateTime(2030, 1, 1, 23, 0, 0); sce=[2])
+        tc, ts, tv = ParseISP.initialise_time_structures()
+        ParseISP.fill_problem_table_drange(tc, DateTime(2030, 1, 1, 0, 0, 0), DateTime(2030, 1, 1, 23, 0, 0); sce=[2])
 
-        static_artifacts = PISP.populate_time_static!(ts, tv, paths; refyear=4006, poe=10)
-        PISP.populate_time_varying!(tc, ts, tv, paths, static_artifacts; refyear=4006, poe=10, skip_traces=false)
+        static_artifacts = ParseISP.populate_time_static!(ts, tv, paths; refyear=4006, poe=10)
+        ParseISP.populate_time_varying!(tc, ts, tv, paths, static_artifacts; refyear=4006, poe=10, skip_traces=false)
 
         @testset "static tables (ts)" begin
             @test size(ts.bus) == (12, 7)

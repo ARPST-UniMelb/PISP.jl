@@ -5,26 +5,26 @@ EditURL = "../../../../literate/shared/source_material/renewable_energy_zones.jl
 # Renewable energy zones
 
 Renewable energy zone records connect zone identifiers and names to NEM regions and ISP subregions.
-PISP uses the ISP 2024 table when allocating utility-scale solar and wind build-out from the generation and storage outlook material.
+ParseISP uses the ISP 2024 table when allocating utility-scale solar and wind build-out from the generation and storage outlook material.
 
 ```@raw html
 <details class="source-code"><summary>Show source code</summary>
 ```
 
 ````julia
-using PISP
+using ParseISP
 using DataFrames
 using XLSX
 
-const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
+const REPO_ROOT = normpath(get(ENV, "ParseISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
-import .PISPDocUtils
+include(joinpath(REPO_ROOT, "docs", "utils", "ParseISPDocUtils.jl"))
+import .ParseISPDocUtils
 
-const ISP2024 = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
-const ISP2026 = PISPDocUtils.edition_profile(REPO_ROOT, "2026")
-const RENEWABLE_ENERGY_ZONES_2024 = PISP.source_spec(:renewable_energy_zones, 2024)
-const WORKBOOK2024 = PISP.source_path(ISP2024.download_root, RENEWABLE_ENERGY_ZONES_2024)
+const ISP2024 = ParseISPDocUtils.edition_profile(REPO_ROOT, "2024")
+const ISP2026 = ParseISPDocUtils.edition_profile(REPO_ROOT, "2026")
+const RENEWABLE_ENERGY_ZONES_2024 = ParseISP.source_spec(:renewable_energy_zones, 2024)
+const WORKBOOK2024 = ParseISP.source_path(ISP2024.download_root, RENEWABLE_ENERGY_ZONES_2024)
 const WORKBOOK2026 = joinpath(ISP2026.download_root, "2026-isp-inputs-and-assumptions-workbook.xlsm")
 ````
 
@@ -41,13 +41,13 @@ The 2024 source includes the NTNDP zone, ISP subregion, and regional cost zone b
 ```
 
 ````julia
-rez_source_2024 = PISP.read_xlsx_rows(WORKBOOK2024, RENEWABLE_ENERGY_ZONES_2024)
+rez_source_2024 = ParseISP.read_xlsx_rows(WORKBOOK2024, RENEWABLE_ENERGY_ZONES_2024)
 rez_2024 = DataFrame(
     rez_source_2024[2:9, 1:6],
     Symbol.(["ID", "Name", "NEM region", "NTNDP zone", "ISP subregion", "Regional cost zone"]);
     makeunique = true,
 )
-PISPDocUtils.markdown_table(rez_2024)
+ParseISPDocUtils.markdown_table(rez_2024)
 ````
 
 ```@raw html
@@ -80,7 +80,7 @@ rez_2026 = DataFrame(
     Symbol.(["ID", "Name", "NEM region", "ISP subregion"]);
     makeunique = true,
 )
-PISPDocUtils.markdown_table(rez_2026)
+ParseISPDocUtils.markdown_table(rez_2026)
 ````
 
 ```@raw html
@@ -116,7 +116,7 @@ rez_names = innerjoin(
     on = :ID,
 )
 renamed_rez = filter(row -> row.name_2024 != row.name_2026, rez_names)
-PISPDocUtils.markdown_table(renamed_rez)
+ParseISPDocUtils.markdown_table(renamed_rez)
 ````
 
 ```@raw html
@@ -130,7 +130,7 @@ PISPDocUtils.markdown_table(renamed_rez)
 
 ## Transformation boundary
 
-The current solar and wind builders read the ISP 2024 REZ table, select the relevant zone IDs for each PISP subregion, and combine them with scenario outlook capacity.
+The current solar and wind builders read the ISP 2024 REZ table, select the relevant zone IDs for each ParseISP subregion, and combine them with scenario outlook capacity.
 Both builders currently apply the package-defined candidate development path `CDP14` across the maintained scenario IDs.
 
 ```@raw html
@@ -139,11 +139,11 @@ Both builders currently apply the package-defined candidate development path `CD
 
 ````julia
 rez_conventions = DataFrame([
-    (subject = "Solar outlook candidate development path", convention = "CDP14 for each current PISP scenario"),
-    (subject = "Wind outlook candidate development path", convention = "CDP14 for each current PISP scenario"),
-    (subject = "Subregion geography", convention = "PISP.NEMBUSNAME and PISP.BUS2AREA"),
+    (subject = "Solar outlook candidate development path", convention = "CDP14 for each current ParseISP scenario"),
+    (subject = "Wind outlook candidate development path", convention = "CDP14 for each current ParseISP scenario"),
+    (subject = "Subregion geography", convention = "ParseISP.NEMBUSNAME and ParseISP.BUS2AREA"),
 ])
-PISPDocUtils.markdown_table(rez_conventions)
+ParseISPDocUtils.markdown_table(rez_conventions)
 ````
 
 ```@raw html
@@ -152,9 +152,9 @@ PISPDocUtils.markdown_table(rez_conventions)
 
 | **subject** | **convention** |
 |:--|:--|
-| Solar outlook candidate development path | CDP14 for each current PISP scenario |
-| Wind outlook candidate development path | CDP14 for each current PISP scenario |
-| Subregion geography | PISP.NEMBUSNAME and PISP.BUS2AREA |
+| Solar outlook candidate development path | CDP14 for each current ParseISP scenario |
+| Wind outlook candidate development path | CDP14 for each current ParseISP scenario |
+| Subregion geography | ParseISP.NEMBUSNAME and ParseISP.BUS2AREA |
 
 
 The candidate-development-path choices are package conventions, not values read from the REZ worksheet.

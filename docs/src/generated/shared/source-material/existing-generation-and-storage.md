@@ -12,20 +12,20 @@ ISP 2024 presents the main generation summary at station level, whereas ISP 2026
 ```
 
 ````julia
-using PISP
+using ParseISP
 using DataFrames
 using XLSX
 
-const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
+const REPO_ROOT = normpath(get(ENV, "ParseISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
-import .PISPDocUtils
+include(joinpath(REPO_ROOT, "docs", "utils", "ParseISPDocUtils.jl"))
+import .ParseISPDocUtils
 
-const ISP2024 = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
-const ISP2026 = PISPDocUtils.edition_profile(REPO_ROOT, "2026")
-const EXISTING_GENERATORS_2024 = PISP.source_spec(:existing_generator_summary, 2024)
-const STORAGE_PROPERTIES_2024 = PISP.source_spec(:bess_storage_properties, 2024)
-const WORKBOOK2024 = PISP.source_path(ISP2024.download_root, EXISTING_GENERATORS_2024)
+const ISP2024 = ParseISPDocUtils.edition_profile(REPO_ROOT, "2024")
+const ISP2026 = ParseISPDocUtils.edition_profile(REPO_ROOT, "2026")
+const EXISTING_GENERATORS_2024 = ParseISP.source_spec(:existing_generator_summary, 2024)
+const STORAGE_PROPERTIES_2024 = ParseISP.source_spec(:bess_storage_properties, 2024)
+const WORKBOOK2024 = ParseISP.source_path(ISP2024.download_root, EXISTING_GENERATORS_2024)
 const WORKBOOK2026 = joinpath(ISP2026.download_root, "2026-isp-inputs-and-assumptions-workbook.xlsm")
 ````
 
@@ -36,7 +36,7 @@ const WORKBOOK2026 = joinpath(ISP2026.download_root, "2026-isp-inputs-and-assump
 ## ISP 2024 station-level summary
 
 Each row below represents a station and combines location, technology, maximum capacity, and seasonal ratings.
-PISP uses this source with `Summary Mapping`, maximum-capacity, emissions, reliability, and package mappings to construct unit-level generator records.
+ParseISP uses this source with `Summary Mapping`, maximum-capacity, emissions, reliability, and package mappings to construct unit-level generator records.
 `Summary Mapping` supplies the identifiers, locations, technologies, and marginal-loss-factor fields that align those records.
 Separate maximum-capacity blocks distinguish existing and new generation from battery projects, while the battery summary-mapping rows support construction of ESS records.
 The 2026 workbook retains `Summary Mapping`, `Maximum capacity`, and
@@ -48,7 +48,7 @@ row structure.
 ```
 
 ````julia
-existing_source_2024 = PISP.read_xlsx_rows(WORKBOOK2024, EXISTING_GENERATORS_2024)
+existing_source_2024 = ParseISP.read_xlsx_rows(WORKBOOK2024, EXISTING_GENERATORS_2024)
 existing_2024 = DataFrame(
     existing_source_2024[4:9, 1:10],
     Symbol.([
@@ -57,7 +57,7 @@ existing_2024 = DataFrame(
     ]);
     makeunique = true,
 )
-PISPDocUtils.markdown_table(existing_2024)
+ParseISPDocUtils.markdown_table(existing_2024)
 ````
 
 ```@raw html
@@ -93,7 +93,7 @@ existing_2026 = DataFrame(
     ]);
     makeunique = true,
 )
-PISPDocUtils.markdown_table(existing_2026)
+ParseISPDocUtils.markdown_table(existing_2026)
 ````
 
 ```@raw html
@@ -121,7 +121,7 @@ A blank ISP 2024 source cell is shown as `Not reported` rather than as a Julia m
 ```
 
 ````julia
-storage_source_2024 = PISP.read_xlsx_rows(WORKBOOK2024, STORAGE_PROPERTIES_2024)
+storage_source_2024 = ParseISP.read_xlsx_rows(WORKBOOK2024, STORAGE_PROPERTIES_2024)
 storage_2024 = DataFrame(
     storage_source_2024[2:10, 1:7],
     Symbol.(["Property", "Battery 1 h", "Battery 2 h", "Battery 4 h", "Battery 8 h", "VPP", "Units"]);
@@ -130,7 +130,7 @@ storage_2024 = DataFrame(
 for column in names(storage_2024)
     storage_2024[!, column] = coalesce.(storage_2024[!, column], "Not reported")
 end
-PISPDocUtils.markdown_table(storage_2024)
+ParseISPDocUtils.markdown_table(storage_2024)
 ````
 
 ```@raw html
@@ -164,7 +164,7 @@ storage_2026 = DataFrame(
     ]);
     makeunique = true,
 )
-PISPDocUtils.markdown_table(storage_2026)
+ParseISPDocUtils.markdown_table(storage_2026)
 ````
 
 ```@raw html
@@ -183,7 +183,7 @@ PISPDocUtils.markdown_table(storage_2026)
 | VPP (aggregated ESS) - V2G | 1.0 | 2.2 | 92.2 | 92.2 | 85.0 | 0.0 | 85.0 |
 
 
-## PISP conventions applied after source reading
+## ParseISP conventions applied after source reading
 
 The current package includes maintained generator, battery, and pumped-hydro dictionaries.
 These objects are package conventions and supplements; they are not additional AEMO source rows.
@@ -194,11 +194,11 @@ These objects are package conventions and supplements; they are not additional A
 
 ````julia
 package_collections = DataFrame([
-    (collection = "Generator unit mappings", object = "PISP.units", entries = length(PISP.units)),
-    (collection = "Battery defaults", object = "PISP.databess", entries = length(PISP.databess)),
-    (collection = "Pumped-hydro defaults", object = "PISP.dataps", entries = length(PISP.dataps)),
+    (collection = "Generator unit mappings", object = "ParseISP.units", entries = length(ParseISP.units)),
+    (collection = "Battery defaults", object = "ParseISP.databess", entries = length(ParseISP.databess)),
+    (collection = "Pumped-hydro defaults", object = "ParseISP.dataps", entries = length(ParseISP.dataps)),
 ])
-PISPDocUtils.markdown_table(package_collections)
+ParseISPDocUtils.markdown_table(package_collections)
 ````
 
 ```@raw html
@@ -207,9 +207,9 @@ PISPDocUtils.markdown_table(package_collections)
 
 | **collection** | **object** | **entries** |
 |:--|:--|--:|
-| Generator unit mappings | PISP.units | 68 |
-| Battery defaults | PISP.databess | 55 |
-| Pumped-hydro defaults | PISP.dataps | 7 |
+| Generator unit mappings | ParseISP.units | 68 |
+| Battery defaults | ParseISP.databess | 55 |
+| Pumped-hydro defaults | ParseISP.dataps | 7 |
 
 
 The ISP 2026 tables above show the unit-level identifiers and workbook

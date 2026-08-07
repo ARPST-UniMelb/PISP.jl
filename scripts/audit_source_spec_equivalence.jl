@@ -2,7 +2,7 @@
 
 using CSV
 using DataFrames
-using PISP
+using ParseISP
 using SHA
 using TOML
 using XLSX
@@ -99,7 +99,7 @@ function cases(data_root)
             push!(c, Case("ev_vehicle_numbers_$(slug(sheet))", :ev_vehicle_numbers, "2023-iasr-ev-workbook.xlsx", sheet, "B:AZ"))
         end
     end
-    push!(c, Case("buildout_schedule", :buildout_schedule, "PISP-buildouts/buildouts.xlsx", "buildout_1", nothing))
+    push!(c, Case("buildout_schedule", :buildout_schedule, "ParseISP-buildouts/buildouts.xlsx", "buildout_1", nothing))
     core = joinpath(data_root, "Core")
     if isdir(core)
         for file in sort(filter(f -> endswith(lowercase(f), ".xlsx"), readdir(core)))
@@ -148,17 +148,17 @@ end
 
 function literal_read(root, case)
     path = joinpath(root, case.workbook)
-    case.range === nothing ? whole_df(path, case.worksheet) : PISP.read_xlsx_with_header(path, case.worksheet, case.range)
+    case.range === nothing ? whole_df(path, case.worksheet) : ParseISP.read_xlsx_with_header(path, case.worksheet, case.range)
 end
 
 function spec_read(root, case)
-    spec = PISP.source_spec(case.source_id, 2024)
+    spec = ParseISP.source_spec(case.source_id, 2024)
     replacements = (; case.replacements...)
-    path = PISP.source_path(root, spec; replacements...)
+    path = ParseISP.source_path(root, spec; replacements...)
     if spec.cell_range === nothing
         return whole_df(path, case.worksheet)
     end
-    return PISP.read_xlsx_with_header(path, spec; worksheet=case.worksheet)
+    return ParseISP.read_xlsx_with_header(path, spec; worksheet=case.worksheet)
 end
 
 function record(case, df, root, output_dir)

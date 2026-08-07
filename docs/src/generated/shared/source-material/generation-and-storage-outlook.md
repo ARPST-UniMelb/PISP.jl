@@ -12,26 +12,26 @@ The workbooks contain capacity, storage energy, storage power, REZ build, retire
 ```
 
 ````julia
-using PISP
+using ParseISP
 using DataFrames
 using XLSX
 
-const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
+const REPO_ROOT = normpath(get(ENV, "ParseISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
-import .PISPDocUtils
+include(joinpath(REPO_ROOT, "docs", "utils", "ParseISPDocUtils.jl"))
+import .ParseISPDocUtils
 
-const ISP2024 = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
-const ISP2026 = PISPDocUtils.edition_profile(REPO_ROOT, "2026")
+const ISP2024 = ParseISPDocUtils.edition_profile(REPO_ROOT, "2024")
+const ISP2026 = ParseISPDocUtils.edition_profile(REPO_ROOT, "2026")
 const CORE2024 = joinpath(ISP2024.download_root, "Core")
 const SENS2024 = joinpath(ISP2024.download_root, "Sensitivities")
 const CORE2026 = joinpath(ISP2026.download_root, "Core scenarios")
 const SENS2026 = joinpath(ISP2026.download_root, "Sensitivities")
 const CORE_WORKBOOK_2024 = "2024 ISP - Green Energy Exports - Core.xlsx"
-const CAPACITY_OUTLOOK_2024 = PISP.source_spec(:core_capacity_outlook, 2024)
-const STORAGE_CAPACITY_OUTLOOK_2024 = PISP.source_spec(:core_storage_capacity_outlook, 2024)
-const STORAGE_ENERGY_OUTLOOK_2024 = PISP.source_spec(:core_storage_energy_outlook, 2024)
-const SAMPLE2024 = PISP.source_path(
+const CAPACITY_OUTLOOK_2024 = ParseISP.source_spec(:core_capacity_outlook, 2024)
+const STORAGE_CAPACITY_OUTLOOK_2024 = ParseISP.source_spec(:core_storage_capacity_outlook, 2024)
+const STORAGE_ENERGY_OUTLOOK_2024 = ParseISP.source_spec(:core_storage_energy_outlook, 2024)
+const SAMPLE2024 = ParseISP.source_path(
     ISP2024.download_root,
     CAPACITY_OUTLOOK_2024;
     core_workbook = CORE_WORKBOOK_2024,
@@ -53,10 +53,10 @@ The two editions retain the core-plus-sensitivity packaging pattern, but the cas
 
 ````julia
 outlook_inventory = vcat(
-    PISPDocUtils.read_outlook_inventory(CORE2024, "2024"),
-    PISPDocUtils.read_outlook_inventory(SENS2024, "2024"),
-    PISPDocUtils.read_outlook_inventory(CORE2026, "2026"),
-    PISPDocUtils.read_outlook_inventory(SENS2026, "2026"),
+    ParseISPDocUtils.read_outlook_inventory(CORE2024, "2024"),
+    ParseISPDocUtils.read_outlook_inventory(SENS2024, "2024"),
+    ParseISPDocUtils.read_outlook_inventory(CORE2026, "2026"),
+    ParseISPDocUtils.read_outlook_inventory(SENS2026, "2026"),
 )
 outlook_summary = combine(
     groupby(outlook_inventory, [:edition, :group]),
@@ -65,7 +65,7 @@ outlook_summary = combine(
     :worksheet_count => maximum => :maximum_worksheets,
 )
 sort!(outlook_summary, [:edition, :group])
-PISPDocUtils.markdown_table(outlook_summary)
+ParseISPDocUtils.markdown_table(outlook_summary)
 ````
 
 ```@raw html
@@ -104,7 +104,7 @@ outlook_sheet_presence = DataFrame([
     for (edition, available) in outlook_sheet_names
     for sheet in outlook_sheets
 ])
-PISPDocUtils.markdown_table(outlook_sheet_presence)
+ParseISPDocUtils.markdown_table(outlook_sheet_presence)
 ````
 
 ```@raw html
@@ -135,13 +135,13 @@ The later sample starts in 2025-26 and retains the same leading keys before its 
 ```
 
 ````julia
-capacity_source_2024 = PISP.read_xlsx_rows(SAMPLE2024, CAPACITY_OUTLOOK_2024)
+capacity_source_2024 = ParseISP.read_xlsx_rows(SAMPLE2024, CAPACITY_OUTLOOK_2024)
 capacity_2024 = DataFrame(
     capacity_source_2024[2:6, 1:8],
     Symbol.(["CDP", "Region", "Subregion", "Technology", "2023-24", "2024-25", "2025-26", "2026-27"]);
     makeunique = true,
 )
-PISPDocUtils.markdown_table(capacity_2024)
+ParseISPDocUtils.markdown_table(capacity_2024)
 ````
 
 ```@raw html
@@ -167,7 +167,7 @@ capacity_2026 = DataFrame(
     Symbol.(["CDP", "Region", "Subregion", "Technology", "2025-26", "2026-27", "2027-28", "2028-29"]);
     makeunique = true,
 )
-PISPDocUtils.markdown_table(capacity_2026)
+ParseISPDocUtils.markdown_table(capacity_2026)
 ````
 
 ```@raw html
@@ -193,13 +193,13 @@ Category labels changed: ISP 2026 distinguishes utility-scale storage depths exp
 ```
 
 ````julia
-storage_capacity_source_2024 = PISP.read_xlsx_rows(SAMPLE2024, STORAGE_CAPACITY_OUTLOOK_2024)
+storage_capacity_source_2024 = ParseISP.read_xlsx_rows(SAMPLE2024, STORAGE_CAPACITY_OUTLOOK_2024)
 storage_capacity_2024 = DataFrame(
     storage_capacity_source_2024[2:6, 1:8],
     Symbol.(["CDP", "Region", "Subregion", "Storage category", "2024-25", "2025-26", "2026-27", "2027-28"]);
     makeunique = true,
 )
-PISPDocUtils.markdown_table(storage_capacity_2024)
+ParseISPDocUtils.markdown_table(storage_capacity_2024)
 ````
 
 ```@raw html
@@ -225,7 +225,7 @@ storage_capacity_2026 = DataFrame(
     Symbol.(["CDP", "Region", "Subregion", "Storage category", "2026-27", "2027-28", "2028-29", "2029-30"]);
     makeunique = true,
 )
-PISPDocUtils.markdown_table(storage_capacity_2026)
+ParseISPDocUtils.markdown_table(storage_capacity_2026)
 ````
 
 ```@raw html
@@ -244,7 +244,7 @@ PISPDocUtils.markdown_table(storage_capacity_2026)
 ## Storage-energy table structure
 
 Storage energy records use the same candidate-development-path, region, subregion, and storage-category keys as storage power, with values in GWh across financial years.
-The 2024 table is read through PISP's registered source specification; the
+The 2024 table is read through ParseISP's registered source specification; the
 2026 table is read from the corresponding core workbook.
 
 ```@raw html
@@ -252,13 +252,13 @@ The 2024 table is read through PISP's registered source specification; the
 ```
 
 ````julia
-storage_energy_source_2024 = PISP.read_xlsx_rows(SAMPLE2024, STORAGE_ENERGY_OUTLOOK_2024)
+storage_energy_source_2024 = ParseISP.read_xlsx_rows(SAMPLE2024, STORAGE_ENERGY_OUTLOOK_2024)
 storage_energy_2024 = DataFrame(
     storage_energy_source_2024[2:6, 1:8],
     Symbol.(["CDP", "Region", "Subregion", "Storage category", "2024-25", "2025-26", "2026-27", "2027-28"]);
     makeunique = true,
 )
-PISPDocUtils.markdown_table(storage_energy_2024)
+ParseISPDocUtils.markdown_table(storage_energy_2024)
 ````
 
 ```@raw html
@@ -284,7 +284,7 @@ storage_energy_2026 = DataFrame(
     Symbol.(["CDP", "Region", "Subregion", "Storage category", "2026-27", "2027-28", "2028-29", "2029-30"]);
     makeunique = true,
 )
-PISPDocUtils.markdown_table(storage_energy_2026)
+ParseISPDocUtils.markdown_table(storage_energy_2026)
 ````
 
 ```@raw html
@@ -300,10 +300,10 @@ PISPDocUtils.markdown_table(storage_energy_2026)
 | CDP1 | NSW | NNSW | Coordinated CER storage | 0.231276 | 0.368492 | 0.538256 | 0.736053 |
 
 
-## How PISP uses the outlooks
+## How ParseISP uses the outlooks
 
 The current scraper reads the 2024 capacity, storage-capacity, storage-energy, and REZ worksheets and writes separate condensed `Auxiliary/` workbooks for parser use.
 The `ess_vpps` path consumes scenario sheets from the generated storage-capacity and storage-energy workbooks for coordinated-CER/VPP storage.
-Those intermediates are PISP-generated material, not AEMO source publications.
+Those intermediates are ParseISP-generated material, not AEMO source publications.
 The ISP 2026 tables above define the revised worksheet names, keys, and units
 that parser work must follow.

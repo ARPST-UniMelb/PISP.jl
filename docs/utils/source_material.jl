@@ -1,10 +1,10 @@
 const CLASSIFICATION_LABELS = Dict(
     "aemo_raw_source" => "AEMO raw source",
     "parsed_representation" => "Parsed representation",
-    "pisp_generated_intermediate" => "PISP-generated intermediate",
-    "package_convention" => "PISP package convention",
+    "pisp_generated_intermediate" => "ParseISP-generated intermediate",
+    "package_convention" => "ParseISP package convention",
     "user_input" => "User input",
-    "pisp_output" => "PISP output",
+    "pisp_output" => "ParseISP output",
     "excluded_trace_material" => "Excluded trace material",
 )
 

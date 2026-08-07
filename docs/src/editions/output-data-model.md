@@ -1,8 +1,8 @@
 # Output data model
 
-The PISP dataset layer consists of exported tables, fields, units, identifiers, and static-to-schedule relationships.
+The ParseISP dataset layer consists of exported tables, fields, units, identifiers, and static-to-schedule relationships.
 
-PISP's documented output contract applies to the ISP 2024 build.
+ParseISP's documented output contract applies to the ISP 2024 build.
 The build can write CSV and Arrow representations of static asset tables and time-varying schedule tables.
 
 Static tables provide the identities and comparatively stable attributes of buses, demand nodes, distributed energy resources, generators, energy-storage systems, and transmission corridors.
@@ -12,5 +12,5 @@ The relevant identifiers, scenario fields, and date fields are part of the relat
 The [ISP 2024 output tables](../generated/isp2024/reference/output-tables.md) page is the authoritative reference for exported filenames, columns, units, and join rules.
 The [domain concepts](../concepts.md) page explains why static rows and schedule rows are kept separate.
 
-No equivalent ISP 2026 output contract is documented by PISP.jl.
+No equivalent ISP 2026 output contract is documented by ParseISP.jl.
 A cross-release analysis must define and validate a 2026 data model before comparing it with the ISP 2024 outputs; [Supported ISP editions](supported-editions.md) records the current capability boundary.

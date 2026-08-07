@@ -1,6 +1,6 @@
 # Quickstart
 
-This walkthrough installs PISP.jl, creates a small ISP 2024 dataset for one scenario and one week, and checks representative static and schedule outputs.
+This walkthrough installs ParseISP.jl, creates a small ISP 2024 dataset for one scenario and one week, and checks representative static and schedule outputs.
 
 ## Prerequisites
 
@@ -9,15 +9,15 @@ This walkthrough installs PISP.jl, creates a small ISP 2024 dataset for one scen
 - A writable working directory with enough storage for the downloaded source archives, extracted inputs, and generated CSV files.
 
 The exact download and output size depends on the selected source material and export settings.
-PISP prepares data for downstream studies; the resulting tables still require review against the intended model, source vintage, network representation, mappings, and assumptions.
+ParseISP prepares data for downstream studies; the resulting tables still require review against the intended model, source vintage, network representation, mappings, and assumptions.
 
-## Install PISP.jl
+## Install ParseISP.jl
 
-PISP.jl is installed directly from its repository URL:
+ParseISP.jl is installed directly from its repository URL:
 
 ```julia
 using Pkg
-Pkg.add(url = "https://github.com/ARPST-UniMelb/PISP.jl")
+Pkg.add(url = "https://github.com/ARPST-UniMelb/ParseISP.jl")
 ```
 
 For a development checkout, contributor tests, and documentation maintenance, see [Contributing](contributing.md).
@@ -40,13 +40,13 @@ Retaining the same download directory allows later builds to reuse those inputs.
 Create a Julia script in a writable working directory:
 
 ```julia
-using PISP
+using ParseISP
 
 workspace = joinpath(@__DIR__, "pisp-quickstart")
 download_root = joinpath(workspace, "downloads")
 output_root = joinpath(workspace, "datasets")
 
-PISP.build_ISP24_datasets(
+ParseISP.build_ISP24_datasets(
     downloadpath = download_root,
     download_from_AEMO = true,
     poe = 10,
@@ -99,7 +99,7 @@ required_paths = [
 ]
 
 for path in required_paths
-    isfile(path) || error("Expected PISP output is missing: $(path)")
+    isfile(path) || error("Expected ParseISP output is missing: $(path)")
 end
 ```
 
@@ -115,7 +115,7 @@ The [ISP 2024 output tables](generated/isp2024/reference/output-tables.md) page 
 
 ## Next steps
 
-- [Working with PISP-generated outputs](generated/isp2024/tutorials/working-with-pisp-outputs.md) demonstrates static/schedule joins, aggregation, and plotting.
+- [Working with ParseISP-generated outputs](generated/isp2024/tutorials/working-with-pisp-outputs.md) demonstrates static/schedule joins, aggregation, and plotting.
 - [ISP 2024](editions/isp2024.md) provides the release-specific documentation route.
 - [Source data](generated/isp2024/reference/source-data.md) identifies the files and selections used by the build.
 - [Parameters and mappings](generated/isp2024/reference/parameters-and-mappings.md) records package-defined values and source-label reconciliation.

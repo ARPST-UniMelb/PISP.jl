@@ -35,36 +35,36 @@ function edition_profiles(repo_root::AbstractString)
             label = "ISP 2024",
             report_root = configured_root(
                 repo_root,
-                "PISP_DOCS_ISP2024_REPORT_ROOT",
+                "ParseISP_DOCS_ISP2024_REPORT_ROOT",
                 joinpath("data", "2024", "pisp-reports"),
             ),
             download_root = configured_root(
                 repo_root,
-                "PISP_DOCS_ISP2024_DOWNLOAD_ROOT",
+                "ParseISP_DOCS_ISP2024_DOWNLOAD_ROOT",
                 joinpath("data", "2024", "pisp-downloads"),
             ),
             output_root = configured_root(
                 repo_root,
-                "PISP_DOCS_ISP2024_OUTPUT_ROOT",
+                "ParseISP_DOCS_ISP2024_OUTPUT_ROOT",
                 joinpath("data", "2024", "pisp-datasets", "out-ref4006-poe10", "csv"),
             ),
-            schedule_tag = configured_schedule("PISP_DOCS_ISP2024_SCHEDULE_TAG", "schedule-2030"),
+            schedule_tag = configured_schedule("ParseISP_DOCS_ISP2024_SCHEDULE_TAG", "schedule-2030"),
         ),
         EditionProfile(
             edition = "2026",
             label = "ISP 2026",
             report_root = configured_root(
                 repo_root,
-                "PISP_DOCS_ISP2026_REPORT_ROOT",
+                "ParseISP_DOCS_ISP2026_REPORT_ROOT",
                 joinpath("data", "2026", "pisp-reports"),
             ),
             download_root = configured_root(
                 repo_root,
-                "PISP_DOCS_ISP2026_DOWNLOAD_ROOT",
+                "ParseISP_DOCS_ISP2026_DOWNLOAD_ROOT",
                 joinpath("data", "2026", "pisp-downloads"),
             ),
-            output_root = configured_root(repo_root, "PISP_DOCS_ISP2026_OUTPUT_ROOT", nothing),
-            schedule_tag = configured_schedule("PISP_DOCS_ISP2026_SCHEDULE_TAG", nothing),
+            output_root = configured_root(repo_root, "ParseISP_DOCS_ISP2026_OUTPUT_ROOT", nothing),
+            schedule_tag = configured_schedule("ParseISP_DOCS_ISP2026_SCHEDULE_TAG", nothing),
         ),
     )
 end

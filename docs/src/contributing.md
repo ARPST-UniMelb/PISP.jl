@@ -1,23 +1,23 @@
 # Contributing
 
-This guide is for contributors working from a local checkout of PISP.jl.
+This guide is for contributors working from a local checkout of ParseISP.jl.
 For package installation and a first dataset build, begin with the [Quickstart](quickstart.md).
 
 ## Set up a development workspace
 
-PISP.jl requires Julia `1.11`, as declared by the root `Project.toml`.
+ParseISP.jl requires Julia `1.11`, as declared by the root `Project.toml`.
 Clone the canonical repository, then instantiate the package and documentation environments separately:
 
 ```sh
-git clone https://github.com/ARPST-UniMelb/PISP.jl.git
-cd PISP.jl
+git clone https://github.com/ARPST-UniMelb/ParseISP.jl.git
+cd ParseISP.jl
 julia --project=. -e 'using Pkg; Pkg.instantiate()'
 julia --project=docs -e 'using Pkg; Pkg.instantiate()'
 ```
 
-The root environment contains PISP and its test dependencies.
+The root environment contains ParseISP and its test dependencies.
 The `docs/` environment contains Documenter, Literate, and the packages used by the documentation workflow.
-`docs/Project.toml` resolves PISP from the same checkout through `PISP = {path = ".."}`.
+`docs/Project.toml` resolves ParseISP from the same checkout through `ParseISP = {path = ".."}`.
 
 ## Run contributor checks
 

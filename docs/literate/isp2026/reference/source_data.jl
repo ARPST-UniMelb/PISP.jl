@@ -9,9 +9,9 @@
 using DataFrames
 using TOML
 
-const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
-include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
-import .PISPDocUtils
+const REPO_ROOT = normpath(get(ENV, "ParseISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
+include(joinpath(REPO_ROOT, "docs", "utils", "ParseISPDocUtils.jl"))
+import .ParseISPDocUtils
 
 const SOURCE_MAP_PATH = joinpath(REPO_ROOT, "docs", "config", "isp2026-source-specs.toml")
 const SOURCE_MAP = TOML.parsefile(SOURCE_MAP_PATH)
@@ -54,7 +54,7 @@ function reader_table(rows)
         :keys,
         :fields_units,
     )
-    return PISPDocUtils.markdown_table(
+    return ParseISPDocUtils.markdown_table(
         table;
         column_labels = ["Source", "File and selection", "Keys", "Fields and units"],
     )

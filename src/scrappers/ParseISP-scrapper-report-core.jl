@@ -1,7 +1,7 @@
 module ISPReportDownloader
 
     using HTTP
-    using PISP.PISPScrapperUtils: DEFAULT_FILE_HEADERS
+    using ParseISP.ParseISPScrapperUtils: DEFAULT_FILE_HEADERS
 
     export ISPReportTarget,
         ReportDownloadFailure,

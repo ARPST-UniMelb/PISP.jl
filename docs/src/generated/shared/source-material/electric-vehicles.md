@@ -5,7 +5,7 @@ EditURL = "../../../../literate/shared/source_material/electric_vehicles.jl"
 # Electric vehicles
 
 The IASR electric-vehicle workbooks provide vehicle numbers, energy consumption, charging-mode shares, and weekday and weekend charging profiles.
-PISP combines the 2023 IASR workbook with ISP 2024 subregional demand allocation when it constructs the current EV demand representation.
+ParseISP combines the 2023 IASR workbook with ISP 2024 subregional demand allocation when it constructs the current EV demand representation.
 The [2023 IASR, p. 59](../../../../../data/2024/pisp-reports/2023-inputs-assumptions-and-scenarios-report.pdf#page=59) explains the earlier charging-profile categories, while the [2025 IASR, p. 94](../../../../../data/2026/pisp-reports/2025-inputs-assumptions-and-scenarios-report.pdf#page=94) defines the revised static and dynamic charging categories.
 
 ```@raw html
@@ -13,20 +13,20 @@ The [2023 IASR, p. 59](../../../../../data/2024/pisp-reports/2023-inputs-assumpt
 ```
 
 ````julia
-using PISP
+using ParseISP
 using DataFrames
 using XLSX
 
-const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
+const REPO_ROOT = normpath(get(ENV, "ParseISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
-import .PISPDocUtils
+include(joinpath(REPO_ROOT, "docs", "utils", "ParseISPDocUtils.jl"))
+import .ParseISPDocUtils
 
-const ISP2024 = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
-const ISP2026 = PISPDocUtils.edition_profile(REPO_ROOT, "2026")
-const EV_NUMBERS_2024 = PISP.source_spec(:ev_vehicle_numbers, 2024)
-const EV_CHARGE_TYPES_2024 = PISP.source_spec(:ev_bev_phev_charge_type, 2024)
-const EV2023 = PISP.source_path(ISP2024.download_root, EV_NUMBERS_2024)
+const ISP2024 = ParseISPDocUtils.edition_profile(REPO_ROOT, "2024")
+const ISP2026 = ParseISPDocUtils.edition_profile(REPO_ROOT, "2026")
+const EV_NUMBERS_2024 = ParseISP.source_spec(:ev_vehicle_numbers, 2024)
+const EV_CHARGE_TYPES_2024 = ParseISP.source_spec(:ev_bev_phev_charge_type, 2024)
+const EV2023 = ParseISP.source_path(ISP2024.download_root, EV_NUMBERS_2024)
 const EV2025 = joinpath(ISP2026.download_root, "aemo-2025-iasr-ev-workbook.xlsx")
 ````
 
@@ -62,7 +62,7 @@ ev_sheet_presence = DataFrame([
     for (edition, available) in ev_sheet_names
     for sheet in ev_sheets
 ])
-PISPDocUtils.markdown_table(ev_sheet_presence)
+ParseISPDocUtils.markdown_table(ev_sheet_presence)
 ````
 
 ```@raw html
@@ -101,7 +101,7 @@ The planning years and scenario names shift between publications, so the values 
 ```
 
 ````julia
-bev_numbers_source_2024 = PISP.read_xlsx_rows(
+bev_numbers_source_2024 = ParseISP.read_xlsx_rows(
     EV2023,
     EV_NUMBERS_2024;
     worksheet = "BEV_Numbers",
@@ -111,7 +111,7 @@ bev_2023 = DataFrame(
     Symbol.(["Vehicle type", "2022-23", "2023-24", "2024-25", "2025-26", "2026-27", "2027-28", "2028-29", "2029-30"]);
     makeunique = true,
 )
-PISPDocUtils.markdown_table(bev_2023)
+ParseISPDocUtils.markdown_table(bev_2023)
 ````
 
 ```@raw html
@@ -139,7 +139,7 @@ bev_2025 = DataFrame(
     Symbol.(["Vehicle type", "2025-26", "2026-27", "2027-28", "2028-29", "2029-30", "2030-31", "2031-32", "2032-33"]);
     makeunique = true,
 )
-PISPDocUtils.markdown_table(bev_2025)
+ParseISPDocUtils.markdown_table(bev_2025)
 ````
 
 ```@raw html
@@ -172,7 +172,7 @@ hybrid_2025 = DataFrame(
     Symbol.(["Vehicle type", "2025-26", "2026-27", "2027-28", "2028-29", "2029-30", "2030-31", "2031-32", "2032-33"]);
     makeunique = true,
 )
-PISPDocUtils.markdown_table(hybrid_2025)
+ParseISPDocUtils.markdown_table(hybrid_2025)
 ````
 
 ```@raw html
@@ -200,13 +200,13 @@ The later source uses unscheduled, public, off-peak-and-solar, and time-of-use c
 ```
 
 ````julia
-charge_type_source_2024 = PISP.read_xlsx_rows(EV2023, EV_CHARGE_TYPES_2024)
+charge_type_source_2024 = ParseISP.read_xlsx_rows(EV2023, EV_CHARGE_TYPES_2024)
 charge_type_2023 = DataFrame(
     charge_type_source_2024[11:14, 1:9],
     Symbol.(["Charging mode", "2022-23", "2023-24", "2024-25", "2025-26", "2026-27", "2027-28", "2028-29", "2029-30"]);
     makeunique = true,
 )
-PISPDocUtils.markdown_table(charge_type_2023)
+ParseISPDocUtils.markdown_table(charge_type_2023)
 ````
 
 ```@raw html
@@ -231,7 +231,7 @@ charge_type_2025 = DataFrame(
     Symbol.(["Charging mode", "2025-26", "2026-27", "2027-28", "2028-29", "2029-30", "2030-31", "2031-32", "2032-33"]);
     makeunique = true,
 )
-PISPDocUtils.markdown_table(charge_type_2025)
+ParseISPDocUtils.markdown_table(charge_type_2025)
 ````
 
 ```@raw html
@@ -248,7 +248,7 @@ PISPDocUtils.markdown_table(charge_type_2025)
 | Commercial - Unscheduled Charging | 0.9033 | 0.8976 | 0.8919 | 0.8862 | 0.8805 | 0.8748 | 0.8691 | 0.8634 |
 
 
-## PISP output-field ownership
+## ParseISP output-field ownership
 
 The maintained mapping assigns four 2023 number worksheets to parsed output fields.
 Charging profiles, vehicle categories, state names, scenario names, bus IDs, and demand relationships use the additional package mappings listed in [AEMO ISP source coverage and ownership](coverage-and-ownership.md).
@@ -258,12 +258,12 @@ Charging profiles, vehicle categories, state names, scenario names, bus IDs, and
 ```
 
 ````julia
-vehicle_number_mapping = getfield(PISP, :EV_2024_VEHICLE_NUMBER_VALUE_COLUMN_BY_SHEET)
+vehicle_number_mapping = getfield(ParseISP, :EV_2024_VEHICLE_NUMBER_VALUE_COLUMN_BY_SHEET)
 ev_output_fields = DataFrame(
     source_worksheet = collect(keys(vehicle_number_mapping)),
     parsed_field = string.(collect(values(vehicle_number_mapping))),
 )
-PISPDocUtils.markdown_table(ev_output_fields)
+ParseISPDocUtils.markdown_table(ev_output_fields)
 ````
 
 ```@raw html

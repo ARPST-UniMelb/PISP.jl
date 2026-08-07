@@ -3,19 +3,19 @@
 # Demand-side participation assumptions quantify response at price bands and at reliability-response conditions.
 # The two editions publish the same broad subject through different table organisations.
 
-using PISP
+using ParseISP
 using DataFrames
 using XLSX
 
-const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
+const REPO_ROOT = normpath(get(ENV, "ParseISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
 
-include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
-import .PISPDocUtils
+include(joinpath(REPO_ROOT, "docs", "utils", "ParseISPDocUtils.jl"))
+import .ParseISPDocUtils
 
-const ISP2024 = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
-const ISP2026 = PISPDocUtils.edition_profile(REPO_ROOT, "2026")
-const DSP_2024 = PISP.source_spec(:dsp_green_energy_exports_nsw_summer, 2024)
-const WORKBOOK2024 = PISP.source_path(ISP2024.download_root, DSP_2024)
+const ISP2024 = ParseISPDocUtils.edition_profile(REPO_ROOT, "2024")
+const ISP2026 = ParseISPDocUtils.edition_profile(REPO_ROOT, "2026")
+const DSP_2024 = ParseISP.source_spec(:dsp_green_energy_exports_nsw_summer, 2024)
+const WORKBOOK2024 = ParseISP.source_path(ISP2024.download_root, DSP_2024)
 const WORKBOOK2026 = joinpath(ISP2026.download_root, "2026-isp-inputs-and-assumptions-workbook.xlsm")
 nothing #hide
 
@@ -24,7 +24,7 @@ nothing #hide
 # ISP 2024 arranges each scenario, NEM region, and season as a separate matrix block.
 # The sampled block shows the New South Wales summer assumptions for the opening scenario section.
 
-dsp_source_2024 = PISP.read_xlsx_rows(WORKBOOK2024, DSP_2024)
+dsp_source_2024 = ParseISP.read_xlsx_rows(WORKBOOK2024, DSP_2024)
 dsp_2024 = DataFrame(
     dsp_source_2024[2:6, 1:9],
     Symbol.([
@@ -33,7 +33,7 @@ dsp_2024 = DataFrame(
     ]);
     makeunique = true,
 )
-PISPDocUtils.markdown_table(dsp_2024)
+ParseISPDocUtils.markdown_table(dsp_2024)
 #-
 
 # ## ISP 2026 normalised rows
@@ -49,7 +49,7 @@ dsp_2026 = DataFrame(
     ]);
     makeunique = true,
 )
-PISPDocUtils.markdown_table(dsp_2026)
+ParseISPDocUtils.markdown_table(dsp_2026)
 #-
 
 # ## Active ISP 2024 source coverage
@@ -57,29 +57,29 @@ PISPDocUtils.markdown_table(dsp_2026)
 # The current parser names every combination of three scenarios, five NEM regions, and two seasons.
 # The coverage ledger expands those selections into 30 active ranges so that no workbook block remains implicit.
 
-coverage = PISPDocUtils.coverage_document(REPO_ROOT)
-source_reads = PISPDocUtils.coverage_table(coverage, "source_read")
+coverage = ParseISPDocUtils.coverage_document(REPO_ROOT)
+source_reads = ParseISPDocUtils.coverage_table(coverage, "source_read")
 dsp_ranges = filter(:owner => ==("shared-source-demand-side-participation"), source_reads)
 
 dsp_coverage = DataFrame([
-    (dimension = "Scenario", values = length(PISP.ID2SCE), interpretation = join(values(PISP.ID2SCE), ", ")),
+    (dimension = "Scenario", values = length(ParseISP.ID2SCE), interpretation = join(values(ParseISP.ID2SCE), ", ")),
     (dimension = "NEM region", values = 5, interpretation = "NSW, QLD, SA, TAS, and VIC"),
     (dimension = "Season", values = 2, interpretation = "Summer and Winter"),
     (dimension = "Explicit source ranges", values = nrow(dsp_ranges), interpretation = "3 × 5 × 2 active blocks"),
 ])
-PISPDocUtils.markdown_table(dsp_coverage)
+ParseISPDocUtils.markdown_table(dsp_coverage)
 #-
 
 # ## Package mappings
 #
-# PISP maps workbook price-band labels to package values and maps the maintained scenario IDs to the 2024 scenario names.
+# ParseISP maps workbook price-band labels to package values and maps the maintained scenario IDs to the 2024 scenario names.
 # These lookups are package conventions that sit between the raw matrices and the generated demand-response records.
 
 scenario_mapping = DataFrame(
-    scenario_id = collect(keys(PISP.ID2SCE)),
-    scenario_name = collect(values(PISP.ID2SCE)),
+    scenario_id = collect(keys(ParseISP.ID2SCE)),
+    scenario_name = collect(values(ParseISP.ID2SCE)),
 )
-PISPDocUtils.markdown_table(scenario_mapping)
+ParseISPDocUtils.markdown_table(scenario_mapping)
 #-
 
 # A future ISP 2026 implementation needs a reviewed mapping for the new row schema and scenario set.

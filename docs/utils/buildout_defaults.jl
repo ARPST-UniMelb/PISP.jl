@@ -15,82 +15,82 @@ const GEN_TEMPLATE_FIELDS = [
 ]
 
 const ESS_FIELD_SOURCES = Dict(
-    "tech" => "PISP default",
-    "type" => "PISP default",
-    "investment" => "PISP default",
-    "active" => "PISP default",
+    "tech" => "ParseISP default",
+    "type" => "ParseISP default",
+    "investment" => "ParseISP default",
+    "active" => "ParseISP default",
     "ch_eff" => "ISP workbook — Storage properties",
     "dch_eff" => "ISP workbook — Storage properties",
-    "eini" => "PISP default",
-    "emin" => "PISP default",
-    "pmin" => "PISP default",
-    "lmin" => "PISP default",
+    "eini" => "ParseISP default",
+    "emin" => "ParseISP default",
+    "pmin" => "ParseISP default",
+    "lmin" => "ParseISP default",
     "fullout" => "ISP workbook — Generator Reliability Settings",
-    "partialout" => "PISP default",
+    "partialout" => "ParseISP default",
     "mttrfull" => "ISP workbook — Generator Reliability Settings",
-    "mttrpart" => "PISP default",
-    "inertia" => "PISP default",
-    "powerfactor" => "PISP default",
-    "ffr" => "PISP default",
-    "pfr" => "PISP default",
-    "res2" => "PISP default",
-    "res3" => "PISP default",
-    "fr_db" => "PISP default",
-    "fr_ad" => "PISP default",
-    "fr_dt" => "PISP default",
-    "fr_frt" => "PISP default",
-    "fr_fr" => "PISP default",
-    "n" => "PISP default",
-    "contingency" => "PISP default",
+    "mttrpart" => "ParseISP default",
+    "inertia" => "ParseISP default",
+    "powerfactor" => "ParseISP default",
+    "ffr" => "ParseISP default",
+    "pfr" => "ParseISP default",
+    "res2" => "ParseISP default",
+    "res3" => "ParseISP default",
+    "fr_db" => "ParseISP default",
+    "fr_ad" => "ParseISP default",
+    "fr_dt" => "ParseISP default",
+    "fr_frt" => "ParseISP default",
+    "fr_fr" => "ParseISP default",
+    "n" => "ParseISP default",
+    "contingency" => "ParseISP default",
 )
 
 const GEN_FIELD_SOURCES = Dict(
-    "fuel" => "PISP default",
-    "tech" => "PISP default",
-    "type" => "PISP default",
+    "fuel" => "ParseISP default",
+    "tech" => "ParseISP default",
+    "type" => "ParseISP default",
     "forate" => "ISP workbook — Generator Reliability Settings (derived)",
     "fullout" => "ISP workbook — Generator Reliability Settings",
-    "partialout" => "PISP default",
-    "derate" => "PISP default",
+    "partialout" => "ParseISP default",
+    "derate" => "ParseISP default",
     "mttrfull" => "ISP workbook — Generator Reliability Settings",
-    "mttrpart" => "PISP default",
-    "pmin" => "PISP default",
+    "mttrpart" => "ParseISP default",
+    "pmin" => "ParseISP default",
     "rup" => "ISP workbook — Max Ramp Rates",
     "rdw" => "ISP workbook — Max Ramp Rates",
-    "investment" => "PISP default",
-    "active" => "PISP default",
+    "investment" => "ParseISP default",
+    "active" => "ParseISP default",
     "cvar" => "ISP workbook — New Entrant Data Summary",
     "cfuel" => "ISP workbook — New Entrant Data Summary",
     "cvom" => "ISP workbook — New Entrant Data Summary",
     "cfom" => "ISP workbook — New Entrant Data Summary",
     "co2" => "ISP workbook — New Entrant Data Summary",
-    "slope" => "PISP default",
+    "slope" => "ParseISP default",
     "hrate" => "ISP workbook — New Entrant Data Summary",
-    "pfrmax" => "PISP default",
-    "g" => "PISP default",
-    "inertia" => "PISP default",
-    "ffr" => "PISP default",
-    "pfr" => "PISP default",
-    "res2" => "PISP default",
-    "res3" => "PISP default",
-    "powerfactor" => "PISP default",
-    "n" => "PISP default",
-    "contingency" => "PISP default",
-    "down_time" => "PISP default",
-    "up_time" => "PISP default",
-    "last_state" => "PISP default",
-    "last_state_period" => "PISP default",
-    "last_state_output" => "PISP default",
-    "start_up_cost" => "PISP default",
-    "shut_down_cost" => "PISP default",
-    "start_up_time" => "PISP default",
-    "shut_down_time" => "PISP default",
+    "pfrmax" => "ParseISP default",
+    "g" => "ParseISP default",
+    "inertia" => "ParseISP default",
+    "ffr" => "ParseISP default",
+    "pfr" => "ParseISP default",
+    "res2" => "ParseISP default",
+    "res3" => "ParseISP default",
+    "powerfactor" => "ParseISP default",
+    "n" => "ParseISP default",
+    "contingency" => "ParseISP default",
+    "down_time" => "ParseISP default",
+    "up_time" => "ParseISP default",
+    "last_state" => "ParseISP default",
+    "last_state_period" => "ParseISP default",
+    "last_state_output" => "ParseISP default",
+    "start_up_cost" => "ParseISP default",
+    "shut_down_cost" => "ParseISP default",
+    "start_up_time" => "ParseISP default",
+    "shut_down_time" => "ParseISP default",
 )
 
-const BUILDOUT_SOURCE_PREFIXES = ("ISP workbook", "Published report", "PISP default")
+const BUILDOUT_SOURCE_PREFIXES = ("ISP workbook", "Published report", "ParseISP default")
 
 const ESS_PLACEHOLDER_ORIGINS = Dict(
-    "id_ess" => "Sequential identifier generated by PISP.",
+    "id_ess" => "Sequential identifier generated by ParseISP.",
     "name" => "Generated as `uppercase(tech * \"_\" * subregion) * \"_NEW\"`.",
     "alias" => "Set equal to the generated name.",
     "capacity" => "Read from the build-out workbook.",
@@ -103,7 +103,7 @@ const ESS_PLACEHOLDER_ORIGINS = Dict(
 )
 
 const GEN_PLACEHOLDER_ORIGINS = Dict(
-    "id_gen" => "Sequential identifier generated by PISP.",
+    "id_gen" => "Sequential identifier generated by ParseISP.",
     "name" => "Generated as `uppercase(tech * \"_\" * subregion) * \"_NEW\"`.",
     "alias" => "Set equal to the generated name.",
     "capacity" => "Read from the build-out workbook.",
@@ -120,19 +120,19 @@ code_span(value) = "`" * string(value) * "`"
 
 function buildout_technology_rows()
     rows = NamedTuple[]
-    for label in sort(collect(PISP._BUILDOUT_ESS_TECHS))
+    for label in sort(collect(ParseISP._BUILDOUT_ESS_TECHS))
         push!(rows, (
             buildout_label = label,
             output_table = "ESS",
             template_key = label,
-            duration_h = PISP._BESS_DURATION_H[label],
+            duration_h = ParseISP._BESS_DURATION_H[label],
         ))
     end
-    for label in sort(collect(PISP._BUILDOUT_GEN_TECHS))
+    for label in sort(collect(ParseISP._BUILDOUT_GEN_TECHS))
         push!(rows, (
             buildout_label = label,
             output_table = "Generator",
-            template_key = String(PISP._BUILDOUT_GEN_TECH_KEY[label]),
+            template_key = String(ParseISP._BUILDOUT_GEN_TECH_KEY[label]),
             duration_h = missing,
         ))
     end
@@ -142,15 +142,15 @@ end
 function buildout_origin_rows()
     return [
         (output = "ESS static row", field_group = "Build-out workbook", rule = "`tech`, `subregion`, and `capacity` select, locate, and size the asset."),
-        (output = "ESS static row", field_group = "Generated or looked up", rule = "PISP generates `id_ess`, `name`, and `alias`, and resolves `id_bus` from the subregion."),
+        (output = "ESS static row", field_group = "Generated or looked up", rule = "ParseISP generates `id_ess`, `name`, and `alias`, and resolves `id_bus` from the subregion."),
         (output = "ESS static row", field_group = "Calculated or explicit", rule = "`emax = duration_h × capacity`; `pmax = capacity`; `lmax = capacity`; coordinates are `0.0`."),
-        (output = "ESS static row", field_group = "Stored default", rule = "The 27 non-placeholder fields listed below come from `PISP.params_buildout_bess`."),
-        (output = "ESS unit-count schedule", field_group = "Build-out workbook and generated", rule = "The workbook supplies `year` and `n`; PISP adds scenario IDs, row IDs, and `DateTime(year, 1, 1)`."),
+        (output = "ESS static row", field_group = "Stored default", rule = "The 27 non-placeholder fields listed below come from `ParseISP.params_buildout_bess`."),
+        (output = "ESS unit-count schedule", field_group = "Build-out workbook and generated", rule = "The workbook supplies `year` and `n`; ParseISP adds scenario IDs, row IDs, and `DateTime(year, 1, 1)`."),
         (output = "Generator static row", field_group = "Build-out workbook", rule = "`tech`, `subregion`, and `capacity` select, locate, and size the asset."),
-        (output = "Generator static row", field_group = "Generated or looked up", rule = "PISP generates `id_gen`, `name`, and `alias`, and resolves `id_bus` from the subregion."),
+        (output = "Generator static row", field_group = "Generated or looked up", rule = "ParseISP generates `id_gen`, `name`, and `alias`, and resolves `id_bus` from the subregion."),
         (output = "Generator static row", field_group = "Calculated or explicit", rule = "`pmax = capacity`; coordinates are `0.0`."),
-        (output = "Generator static row", field_group = "Stored default", rule = "The 40 non-placeholder fields listed below come from `PISP.params_buildout_gen`."),
-        (output = "Generator unit-count schedule", field_group = "Build-out workbook and generated", rule = "The workbook supplies `year` and `n`; PISP adds scenario IDs, row IDs, and `DateTime(year, 1, 1)`."),
+        (output = "Generator static row", field_group = "Stored default", rule = "The 40 non-placeholder fields listed below come from `ParseISP.params_buildout_gen`."),
+        (output = "Generator unit-count schedule", field_group = "Build-out workbook and generated", rule = "The workbook supplies `year` and `n`; ParseISP adds scenario IDs, row IDs, and `DateTime(year, 1, 1)`."),
     ]
 end
 
@@ -167,15 +167,15 @@ end
 
 function template_comparison_rows(kind::Symbol)
     if kind == :ess
-        labels = sort(collect(PISP._BUILDOUT_ESS_TECHS))
+        labels = sort(collect(ParseISP._BUILDOUT_ESS_TECHS))
         fields = ESS_TEMPLATE_FIELDS
         sources = ESS_FIELD_SOURCES
-        templates = Dict(label => PISP.params_buildout_bess[Symbol(label)] for label in labels)
+        templates = Dict(label => ParseISP.params_buildout_bess[Symbol(label)] for label in labels)
     elseif kind == :gen
-        labels = sort(collect(PISP._BUILDOUT_GEN_TECHS))
+        labels = sort(collect(ParseISP._BUILDOUT_GEN_TECHS))
         fields = GEN_TEMPLATE_FIELDS
         sources = GEN_FIELD_SOURCES
-        templates = Dict(label => PISP.params_buildout_gen[PISP._BUILDOUT_GEN_TECH_KEY[label]] for label in labels)
+        templates = Dict(label => ParseISP.params_buildout_gen[ParseISP._BUILDOUT_GEN_TECH_KEY[label]] for label in labels)
     else
         error("kind must be :ess or :gen")
     end
@@ -228,11 +228,11 @@ function technology_value_frame(rows, labels)
 end
 
 function buildout_reference_tables()
-    ess_labels = sort(collect(PISP._BUILDOUT_ESS_TECHS))
+    ess_labels = sort(collect(ParseISP._BUILDOUT_ESS_TECHS))
     ess_rows = template_comparison_rows(:ess)
     ess_common, ess_varying = split_common_rows(ess_rows, ess_labels)
 
-    gen_labels = sort(collect(PISP._BUILDOUT_GEN_TECHS))
+    gen_labels = sort(collect(ParseISP._BUILDOUT_GEN_TECHS))
     gen_rows = template_comparison_rows(:gen)
     gen_common, gen_varying = split_common_rows(gen_rows, gen_labels)
 
@@ -297,7 +297,7 @@ function validate_buildout_defaults_contract(parser_path)
             error("unsupported build-out source classification: $source")
     end
 
-    for (label, template) in PISP.params_buildout_bess
+    for (label, template) in ParseISP.params_buildout_bess
         for field in ESS_TEMPLATE_FIELDS
             haskey(template, field) || error("ESS template $label is missing $field")
             template[field] === nothing && error("ESS output-effective field $label.$field is `nothing`")
@@ -306,7 +306,7 @@ function validate_buildout_defaults_contract(parser_path)
         actual_placeholders == Set(keys(ESS_PLACEHOLDER_ORIGINS)) || error("ESS placeholder classification differs for $label")
     end
 
-    for (label, template) in PISP.params_buildout_gen
+    for (label, template) in ParseISP.params_buildout_gen
         for field in GEN_TEMPLATE_FIELDS
             haskey(template, field) || error("Generator template $label is missing $field")
             template[field] === nothing && error("Generator output-effective field $label.$field is `nothing`")

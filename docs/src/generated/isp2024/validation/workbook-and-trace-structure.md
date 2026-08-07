@@ -18,18 +18,18 @@ The tables below describe their workbook, model-archive, and trace structure.
 using CSV
 using DataFrames
 using Dates
-using PISP
+using ParseISP
 using Plots
 using Statistics
 using XLSX
 
 
-const REPO_ROOT = normpath(get(ENV, "PISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
-include(joinpath(REPO_ROOT, "docs", "utils", "PISPDocUtils.jl"))
-import .PISPDocUtils
+const REPO_ROOT = normpath(get(ENV, "ParseISP_DOCS_REPO_ROOT", joinpath(@__DIR__, "..", "..", "..", "..")))
+include(joinpath(REPO_ROOT, "docs", "utils", "ParseISPDocUtils.jl"))
+import .ParseISPDocUtils
 
-const PROFILE = PISPDocUtils.edition_profile(REPO_ROOT, "2024")
-const SOURCE_ROWS = DataFrame(PISP.source_spec_rows(2024))
+const PROFILE = ParseISPDocUtils.edition_profile(REPO_ROOT, "2024")
+const SOURCE_ROWS = DataFrame(ParseISP.source_spec_rows(2024))
 
 function sheet_matches(pattern, sheets)
     pattern == "*_Numbers" && return any(sheet -> endswith(sheet, "_Numbers"), sheets)
@@ -92,7 +92,7 @@ workbook_structure = DataFrame(
         "Capacity, Storage Capacity, Storage Energy, and REZ Generation Capacity",
     ],
 )
-PISPDocUtils.markdown_table(
+ParseISPDocUtils.markdown_table(
     workbook_structure;
     column_labels = ["Source collection", "Files", "Selections"],
 )
@@ -129,7 +129,7 @@ model_structure = DataFrame(
         "Scenario, region or project, reference year, and PoE where applicable",
     ],
 )
-PISPDocUtils.markdown_table(
+ParseISPDocUtils.markdown_table(
     model_structure;
     column_labels = ["Source collection", "Files", "Selections"],
 )
@@ -161,7 +161,7 @@ trace_schema = select(
     :keys,
     [:columns, :units] => ByRow((columns, units) -> join(filter(value -> !isempty(value), [columns, units]), ". ")) => :fields_units,
 )
-PISPDocUtils.markdown_table(
+ParseISPDocUtils.markdown_table(
     trace_schema;
     column_labels = ["Trace family", "File or pattern", "Keys", "Fields and units"],
 )
@@ -238,12 +238,12 @@ let
         bottom_margin = 4Plots.mm,
         top_margin = 4Plots.mm,
     )
-    figure_path = PISPDocUtils.figure_path( # hide
+    figure_path = ParseISPDocUtils.figure_path( # hide
         "isp2024_workbook_and_trace_structure", # hide
         "01_sample_traces.png", # hide
     ) # hide
     savefig(figure, figure_path) # hide
-    PISPDocUtils.embed_figure(figure_path, "01_sample_traces.png") # hide
+    ParseISPDocUtils.embed_figure(figure_path, "01_sample_traces.png") # hide
 end
 ````
 
